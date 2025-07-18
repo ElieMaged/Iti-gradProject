@@ -1,5 +1,21 @@
 @import "tailwindcss";
 
 body {
-  background-color: rgb(0, 0, 0);
+  background-color: rgb(60, 60, 60);
 }
+
+
+.svg-white {
+  color: aliceblue;
+  background-color: aliceblue;
+}
+
+.footerTwo {
+  background-color: #625397;
+
+}
+
+.footer {
+  border-radius: 50%;
+}
+
