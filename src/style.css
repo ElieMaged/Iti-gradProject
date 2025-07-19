@@ -1,6 +1,22 @@
 @import "tailwindcss";
 
 body {
+  box-sizing: border-box;
+}
+
+:root {
+  --primary-color: #625498;
+  --secondary-color: #FFC230;
+}
+.primary-color {
+  color: var(--primary-color);
+}
+.secondary-color {
+  color: var(--secondary-color);
+}
+
+.no-underline {
+  text-decoration: none;
   background-color: rgb(60, 60, 60);
 }
 
