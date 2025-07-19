@@ -1,11 +1,11 @@
 <script setup>
 import Navbar from './components/Navbar.vue'
-
+import Hero from './components/Hero.vue'
 </script>
 
 <template>
   <Navbar />
-<h1>npiqwejnrpqiwnipqnrp</h1>
+<Hero />
 </template>
 
 <style scoped>
