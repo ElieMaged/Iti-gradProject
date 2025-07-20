@@ -69,7 +69,7 @@
   import profile6 from '../assets/profile/6.png'
   import profile7 from '../assets/profile/7.png'
   import profile8 from '../assets/profile/8.png'
-  import collage1 from '../assets/Professions/technicians.jpg'
+  import collage1 from '../assets/Professions/Technicians.jpg'
   import collage2 from '../assets/Contact/end.png'
   import EndCard from '../components/EndCard.vue'
   
