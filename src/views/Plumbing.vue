@@ -60,73 +60,90 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import profile1 from '../assets/profile/1.jpg'
-import profile2 from '../assets/profile/2.png'
-import profile3 from '../assets/profile/3.png'
-import profile4 from '../assets/profile/4.png'
-import profile5 from '../assets/profile/5.jpg'
-import profile6 from '../assets/profile/6.png'
-import profile7 from '../assets/profile/7.png'
-import profile8 from '../assets/profile/8.png'
-import collage1 from '../assets/Professions/Plumbing.jpg'
-import collage2 from '../assets/Contact/end.png'
+import { computed, ref, onMounted } from 'vue'
 import EndCard from '../components/EndCard.vue'
 
-const technicians = [
+const profile1 = ref('')
+const profile2 = ref('')
+const profile3 = ref('')
+const profile4 = ref('')
+const profile5 = ref('')
+const profile6 = ref('')
+const profile7 = ref('')
+const profile8 = ref('')
+const collage1 = ref('')
+const collage2 = ref('')
+
+onMounted(async () => {
+  // Dynamic imports for profile images
+  profile1.value = (await import('../assets/profile/1.jpg')).default
+  profile2.value = (await import('../assets/profile/2.png')).default
+  profile3.value = (await import('../assets/profile/3.png')).default
+  profile4.value = (await import('../assets/profile/4.png')).default
+  profile5.value = (await import('../assets/profile/5.jpg')).default
+  profile6.value = (await import('../assets/profile/6.png')).default
+  profile7.value = (await import('../assets/profile/7.png')).default
+  profile8.value = (await import('../assets/profile/8.png')).default
+  
+  // Dynamic imports for background images
+  collage1.value = (await import('../assets/Professions/Plumbing.jpg')).default
+  collage2.value = (await import('../assets/Contact/end.png')).default
+})
+
+const technicians = computed(() => [
   {
     id: 1,
     name: 'Ahmed Salah',
-    image: profile1,
+    image: profile1.value,
     bgColor: '#E8E4F3'
   },
   {
     id: 2,
     name: 'Mohammed Ali',
-    image: profile2,
+    image: profile2.value,
     bgColor: '#E3F2FD'
   },
   {
     id: 3,
     name: 'Omar Hassan',
-    image: profile3,
+    image: profile3.value,
     bgColor: '#FFF3E0'
   },
   {
     id: 4,
     name: 'Youssef Ahmed',
-    image: profile4,
+    image: profile4.value,
     bgColor: '#F3E5F5'
   },
   {
     id: 5,
     name: 'Karim Mahmoud',
-    image: profile5,
+    image: profile5.value,
     bgColor: '#E8F5E8'
   },
   {
     id: 6,
     name: 'Hassan Ibrahim',
-    image: profile6,
+    image: profile6.value,
     bgColor: '#FFF8E1'
   },
   {
     id: 7,
     name: 'Mahmoud Ali',
-    image: profile7,
+    image: profile7.value,
     bgColor: '#F1F8E9'
   },
   {
     id: 8,
     name: 'Ibrahim Hassan',
-    image: profile8,
+    image: profile8.value,
     bgColor: '#E0F2F1'
   }
-]
+])
 
 const heroBackgroundStyle = computed(() => {
   return {
-    backgroundImage: `linear-gradient(rgba(98, 84, 152, 0.7), rgba(98, 84, 152, 0.7)), url(${collage1})`
+    backgroundImage: `linear-gradient(rgba(98, 84, 152, 0.7), rgba(98, 84, 152, 0.7)), url(${collage1.value})`
   }
 })
 </script>
