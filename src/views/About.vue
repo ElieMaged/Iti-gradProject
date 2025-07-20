@@ -24,7 +24,7 @@ At BoltFix, we're redefining how home maintenance is done. As Egypt’s trusted 
 Our mission at BoltFix is to simplify access to trusted home repair services by empowering skilled technicians and delivering a seamless, dependable experience for every customer. We aim to raise the standard of home maintenance in Egypt through speed, honesty, and quality — ensuring that every task, big or small, is completed with precision, professionalism, and care.
     </div>
 
-<img class="collage-all" src="../assets/contact/collage-all.png" alt="">
+<img class="collage-all" src="../assets/contact/collageall.png" alt="">
 
           <div class="flex flex-col md:mr-3 col-span-3">
 
