@@ -1,19 +1,39 @@
 <script>
 import '../style.css'
+import { ref, onMounted } from 'vue';
+import { auth } from '../firebase';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+
 export default {
+  setup() {
+    const user = ref(null);
+
+    onMounted(() => {
+      onAuthStateChanged(auth, (firebaseUser) => {
+        user.value = firebaseUser;
+      });
+    });
+
+    const logout = async () => {
+      await signOut(auth);
+      user.value = null;
+      window.location.href = '/'; // Optionally redirect to home
+    };
+
+    return {
+      user,
+      logout
+    };
+  },
   data() {
     return {
       userButtonClass: " text-gray-600 p-2 rounded-full ",
-      loginButtonClass: "",
-      mobileMenuOpen: false,
+
     };
   },
   methods: {
     goToUserAccount() {
-      this.$router.push("/profile");
-    },
-    toggleMobileMenu() {
-      this.mobileMenuOpen = !this.mobileMenuOpen;
+      this.$router.push("/usersignup");
     },
   },
 };
@@ -37,53 +57,33 @@ export default {
     </div>
   </div>
   <!-- Navbar -->
-  <nav class="bg-white px-4 py-3 flex justify-between items-center max-w-7xl mx-auto relative">
-    <!-- Logo -->
-    <div class="flex items-center gap-2 text-2xl font-bold">
-      <img src="/logo/ace04d3b268cf810c91d002fdf7454a6ef778f27.png" alt="Logo" class="h-8" id="logo" />
-    </div>
-    <!-- Hamburger (mobile) -->
-    <button class="md:hidden flex items-center px-2 py-1 text-gray-700 focus:outline-none" @click="toggleMobileMenu">
-      <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-      </svg>
-    </button>
-    <!-- Nav Links (desktop) -->
-    <ul class="hidden md:flex gap-8 font-medium m-0">
-      <li><a href="#" class="no-underline services-color">Home</a></li>
-      <li><a href="#" class="no-underline services-color">About us</a></li>
-      <li><a href="#" class="no-underline services-color">Services</a></li>
-      <li><a href="#" class="no-underline services-color">Contact Us</a></li>
-    </ul>
-    <!-- Login/Register (desktop) -->
-    <div class="hidden md:flex items-center gap-2">
-      <button :class="userButtonClass" @click="goToUserAccount">
-        <i class="fa-regular fa-user"></i>
-      </button>
-      <button :class="loginButtonClass" id="login-btn" @click="goToUserAccount">
-        Log in/Register
-      </button>
-    </div>
-    <!-- Mobile Menu -->
-    <transition name="fade">
-      <div v-if="mobileMenuOpen" class="absolute top-full left-0 w-full bg-white shadow-lg z-50 md:hidden animate-fade-in">
-        <ul class="flex flex-col gap-4 py-4 px-6 font-medium">
-          <li><a href="#" class="no-underline services-color block">Home</a></li>
-          <li><a href="#" class="no-underline services-color block">About us</a></li>
-          <li><a href="#" class="no-underline services-color block">Services</a></li>
-          <li><a href="#" class="no-underline services-color block">Contact Us</a></li>
-        </ul>
-        <div class="flex flex-col gap-2 px-6 pb-4">
-          <button :class="userButtonClass + ' w-full flex justify-start'" @click="goToUserAccount">
-            <i class="fa-regular fa-user mr-2"></i> My Account
-          </button>
-          <button :class="loginButtonClass + ' w-full flex justify-start'" id="login-btn" @click="goToUserAccount">
-            Log in/Register
-          </button>
-        </div>
+   <nav class="bg-white px-6 py-3 flex justify-between items-center container">
+      <!-- Logo -->
+      <div class="flex items-center gap-2 text-2xl font-bold">
+        <img src="/logo/ace04d3b268cf810c91d002fdf7454a6ef778f27.png" alt="Logo" class="h-8" id="logo"/>
       </div>
-    </transition>
-  </nav>
+
+      <!-- Nav Links -->
+      <ul class="hidden md:flex gap-8  font-medium m-0">
+        <li><a href="#" class="no-underline services-color">Home</a></li>
+        <li><a href="#" class="no-underline services-color">About us</a></li>
+        <li><a href="#" class="no-underline services-color">Services</a></li>
+        <li><a href="#" class="no-underline services-color">Contact Us</a></li>
+      </ul>
+
+      <!-- Login/Register -->
+      <div class="flex items-center gap-2">
+        <!-- User Icon Button -->
+        <button :class="userButtonClass" @click="goToUserAccount">
+          <i class="fa-regular fa-user"></i>
+        </button>
+
+        <!-- Log in/Register Button -->
+        <button :class="loginButtonClass" id="login-btn" @click="goToUserAccount">
+          Log in/Register
+        </button>
+      </div>
+    </nav>
 </template>
 
 <style scoped>

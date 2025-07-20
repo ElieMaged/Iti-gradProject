@@ -1,5 +1,10 @@
+<script setup>
+import Hero from '../components/Hero.vue';
+</script>
+
 <template>
   <div>
+<<<<<<< HEAD
     <HeroSection />
     <Hero />
     <TrustedCompanies />
@@ -10,6 +15,10 @@
     <ServicesFeatures />
     <Testimonials />
     <FAQ />
+=======
+    <Hero />
+
+>>>>>>> 81385828d5b564d11a1c72d926d514c10deab9a0
   </div>
 </template>
 
