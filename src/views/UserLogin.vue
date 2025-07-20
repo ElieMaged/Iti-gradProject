@@ -1,4 +1,33 @@
 <script setup>
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { auth, provider } from '../firebase';
+import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+
+const email = ref('');
+const password = ref('');
+const error = ref('');
+const router = useRouter();
+
+const handleLogin = async () => {
+  error.value = '';
+  try {
+    await signInWithEmailAndPassword(auth, email.value, password.value);
+    router.push('/');
+  } catch (err) {
+    error.value = err.message;
+  }
+};
+
+const handleGoogleSignIn = async () => {
+  error.value = '';
+  try {
+    await signInWithPopup(auth, provider);
+    router.push('/');
+  } catch (err) {
+    error.value = err.message;
+  }
+};
 </script>
 
 <template>
@@ -6,14 +35,14 @@
 <body>
     
 <div class="container pt-5  flex flex-col lg:flex-row">
-<form class="flex flex-col justify-center align-items-center ml-10 mr-10 p-20 px-40">
+<form class="flex flex-col justify-center align-items-center ml-10 mr-10 p-20 px-40" @submit.prevent="handleLogin">
     <img class="w-40" src="../assets/logo-secondary.png" alt="">
     <h1 class="title signup 3xl mb-5">Welcome Back!</h1>
-    <p class="title">Don’t have an account yet? <a href="#" class="brand">Sign Up Now</a></p>
+    <p class="title">Don’t have an account yet? <a href="/usersignup" class="brand">Sign Up Now</a></p>
 
   <div class="mb-3">
     <label for="email" class="block mb-2 text-sm font-medium text-gray-900 "></label>
-    <input type="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block md:w-120 p-3 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400  dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Email" required />
+    <input v-model="email" type="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block md:w-120 p-3 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400  dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Email" required />
   </div>
 <div class="relative mb-5">
     <input
@@ -54,8 +83,9 @@
 </div>
 <!-- Login button -->
   <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium text-sm px-20 md:px-36 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 flex flex-row gap-x-3 mb-3">Login</button>
+  <p v-if="error" class="text-red-500 mb-2">{{ error }}</p>
 <p>OR</p>
-  <button type="submit" class=" hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium text-sm px-20 py-2.5 text-center bg-white text-black dark:hover:bg-blue-700 dark:focus:ring-blue-800 flex flex-row gap-x-3 mb-3"> <img class="w-5 h-5" src="../assets/Icons/google.png" alt="">Sign in with google
+  <button type="button" @click="handleGoogleSignIn" class=" hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium text-sm px-20 py-2.5 text-center bg-white text-black dark:hover:bg-blue-700 dark:focus:ring-blue-800 flex flex-row gap-x-3 mb-3"> <img class="w-5 h-5" src="../assets/Icons/google.png" alt="">Sign in with Google
   </button>
 
 

@@ -1,15 +1,38 @@
 <script>
 import '../style.css'
+import { ref, onMounted } from 'vue';
+import { auth } from '../firebase';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+
 export default {
+  setup() {
+    const user = ref(null);
+
+    onMounted(() => {
+      onAuthStateChanged(auth, (firebaseUser) => {
+        user.value = firebaseUser;
+      });
+    });
+
+    const logout = async () => {
+      await signOut(auth);
+      user.value = null;
+      window.location.href = '/'; // Optionally redirect to home
+    };
+
+    return {
+      user,
+      logout
+    };
+  },
   data() {
     return {
       userButtonClass: " text-gray-600 p-2 rounded-full ",
-
     };
   },
   methods: {
     goToUserAccount() {
-      this.$router.push("/profile");
+      this.$router.push("/usersignup");
     },
     goToHome() {
       this.$router.push('/')
@@ -59,15 +82,20 @@ export default {
 
       <!-- Login/Register -->
       <div class="flex items-center gap-2">
-        <!-- User Icon Button -->
-        <button :class="userButtonClass" @click="goToUserAccount">
-          <i class="fa-regular fa-user"></i>
-        </button>
-
-        <!-- Log in/Register Button -->
-        <button :class="loginButtonClass" id="login-btn" @click="goToUserAccount">
-          Log in/Register
-        </button>
+        <template v-if="user">
+          <span class="text-gray-700 font-semibold mr-2">{{ user.displayName || user.email }}</span>
+          <button :class="userButtonClass" @click="logout">
+            Logout
+          </button>
+        </template>
+        <template v-else>
+          <button :class="userButtonClass" @click="goToUserAccount">
+            <i class="fa-regular fa-user"></i>
+          </button>
+          <button :class="loginButtonClass" id="login-btn" @click="goToUserAccount">
+            Log in/Register
+          </button>
+        </template>
       </div>
     </nav>
 </template>
