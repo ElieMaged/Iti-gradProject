@@ -13,6 +13,8 @@ import AirCondition from '../views/AirCondition.vue'
 import WallFinishing from '../views/WallFinishing.vue'
 import Carpentry from '../views/Carpentry.vue'
 import ElecTechnicians from '../views/ElecTechnicians.vue'
+import TechRegister from '../views/TechRegister.vue'
+import WelcomePage from '../views/WelcomePage.vue'
 
 const routes = [
   { path: '/', component: HomePage },
@@ -28,6 +30,8 @@ const routes = [
   { path: '/usersignup', component: UserSignUp },
   { path: '/userlogin', component: UserLogin },
   { path: '/profile', component: Profile },
+  { path: '/techregister', component: TechRegister },
+  { path: '/welcomepage', component: WelcomePage },
 ]
 
 const router = createRouter({
