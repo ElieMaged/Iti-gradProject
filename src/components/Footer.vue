@@ -54,19 +54,29 @@ import { ref } from 'vue'
 <ul class="">
 <li><h2 class="">Service</h2></li>
 <li>
-    Pumping
+    <a class='text-white' href="/plumbing">
+        Plumbing
+    </a>
 </li>
 <li>
-    Air conditioner technicians
+    <a class='text-white' href="/aircondition">
+        Air conditioner technicians
+    </a>
 </li>
 <li>
-    Electricity
+    <a class='text-white' href="/electricity">
+        Electricity
+    </a>
 </li>
 <li>
-    Wall finishing
+    <a class='text-white' href="/wallfinishing">
+        Wall finishing
+    </a>
 </li>
 <li>
-    Carpentry
+    <a class='text-white' href="/carpentry">
+        Carpentry
+    </a>
 </li>
 
 </ul>

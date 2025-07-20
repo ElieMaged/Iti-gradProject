@@ -11,6 +11,9 @@ export default {
     goToUserAccount() {
       this.$router.push("/profile");
     },
+    goToHome() {
+      this.$router.push('/')
+    }
   },
 };
 </script>
@@ -46,10 +49,12 @@ export default {
 
       <!-- Nav Links -->
       <ul class="hidden md:flex gap-8  font-medium m-0">
-        <li><a href="#" class="no-underline services-color">Home</a></li>
-        <li><a href="#" class="no-underline services-color">About us</a></li>
-        <li><a href="#" class="no-underline services-color">Services</a></li>
-        <li><a href="#" class="no-underline services-color">Contact Us</a></li>
+        <li><a href="/" class="no-underline services-color">Home</a></li>
+        <li><a href="/about" class="no-underline services-color">About us</a></li>
+        <li><a href="/plumbing" class="no-underline services-color">Plumbing</a></li>
+        <li><a href="/electricity" class="no-underline services-color">Electricity</a></li>
+        <li><a href="/test" class="no-underline services-color">Test</a></li>
+        <li><a href="/contact" class="no-underline services-color">Contact Us</a></li>
       </ul>
 
       <!-- Login/Register -->
