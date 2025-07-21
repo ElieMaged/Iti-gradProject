@@ -4,8 +4,6 @@ import Hero from '../components/Hero.vue';
 
 <template>
   <div>
-<<<<<<< HEAD
-    <HeroSection />
     <Hero />
     <TrustedCompanies />
     <ServicesSection />
@@ -15,10 +13,7 @@ import Hero from '../components/Hero.vue';
     <ServicesFeatures />
     <Testimonials />
     <FAQ />
-=======
-    <Hero />
-
->>>>>>> 81385828d5b564d11a1c72d926d514c10deab9a0
+    <HeroSection />
   </div>
 </template>
 

@@ -3,10 +3,10 @@
 </script>
 
 <template>
-    <div class="flex flex-col container md:grid md:grid-cols-12">
+    <div class="flex flex-col md:grid md:grid-cols-12 m-3">
 
   
-    <div class="col-span-6 ">
+    <div class="col-span-5 ">
      <h2 class="title">Contact Us</h2>
      <p class="text-2xl">Email, call, or complete the form to learn how BoltFix can solve your messaging problem </p>
 
@@ -42,7 +42,7 @@
     </div>
 </div>
 
-<form class="max-w-sm mx-auto col-span-6">
+<form class="max-w-sm mx-auto col-span-5">
     <h2 class="title">Get In Touch!</h2>
   <div class="mb-3">
     <label for="name" class="block mb-2 text-sm font-medium text-gray-900">Name</label>
