@@ -1,34 +1,11 @@
 <script>
 import '../style.css'
-import { ref, onMounted } from 'vue';
-import { auth } from '../firebase';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
 
 export default {
-  setup() {
-    const user = ref(null);
-
-    onMounted(() => {
-      onAuthStateChanged(auth, (firebaseUser) => {
-        user.value = firebaseUser;
-      });
-    });
-
-    const logout = async () => {
-      await signOut(auth);
-      user.value = null;
-      window.location.href = '/'; // Optionally redirect to home
-    };
-
-    return {
-      user,
-      logout
-    };
-  },
   data() {
     return {
       userButtonClass: " text-gray-600 p-2 rounded-full ",
-
+      loginButtonClass: "",
     };
   },
   methods: {
@@ -65,10 +42,10 @@ export default {
 
       <!-- Nav Links -->
       <ul class="hidden md:flex gap-8  font-medium m-0">
-        <li><a href="#" class="no-underline services-color">Home</a></li>
-        <li><a href="#" class="no-underline services-color">About us</a></li>
-        <li><a href="#" class="no-underline services-color">Services</a></li>
-        <li><a href="#" class="no-underline services-color">Contact Us</a></li>
+        <li><a href="/" class="no-underline services-color">Home</a></li>
+        <li><a href="/views/AboutUs.vue" class="no-underline services-color">About us</a></li>
+        <li><a href="/views/Services.vue" class="no-underline services-color">Services</a></li>
+        <li><a href="/views/Contact.vue" class="no-underline services-color">Contact Us</a></li>
       </ul>
 
       <!-- Login/Register -->
