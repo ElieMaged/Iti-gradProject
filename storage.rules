@@ -1,0 +1,9 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Allow read access to team images
+    match /team/{allPaths=**} {
+      allow read: if true;
+    }
+  }
+} 

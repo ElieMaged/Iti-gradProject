@@ -17,7 +17,10 @@ body {
 
 .no-underline {
   text-decoration: none;
+<<<<<<< HEAD
+=======
   /* background-color: rgb(60, 60, 60); */
+>>>>>>> 81385828d5b564d11a1c72d926d514c10deab9a0
 }
 
 
