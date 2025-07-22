@@ -8,9 +8,8 @@
             <!-- quick info -->
             <div class="flex flex-col mb-6 md:mb-0">
                 <img class="w-20 pb-2" src="../assets/Logo.png" alt="BoltFix logo">
-                <p class="text-left w-60">BoltFix exists to simplify home maintenance for every household in Egypt by
-                    connecting users with skilled, verified technicians.</p>
-                <p class="text-2xl font-bold mt-4">Social Links</p>
+                <p class="text-left w-60">{{ $t('footerQuickInfo') }}</p>
+                <p class="text-2xl font-bold mt-4">{{ $t('footerSocialLinks') }}</p>
                 <div class="flex gap-3 mt-2">
                     <a href="https://www.facebook.com/" target="_blank" aria-label="Facebook"><i class="fa-brands fa-facebook"></i></a>
                     <a href="https://twitter.com/" target="_blank" aria-label="Twitter"><i class="fa-brands fa-twitter"></i></a>
@@ -21,38 +20,38 @@
 
             <!-- quick links -->
             <div class="flex flex-col mb-6 md:mb-0">
-                <p class="text-2xl font-bold mb-2">Quick Link</p>
-                <router-link to="/">Home</router-link>
-                <router-link to="/about">About Us</router-link>
-                <router-link to="/services">Services</router-link>
-                <router-link to="/contact">Contact Us</router-link>
-                <router-link to="/faqs">FAQS</router-link>
+                <p class="text-2xl font-bold mb-2">{{ $t('footerQuickLink') }}</p>
+                <router-link to="/">{{ $t('footerHome') }}</router-link>
+                <router-link to="/about">{{ $t('footerAboutUs') }}</router-link>
+                <router-link to="/services">{{ $t('footerServices') }}</router-link>
+                <router-link to="/contact">{{ $t('footerContactUs') }}</router-link>
+                <router-link to="/faqs">{{ $t('footerFaqs') }}</router-link>
             </div>
 
             <!-- services -->
             <div class="flex flex-col mb-6 md:mb-0">
-                <p class="text-2xl font-bold mb-2">Service</p>
-                <router-link class="text-[#e6e3f8]" to="/plumbing">Plumbing</router-link>
-                <router-link class="text-[#e6e3f8]" to="/aircondition">Air Conditioner technicians</router-link>
-                <router-link class="text-[#e6e3f8]" to="/electricity">Electricity</router-link>
-                <router-link class="text-[#e6e3f8]" to="/wallfinishing">Wall finishing</router-link>
-                <router-link class="text-[#e6e3f8]" to="/carpentry">Carpentry</router-link>
+                <p class="text-2xl font-bold mb-2">{{ $t('footerService') }}</p>
+                <router-link class="text-[#e6e3f8]" to="/plumbing">{{ $t('footerPlumbing') }}</router-link>
+                <router-link class="text-[#e6e3f8]" to="/aircondition">{{ $t('footerAirConditioner') }}</router-link>
+                <router-link class="text-[#e6e3f8]" to="/electricity">{{ $t('footerElectricity') }}</router-link>
+                <router-link class="text-[#e6e3f8]" to="/wallfinishing">{{ $t('footerWallFinishing') }}</router-link>
+                <router-link class="text-[#e6e3f8]" to="/carpentry">{{ $t('footerCarpentry') }}</router-link>
             </div>
 
             <!-- contact us -->
             <div class="flex flex-col gap-2">
-                <p class="text-2xl font-bold mb-2">Contact Us</p>
+                <p class="text-2xl font-bold mb-2">{{ $t('footerContactUs') }}</p>
                 <div class="flex items-center gap-3">
                     <i class="fa-solid fa-phone text-[#c3b0f4] text-base text-center"></i>
-                    <span class="text-[#e6e3f8]">925-465-3762</span>
+                    <span class="text-[#e6e3f8]">{{ $t('footerPhone') }}</span>
                 </div>
                 <div class="flex items-center gap-3">
                     <i class="fa-solid fa-envelope text-[#c3b0f4] text-base text-center"></i>
-                    <span class="text-[#e6e3f8]">boltfix@gmail.com</span>
+                    <span class="text-[#e6e3f8]">{{ $t('footerEmail') }}</span>
                 </div>
                 <div class="flex items-center gap-3">
                     <i class="fa-solid fa-location-dot text-[#c3b0f4] text-base text-center"></i>
-                    <span class="text-[#e6e3f8]">4096 Modesto,<br>CA 95350, USA</span>
+                    <span class="text-[#e6e3f8]">{{ $t('footerAddress') }}</span>
                 </div>
             </div>
         </div>
@@ -62,11 +61,11 @@
 
         <!-- copyright -->
         <div class="flex flex-col md:flex-row justify-between items-center gap-2">
-            <p class="text-base font-sans font-light">© 2025 Design and Developed by ITI students</p>
+            <p class="text-base font-sans font-light">{{ $t('footerCopyright') }}</p>
             <div class="flex gap-4 text-base font-sans font-light">
-                <a href="#">Privacy Policy</a>
+                <a href="#">{{ $t('footerPrivacyPolicy') }}</a>
                 <span class="hidden md:inline">|</span>
-                <a href="#">Terms of Service</a>
+                <a href="#">{{ $t('footerTermsOfService') }}</a>
             </div>
         </div>
     </footer>

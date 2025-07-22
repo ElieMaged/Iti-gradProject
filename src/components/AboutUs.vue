@@ -74,6 +74,15 @@ export default {
   position: relative;
 }
 
+@media (max-width: 1000px) {
+  .about-container {
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
 .about-container {
   width: 90%;
   max-width: 1200px;
@@ -110,7 +119,7 @@ export default {
 
 .about-features {
   display: flex;
-    flex-direction: row;
+  flex-direction: row;
   gap: 50px;
 }
 

@@ -57,21 +57,21 @@ export default {
           id: '2',
           name: 'Sarah Johnson',
           image: '/public/images/Image.png',
-          description: 'Expert cleaning specialist with 5+ years of experience. Dedicated to providing exceptional service.',
+          description: 'Skilled technician with a strong track record of customer satisfaction. Professional, and ready for your job.',
           rating: 5
         },
         {
           id: '3',
           name: 'Mike Chen',
           image: '/public/images/Image.png',
-          description: 'Professional technician with excellent attention to detail. Committed to customer satisfaction.',
+          description: 'Skilled technician with a strong track record of customer satisfaction. Professional, and ready for your job.',
           rating: 5
         },
         {
           id: '4',
           name: 'Lisa Rodriguez',
           image: '/public/images/Image.png',
-          description: 'Experienced team member with strong work ethic. Delivers quality results every time.',
+          description: 'Skilled technician with a strong track record of customer satisfaction. Professional, and ready for your job.',
           rating: 5
         }
       ],
