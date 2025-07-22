@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+   "optimize-images": "imagemin 'src/assets/**/*.{jpg,jpeg,png,svg}' --out-dir='src/assets'",
+    "build": "npm run optimize-images && vite build",
     "preview": "vite preview",
     "build:prod": "vite build --mode production",
-    "serve": "vite preview --port 3000"
+    "server": "vite preview --port 3000"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.11",
@@ -23,6 +24,11 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.0",
     "autoprefixer": "^10.4.21",
+    "imagemin": "^9.0.1",
+    "imagemin-cli": "^8.0.0",
+    "imagemin-mozjpeg": "^10.0.0",
+    "imagemin-pngquant": "^10.0.0",
+    "imagemin-svgo": "^11.0.1",
     "postcss": "^8.5.6",
     "sass-embedded": "^1.89.2",
     "tailwindcss": "^4.1.11",
