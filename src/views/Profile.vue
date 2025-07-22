@@ -78,7 +78,7 @@
                'flex items-center space-x-3 py-2 px-3 rounded-lg transition-colors',
                activeTab === 'logout' ? 'bg-purple-200 text-purple-700 font-medium' : 'text-gray-700 hover:text-purple-700'
              ]"
-             @click="activeTab = 'logout'">
+             @click="handleLogout">
             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"/>
             </svg>
@@ -89,153 +89,237 @@
 
       <!-- Main Content -->
       <main class="flex-1 p-8 bg-white">
-        <!-- Personal Information Section -->
-        <div class="mb-8">
-          <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold title">Personal Information</h2>
-            <button class="bg-purple-300 text-white px-4 py-2 rounded-lg hover:bg-purple-400 transition-colors">
-              Edit
-            </button>
-          </div>
+        <!-- Loading State -->
+        <div v-if="loading" class="text-center py-8">
+          <p class="text-lg text-gray-600">Loading profile data...</p>
+        </div>
 
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Form Fields -->
-            <div class="lg:col-span-2 space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                <input type="text" value="Mohamed ali ahmed" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
-              </div>
-              
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                <input type="email" value="mohamed@gmail.com" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
-              </div>
-              
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                <input type="tel" value="+20 111 222 5555" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
-              </div>
-              
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                <input type="tel" value="+20 111 222 5555" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
-              </div>
+        <!-- Error State -->
+        <div v-else-if="error" class="text-center py-8">
+          <p class="text-lg text-red-600">{{ error }}</p>
+        </div>
 
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Specialization</label>
-                <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                  <option>Plumbing</option>
-                </select>
-              </div>
-              
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Years of Experience</label>
-                <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                  <option>5 years</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Base Visit Price</label>
-                <input type="text" value="250 EGP" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">About</label>
-                <textarea rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">Experienced plumber specializing in residential plumbing repairs and installations.</textarea>
-              </div>
-            </div>
-
-            <!-- Profile Picture -->
-            <div class="flex flex-col items-center space-y-4">
-              <div class="w-36 h-36 rounded-lg overflow-hidden bg-gray-200">
-                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face" alt="Profile" class="w-full h-full object-cover" />
-              </div>
-              <button class="bg-purple-500 text-white px-6 py-2 rounded-lg hover:bg-purple-600 transition-colors">
-                Upload
+        <!-- Profile Content -->
+        <div v-else-if="technicianData">
+          <!-- Personal Information Section -->
+          <div class="mb-8">
+            <div class="flex justify-between items-center mb-6">
+              <h2 class="text-2xl font-bold title">Personal Information</h2>
+              <button class="bg-purple-300 text-white px-4 py-2 rounded-lg hover:bg-purple-400 transition-colors">
+                Edit
               </button>
             </div>
-          </div>
-        </div>
 
-        <!-- Change Address Section -->
-        <div class="mb-8 border-t pt-8">
-          <div class="flex justify-between items-center mb-6">
-            <h3 class="text-xl font-bold text-purple-800">Change Address</h3>
-            <button class="bg-purple-300 text-white px-4 py-2 rounded-lg hover:bg-purple-400 transition-colors">
-              Edit
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <!-- Form Fields -->
+              <div class="lg:col-span-2 space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                  <input type="text" :value="technicianData.fullName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" readonly />
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                  <input type="email" :value="technicianData.email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" readonly />
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                  <input type="tel" value="+20 111 222 5555" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Specialization</label>
+                  <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                    <option :selected="technicianData.specialization">{{ technicianData.specialization }}</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Years of Experience</label>
+                  <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                    <option :selected="technicianData.experience">{{ technicianData.experience }} years</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Base Visit Price</label>
+                  <input type="text" :value="technicianData.basePrice + ' EGP'" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">About</label>
+                  <textarea rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">{{ technicianData.bio }}</textarea>
+                </div>
+              </div>
+
+              <!-- Profile Picture -->
+              <div class="flex flex-col items-center space-y-4">
+                <div class="w-36 h-36 rounded-lg overflow-hidden bg-gray-200">
+                  <img v-if="technicianData.idPhotoUrl" :src="technicianData.idPhotoUrl" alt="Profile" class="w-full h-full object-cover" />
+                  <div v-else class="w-full h-full flex items-center justify-center text-gray-500">
+                    <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                </div>
+                <button class="bg-purple-500 text-white px-6 py-2 rounded-lg hover:bg-purple-600 transition-colors">
+                  Upload
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Change Address Section -->
+          <div class="mb-8 border-t pt-8">
+            <div class="flex justify-between items-center mb-6">
+              <h3 class="text-xl font-bold text-purple-800">Change Address</h3>
+              <button class="bg-purple-300 text-white px-4 py-2 rounded-lg hover:bg-purple-400 transition-colors">
+                Edit
+              </button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">City</label>
+                <input type="text" :value="technicianData.government" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Area</label>
+                <input type="text" :value="technicianData.district" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Street Name</label>
+                <input type="text" value="Tahrir Street" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+              </div>
+            </div>
+            
+            <div class="flex items-center space-x-6">
+              <span class="text-gray-700 font-medium">Willing to Travel?</span>
+              <label class="flex items-center space-x-2">
+                <input type="radio" name="travel" value="yes" :checked="technicianData.willingToTravel === 'yes'" class="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-500" />
+                <span class="text-gray-700">Yes</span>
+              </label>
+              <label class="flex items-center space-x-2">
+                <input type="radio" name="travel" value="no" :checked="technicianData.willingToTravel === 'no'" class="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-500" />
+                <span class="text-gray-700">No</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Account Status -->
+          <div class="mb-8 border-t pt-8">
+            <div class="flex justify-between items-center mb-6">
+              <h3 class="text-xl font-bold text-purple-800">Account Status</h3>
+            </div>
+            <div class="flex items-center space-x-4">
+              <span class="text-gray-700 font-medium">Status:</span>
+              <span :class="[
+                'px-3 py-1 rounded-full text-sm font-medium',
+                technicianData.status === 'approved' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+              ]">
+                {{ technicianData.status === 'approved' ? 'Approved' : 'Pending Approval' }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Change Password Section -->
+          <div class="mb-8 border-t pt-8">
+            <div class="flex justify-between items-center mb-6">
+              <h3 class="text-xl font-bold text-purple-800">Change Password</h3>
+              <button class="bg-purple-300 text-white px-4 py-2 rounded-lg hover:bg-purple-400 transition-colors">
+                Edit
+              </button>
+            </div>
+            
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Old Password</label>
+                <input type="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                <input type="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Save Button -->
+          <div class="text-center pt-6">
+            <button class="bg-purple-600 text-white px-8 py-3 rounded-lg hover:bg-purple-700 transition-colors font-medium text-lg">
+              Save Changes
             </button>
           </div>
-          
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">City</label>
-              <input type="text" value="Cairo" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Area</label>
-              <input type="text" value="Giza" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Street Name</label>
-              <input type="text" value="Tahrir Street" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
-            </div>
-          </div>
-          
-          <div class="flex items-center space-x-6">
-            <span class="text-gray-700 font-medium">Willing to Travel?</span>
-            <label class="flex items-center space-x-2">
-              <input type="radio" name="travel" value="yes" checked class="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-500" />
-              <span class="text-gray-700">Yes</span>
-            </label>
-            <label class="flex items-center space-x-2">
-              <input type="radio" name="travel" value="no" class="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-500" />
-              <span class="text-gray-700">No</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Change Password Section -->
-        <div class="mb-8 border-t pt-8">
-          <div class="flex justify-between items-center mb-6">
-            <h3 class="text-xl font-bold text-purple-800">Change Password</h3>
-            <button class="bg-purple-300 text-white px-4 py-2 rounded-lg hover:bg-purple-400 transition-colors">
-              Edit
-            </button>
-          </div>
-          
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Old Password</label>
-              <input type="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
-              <input type="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
-            </div>
-          </div>
-        </div>
-
-        <!-- Save Button -->
-        <div class="text-center pt-6">
-          <button class="bg-purple-600 text-white px-8 py-3 rounded-lg hover:bg-purple-700 transition-colors font-medium text-lg">
-            Save Changes
-          </button>
         </div>
       </main>
     </div>
   </div>
 </template>
 
-<script>
-export default {
-  name: 'Profile',
-  data() {
-    return {
-      activeTab: null // No default selected tab
+<script setup>
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { auth, db } from '../firebase';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { signOut } from 'firebase/auth';
+
+const router = useRouter();
+const activeTab = ref('profile');
+const loading = ref(true);
+const error = ref('');
+const technicianData = ref(null);
+
+onMounted(async () => {
+  try {
+    console.log('Profile component mounted, checking authentication...');
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      console.log('No authenticated user, redirecting to login...');
+      router.push('/userlogin');
+      return;
     }
+
+    console.log('User authenticated:', currentUser.uid);
+
+    // Fetch technician data from Firestore
+    const techniciansRef = collection(db, 'technicians');
+    const q = query(techniciansRef, where('uid', '==', currentUser.uid));
+    
+    console.log('Querying Firestore for technician data...');
+    const querySnapshot = await getDocs(q);
+    
+    if (!querySnapshot.empty) {
+      const doc = querySnapshot.docs[0];
+      technicianData.value = { id: doc.id, ...doc.data() };
+      console.log('Technician data loaded:', technicianData.value);
+    } else {
+      console.log('No technician profile found for user:', currentUser.uid);
+      error.value = 'Technician profile not found';
+    }
+  } catch (err) {
+    console.error('Error loading profile:', err);
+    
+    // Provide more specific error messages
+    if (err.code === 'permission-denied') {
+      error.value = 'Permission denied. Please check your Firebase Firestore rules.';
+    } else if (err.code === 'unavailable') {
+      error.value = 'Firestore is currently unavailable. Please try again later.';
+    } else {
+      error.value = 'Error loading profile: ' + err.message;
+    }
+  } finally {
+    loading.value = false;
   }
-}
+});
+
+const handleLogout = async () => {
+  try {
+    await signOut(auth);
+    router.push('/');
+  } catch (err) {
+    console.error('Logout error:', err);
+  }
+};
 </script>
 
 <style scoped>
@@ -244,7 +328,6 @@ input, select, textarea {
   border-radius: 4rem;
   background-color: #D0D1D1;
 }
-
 
 button {
   background-color: #625397;
@@ -267,5 +350,4 @@ a:hover {
 .title {
   color: #625397;
 }
-
 </style>
