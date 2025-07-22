@@ -14,7 +14,7 @@
       </div>
     </div>
     <!-- Image and Accordion below -->
-    <div class="faq-container">
+    <div class="faq-container flex flex-col md:flex-row align-items-center justify-center">
       <div class="faq-image">
         <img src="/images/questions image.png" alt="Plumbers working in kitchen" class="plumbers-photo" />
       </div>
