@@ -55,9 +55,8 @@
                 </div>
             </div>
         </div>
-=======
 
-  <footer class="footer">
+
     <div class="footer__main">
       <!-- Left: Logo & Description -->
       <div class="footer__col footer__col--desc">
@@ -314,17 +313,7 @@
   }
 }
 
-        <!-- copyright -->
-        <div class="flex flex-col md:flex-row justify-between items-center gap-2">
-            <p class="text-base font-sans font-light">{{ $t('footerCopyright') }}</p>
-            <div class="flex gap-4 text-base font-sans font-light">
-                <a href="#">{{ $t('footerPrivacyPolicy') }}</a>
-                <span class="hidden md:inline">|</span>
-                <a href="#">{{ $t('footerTermsOfService') }}</a>
-            </div>
-        </div>
-    </footer>
-</template>
+
 
 @media (max-width: 768px) {
   .footer {

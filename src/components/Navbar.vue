@@ -54,6 +54,10 @@ export default {
       }
     }
 
+    function goToUserAccount() {
+      router.push(getRoute('usersignup'));
+    }
+
     return {
       user,
       loading,
@@ -62,24 +66,9 @@ export default {
       userButtonClass: " text-gray-600 p-2 rounded-full ",
       loginButtonClass: "",
       getRoute,
-      goToUserAccount() {
-        this.$router.push(getRoute("usersignup"));
-      }
+      goToUserAccount
     };
-  },
-
-export default {
-  data() {
-    return {
-      userButtonClass: " text-gray-600 p-2 rounded-full ",
-      loginButtonClass: "",
-    };
-  },
-  methods: {
-    goToUserAccount() {
-      this.$router.push(this.getRoute("welcomepage"));
-    },
-  },
+  }
 };
 </script>
 
