@@ -13,9 +13,8 @@ watch(locale, (newLocale) => {
 
 <template>
   <Navbar />
-   <Hero />
   <div id="app">
     <router-view />
-    <Footer />
   </div>
+  <Footer />
 </template>
