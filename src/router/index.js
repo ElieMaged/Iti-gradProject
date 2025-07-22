@@ -5,7 +5,7 @@ import About from '../views/About.vue'
 import Contact from '../views/Contact.vue'
 import UserSignUp from '../views/UserSignUp.vue'
 import UserLogin from '../views/UserLogin.vue'
-import Profile from '../views/Profile.vue'
+import TechProfile from '../views/Profile.vue'
 import Plumbing from '../views/Plumbing.vue'
 import Electricity from '../views/Electricity.vue'
 import TestPage from '../views/TestPage.vue'
@@ -13,7 +13,16 @@ import AirCondition from '../views/AirCondition.vue'
 import WallFinishing from '../views/WallFinishing.vue'
 import Carpentry from '../views/Carpentry.vue'
 import ElecTechnicians from '../views/ElecTechnicians.vue'
+
+import TechRegister from '../views/TechRegister.vue'
+import WelcomePage from '../views/WelcomePage.vue'
+import ProfileView from '../views/ProfileView.vue'
+import PreviousServices from '../views/PreviousServices.vue'
+import ProfileEdit from '../views/ProfileEdit.vue'
+import Payment from '../views/Payment.vue'
+=======
 import FAQ from '../components/FAQ.vue'
+
 
 const routes = [
   { path: '/', component: HomePage },
@@ -28,8 +37,17 @@ const routes = [
   { path: '/test', component: TestPage },
   { path: '/usersignup', component: UserSignUp },
   { path: '/userlogin', component: UserLogin },
+  { path: '/techprofile', component: TechProfile },
+  { path: '/profile-edit', component: ProfileEdit },
+  { path: '/techregister', component: TechRegister },
+  { path: '/welcomepage', component: WelcomePage },
+  { path: '/profile-view', component: ProfileView },
+  { path: '/previous-services', component: PreviousServices },
+  { path: '/payment', component: Payment },
+=======
   { path: '/profile', component: Profile },
   {path: '/faq', component: FAQ },
+
 ]
 
 const router = createRouter({

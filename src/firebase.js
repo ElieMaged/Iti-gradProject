@@ -3,7 +3,7 @@ import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
-// Your Firebase configuration
+// Firebase config - use .env values if available, otherwise fallback to project defaults
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyCge8apwznA8qhYMAUSaUltkYMnmYbBKv4",
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "iti-grad-a4054.firebaseapp.com",
@@ -14,14 +14,12 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-K6004N4Y0B"
 };
 
-
-// Initialize Firestore and Storage
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 const db = getFirestore(app);
 const storage = getStorage(app);
 
 export { auth, provider, db, storage };
-export default app;
+export default app; 

@@ -1,5 +1,6 @@
 <template>
   <section class="how-it-works">
+    <div class="flex flex-col items-center justify-center">
     <h2 class="how-it-works-title">How It Works</h2>
     <p class="how-it-works-subtitle">Our Work Process</p>
     <div class="steps-container">
@@ -16,6 +17,7 @@
         <p class="step-description">{{ step.description }}</p>
       </div>
     </div>
+  </div>
   </section>
 </template>
 
