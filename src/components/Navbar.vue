@@ -67,10 +67,12 @@ export default {
       }
     };
   },
+
+export default {
   data() {
     return {
       userButtonClass: " text-gray-600 p-2 rounded-full ",
-
+      loginButtonClass: "",
     };
   },
   methods: {
