@@ -5,8 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-   "optimize-images": "imagemin 'src/assets/**/*.{jpg,jpeg,png,svg}' --out-dir='src/assets'",
-    "build": "npm run optimize-images && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "build:prod": "vite build --mode production",
     "server": "vite preview --port 3000"
