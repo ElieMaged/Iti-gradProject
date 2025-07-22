@@ -13,6 +13,7 @@ import AirCondition from '../views/AirCondition.vue'
 import WallFinishing from '../views/WallFinishing.vue'
 import Carpentry from '../views/Carpentry.vue'
 import ElecTechnicians from '../views/ElecTechnicians.vue'
+import PendingBookings from '../views/PendingBookings.vue'
 
 const routes = [
   { path: '/', component: HomePage },
@@ -28,6 +29,7 @@ const routes = [
   { path: '/usersignup', component: UserSignUp },
   { path: '/userlogin', component: UserLogin },
   { path: '/profile', component: Profile },
+  { path: '/pending-bookings', component: PendingBookings },
 ]
 
 const router = createRouter({
