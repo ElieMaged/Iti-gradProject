@@ -29,6 +29,8 @@ const messages = {
     footerPlumbing: 'Plumbing',
     footerAirConditioner: 'Air Conditioner technicians',
     footerElectricity: 'Electricity',
+    footerElecTechnicians: 'Electricity Technicians',
+  
     footerWallFinishing: 'Wall finishing',
     footerCarpentry: 'Carpentry',
     footerPhone: '925-465-3762',
@@ -272,6 +274,29 @@ const messages = {
     // Testimonials.vue navigation
     testimonialPrev: 'Previous Testimonial',
     testimonialNext: 'Next Testimonial',
+    // EndCard
+    endCardTitle: "We're Here to Help You.",
+    endCardDescription: "We're here to help you achieve your goals. Book an appointment with our expert technicians today!",
+    endCardBookBtn: "Book an Appointment",
+    // Services Dropdown
+    navPlumbing: 'Plumbing',
+    navAirConditioner: 'Air Conditioner technicians',
+    navElectricity: 'Electricity',
+    navWallFinishing: 'Wall finishing',
+    navCarpentry: 'Carpentry',
+    navElectricityTechnicians: 'Electricity Technicians',
+    // Service Titles
+    electricityTitle: 'Electricity',
+    electricalTechniciansTitle: 'Electrical Technicians',
+    wallFinishingTitle: 'Wall Finishing',
+    airConditioningTitle: 'Air Conditioner Technicians',
+    carpentryTitle: 'Carpentry',
+    meetTechniciansTeam: 'Meet Our Technicians Team',
+    plumbingTeamDescription: 'We pride ourselves on being your trusted local plumbing experts. With 20 years of experience serving your city, our mission is to provide high quality, reliable plumbing services that you can depend on, whether it\'s for your home or business.',
+    electricalTechniciansTeamDescription: 'Our electrical technicians are certified and experienced, ready to handle all your electrical needs safely and efficiently.',
+    airConditioningTeamDescription: 'Our air conditioning technicians are experts in installation, maintenance, and repair, ensuring your comfort all year round.',
+    carpentryTeamDescription: 'Our carpenters deliver quality craftsmanship for all your woodwork and furniture needs.',
+    wallFinishingTeamDescription: 'Our wall finishing team provides professional painting, plastering, and decorative finishes for your home or office.',
   },
   ar: {
     // Navbar
@@ -300,6 +325,7 @@ const messages = {
     footerPlumbing: 'السباكة',
     footerAirConditioner: 'فنيي التكييف',
     footerElectricity: 'الكهرباء',
+    footerElecTechnicians: 'فنيو الكهرباء',
     footerWallFinishing: 'تشطيب الجدران',
     footerCarpentry: 'النجارة',
     footerPhone: '٩٢٥-٤٦٥-٣٧٦٢',
@@ -405,10 +431,10 @@ const messages = {
     electricalTechniciansTitle: 'فنيي الكهرباء',
     electricityTitle: 'الكهرباء',
     meetTechniciansTeam: 'تعرف على فريق الفنيين لدينا',
-    plumbingTeamDescription: 'نفخر بكوننا خبراء السباكة المحليين الموثوقين لديك. مع 20 عامًا من الخبرة في خدمتك، مهمتنا هي تقديم خدمات سباكة عالية الجودة وموثوقة يمكنك الاعتماد عليها، سواء لمنزلك أو عملك.',
-    airConditioningTeamDescription: 'خبراء التكييف لدينا جاهزون لمساعدتك على البقاء بارداً ومرتاحاً. نقدم خدمات تركيب وصيانة وإصلاح التكييف.',
-    carpentryTeamDescription: 'نجارونا المهرة يتعاملون مع جميع احتياجات الأعمال الخشبية بدقة واهتمام. من الإصلاحات إلى المشاريع المخصصة، نحن هنا من أجلك.',
-    electricalTechniciansTeamDescription: 'يضمن فنيو الكهرباء المعتمدون لدينا أن يكون منزلك آمناً ومزوداً بالطاقة. نتعامل مع الأسلاك والإصلاحات والتركيبات.',
+    plumbingTeamDescription: 'نحن نفخر بكوننا خبراء السباكة المحليين الموثوقين لديك. مع 20 عامًا من الخبرة في خدمة مدينتك، مهمتنا هي تقديم خدمات سباكة عالية الجودة وموثوقة يمكنك الاعتماد عليها، سواء لمنزلك أو عملك.',
+    airConditioningTeamDescription: 'فنيونا في تكييف الهواء خبراء في التركيب والصيانة والإصلاح، لضمان راحتك طوال العام.',
+    carpentryTeamDescription: 'نجارونا يقدمون أعمال خشبية عالية الجودة لجميع احتياجاتك من الأثاث والأعمال الخشبية.',
+    electricalTechniciansTeamDescription: 'فنيونا الكهربائيون معتمدون وذوو خبرة، جاهزون للتعامل مع جميع احتياجاتك الكهربائية بأمان وكفاءة.',
     electricityTeamDescription: 'يقدم كهربائيوونا ذوو الخبرة خدمات كهربائية آمنة وفعالة لمنزلك أو عملك.',
     technicianDescription: 'فني ماهر ذو سجل قوي في رضا العملاء. محترف وجاهز لخدمتك.',
     viewProfile: 'عرض الملف الشخصي',
@@ -543,6 +569,29 @@ const messages = {
     // Testimonials.vue navigation
     testimonialPrev: 'التوصية السابقة',
     testimonialNext: 'التوصية التالية',
+    // EndCard
+    endCardTitle: "نحن هنا لمساعدتك.",
+    endCardDescription: "نحن هنا لمساعدتك في تحقيق أهدافك، وتجاوز التحديات، وجعل كل خطوة أسهل على طول الطريق. احجز موعدًا مع فنيينا المتخصصين اليوم!",
+    endCardBookBtn: "احجز موعدًا",
+    // Services Dropdown
+    navPlumbing: 'السباكة',
+    navAirConditioner: 'فنيين تكييف الهواء',
+    navElectricity: 'الكهرباء',
+    navWallFinishing: 'تشطيب الحوائط',
+    navCarpentry: 'النجارة',
+    navElectricityTechnicians: 'فنيين كهرباء',
+    // Service Titles
+    electricityTitle: 'الكهرباء',
+    electricalTechniciansTitle: 'فنيين كهرباء',
+    wallFinishingTitle: 'تشطيب الحوائط',
+    airConditioningTitle: 'فنيين تكييف الهواء',
+    carpentryTitle: 'النجارة',
+    meetTechniciansTeam: 'تعرف على فريق الفنيين لدينا',
+    plumbingTeamDescription: 'نحن نفخر بكوننا خبراء السباكة المحليين الموثوقين لديك. مع 20 عامًا من الخبرة في خدمة مدينتك، مهمتنا هي تقديم خدمات سباكة عالية الجودة وموثوقة يمكنك الاعتماد عليها، سواء لمنزلك أو عملك.',
+    electricalTechniciansTeamDescription: 'فنيونا الكهربائيون معتمدون وذوو خبرة، جاهزون للتعامل مع جميع احتياجاتك الكهربائية بأمان وكفاءة.',
+    airConditioningTeamDescription: 'فنيونا في تكييف الهواء خبراء في التركيب والصيانة والإصلاح، لضمان راحتك طوال العام.',
+    carpentryTeamDescription: 'نجارونا يقدمون أعمال خشبية عالية الجودة لجميع احتياجاتك من الأثاث والأعمال الخشبية.',
+    wallFinishingTeamDescription: 'فريق تشطيب الحوائط لدينا يقدم خدمات الدهان واللياسة والتشطيبات الزخرفية لمنزلك أو مكتبك.',
   }
 };
 
