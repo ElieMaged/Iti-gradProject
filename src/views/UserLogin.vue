@@ -141,6 +141,6 @@ body {
  }
 
  .google {
-    
- }
+    background-color: white;
+  }
 </style>
