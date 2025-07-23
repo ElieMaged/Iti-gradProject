@@ -12,10 +12,13 @@
         </p>
         <div class="mt-6 flex gap-4">
         <button id="book-btn" class="bg-purple-700 text-white px-4 py-2 rounded-full">
+
             {{ $t('heroBookBtn') }}
         </button>
         <button id="service-btn" class="bg-purple-200 text-purple-900 px-4 py-2 rounded-full">
             {{ $t('heroShowServicesBtn') }}
+          Show all services →
+
         </button>
     </div>
     </div>
@@ -24,7 +27,11 @@
 
 <script>
     export default {
-        
+          methods:{
+            goToServices(){
+              return this.$router.push('/plumbing')
+            }
+          }
     }
 </script>
 

@@ -18,9 +18,17 @@ import WelcomePage from '../views/WelcomePage.vue'
 import ProfileView from '../views/ProfileView.vue'
 import PreviousServices from '../views/PreviousServices.vue'
 import ProfileEdit from '../views/ProfileEdit.vue'
-import Payment from '../views/Payment.vue'
+import Payment from '../views/TechPayment.vue'
 import FAQ from '../components/FAQ.vue'
 import Profile from '../views/Profile.vue'
+
+import TechnicianDetails from '../views/TechnicianDetails.vue'
+import TechnicionProfile from '../views/TechnicionProfile.vue'
+import TechnicianEditProfile from '../views/TechnichianEditProfile.vue'
+import PendingBookings from '../views/PendingBookings.vue'
+import RegisterChoice from '../views/RegisterChoice.vue'
+import TechnicianAvailability from '../views/TechnicianAvailbility.vue'
+
 
 const routes = [
   { path: '/', component: HomePage },
@@ -32,6 +40,7 @@ const routes = [
   { path: '/wallfinishing', component: WallFinishing },
   { path: '/carpentry', component: Carpentry },
   { path: '/elecTechnicians', component: ElecTechnicians },
+  {path: '/RegisterChoice', component: RegisterChoice },
   { path: '/test', component: TestPage },
   { path: '/usersignup', component: UserSignUp },
   { path: '/userlogin', component: UserLogin },
@@ -44,7 +53,12 @@ const routes = [
   { path: '/payment', component: Payment },
   { path: '/profile', component: Profile },
   {path: '/faq', component: FAQ },
-
+  {path: '/technician-details', component: TechnicianDetails },
+  {path: '/technicion-profile', component: TechnicionProfile },
+  {path: '/technician-edit-profile', component: TechnicianEditProfile },
+  {path: '/booking', component: PendingBookings },
+  {path: '/technicianavailbility', component: TechnicianAvailability },
+    
 ]
 
 const router = createRouter({

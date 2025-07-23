@@ -7,7 +7,19 @@ body {
 :root {
   --primary-color: #625498;
   --secondary-color: #FFC230;
+  --primary: #ffd54f;
+  --secondary: #7c6bb0;
+  --sidebar: #ede7f6;
+  --text-main: #333333;
+  --text-muted: #aaaaaa;
+  --input-bg: #f8f9fa;
+  --input-border: #e0e0e0;
+  --success: #22c55e;
+  --danger: #ef4444;
+  --completed: #6b7280;
 }
+
+
 .primary-color {
   color: var(--primary-color);
 }

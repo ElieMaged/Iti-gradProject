@@ -148,6 +148,7 @@ function cancelPaypal() {
   paypalEmailInput.value = paypalEmail.value;
   editingPaypal.value = false;
 }
+
 </script>
 <style scoped>
 .sidebar-item {

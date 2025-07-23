@@ -11,6 +11,12 @@
           <p class="service-desc">{{ $t(service.desc) }}</p>
           <button class="service-btn">
             {{ $t('bookNow') }}
+
+          <h3 class="service-title">{{ service.title }}</h3>
+          <p class="service-desc">{{ service.desc }}</p>
+          <button class="service-btn" @click="$router.push(service.route || '#')">
+            Book Now
+
             <span class="arrow">→</span>
           </button>
         </div>
@@ -28,31 +34,59 @@ export default {
       services: [
         {
           title: 'plumbingServiceTitle',
+          title: 'Plumbing',
+          route: '/plumbing',
+
           image: '/images/servicesImages/plumbing.png',
           desc: 'plumbingServiceDesc',
         },
         {
+
           title: 'carpentryServiceTitle',
+
+          title: 'Carpentry',
+          route: '/carpentry',
+
           image: '/images/servicesImages/Carpentry.png',
           desc: 'carpentryServiceDesc',
         },
         {
+
           title: 'electricityServiceTitle',
+
+          title: 'Electricity',
+          route: '/electricity',
+
           image: '/images/servicesImages/Electrecity.png',
           desc: 'electricityServiceDesc',
         },
         {
+
           title: 'acTechniciansServiceTitle',
+
+          title: 'AC Technicians',
+          route: '/aircondition',
+
           image: '/images/servicesImages/Ac Technicions.png',
           desc: 'acTechniciansServiceDesc',
         },
         {
+
           title: 'applianceRepairServiceTitle',
+
+          title: 'Electrical Appliance Repair',
+          route: '/elecTechnicians',
+
           image: '/images/servicesImages/electrical appliance repair.png',
           desc: 'applianceRepairServiceDesc',
         },
         {
+
           title: 'wallFinishingServiceTitle',
+
+          title: 'Wall finishing',
+          route: '/wallfinishing',
+
           image: '/images/servicesImages/wall finishing.png',
           desc: 'wallFinishingServiceDesc',
         },

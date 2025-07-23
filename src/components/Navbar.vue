@@ -53,8 +53,8 @@ export default {
       }
     }
 
-    function goToUserAccount() {
-      router.push(getRoute('usersignup'));
+    function signUpOptions() {
+      router.push(getRoute('RegisterChoice'));
     }
 
     function closeMobileMenu() {
@@ -67,16 +67,29 @@ export default {
       loading,
       logout,
       handleProfileClick,
+      getRoute,
+      signUpOptions,
       userButtonClass: " text-gray-600 p-2 rounded-full ",
       loginButtonClass: "",
+
       getRoute,
       goToUserAccount,
       mobileMenuOpen,
       navAccordionOpen,
       closeMobileMenu
+      categories: [
+        { name: 'Plumbing', route: '/plumbing' },
+        { name: 'Electricity', route: '/electricity' },
+        { name: 'Carpentry', route: '/carpentry' },
+        { name: 'Air Condition', route: '/aircondition' },
+        { name: 'Wall Finishing', route: '/wallfinishing' },
+        {name: 'Electrical Technicians', route: '/elecTechnicians'}
+        // Add more categories as needed
+      ]
     };
-  }
-};
+  },
+  };
+  
 </script>
 
 <template>
@@ -167,6 +180,29 @@ export default {
         </button>
       </div>
       <div class="mt-4 flex flex-col gap-2">
+
+
+      <!-- Nav Links -->
+      <ul class="hidden md:flex gap-8  font-medium m-0">
+        <li><a href="/" class="no-underline services-color">Home</a></li>
+        <li><a href="/about" class="no-underline services-color">About us</a></li>
+        <li><a href="/contact" class="no-underline services-color">Contact Us</a></li>
+        <li class="relative group">
+          <button class="no-underline services-color flex items-center focus:outline-none">
+            Services
+            <svg class="services-dropdown-arrow ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+          <div class="services-dropdown">
+            <a href="/services" class="block">All Services</a>
+            <a v-for="category in categories" :key="category.name" :href="category.route" class="block">
+              {{ category.name }}
+            </a>
+          </div>
+        </li>
+      </ul>
+
+      <!-- Login/Register -->
+      <div class="flex items-center gap-2">
         <template v-if="loading">
           <span class="text-gray-500">{{ $t('loading') }}</span>
         </template>
@@ -187,11 +223,18 @@ export default {
               <i class="fa-regular fa-user"></i>
             </button>
             <button :class="loginButtonClass" id="login-btn" @click="goToUserAccount">
+            <!-- User Icon Button -->
+            <button :class="userButtonClass" @click="signUpOption">
+              <i class="fa-regular fa-user"></i>
+            </button>
+            <!-- Log in/Register Button -->
+            <button :class="loginButtonClass" id="login-btn" @click="signUpOptions">
               {{ $t('loginRegister') }}
             </button>
           </template>
         </template>
         <LanguageToggle />
+        
       </div>
     </div>
   </nav>
@@ -208,12 +251,16 @@ export default {
   height: 52px;
 }
 #login-btn {
+  border: 1px solid #6B4FA1;
   transition: background-color 0.3s ease;
   background-color: var(--primary-color);
   color: white;
-  border: none;
-  padding: 10px 20px;
+  padding: 0.25rem 1rem;
   border-radius: 20px;
+}
+#login-btn:hover {
+  background-color: white;
+  color: #6B4FA1;
 }
 .services-color {
   color: #8C8E90;
@@ -226,6 +273,46 @@ export default {
 }
 .fade-enter-from, .fade-leave-to {
   opacity: 0;
+}
+/* Dropdown Styles */
+.services-dropdown {
+  min-width: 180px;
+  background: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08), 0 1.5px 4px rgba(0,0,0,0.03);
+  padding: 0.5rem 0;
+  z-index: 50;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  position: absolute;
+  left: 0;
+  top: 100%;
+}
+.group:hover .services-dropdown {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+.services-dropdown a {
+  display: block;
+  padding: 0.5rem 1rem;
+  color: #333;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+  border-radius: 0.25rem;
+}
+.services-dropdown a:hover {
+  background: var(--primary-color);
+  color: #fff;
+}
+.services-dropdown-arrow {
+  margin-left: 0.25rem;
+  transition: transform 0.18s;
+}
+.group:hover .services-dropdown-arrow {
+  transform: rotate(180deg);
 }
 @media (max-width: 768px) {
   #contact-Nav {
