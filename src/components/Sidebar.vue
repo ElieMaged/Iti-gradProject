@@ -4,7 +4,7 @@
       <div
         class="menu-item"
         :class="{ active: activeMenu === 'technicionprofile' }"
-        @click="$emit('navigate', '/technicionprofile')"
+        @click="$emit('navigate', '/technicion-profile')"
         >
         <i class="fa-regular fa-user"></i>
         <span>My Profile</span>
@@ -12,7 +12,7 @@
       <div
         class="menu-item"
         :class="{ active: activeMenu === 'technicianeditprofile' }"
-        @click="$emit('navigate', '/technicianeditprofile')"
+        @click="$emit('navigate', '/technician-edit-profile')"
       >
         <i class="fa-solid fa-gear"></i>
         <span>Settings</span>
@@ -100,7 +100,7 @@ function navigateBookingStatus(status) {
   width: 250px;
   background: #D3CFE2;
   padding: 2rem 0;
-  height: 100vh;
+  height: auto;
   overflow-y: auto;
   overflow-x: hidden;
 }

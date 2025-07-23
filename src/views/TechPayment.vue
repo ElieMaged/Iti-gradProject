@@ -54,7 +54,7 @@ export default {
   },
   data() {
     return {
-      activeMenu: 'Techpayment',
+      activeMenu: 'payment',
     }
   },
   methods: {

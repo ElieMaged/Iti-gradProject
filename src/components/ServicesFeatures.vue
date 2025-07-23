@@ -57,6 +57,7 @@ export default {
   padding: 80px 0;
   width: 100%;
   background-color: var(--primary-color);
+  border-radius: 16px;
 }
 
 .services-header {

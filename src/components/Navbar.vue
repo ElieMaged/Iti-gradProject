@@ -54,8 +54,8 @@ export default {
       }
     }
 
-    function goToUserAccount() {
-      router.push(getRoute('usersignup'));
+    function signUpOptions() {
+      router.push(getRoute('RegisterChoice'));
     }
 
     return {
@@ -63,21 +63,21 @@ export default {
       loading,
       logout,
       handleProfileClick,
+      getRoute,
+      signUpOptions,
       userButtonClass: " text-gray-600 p-2 rounded-full ",
       loginButtonClass: "",
       categories: [
         { name: 'Plumbing', route: '/plumbing' },
         { name: 'Electricity', route: '/electricity' },
         { name: 'Carpentry', route: '/carpentry' },
-        { name: 'Air Condition', route: '/air-condition' },
+        { name: 'Air Condition', route: '/aircondition' },
         { name: 'Wall Finishing', route: '/wallfinishing' },
         {name: 'Electrical Technicians', route: '/elecTechnicians'}
         // Add more categories as needed
       ]
     };
   },
-    getRoute,
-    goToUserAccount
   };
   
 </script>
@@ -145,26 +145,18 @@ export default {
           </template>
           <template v-else>
             <!-- User Icon Button -->
-            <button :class="userButtonClass" @click="goToUserAccount">
+            <button :class="userButtonClass" @click="signUpOption">
               <i class="fa-regular fa-user"></i>
             </button>
             <!-- Log in/Register Button -->
-            <button :class="loginButtonClass" id="login-btn" @click="goToUserAccount">
+            <button :class="loginButtonClass" id="login-btn" @click="signUpOptions">
               {{ $t('loginRegister') }}
             </button>
           </template>
         </template>
         <!-- Language Toggle Button -->
         <LanguageToggle />
-        <!-- User Icon Button -->
-        <button :class="userButtonClass" @click="goToUserAccount">
-          <i class="fa-regular fa-user"></i>
-        </button>
-
-        <!-- Log in/Register Button -->
-        <button :class="loginButtonClass" id="login-btn" @click="goToRegisterChoice">
-          Log in/Register
-        </button>
+        
       </div>
     </nav>
 </template>
@@ -180,12 +172,16 @@ export default {
   height: 52px;
 }
 #login-btn {
+  border: 1px solid #6B4FA1;
   transition: background-color 0.3s ease;
   background-color: var(--primary-color);
   color: white;
-  border: none;
-  padding: 10px 20px;
+  padding: 0.25rem 1rem;
   border-radius: 20px;
+}
+#login-btn:hover {
+  background-color: white;
+  color: #6B4FA1;
 }
 .services-color {
   color: #8C8E90;

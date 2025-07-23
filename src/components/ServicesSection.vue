@@ -46,19 +46,19 @@ export default {
         },
         {
           title: 'AC Technicians',
-          route: '/ac-technicians',
+          route: '/aircondition',
           image: '/images/servicesImages/Ac Technicions.png',
           desc: 'While we can customize your cleaning plan to suit your needs, most clients schedule regular maintenance services:',
         },
         {
           title: 'Electrical Appliance Repair',
-          route: '/electrical-appliance-repair',
+          route: '/elecTechnicians',
           image: '/images/servicesImages/electrical appliance repair.png',
           desc: 'While we can customize your cleaning plan to suit your needs, most clients schedule regular maintenance services:',
         },
         {
           title: 'Wall finishing',
-          route: '/wall-finishing',
+          route: '/wallfinishing',
           image: '/images/servicesImages/wall finishing.png',
           desc: 'While we can customize your cleaning plan to suit your needs, most clients schedule regular maintenance services:',
         },

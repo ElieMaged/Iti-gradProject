@@ -70,12 +70,13 @@
 import Sidebar from '../components/Sidebar.vue';
 
 export default {
-  name: 'PendingBookings',
+  name: 'Bookings',
   components: {
     Sidebar
   },
   data() {
     return {
+      activeMenu: 'booking',
       isBookingDropdownOpen: false,
       currentStatus: 'pending',
       pendingBookings: [
