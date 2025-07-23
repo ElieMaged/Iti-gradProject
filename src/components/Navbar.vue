@@ -1,6 +1,6 @@
 <script>
 import '../style.css'
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { auth } from '../firebase';
@@ -66,9 +66,30 @@ export default {
       router.push(getRoute('usersignup'));
     }
 
+
+    const isDark = ref(false);
+
+    onMounted(() => {
+      isDark.value = localStorage.getItem('theme') === 'dark' ||
+        (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    });
+
+    watch(isDark, (val) => {
+      document.documentElement.classList.toggle('dark', val);
+      localStorage.setItem('theme', val ? 'dark' : 'light');
+    });
+
+    function toggleDarkMode() {
+      isDark.value = !isDark.value;
+    }
+
+    const iconClass = computed(() => isDark.value ? 'fa fa-moon' : 'fa fa-sun');
+
     return {
       user,
       loading,
+      locale, 
+      isDark,
       logout,
       handleProfileClick,
       getRoute,
@@ -79,6 +100,8 @@ export default {
       navAccordionOpen,
       closeMobileMenu,
       goToUserAccount,
+      toggleDarkMode,
+      iconClass,
       categories: [
         { name: 'Plumbing', route: '/plumbing' },
         { name: 'Electricity', route: '/electricity' },
@@ -96,23 +119,23 @@ export default {
 
 <template>
   <!-- Top Bar -->
-  <div class="text-white w-full" id="contact-Nav">
+  <div class="topbar w-full" id="contact-Nav">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center px-4 py-2 gap-2">
       <div class="flex flex-col sm:flex-row gap-2 items-center">
-        <a href="tel:+12095551234" class="text-white no-underline mx-1 flex items-center text-sm"><i class="fa-solid fa-phone px-2"></i>{{ $t('contactPhone') }}</a>
-        <a href="mailto:Boltfix@gmail.com" class="text-white no-underline mx-1 flex items-center text-sm"><i class="fa-solid fa-envelope px-2"></i>{{ $t('contactEmail') }}</a>
-        <a href="https://www.google.com/maps/place/123+Main+St,+Anytown,+USA" class="text-white no-underline mx-1 flex items-center text-sm"><i class="fa-solid fa-map-marker-alt px-2"></i>{{ $t('contactAddress') }}</a>
+        <a href="tel:+12095551234" class="no-underline mx-1 flex items-center text-sm"><i class="fa-solid fa-phone px-2"></i>{{ $t('contactPhone') }}</a>
+        <a href="mailto:Boltfix@gmail.com" class="no-underline mx-1 flex items-center text-sm"><i class="fa-solid fa-envelope px-2"></i>{{ $t('contactEmail') }}</a>
+        <a href="https://www.google.com/maps/place/123+Main+St,+Anytown,+USA" class="no-underline mx-1 flex items-center text-sm"><i class="fa-solid fa-map-marker-alt px-2"></i>{{ $t('contactAddress') }}</a>
       </div>
       <div class="flex gap-2">
-        <a href="#" class="flex items-center justify-center rounded-full bg-white text-white w-7 h-7"><i class="fa-brands fa-facebook-f secondary-color"></i></a>
-        <a href="#" class="flex items-center justify-center rounded-full bg-white text-white w-7 h-7"><i class="fa-brands fa-x-twitter secondary-color"></i></a>
-        <a href="#" class="flex items-center justify-center rounded-full bg-white text-white w-7 h-7"><i class="fa-brands fa-linkedin-in secondary-color"></i></a>
-        <a href="#" class="flex items-center justify-center rounded-full bg-white text-white w-7 h-7"><i class="fab fa-youtube secondary-color"></i></a>
+        <a href="#" class="flex items-center justify-center rounded-full w-7 h-7"><i class="fa-brands fa-facebook-f secondary-color"></i></a>
+        <a href="#" class="flex items-center justify-center rounded-full w-7 h-7"><i class="fa-brands fa-x-twitter secondary-color"></i></a>
+        <a href="#" class="flex items-center justify-center rounded-full w-7 h-7"><i class="fa-brands fa-linkedin-in secondary-color"></i></a>
+        <a href="#" class="flex items-center justify-center rounded-full w-7 h-7"><i class="fab fa-youtube secondary-color"></i></a>
       </div>
     </div>
   </div>
   <!-- Navbar -->
-  <nav class="bg-white px-6 py-3 flex justify-between items-center container">
+  <nav class="navbar px-6 py-3 flex justify-between items-center container">
     <!-- Logo -->
     <div class="flex items-center gap-2 text-2xl font-bold">
       <img src="/logo/ace04d3b268cf810c91d002fdf7454a6ef778f27.png" alt="Logo" class="h-8" id="logo"/>
@@ -163,6 +186,9 @@ export default {
         </template>
       </template>
       <LanguageToggle />
+      <button @click="toggleDarkMode" class="ml-2 darkmode-btn" :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'">
+        <i :class="iconClass"></i>
+      </button>
     </div>
     <!-- Mobile Menu -->
     <div v-if="mobileMenuOpen" class="md:hidden absolute top-20 left-0 w-full bg-white shadow-lg z-50 p-4">
@@ -207,16 +233,20 @@ export default {
           </template>
         </template>
         <LanguageToggle />
+        <button @click="toggleDarkMode" class="ml-2 darkmode-btn" :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'">
+          <i :class="iconClass"></i>
+        </button>
       </div>
     </div>
   </nav>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 #contact-Nav {
   background-color: var(--secondary-color);
   width: 100%;
   padding: 0;
+  color: var(--primary-bg);
 }
 #logo {
   width: 153.308px;
@@ -285,6 +315,17 @@ export default {
 }
 .group:hover .services-dropdown-arrow {
   transform: rotate(180deg);
+}
+.darkmode-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: #6B4FA1;
+  transition: color 0.3s;
+}
+.darkmode-btn:hover {
+  color: var(--text-muted);
 }
 @media (max-width: 768px) {
   #contact-Nav {

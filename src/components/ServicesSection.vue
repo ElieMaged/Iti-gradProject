@@ -21,6 +21,7 @@
 </template>
 
 <script>
+import '../style.css'
 export default {
   name: 'ServicesSection',
   data() {
@@ -132,6 +133,10 @@ export default {
   flex-direction: column;
   transition: transform 0.2s;
 }
+.dark .service-card {
+  background: var(--secondary-bg);
+}
+
 .service-card:hover {
   transform: translateY(-2px);
 }

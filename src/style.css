@@ -17,6 +17,20 @@ body {
   --success: #22c55e;
   --danger: #ef4444;
   --completed: #6b7280;
+  --primary-bg: #fff;
+  --primary-text: #222;
+}
+.dark {
+  body, .sidebar, .navbar , .topbar{
+  background: var(--primary-bg);
+  color: var(--primary-text);
+  
+
+}
+
+  --primary-bg: #181824;
+  --primary-text: #f1f1f1;
+  --secondary-bg: #303033;
 }
 
 
