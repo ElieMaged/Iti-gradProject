@@ -76,14 +76,14 @@ export default {
       goToUserAccount,
       mobileMenuOpen,
       navAccordionOpen,
-      closeMobileMenu
+      closeMobileMenu,
       categories: [
         { name: 'Plumbing', route: '/plumbing' },
         { name: 'Electricity', route: '/electricity' },
         { name: 'Carpentry', route: '/carpentry' },
         { name: 'Air Condition', route: '/aircondition' },
         { name: 'Wall Finishing', route: '/wallfinishing' },
-        {name: 'Electrical Technicians', route: '/elecTechnicians'}
+        { name: 'Electrical Technicians', route: '/elecTechnicians' }
         // Add more categories as needed
       ]
     };
@@ -180,29 +180,6 @@ export default {
         </button>
       </div>
       <div class="mt-4 flex flex-col gap-2">
-
-
-      <!-- Nav Links -->
-      <ul class="hidden md:flex gap-8  font-medium m-0">
-        <li><a href="/" class="no-underline services-color">Home</a></li>
-        <li><a href="/about" class="no-underline services-color">About us</a></li>
-        <li><a href="/contact" class="no-underline services-color">Contact Us</a></li>
-        <li class="relative group">
-          <button class="no-underline services-color flex items-center focus:outline-none">
-            Services
-            <svg class="services-dropdown-arrow ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-          </button>
-          <div class="services-dropdown">
-            <a href="/services" class="block">All Services</a>
-            <a v-for="category in categories" :key="category.name" :href="category.route" class="block">
-              {{ category.name }}
-            </a>
-          </div>
-        </li>
-      </ul>
-
-      <!-- Login/Register -->
-      <div class="flex items-center gap-2">
         <template v-if="loading">
           <span class="text-gray-500">{{ $t('loading') }}</span>
         </template>
@@ -223,18 +200,11 @@ export default {
               <i class="fa-regular fa-user"></i>
             </button>
             <button :class="loginButtonClass" id="login-btn" @click="goToUserAccount">
-            <!-- User Icon Button -->
-            <button :class="userButtonClass" @click="signUpOption">
-              <i class="fa-regular fa-user"></i>
-            </button>
-            <!-- Log in/Register Button -->
-            <button :class="loginButtonClass" id="login-btn" @click="signUpOptions">
               {{ $t('loginRegister') }}
             </button>
           </template>
         </template>
         <LanguageToggle />
-        
       </div>
     </div>
   </nav>

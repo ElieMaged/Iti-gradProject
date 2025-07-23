@@ -31,12 +31,8 @@
           </div>
           
 
-          <button class="about-btn">
-            {{ $t('aboutMoreBtn') }}
-
           <button class="about-btn" @click="$router.push('/about')">
-            More About Us
-
+            {{ $t('aboutMoreBtn') }}
           </button>
         </div>
       </div>

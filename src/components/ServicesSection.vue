@@ -1,28 +1,22 @@
 <template>
   <section class="services-section">
     <div class="">
-    <h2 class="services-title">{{ $t('servicesSectionTitle') }}</h2>
-    <hr class="services-divider" />
-    <div class="services-grid">
-      <div v-for="(service, idx) in services" :key="idx" class="service-card">
-        <img :src="service.image" :alt="service.title" class="service-image" />
-        <div class="service-content">
-          <h3 class="service-title">{{ $t(service.title) }}</h3>
-          <p class="service-desc">{{ $t(service.desc) }}</p>
-          <button class="service-btn">
-            {{ $t('bookNow') }}
-
-          <h3 class="service-title">{{ service.title }}</h3>
-          <p class="service-desc">{{ service.desc }}</p>
-          <button class="service-btn" @click="$router.push(service.route || '#')">
-            Book Now
-
-            <span class="arrow">→</span>
-          </button>
+      <h2 class="services-title">{{ $t('servicesSectionTitle') }}</h2>
+      <hr class="services-divider" />
+      <div class="services-grid">
+        <div v-for="(service, idx) in services" :key="idx" class="service-card">
+          <img :src="service.image" :alt="service.title" class="service-image" />
+          <div class="service-content">
+            <h3 class="service-title">{{ $t(service.title) }}</h3>
+            <p class="service-desc">{{ $t(service.desc) }}</p>
+            <button class="service-btn" @click="$router.push(service.route || '#')">
+              {{ $t('bookNow') }}
+              <span class="arrow">→</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
   </section>
 </template>
 
