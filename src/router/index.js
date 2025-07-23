@@ -21,6 +21,8 @@ import ProfileEdit from '../views/ProfileEdit.vue'
 import Payment from '../views/TechPayment.vue'
 import FAQ from '../components/FAQ.vue'
 import Profile from '../views/Profile.vue'
+import BookingPage from '../views/BookingPage.vue'
+import BookingConfirmation from '../views/BookingConfirmation.vue'
 
 import TechnicianDetails from '../views/TechnicianDetails.vue'
 import TechnicionProfile from '../views/TechnicionProfile.vue'
@@ -59,6 +61,8 @@ const routes = [
   {path: '/booking', component: PendingBookings },
   {path: '/technicianavailbility', component: TechnicianAvailability },
   { path: '/technician/:id', name: 'TechnicianProfile', component: () => import('../views/TechnicianProfile.vue') },
+  { path: '/bookingpage', component: BookingPage },
+  { path: '/bookingconfirmation', component: BookingConfirmation },
     
 ]
 

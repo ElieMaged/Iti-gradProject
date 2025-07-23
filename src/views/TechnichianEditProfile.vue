@@ -14,55 +14,55 @@
             <div class="max-w-4xl mx-auto">
                 <div class="bg-white rounded-xl shadow-lg p-8">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold text-secondary">Personal Information</h2>
+                        <h2 class="text-2xl font-bold text-secondary">{{ $t('editProfileTitle') }}</h2>
                     </div>
                     <div class="flex flex-col md:flex-row gap-8 items-start">
                         <!-- Info -->
                         <div class="flex-1 space-y-4">
                             <div>
-                                <label class="block text-sm font-bold text-text-main mb-1">Full Name</label>
+                                <label class="block text-sm font-bold text-text-main mb-1">{{ $t('fullNameLabel') }}</label>
                                 <input type="text" value="Mohamed ali ahmed" class="input-field w-full px-4 py-2 rounded-lg text-sm" />
                             </div>
                             <div>
-                                <label class="block text-sm font-bold text-text-main mb-1">Email Address</label>
+                                <label class="block text-sm font-bold text-text-main mb-1">{{ $t('emailAddressLabel') }}</label>
                                 <input type="email" value="mohamedx@gmail.com" class="input-field w-full px-4 py-2 rounded-lg text-sm" />
                             </div>
                             <div>
-                                <label class="block text-sm font-bold text-text-main mb-1">Phone Number</label>
+                                <label class="block text-sm font-bold text-text-main mb-1">{{ $t('phoneNumberLabel') }}</label>
                                 <input type="text" value="+20 111 222 5555" class="input-field w-full px-4 py-2 rounded-lg text-sm" />
                             </div>
                             <div>
-                                <label class="block text-sm font-bold text-text-main mb-1">Specialization</label>
+                                <label class="block text-sm font-bold text-text-main mb-1">{{ $t('specializationLabel') }}</label>
                                 <select class="input-field w-full px-4 py-2 rounded-lg text-sm">
-                                    <option>Plumbing</option>
-                                    <option>Electrician</option>
-                                    <option>Carpentry</option>
-                                    <option>Painting</option>
-                                    <option>AC Technician</option>
+                                    <option>{{ $t('specializationPlumbing') }}</option>
+                                    <option>{{ $t('specializationElectrician') }}</option>
+                                    <option>{{ $t('specializationCarpentry') }}</option>
+                                    <option>{{ $t('specializationPainting') }}</option>
+                                    <option>{{ $t('specializationACTechnician') }}</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-bold text-text-main mb-1">Years of Experience</label>
+                                <label class="block text-sm font-bold text-text-main mb-1">{{ $t('yearsOfExperienceLabel') }}</label>
                                 <select class="input-field w-full px-4 py-2 rounded-lg text-sm">
-                                    <option>1 year</option>
-                                    <option>2 years</option>
-                                    <option>3 years</option>
-                                    <option>4 years</option>
-                                    <option selected>5 years</option>
-                                    <option>6 years</option>
-                                    <option>7 years</option>
-                                    <option>8 years</option>
-                                    <option>9 years</option>
-                                    <option>10+ years</option>
+                                    <option>{{ $t('yearsOfExperience1') }}</option>
+                                    <option>{{ $t('yearsOfExperience2') }}</option>
+                                    <option>{{ $t('yearsOfExperience3') }}</option>
+                                    <option>{{ $t('yearsOfExperience4') }}</option>
+                                    <option selected>{{ $t('yearsOfExperience5') }}</option>
+                                    <option>{{ $t('yearsOfExperience6') }}</option>
+                                    <option>{{ $t('yearsOfExperience7') }}</option>
+                                    <option>{{ $t('yearsOfExperience8') }}</option>
+                                    <option>{{ $t('yearsOfExperience9') }}</option>
+                                    <option>{{ $t('yearsOfExperience10') }}</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-bold text-text-main mb-1">Base Visit Price</label>
+                                <label class="block text-sm font-bold text-text-main mb-1">{{ $t('baseVisitPriceLabel') }}</label>
                                 <input type="text" value="250 EGP" class="input-field w-full px-4 py-2 rounded-lg text-sm" />
                             </div>
                             <div>
-                                <label class="block text-sm font-bold text-text-main mb-1">About</label>
-                                <textarea class="input-field w-full px-4 py-2 rounded-lg text-sm" rows="2">Experienced plumber specializing in residential plumbing repairs and installations.</textarea>
+                                <label class="block text-sm font-bold text-text-main mb-1">{{ $t('aboutLabel') }}</label>
+                                <textarea class="input-field w-full px-4 py-2 rounded-lg text-sm" rows="2">{{ $t('aboutDescription') }}</textarea>
                             </div>
                         </div>
                         <!-- Profile Image -->
@@ -71,79 +71,79 @@
                                 <img :src="profileImageUrl" alt="Technician Photo" class="w-full h-full object-cover">
                             </div>
                             <input ref="fileInput" type="file" class="hidden" @change="onFileChange" />
-                            <button ref="uploadBtn" type="button" class="mt-2 px-4 py-2 bg-secondary text-white rounded" @click="triggerFileInput">Upload Photo</button>
+                            <button ref="uploadBtn" type="button" class="mt-2 px-4 py-2 bg-secondary text-white rounded" @click="triggerFileInput">{{ $t('uploadPhotoButton') }}</button>
                         </div>
                     </div>
                     <!-- Address Section -->
                     <div class="mt-10">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-lg font-bold text-text-main">Change Address</h3>
+                            <h3 class="text-lg font-bold text-text-main">{{ $t('changeAddressTitle') }}</h3>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                             <div>
-                                <label class="block text-sm font-bold text-text-main mb-1">City</label>
+                                <label class="block text-sm font-bold text-text-main mb-1">{{ $t('cityLabel') }}</label>
                                 <select class="input-field w-full px-4 py-2 rounded-lg text-sm">
-                                    <option value="">Select Government</option>
-                                            <option value="Cairo" selected>Cairo</option>
-                                            <option value="Giza">Giza</option>
-                                            <option value="Alexandria">Alexandria</option>
-                                            <option value="Dakahlia">Dakahlia</option>
-                                            <option value="Red Sea">Red Sea</option>
-                                            <option value="Beheira">Beheira</option>
-                                            <option value="Fayoum">Fayoum</option>
-                                            <option value="Gharbiya">Gharbiya</option>
-                                            <option value="Ismailia">Ismailia</option>
-                                            <option value="Menoufia">Menoufia</option>
-                                            <option value="Minya">Minya</option>
-                                            <option value="Qaliubiya">Qaliubiya</option>
-                                            <option value="New Valley">New Valley</option>
-                                            <option value="Suez">Suez</option>
-                                            <option value="Aswan">Aswan</option>
-                                            <option value="Assiut">Assiut</option>
-                                            <option value="Beni Suef">Beni Suef</option>
-                                            <option value="Port Said">Port Said</option>
-                                            <option value="Damietta">Damietta</option>
-                                            <option value="Sharkia">Sharkia</option>
-                                            <option value="South Sinai">South Sinai</option>
-                                            <option value="Kafr Al sheikh">Kafr Al sheikh</option>
-                                            <option value="Matrouh">Matrouh</option>
-                                            <option value="Luxor">Luxor</option>
-                                            <option value="Qena">Qena</option>
-                                            <option value="North Sinai">North Sinai</option>
-                                            <option value="Sohag">Sohag</option>
+                                    <option value="">{{ $t('selectGovernment') }}</option>
+                                            <option value="Cairo" selected>{{ $t('cairo') }}</option>
+                                            <option value="Giza">{{ $t('giza') }}</option>
+                                            <option value="Alexandria">{{ $t('alexandria') }}</option>
+                                            <option value="Dakahlia">{{ $t('dakahlia') }}</option>
+                                            <option value="Red Sea">{{ $t('redSea') }}</option>
+                                            <option value="Beheira">{{ $t('beheira') }}</option>
+                                            <option value="Fayoum">{{ $t('fayoum') }}</option>
+                                            <option value="Gharbiya">{{ $t('gharbiya') }}</option>
+                                            <option value="Ismailia">{{ $t('ismailia') }}</option>
+                                            <option value="Menoufia">{{ $t('menoufia') }}</option>
+                                            <option value="Minya">{{ $t('minya') }}</option>
+                                            <option value="Qaliubiya">{{ $t('qaliubiya') }}</option>
+                                            <option value="New Valley">{{ $t('newValley') }}</option>
+                                            <option value="Suez">{{ $t('suez') }}</option>
+                                            <option value="Aswan">{{ $t('aswan') }}</option>
+                                            <option value="Assiut">{{ $t('assiut') }}</option>
+                                            <option value="Beni Suef">{{ $t('beniSuef') }}</option>
+                                            <option value="Port Said">{{ $t('portSaid') }}</option>
+                                            <option value="Damietta">{{ $t('damietta') }}</option>
+                                            <option value="Sharkia">{{ $t('sharkia') }}</option>
+                                            <option value="South Sinai">{{ $t('southSinai') }}</option>
+                                            <option value="Kafr Al sheikh">{{ $t('kafrAlsheikh') }}</option>
+                                            <option value="Matrouh">{{ $t('matrouh') }}</option>
+                                            <option value="Luxor">{{ $t('luxor') }}</option>
+                                            <option value="Qena">{{ $t('qena') }}</option>
+                                            <option value="North Sinai">{{ $t('northSinai') }}</option>
+                                            <option value="Sohag">{{ $t('sohag') }}</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-bold text-text-main mb-1">Area</label>
+                                <label class="block text-sm font-bold text-text-main mb-1">{{ $t('areaLabel') }}</label>
                                 <select class="input-field w-full px-4 py-2 rounded-lg text-sm">
-                                    <option>Dokki</option>
-                                    <option>Maadi</option>
-                                    <option>Zamalek</option>
-                                    <option>6th of October</option>
-                                    <option>Nasr City</option>
+                                    <option>{{ $t('dokki') }}</option>
+                                    <option>{{ $t('maadi') }}</option>
+                                    <option>{{ $t('zamalek') }}</option>
+                                    <option>{{ $t('6thOfOctober') }}</option>
+                                    <option>{{ $t('nasrCity') }}</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-bold text-text-main mb-1">Street Name</label>
+                                <label class="block text-sm font-bold text-text-main mb-1">{{ $t('streetNameLabel') }}</label>
                                 <select class="input-field w-full px-4 py-2 rounded-lg text-sm">
-                                    <option>Tahrir Street</option>
-                                    <option>El Haram Street</option>
-                                    <option>El Merghany Street</option>
-                                    <option>El Nasr Road</option>
-                                    <option>El Thawra Street</option>
+                                    <option>{{ $t('tahrirStreet') }}</option>
+                                    <option>{{ $t('elHaramStreet') }}</option>
+                                    <option>{{ $t('elMerghanyStreet') }}</option>
+                                    <option>{{ $t('elNasrRoad') }}</option>
+                                    <option>{{ $t('elThawraStreet') }}</option>
                                 </select>
                             </div>
                         </div>
                         <div class="mb-4">
-                            <span class="block text-sm font-bold text-text-main mb-1">Willing to Travel ?</span>
+                            <span class="block text-sm font-bold text-text-main mb-1">{{ $t('willingToTravelLabel') }}</span>
                             <div class="flex items-center gap-6">
                                 <label class="inline-flex items-center">
                                     <input type="radio" name="travel" class="form-radio text-secondary" checked>
-                                    <span class="ml-2">Yes</span>
+                                    <span class="ml-2">{{ $t('yes') }}</span>
                                 </label>
                                 <label class="inline-flex items-center">
                                     <input type="radio" name="travel" class="form-radio text-secondary">
-                                    <span class="ml-2">No</span>
+                                    <span class="ml-2">{{ $t('no') }}</span>
                                 </label>
                             </div>
                         </div>
@@ -151,21 +151,21 @@
                     <!-- Change Password Section -->
                     <div class="mt-10">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-lg font-bold text-text-main">Change Password</h3>
+                            <h3 class="text-lg font-bold text-text-main">{{ $t('changePasswordTitle') }}</h3>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             <div>
-                                <label class="block text-sm font-bold text-text-main mb-1">Old Password</label>
+                                <label class="block text-sm font-bold text-text-main mb-1">{{ $t('oldPasswordLabel') }}</label>
                                 <input type="password" class="input-field w-full px-4 py-2 rounded-lg text-sm" />
                             </div>
                             <div>
-                                <label class="block text-sm font-bold text-text-main mb-1">New Password</label>
+                                <label class="block text-sm font-bold text-text-main mb-1">{{ $t('newPasswordLabel') }}</label>
                                 <input type="password" class="input-field w-full px-4 py-2 rounded-lg text-sm" />
                             </div>
                         </div>
                     </div>
                     <div class="flex justify-end mt-8">
-                        <button class="bg-secondary text-white px-10 py-2 rounded-full text-lg font-medium hover:bg-opacity-90 transition-colors">Save Changes</button>
+                        <button class="bg-secondary text-white px-10 py-2 rounded-full text-lg font-medium hover:bg-opacity-90 transition-colors">{{ $t('saveChangesButton') }}</button>
                     </div>
                 </div>
             </div>

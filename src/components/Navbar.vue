@@ -1,6 +1,6 @@
 <script>
 import '../style.css'
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { auth } from '../firebase';
@@ -17,6 +17,8 @@ export default {
     const { locale } = useI18n();
     const mobileMenuOpen = ref(false);
     const navAccordionOpen = ref(true);
+    const servicesDropdownOpen = ref(false);
+    let dropdownTimeout = null;
 
     function getRoute(path) {
       return locale.value === 'ar' ? `/ar/${path}` : `/${path}`;
@@ -63,8 +65,41 @@ export default {
     }
 
     function goToUserAccount() {
-      router.push(getRoute('usersignup'));
+      router.push(getRoute('welcomepage'));
     }
+
+    function showDropdown() {
+      if (dropdownTimeout) {
+        clearTimeout(dropdownTimeout);
+        dropdownTimeout = null;
+      }
+      servicesDropdownOpen.value = true;
+    }
+
+    function hideDropdown() {
+      if (dropdownTimeout) clearTimeout(dropdownTimeout);
+      servicesDropdownOpen.value = false;
+    }
+
+    function handleDocumentClick(e) {
+      const dropdown = document.querySelector('.services-dropdown');
+      const trigger = document.querySelector('.services-color.cursor-pointer');
+      if (
+        dropdown &&
+        !dropdown.contains(e.target) &&
+        trigger &&
+        !trigger.contains(e.target)
+      ) {
+        hideDropdown();
+      }
+    }
+
+    onMounted(() => {
+      document.addEventListener('click', handleDocumentClick);
+    });
+    onBeforeUnmount(() => {
+      document.removeEventListener('click', handleDocumentClick);
+    });
 
     return {
       user,
@@ -79,6 +114,9 @@ export default {
       navAccordionOpen,
       closeMobileMenu,
       goToUserAccount,
+      servicesDropdownOpen,
+      showDropdown,
+      hideDropdown,
       categories: [
         { name: 'Plumbing', route: '/plumbing' },
         { name: 'Electricity', route: '/electricity' },
@@ -129,8 +167,25 @@ export default {
       <li>
         <router-link :to="locale === 'ar' ? getRoute('about') : '/about'" class="no-underline services-color">{{ $t('navAbout') }}</router-link>
       </li>
-      <li>
-        <router-link :to="locale === 'ar' ? getRoute('plumbing') : '/plumbing'" class="no-underline services-color">{{ $t('navServices') }}</router-link>
+      <li class="relative group"
+          @mouseenter="showDropdown">
+        <span class="no-underline services-color cursor-pointer flex items-center">
+          {{ $t('navServices') }}
+          <i class="fa fa-chevron-down services-dropdown-arrow ml-1"></i>
+        </span>
+        <div
+          class="services-dropdown absolute left-0 mt-2 shadow-lg bg-white rounded z-50"
+          v-show="servicesDropdownOpen"
+          @mouseenter="showDropdown"
+        > <router-link to="/">All services</router-link>
+        <router-link to="/plumbing">{{ $t('navPlumbing') }}</router-link>
+         
+          <router-link to="/aircondition">{{ $t('navAirConditioner') }}</router-link>
+          <router-link to="/electricity">{{ $t('navElectricity') }}</router-link>
+          <router-link to="/wallfinishing">{{ $t('navWallFinishing') }}</router-link>
+          <router-link to="/carpentry">{{ $t('navCarpentry') }}</router-link>
+          <router-link to="/elecTechnicians">{{ $t('navElectricityTechnicians') }}</router-link>
+        </div>
       </li>
       <li>
         <router-link :to="locale === 'ar' ? getRoute('contact') : '/contact'" class="no-underline services-color">{{ $t('navContact') }}</router-link>
@@ -257,7 +312,7 @@ export default {
   opacity: 0;
   pointer-events: none;
   transform: translateY(10px);
-  transition: opacity 0.18s ease, transform 0.18s ease;
+  transition: opacity 1.5s ease, transform 1.5s ease;
   position: absolute;
   left: 0;
   top: 100%;
@@ -281,7 +336,7 @@ export default {
 }
 .services-dropdown-arrow {
   margin-left: 0.25rem;
-  transition: transform 0.18s;
+  transition: transform 0.36s;
 }
 .group:hover .services-dropdown-arrow {
   transform: rotate(180deg);
