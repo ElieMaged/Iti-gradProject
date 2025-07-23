@@ -70,7 +70,7 @@
   import profile7 from '../assets/profile/7.png'
   import profile8 from '../assets/profile/8.png'
   import collage1 from '../assets/Professions/Wall.jpg'
-  import collage2 from '../assets/Contact/end.png'
+  import collage2 from '../assets/Contact/end.jpg'
   import EndCard from '../components/EndCard.vue'
   
   const technicians = [

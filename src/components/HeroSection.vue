@@ -7,12 +7,12 @@
       </div>
       <div class="hero-content">
         <div class="hero-text">
-          <h1 class="hero-title">We're here to help you.</h1>
+          <h1 class="hero-title">{{ $t('heroSectionTitle') }}</h1>
           <p class="hero-description">
-            We're here to help you achieve your goals, overcome challenges and make every step smoother along the way.
+            {{ $t('heroSectionDescription') }}
           </p>
           <button class="hero-btn">
-            Book an Appointment
+            {{ $t('heroSectionBookBtn') }}
             <span class="arrow">→</span>
           </button>
         </div>

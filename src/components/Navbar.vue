@@ -15,6 +15,8 @@ export default {
     const loading = ref(true);
     const router = useRouter();
     const { locale } = useI18n();
+    const mobileMenuOpen = ref(false);
+    const navAccordionOpen = ref(true);
 
     function getRoute(path) {
       return locale.value === 'ar' ? `/ar/${path}` : `/${path}`;
@@ -35,17 +37,14 @@ export default {
 
     function handleProfileClick() {
       const currentUser = auth.currentUser;
-      // If the user's email ends with @gmail.com, always go to ProfileView
       if (currentUser && currentUser.email && currentUser.email.endsWith('@gmail.com')) {
         router.push(getRoute('profile-view'));
         return;
       }
-      // If signed in with Google, always go to ProfileView
       if (currentUser && currentUser.providerData && currentUser.providerData.some(p => p.providerId === 'google.com')) {
         router.push(getRoute('profile-view'));
         return;
       }
-      // Otherwise, check userType
       const userType = localStorage.getItem('userType');
       if (userType === 'technician') {
         router.push(getRoute('profile'));
@@ -58,6 +57,11 @@ export default {
       router.push(getRoute('RegisterChoice'));
     }
 
+    function closeMobileMenu() {
+      mobileMenuOpen.value = false;
+      navAccordionOpen.value = true;
+    }
+
     return {
       user,
       loading,
@@ -67,6 +71,12 @@ export default {
       signUpOptions,
       userButtonClass: " text-gray-600 p-2 rounded-full ",
       loginButtonClass: "",
+
+      getRoute,
+      goToUserAccount,
+      mobileMenuOpen,
+      navAccordionOpen,
+      closeMobileMenu
       categories: [
         { name: 'Plumbing', route: '/plumbing' },
         { name: 'Electricity', route: '/electricity' },
@@ -100,11 +110,77 @@ export default {
     </div>
   </div>
   <!-- Navbar -->
-   <nav class="bg-white px-6 py-3 flex justify-between items-center container">
-      <!-- Logo -->
-      <div class="flex items-center gap-2 text-2xl font-bold">
-        <img src="/logo/ace04d3b268cf810c91d002fdf7454a6ef778f27.png" alt="Logo" class="h-8" id="logo"/>
+  <nav class="bg-white px-6 py-3 flex justify-between items-center container">
+    <!-- Logo -->
+    <div class="flex items-center gap-2 text-2xl font-bold">
+      <img src="/logo/ace04d3b268cf810c91d002fdf7454a6ef778f27.png" alt="Logo" class="h-8" id="logo"/>
+    </div>
+    <!-- Hamburger for mobile -->
+    <button class="md:hidden block text-2xl" @click="mobileMenuOpen = !mobileMenuOpen">
+      <i class="fa fa-bars"></i>
+    </button>
+    <!-- Nav Links (Desktop) -->
+    <ul class="hidden md:flex gap-8 font-medium m-0">
+      <li>
+        <router-link :to="locale === 'ar' ? getRoute('') : '/'" class="no-underline services-color">{{ $t('navHome') }}</router-link>
+      </li>
+      <li>
+        <router-link :to="locale === 'ar' ? getRoute('about') : '/about'" class="no-underline services-color">{{ $t('navAbout') }}</router-link>
+      </li>
+      <li>
+        <router-link :to="locale === 'ar' ? getRoute('plumbing') : '/plumbing'" class="no-underline services-color">{{ $t('navServices') }}</router-link>
+      </li>
+      <li>
+        <router-link :to="locale === 'ar' ? getRoute('contact') : '/contact'" class="no-underline services-color">{{ $t('navContact') }}</router-link>
+      </li>
+    </ul>
+    <!-- Login/Register (Desktop) -->
+    <div class="hidden md:flex items-center gap-2">
+      <template v-if="loading">
+        <span class="text-gray-500">{{ $t('loading') }}</span>
+      </template>
+      <template v-else>
+        <template v-if="user">
+          <span class="flex items-center gap-2">
+            <span class="text-gray-700 font-semibold px-3 py-1 rounded bg-gray-100 cursor-pointer" @click="handleProfileClick">
+              {{ user.email || user.uid }}
+            </span>
+            <i class="fas fa-user-circle text-2xl text-secondary cursor-pointer" @click="handleProfileClick"></i>
+          </span>
+          <button :class="loginButtonClass" id="login-btn" @click="logout">
+            {{ $t('logout') }}
+          </button>
+        </template>
+        <template v-else>
+          <button :class="userButtonClass" @click="goToUserAccount">
+            <i class="fa-regular fa-user"></i>
+          </button>
+          <button :class="loginButtonClass" id="login-btn" @click="goToUserAccount">
+            {{ $t('loginRegister') }}
+          </button>
+        </template>
+      </template>
+      <LanguageToggle />
+    </div>
+    <!-- Mobile Menu -->
+    <div v-if="mobileMenuOpen" class="md:hidden absolute top-20 left-0 w-full bg-white shadow-lg z-50 p-4">
+      <div>
+        <button class="w-full text-left font-bold py-2 flex items-center justify-between" @click="navAccordionOpen = !navAccordionOpen">
+          <span>{{ $t('Menu') }}</span>
+          <i :class="navAccordionOpen ? 'fa fa-chevron-up' : 'fa fa-chevron-down'"></i>
+        </button>
+        <div v-if="navAccordionOpen" class="pl-2 pb-2">
+          <router-link :to="locale === 'ar' ? getRoute('') : '/'" class="block py-2" @click="closeMobileMenu">{{ $t('navHome') }}</router-link>
+          <router-link :to="locale === 'ar' ? getRoute('about') : '/about'" class="block py-2" @click="closeMobileMenu">{{ $t('navAbout') }}</router-link>
+          <router-link :to="locale === 'ar' ? getRoute('plumbing') : '/plumbing'" class="block py-2" @click="closeMobileMenu">{{ $t('navServices') }}</router-link>
+          <router-link :to="locale === 'ar' ? getRoute('contact') : '/contact'" class="block py-2" @click="closeMobileMenu">{{ $t('navContact') }}</router-link>
+        </div>
+        <button class="w-full text-right text-gray-500 mt-2" @click="closeMobileMenu">
+          <i class="fa fa-times"></i> {{ $t('close') }}
+        </button>
       </div>
+      <div class="mt-4 flex flex-col gap-2">
+
 
       <!-- Nav Links -->
       <ul class="hidden md:flex gap-8  font-medium m-0">
@@ -132,7 +208,6 @@ export default {
         </template>
         <template v-else>
           <template v-if="user">
-            <!-- Show user email or UID if logged in -->
             <span class="flex items-center gap-2">
               <span class="text-gray-700 font-semibold px-3 py-1 rounded bg-gray-100 cursor-pointer" @click="handleProfileClick">
                 {{ user.email || user.uid }}
@@ -144,6 +219,10 @@ export default {
             </button>
           </template>
           <template v-else>
+            <button :class="userButtonClass" @click="goToUserAccount">
+              <i class="fa-regular fa-user"></i>
+            </button>
+            <button :class="loginButtonClass" id="login-btn" @click="goToUserAccount">
             <!-- User Icon Button -->
             <button :class="userButtonClass" @click="signUpOption">
               <i class="fa-regular fa-user"></i>
@@ -154,11 +233,11 @@ export default {
             </button>
           </template>
         </template>
-        <!-- Language Toggle Button -->
         <LanguageToggle />
         
       </div>
-    </nav>
+    </div>
+  </nav>
 </template>
 
 <style scoped>

@@ -2,7 +2,7 @@
   <div class="trusted-section">
     <div class="trusted-header">
       <hr class="trusted-line" />
-      <span class="trusted-text">Trusted by 4,000+ companies</span>
+      <span class="trusted-text">{{ $t('trustedCompaniesText') }}</span>
       <hr class="trusted-line" />
     </div>
     <div class="trusted-logos">

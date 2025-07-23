@@ -1,17 +1,17 @@
 <template>
     <div class="end-card" :style="{ backgroundImage: `url(${backgroundImage})` }">
         <div class="end-content">
-            <h2 class="end-title">We're Here to Help You.</h2>
-            <p class="end-description">We're here to help you achieve your goals, overcome challenges and make every step smoother along the way.</p>
+            <h2 class="end-title">{{ $t('endCardTitle') }} <!-- We're Here to Help You. --></h2>
+            <p class="end-description">{{ $t('endCardDescription') }} <!-- We're here to help you achieve your goals... --></p>
             <button class="end-button">
-                Book an Appointment <i class="fa-solid fa-arrow-right"></i>
+                {{ $t('endCardBookBtn') }} <!-- Book an Appointment --> <i class="fa-solid fa-arrow-right"></i>
             </button>
         </div>
     </div>
 </template>
 
 <script setup>
-import endImage from '../assets/Contact/end.png'
+import endImage from '../assets/Contact/end.jpg'
 
 const backgroundImage = endImage
 </script>

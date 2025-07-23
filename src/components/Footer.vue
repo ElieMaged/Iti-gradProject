@@ -55,80 +55,18 @@
                 </div>
             </div>
         </div>
-
-
-    <div class="footer__main">
-      <!-- Left: Logo & Description -->
-      <div class="footer__col footer__col--desc">
-        <div class="footer__logo-row">
-          <img class="footer__logo" src="../assets/Logo.png" alt="BoltFix logo" />
+        <div class="footer__bottom">
+          <hr class="footer__divider" />
+          <div class="footer__bottom-row">
+            <span>{{ $t('footerCopyright') }}</span>
+            <div class="footer__bottom-links">
+              <a href="#">{{ $t('footerPrivacyPolicy') }}</a>
+              <span class="footer__bottom-sep">|</span>
+              <a href="#">{{ $t('footerTermsOfService') }}</a>
+            </div>
+          </div>
         </div>
-        <p class="footer__desc">
-          BoltFix exists to simplify home maintenance for every household in Egypt by connecting users with skilled, verified technicians.
-        </p>
-        <div class="footer__social-label">Social Links</div>
-        <div class="footer__social-row">
-          <a href="#" class="footer__social-icon" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
-          <a href="#" class="footer__social-icon" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a>
-          <a href="#" class="footer__social-icon" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
-          <a href="#" class="footer__social-icon" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
-        </div>
-      </div>
-      <!-- Quick Links -->
-      <div class="footer__col">
-        <div class="footer__col-title">Quick Link</div>
-        <ul class="footer__list">
-          <li><a href="/">Home</a></li>
-          <li><a href="/about">About us</a></li>
-          <li><a href="/plumbing">Services</a></li>
-          <li><a href="/contact">Contact Us</a></li>
-          <li><a href="/faq">FAQS</a></li>
-        </ul>
-      </div>
-      <!-- Service Links -->
-      <div class="footer__col">
-        <div class="footer__col-title">Service</div>
-        <ul class="footer__list">
-          <li><a href="/plumbing">Plumping</a></li>
-          <li><a href="/aircondition">Air conditioner technicians</a></li>
-          <li><a href="/electricity">Electricity</a></li>
-          <li><a href="/wallfinishing">Wall finishing</a></li>
-          <li><a href="/carpentry">Carpentry</a></li>
-        </ul>
-      </div>
-      <!-- Contact Us -->
-      <div class="footer__col footer__col--contact">
-        <div class="footer__col-title">Contact Us</div>
-        <ul class="footer__contact-list">
-          <li>
-            <i class="fa-solid fa-phone footer__contact-icon"></i>
-            <span>925-465-3762</span>
-          </li>
-          <li>
-            <i class="fa-solid fa-envelope footer__contact-icon"></i>
-            <span>boltfix@gmail.com</span>
-          </li>
-          <li>
-            <i class="fa-solid fa-location-dot footer__contact-icon"></i>
-            <span>4096 Modesto,<br />CA 95350, USA</span>
-          </li>
-        </ul>
-      </div>
-    </div>
-    <div class="footer__bottom">
-      <hr class="footer__divider" />
-      <div class="footer__bottom-row">
-        <span>© 2025 Design and Developed by ITI students</span>
-        <div class="footer__bottom-links">
-          <a href="#">Privacy Policy</a>
-          <span class="footer__bottom-sep">|</span>
-          <a href="#">Terms of Service</a>
-        </div>
-      </div>
-    </div>
-  </footer>
-
-    
+    </footer>
 </template>
 
 <style lang="scss" scoped>

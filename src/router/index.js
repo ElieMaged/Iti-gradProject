@@ -21,6 +21,7 @@ import ProfileEdit from '../views/ProfileEdit.vue'
 import Payment from '../views/TechPayment.vue'
 import FAQ from '../components/FAQ.vue'
 import Profile from '../views/Profile.vue'
+
 import TechnicianDetails from '../views/TechnicianDetails.vue'
 import TechnicionProfile from '../views/TechnicionProfile.vue'
 import TechnicianEditProfile from '../views/TechnichianEditProfile.vue'

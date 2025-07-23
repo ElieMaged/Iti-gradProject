@@ -4,12 +4,10 @@
     <div class="faq-content">
       <div class="faq-header">
         <div class="faq-title-box">
-          <h2 class="faq-title">Frequently Asked Questions</h2>
+          <h2 class="faq-title">{{ $t('faqTitle') }}</h2>
         </div>
         <div class="faq-intro">
-          <p>
-            We pride ourselves on being your trusted local plumbing experts. With 20 years of experience serving your city, our mission is to provide high quality, reliable plumbing services that you can depend on, whether it's for your home or business.
-          </p>
+          <p>{{ $t('faqIntro') }}</p>
         </div>
       </div>
     </div>
@@ -28,13 +26,13 @@
           @click="toggleFAQ(index)"
         >
           <div class="faq-question">
-            <h3 class="question-text">{{ item.question }}</h3>
+            <h3 class="question-text">{{ $t(item.question) }}</h3>
             <div class="faq-icon">
               <i :class="item.isExpanded ? 'fas fa-minus' : 'fas fa-plus'"></i>
             </div>
           </div>
           <div class="faq-answer" v-show="item.isExpanded">
-            <p>{{ item.answer }}</p>
+            <p>{{ $t(item.answer) }}</p>
           </div>
         </div>
       </div>
@@ -50,28 +48,28 @@ export default {
     return {
       faqItems: [
         {
-          question: 'How Often Should I Have My Plumbing Inspected?',
-          answer: 'Donec massa sapien faucibus et molestie ac. Sed blandit libero volutpat sed cras ornare arcu. Vulputate mi sit amet mauris. Integer enim neque volutpat ac tincidunt.',
+          question: 'faqQ1',
+          answer: 'faqA1',
           isExpanded: true
         },
         {
-          question: 'How Do I Choose The Right Masonry Contractor?',
-          answer: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
+          question: 'faqQ2',
+          answer: 'faqA2',
           isExpanded: false
         },
         {
-          question: 'What Are Some Signs That Masonry Work Needs Repair?',
-          answer: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.',
+          question: 'faqQ3',
+          answer: 'faqA3',
           isExpanded: false
         },
         {
-          question: 'What Should I Do If My Toilet Is Constantly Running?',
-          answer: 'Sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.',
+          question: 'faqQ4',
+          answer: 'faqA4',
           isExpanded: false
         },
         {
-          question: 'Do You Offer Eco-Friendly Or Sustainable Options For Your Services?',
-          answer: 'Totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas.',
+          question: 'faqQ5',
+          answer: 'faqA5',
           isExpanded: false
         }
       ]

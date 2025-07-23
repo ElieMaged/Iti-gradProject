@@ -1,14 +1,32 @@
 <template>
   <div class="plumbing-page">
+
     <!-- Hero Section -->
     <section class="hero-section m-5" :style="heroBackgroundStyle">
       <div class="hero-overlay">
         <div class="hero-content">
-          <h1 class="hero-title">Plumbing</h1>
+          <h1 class="hero-title">{{ $t('plumbingTitle') }}</h1>
+          <SearchBar
+            :filterOptions="[
+              { value: 'price', label: 'Select a price' },
+              { value: 'area', label: 'Select an area' },
+              { value: 'rating', label: 'Rating' },
+              { value: 'years', label: 'Years of experience' }
+            ]"
+            :sortOptions="[
+              { value: 'relevance', label: 'Relevance' },
+              { value: 'priceLow', label: 'Price: Low to High' },
+              { value: 'priceHigh', label: 'Price: High to Low' },
+              { value: 'rating', label: 'Rating' }
+            ]"
+            @update:filter="onFilter"
+            @update:sort="onSort"
+            @update:search="onSearch"
+          />
           <div class="breadcrumbs">
-            <span>Home</span>
+            <span>{{ $t('home') }}</span>
             <span class="separator">•</span>
-            <span>Services</span>
+            <span>{{ $t('services') }}</span>
           </div>
         </div>
       </div>
@@ -18,10 +36,8 @@
     <section class="technicians-section">
       <div class="container">
         <div class="section-header">
-          <h2 class="section-title">Meet Our Technicians Team</h2>
-          <p class="section-description">
-            We pride ourselves on being your trusted local plumbing experts. With 20 years of experience serving your city, our mission is to provide high quality, reliable plumbing services that you can depend on, whether it's for your home or business.
-          </p>
+          <h2 class="section-title">{{ $t('meetTechniciansTeam') }}</h2>
+          <p class="section-description">{{ $t('plumbingTeamDescription') }}</p>
         </div>
 
         <div class="technicians-grid">
@@ -34,10 +50,8 @@
               <div class="rating">
                 <i class="fa-solid fa-star" v-for="n in 5" :key="n"></i>
               </div>
-              <p class="technician-description">
-                Skilled technician with a strong track record of customer satisfaction. professional, and ready for your job.
-              </p>
-              <button class="view-profile-btn">View Profile</button>
+              <p class="technician-description">{{ $t('technicianDescription') }}</p>
+              <button class="view-profile-btn">{{ $t('viewProfile') }}</button>
             </div>
           </div>
         </div>
@@ -62,6 +76,7 @@
 <script setup>
 import { computed, ref, onMounted } from 'vue'
 import EndCard from '../components/EndCard.vue'
+import SearchBar from '../components/SearchBar.vue'
 
 const profile1 = ref('')
 const profile2 = ref('')
@@ -87,7 +102,7 @@ onMounted(async () => {
   
   // Dynamic imports for background images
   collage1.value = (await import('../assets/Professions/Plumbing.jpg')).default
-  collage2.value = (await import('../assets/Contact/end.png')).default
+  collage2.value = (await import('../assets/Contact/end.jpg')).default
 })
 
 const technicians = computed(() => [

@@ -2,17 +2,17 @@
   <section class="expert-team">
     <div class="team-header">
       <div class="team-title-section">
-        <h2 class="team-title">Effective Cleaning Requires an Expert Cleaning Team</h2>
+        <h2 class="team-title">{{ $t('expertTeamTitle') }}</h2>
       </div>
       <div class="team-subtitle-section">
-        <h3 class="team-subtitle">Expert Team</h3>
-        <p class="team-description">We have professional expert cleaning staff ensuring top-notch cleanliness and hygiene for your space.</p>
+        <h3 class="team-subtitle">{{ $t('expertTeamSubtitle') }}</h3>
+        <p class="team-description">{{ $t('expertTeamDescription') }}</p>
       </div>
     </div>
     
     <div v-if="loading" class="loading-container">
       <div class="loading-spinner"></div>
-      <p>Loading team members...</p>
+      <p>{{ $t('loadingTeamMembers') }}</p>
     </div>
     
     <div v-else class="team-cards">
@@ -21,13 +21,13 @@
           <img :src="member.image" :alt="member.name" class="member-photo" />
         </div>
         <div class="member-info">
-          <h3 class="member-name">{{ member.name }}</h3>
+          <h3 class="member-name">{{ $t(member.name) }}</h3>
           <div class="member-rating">
             <i v-for="star in member.rating" :key="star" class="fas fa-star"></i>
           </div>
-          <p class="member-description">{{ member.description }}</p>
+          <p class="member-description">{{ $t(member.description) }}</p>
           <button class="view-profile-btn">
-            View Profile
+            {{ $t('viewProfile') }}
             <i class="fas fa-arrow-right arrow-right"></i>
           </button>
         </div>
@@ -48,30 +48,30 @@ export default {
       teamMembers: [
         {
           id: '1',
-          name: 'Erick Reynolds',
+          name: 'teamMember1Name',
           image: '/public/images/Image.png',
-          description: 'Skilled technician with a strong track record of customer satisfaction. Professional, and ready for your job.',
+          description: 'teamMember1Desc',
           rating: 5
         },
         {
           id: '2',
-          name: 'Sarah Johnson',
+          name: 'teamMember2Name',
           image: '/public/images/Image.png',
-          description: 'Skilled technician with a strong track record of customer satisfaction. Professional, and ready for your job.',
+          description: 'teamMember2Desc',
           rating: 5
         },
         {
           id: '3',
-          name: 'Mike Chen',
+          name: 'teamMember3Name',
           image: '/public/images/Image.png',
-          description: 'Skilled technician with a strong track record of customer satisfaction. Professional, and ready for your job.',
+          description: 'teamMember3Desc',
           rating: 5
         },
         {
           id: '4',
-          name: 'Lisa Rodriguez',
+          name: 'teamMember4Name',
           image: '/public/images/Image.png',
-          description: 'Skilled technician with a strong track record of customer satisfaction. Professional, and ready for your job.',
+          description: 'teamMember4Desc',
           rating: 5
         }
       ],

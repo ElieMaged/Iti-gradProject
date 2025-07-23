@@ -4,7 +4,7 @@
       <!-- Header Section -->
       <div class="testimonials-header">
         <div class="header-left">
-          <h2 class="testimonials-title">What Our Client Say About Us</h2>
+          <h2 class="testimonials-title">{{ $t('testimonialsTitle') }}</h2>
         </div>
         
       </div>
@@ -18,29 +18,27 @@
           
           <div class="testimonial-text">
             <div class="quote-marks">"</div>
-            <h3 class="testimonial-heading">Real Stories, Real Fixes, Real Satisfaction</h3>
+            <h3 class="testimonial-heading">{{ $t('testimonialHeading') }}</h3>
             
             <div class="testimonial-rating">
               <i v-for="star in 5" :key="star" class="fas fa-star"></i>
             </div>
             
-            <p class="testimonial-text-content">
-              Excellent service! The team was punctual, thorough, and fixed my air conditioner right a way. Highly recommend for anyone needing a reliable and detailed technicians service.
-            </p>
+            <p class="testimonial-text-content">{{ $t('testimonialTextContent') }}</p>
             
             <div class="client-info">
-              <h4 class="client-name">Ahmed Sabry</h4>
-              <p class="client-title">Engineer</p>
+              <h4 class="client-name">{{ $t('clientName') }}</h4>
+              <p class="client-title">{{ $t('clientTitle') }}</p>
             </div>
           </div>
         </div>
         
         <!-- Navigation Buttons -->
         <div class="testimonial-nav">
-          <button class="nav-btn prev-btn">
+          <button class="nav-btn prev-btn" :title="$t('testimonialPrev')">
             <i class="fas fa-arrow-left"></i>
           </button>
-          <button class="nav-btn next-btn">
+          <button class="nav-btn next-btn" :title="$t('testimonialNext')">
             <i class="fas fa-arrow-right"></i>
           </button>
         </div>

@@ -4,11 +4,11 @@
       <section class="hero-section m-5" :style="heroBackgroundStyle">
         <div class="hero-overlay">
           <div class="hero-content">
-            <h1 class="hero-title">Electricity</h1>
+            <h1 class="hero-title">{{ $t('electricityTitle') }}</h1>
             <div class="breadcrumbs">
-              <span>Home</span>
+              <span>{{ $t('home') }}</span>
               <span class="separator">•</span>
-              <span>Services</span>
+              <span>{{ $t('services') }}</span>
             </div>
           </div>
         </div>
@@ -18,10 +18,8 @@
       <section class="technicians-section">
         <div class="container">
           <div class="section-header">
-            <h2 class="section-title">Meet Our Technicians Team</h2>
-            <p class="section-description">
-              We pride ourselves on being your trusted local plumbing experts. With 20 years of experience serving your city, our mission is to provide high quality, reliable plumbing services that you can depend on, whether it's for your home or business.
-            </p>
+            <h2 class="section-title">{{ $t('meetTechniciansTeam') }}</h2>
+            <p class="section-description">{{ $t('electricityTeamDescription') }}</p>
           </div>
   
           <div class="technicians-grid">
@@ -34,10 +32,8 @@
                 <div class="rating">
                   <i class="fa-solid fa-star" v-for="n in 5" :key="n"></i>
                 </div>
-                <p class="technician-description">
-                  Skilled technician with a strong track record of customer satisfaction. professional, and ready for your job.
-                </p>
-                <button class="view-profile-btn">View Profile</button>
+                <p class="technician-description">{{ $t('technicianDescription') }}</p>
+                <button class="view-profile-btn">{{ $t('viewProfile') }}</button>
               </div>
             </div>
           </div>
@@ -45,11 +41,11 @@
           <!-- Pagination -->
           <div class="pagination">
             <button class="pagination-btn"><i class="fa-solid fa-chevron-left"></i></button>
-            <button class="pagination-btn active">1</button>
-            <button class="pagination-btn">2</button>
-            <button class="pagination-btn">3</button>
-            <span class="pagination-dots">...</span>
-            <button class="pagination-btn">10</button>
+            <button class="pagination-btn active">{{ $t('page1') }}</button>
+            <button class="pagination-btn">{{ $t('page2') }}</button>
+            <button class="pagination-btn">{{ $t('page3') }}</button>
+            <span class="pagination-dots">{{ $t('paginationDots') }}</span>
+            <button class="pagination-btn">{{ $t('page10') }}</button>
             <button class="pagination-btn"><i class="fa-solid fa-chevron-right"></i></button>
           </div>
         </div>
@@ -70,7 +66,7 @@
   import profile7 from '../assets/profile/7.png'
   import profile8 from '../assets/profile/8.png'
   import collage1 from '../assets/Professions/Electricity.jpg'
-  import collage2 from '../assets/Contact/end.png'
+  import collage2 from '../assets/Contact/end.jpg'
   import EndCard from '../components/EndCard.vue'
   
   const technicians = [

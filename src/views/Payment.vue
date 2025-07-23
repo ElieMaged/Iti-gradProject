@@ -127,10 +127,10 @@
 <script setup>
 import { ref } from 'vue';
 const transactions = ref([
-  { id: 1, technician: 'Mohsen Ali', phone: '+20 111 555 2365', type: 'Plumbing', icon: 'fas fa-wrench', time: '10:00AM, Friday, July 23', price: 400 },
-  { id: 2, technician: 'Samir Mohamed', phone: '+20 111 555 2365', type: 'Electricity', icon: 'fas fa-lightbulb', time: '2:30PM, Wednesday, July 20', price: 250 },
-  { id: 3, technician: 'Ahmed Hassan', phone: '+20 111 555 2365', type: 'Air Conditioning', icon: 'fas fa-snowflake', time: '11:00AM, Saturday, July 15', price: 500 },
-  { id: 4, technician: 'Mahmoud Omar', phone: '+20 111 555 2365', type: 'Electrical Wiring', icon: 'fas fa-bolt', time: '3:00PM, Thursday, July 12', price: 350 },
+  { id: 1, technician: $t('technicianMohsenAli'), phone: '+20 111 555 2365', type: $t('plumbing'), icon: 'fas fa-wrench', time: '10:00AM, Friday, July 23', price: 400 },
+  { id: 2, technician: $t('technicianSamirMohamed'), phone: '+20 111 555 2365', type: $t('electricity'), icon: 'fas fa-lightbulb', time: '2:30PM, Wednesday, July 20', price: 250 },
+  { id: 3, technician: $t('technicianAhmedHassan'), phone: '+20 111 555 2365', type: $t('airConditioning'), icon: 'fas fa-snowflake', time: '11:00AM, Saturday, July 15', price: 500 },
+  { id: 4, technician: $t('technicianMahmoudOmar'), phone: '+20 111 555 2365', type: $t('electricalWiring'), icon: 'fas fa-bolt', time: '3:00PM, Thursday, July 12', price: 350 },
 ]);
 const paypalEmail = ref('exampletech@gmail.com');
 const paypalEmailInput = ref(paypalEmail.value);

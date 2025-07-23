@@ -25,10 +25,10 @@
         </div>
       </div>
       <nav class="flex items-center space-x-8">
-        <a href="#" class="text-text-main hover:text-secondary transition-colors font-medium">{{ $t('home') }}</a>
-        <a href="#" class="text-text-main hover:text-secondary transition-colors font-medium">{{ $t('aboutUs') }}</a>
-        <a href="#" class="text-text-main hover:text-secondary transition-colors font-medium">{{ $t('services') }}</a>
-        <a href="#" class="text-text-main hover:text-secondary transition-colors font-medium">{{ $t('contactUs') }}</a>
+        <router-link :to="getRoute('home')" class="text-text-main hover:text-secondary transition-colors font-medium">{{ $t('home') }}</router-link>
+        <router-link :to="getRoute('aboutUs')" class="text-text-main hover:text-secondary transition-colors font-medium">{{ $t('aboutUs') }}</router-link>
+        <router-link :to="getRoute('services')" class="text-text-main hover:text-secondary transition-colors font-medium">{{ $t('services') }}</router-link>
+        <router-link :to="getRoute('contactUs')" class="text-text-main hover:text-secondary transition-colors font-medium">{{ $t('contactUs') }}</router-link>
       </nav>
       <div class="flex items-center space-x-4">
         <i class="fas fa-bell text-xl text-secondary cursor-pointer"></i>
@@ -40,22 +40,22 @@
   <div class="flex min-h-screen">
     <!-- Sidebar -->
     <div class="w-64 bg-sidebar flex flex-col items-center pt-10">
-      <a href="profile-view" class="sidebar-item w-full py-4 px-8 flex items-center space-x-4 text-lg font-medium text-secondary">
+      <router-link :to="getRoute('profile-view')" class="sidebar-item w-full py-4 px-8 flex items-center space-x-4 text-lg font-medium text-secondary">
         <i class="fas fa-user text-xl"></i>
         <span>{{ $t('myProfile') }}</span>
-      </a>
-      <a href="profile-edit" class="sidebar-item active w-full py-4 px-8 flex items-center space-x-4 text-lg font-medium">
+      </router-link>
+      <router-link :to="getRoute('profile-edit')" class="sidebar-item active w-full py-4 px-8 flex items-center space-x-4 text-lg font-medium">
         <i class="fas fa-cog text-xl"></i>
         <span>{{ $t('settings') }}</span>
-      </a>
-      <a href="previous-services" class="sidebar-item w-full py-4 px-8 flex items-center space-x-4 text-lg font-medium text-secondary">
+      </router-link>
+      <router-link :to="getRoute('previous-services')" class="sidebar-item w-full py-4 px-8 flex items-center space-x-4 text-lg font-medium text-secondary">
         <i class="fas fa-calendar-check text-xl"></i>
         <span>{{ $t('history') }}</span>
-      </a>
-      <a href="payment" class="sidebar-item w-full py-4 px-8 flex items-center space-x-4 text-lg font-medium text-secondary">
+      </router-link>
+      <router-link :to="getRoute('payment')" class="sidebar-item w-full py-4 px-8 flex items-center space-x-4 text-lg font-medium text-secondary">
         <i class="fas fa-credit-card text-xl"></i>
         <span>{{ $t('payment') }}</span>
-      </a>
+      </router-link>
       <a href="#" class="sidebar-item w-full py-4 px-8 flex items-center space-x-4 text-lg font-medium text-secondary">
         <i class="fas fa-sign-out-alt text-xl"></i>
         <span>{{ $t('logout') }}</span>
@@ -177,6 +177,8 @@
 </template>
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+const { locale } = useI18n();
 const profileImageUrl = ref(null);
 const fileInput = ref(null);
 const formData = reactive({
@@ -246,6 +248,9 @@ function saveChanges() {
   }
   // Simulate saving (replace with actual API call if needed)
   alert(this.$t('profileUpdated'));
+}
+function getRoute(path) {
+  return locale.value === 'ar' ? `/ar/${path}` : `/${path}`;
 }
 </script>
 <style scoped>
