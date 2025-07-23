@@ -62,6 +62,10 @@ export default {
       navAccordionOpen.value = true;
     }
 
+    function goToUserAccount() {
+      router.push(getRoute('usersignup'));
+    }
+
     return {
       user,
       loading,
@@ -71,12 +75,10 @@ export default {
       signUpOptions,
       userButtonClass: " text-gray-600 p-2 rounded-full ",
       loginButtonClass: "",
-
-      getRoute,
-      goToUserAccount,
       mobileMenuOpen,
       navAccordionOpen,
       closeMobileMenu,
+      goToUserAccount,
       categories: [
         { name: 'Plumbing', route: '/plumbing' },
         { name: 'Electricity', route: '/electricity' },
