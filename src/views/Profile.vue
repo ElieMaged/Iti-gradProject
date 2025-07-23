@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50 container">
+  <div class="bg-gray-50">
     <div class="flex">
       <!-- Sidebar -->
       <aside class="w-64 side-bar-color min-h-screen p-6">
