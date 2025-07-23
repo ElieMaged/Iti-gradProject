@@ -1,6 +1,4 @@
 <script setup>
-import Navbar from '../components/Navbar.vue';
-import Footer from '../components/Footer.vue';
 import Hero from '../components/Hero.vue';
 import TrustedCompanies from '../components/TrustedCompanies.vue';
 import ServicesSection from '../components/ServicesSection.vue';
@@ -15,7 +13,6 @@ import HeroSection from '../components/HeroSection.vue';
 
 <template>
   <div>
-    <Navbar />
     <Hero />
     <TrustedCompanies />
     <ServicesSection />
@@ -26,6 +23,5 @@ import HeroSection from '../components/HeroSection.vue';
     <Testimonials />
     <FAQ />
     <HeroSection />
-    <Footer />
   </div>
 </template>
