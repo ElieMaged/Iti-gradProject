@@ -1,4 +1,5 @@
 <template>
+  <Navbar />
   <div class="bg-gray-50">
     <div class="flex">
       <!-- Sidebar -->
@@ -202,9 +203,12 @@
       </main>
     </div>
   </div>
+  <Footer />
 </template>
 
 <script setup>
+import Navbar from '../components/Navbar.vue';
+import Footer from '../components/Footer.vue';
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { auth, db } from '../firebase';

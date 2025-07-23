@@ -1,6 +1,4 @@
 <script setup>
-import Navbar from './components/Navbar.vue'
-import Footer from './components/Footer.vue'
 import { useI18n } from 'vue-i18n';
 import { watch } from 'vue';
 
@@ -12,9 +10,7 @@ watch(locale, (newLocale) => {
 </script>
 
 <template>
-  <Navbar />
   <div id="app">
     <router-view />
   </div>
-  <Footer />
 </template>
