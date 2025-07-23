@@ -58,6 +58,7 @@ const routes = [
   {path: '/technician-edit-profile', component: TechnicianEditProfile },
   {path: '/booking', component: PendingBookings },
   {path: '/technicianavailbility', component: TechnicianAvailability },
+  { path: '/technician/:id', name: 'TechnicianProfile', component: () => import('../views/TechnicianProfile.vue') },
     
 ]
 
