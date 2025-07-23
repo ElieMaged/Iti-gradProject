@@ -41,7 +41,7 @@
         </div>
 
         <div class="technicians-grid">
-          <div class="technician-card" v-for="technician in technicians" :key="technician.id">
+          <div class="technician-card" v-for="technician in filteredTechnicians" :key="technician.id">
             <div class="technician-image" :style="{ backgroundColor: technician.bgColor }">
               <img :src="technician.image" :alt="technician.name" />
             </div>
@@ -51,7 +51,7 @@
                 <i class="fa-solid fa-star" v-for="n in 5" :key="n"></i>
               </div>
               <p class="technician-description">{{ $t('technicianDescription') }}</p>
-              <button class="view-profile-btn">{{ $t('viewProfile') }}</button>
+              <button class="view-profile-btn" @click="viewProfile(technician.id)">{{ $t('viewProfile') }}</button>
             </div>
           </div>
         </div>
@@ -74,91 +74,98 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { collection, getDocs } from 'firebase/firestore'
+import { db } from '../firebase'
+import { useRouter } from 'vue-router'
 import EndCard from '../components/EndCard.vue'
 import SearchBar from '../components/SearchBar.vue'
+import profile1 from '../assets/profile/1.jpg'
+import profile2 from '../assets/profile/2.png'
+import profile3 from '../assets/profile/3.png'
+import profile4 from '../assets/profile/4.png'
+import profile5 from '../assets/profile/5.jpg'
+import profile6 from '../assets/profile/6.png'
+import profile7 from '../assets/profile/7.png'
+import profile8 from '../assets/profile/8.png'
+import plumbingBg from '../assets/Professions/Plumbing.jpg'
 
-const profile1 = ref('')
-const profile2 = ref('')
-const profile3 = ref('')
-const profile4 = ref('')
-const profile5 = ref('')
-const profile6 = ref('')
-const profile7 = ref('')
-const profile8 = ref('')
-const collage1 = ref('')
-const collage2 = ref('')
+const router = useRouter()
+const stockTechnicians = [
+  { id: 'stock-1', name: 'Ahmed Salah', image: profile1, bgColor: '#E8E4F3', price: 200, description: 'Experienced plumber with 10+ years in the field.', rating: 5 },
+  { id: 'stock-2', name: 'Mohammed Ali', image: profile2, bgColor: '#E3F2FD', price: 180, description: 'Expert in residential plumbing.', rating: 5 },
+  { id: 'stock-3', name: 'Omar Hassan', image: profile3, bgColor: '#FFF3E0', price: 220, description: 'Specialist in pipe installation and repair.', rating: 5 },
+  { id: 'stock-4', name: 'Youssef Ahmed', image: profile4, bgColor: '#F3E5F5', price: 210, description: 'Professional with a focus on customer satisfaction.', rating: 5 },
+  { id: 'stock-5', name: 'Karim Mahmoud', image: profile5, bgColor: '#E8F5E8', price: 190, description: 'Reliable and efficient plumbing solutions.', rating: 5 },
+  { id: 'stock-6', name: 'Hassan Ibrahim', image: profile6, bgColor: '#FFF8E1', price: 205, description: 'Expert in leak detection and repair.', rating: 5 },
+  { id: 'stock-7', name: 'Mahmoud Ali', image: profile7, bgColor: '#F1F8E9', price: 195, description: 'Specialist in bathroom and kitchen plumbing.', rating: 5 },
+  { id: 'stock-8', name: 'Ibrahim Hassan', image: profile8, bgColor: '#E0F2F1', price: 215, description: 'Trusted by hundreds of satisfied customers.', rating: 5 }
+]
+const firebaseTechnicians = ref([])
+const searchQuery = ref('')
+const filterOption = ref('')
+const sortOption = ref('')
 
-onMounted(async () => {
-  // Dynamic imports for profile images
-  profile1.value = (await import('../assets/profile/1.jpg')).default
-  profile2.value = (await import('../assets/profile/2.png')).default
-  profile3.value = (await import('../assets/profile/3.png')).default
-  profile4.value = (await import('../assets/profile/4.png')).default
-  profile5.value = (await import('../assets/profile/5.jpg')).default
-  profile6.value = (await import('../assets/profile/6.png')).default
-  profile7.value = (await import('../assets/profile/7.png')).default
-  profile8.value = (await import('../assets/profile/8.png')).default
-  
-  // Dynamic imports for background images
-  collage1.value = (await import('../assets/Professions/Plumbing.jpg')).default
-  collage2.value = (await import('../assets/Contact/end.jpg')).default
+async function fetchTechnicians() {
+  const querySnapshot = await getDocs(collection(db, 'technicians'))
+  firebaseTechnicians.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+}
+
+onMounted(fetchTechnicians)
+
+const mergedTechnicians = computed(() => {
+  // Avoid duplicate names/IDs with stock
+  const allTechs = [...stockTechnicians]
+  firebaseTechnicians.value.forEach(fbTech => {
+    if (!allTechs.some(t => t.name === fbTech.name && t.price === fbTech.price)) {
+      allTechs.push(fbTech)
+    }
+  })
+  return allTechs
 })
 
-const technicians = computed(() => [
-  {
-    id: 1,
-    name: 'Ahmed Salah',
-    image: profile1.value,
-    bgColor: '#E8E4F3'
-  },
-  {
-    id: 2,
-    name: 'Mohammed Ali',
-    image: profile2.value,
-    bgColor: '#E3F2FD'
-  },
-  {
-    id: 3,
-    name: 'Omar Hassan',
-    image: profile3.value,
-    bgColor: '#FFF3E0'
-  },
-  {
-    id: 4,
-    name: 'Youssef Ahmed',
-    image: profile4.value,
-    bgColor: '#F3E5F5'
-  },
-  {
-    id: 5,
-    name: 'Karim Mahmoud',
-    image: profile5.value,
-    bgColor: '#E8F5E8'
-  },
-  {
-    id: 6,
-    name: 'Hassan Ibrahim',
-    image: profile6.value,
-    bgColor: '#FFF8E1'
-  },
-  {
-    id: 7,
-    name: 'Mahmoud Ali',
-    image: profile7.value,
-    bgColor: '#F1F8E9'
-  },
-  {
-    id: 8,
-    name: 'Ibrahim Hassan',
-    image: profile8.value,
-    bgColor: '#E0F2F1'
+const filteredTechnicians = computed(() => {
+  let list = mergedTechnicians.value
+  const query = searchQuery.value.trim().toLowerCase()
+  if (query) {
+    list = list.filter(t => t.name && t.name.toLowerCase().includes(query))
   }
-])
+  if (filterOption.value === 'price') {
+    list = list.filter(t => t.price)
+  } else if (filterOption.value === 'area') {
+    // Implement area filter if you have area data
+  } else if (filterOption.value === 'rating') {
+    list = list.filter(t => t.rating >= 4)
+  } else if (filterOption.value === 'years') {
+    // Implement years filter if you have years data
+  }
+  if (sortOption.value === 'priceLow') {
+    list = [...list].sort((a, b) => a.price - b.price)
+  } else if (sortOption.value === 'priceHigh') {
+    list = [...list].sort((a, b) => b.price - a.price)
+  } else if (sortOption.value === 'rating') {
+    list = [...list].sort((a, b) => b.rating - a.rating)
+  }
+  return list
+})
+
+function onSearch(query) {
+  searchQuery.value = query
+}
+function onFilter(option) {
+  filterOption.value = option
+}
+function onSort(option) {
+  sortOption.value = option
+}
+
+function viewProfile(id) {
+  router.push({ name: 'TechnicianProfile', params: { id } })
+}
 
 const heroBackgroundStyle = computed(() => {
   return {
-    backgroundImage: `linear-gradient(rgba(98, 84, 152, 0.7), rgba(98, 84, 152, 0.7)), url(${collage1.value})`
+    backgroundImage: `linear-gradient(rgba(98, 84, 152, 0.7), rgba(98, 84, 152, 0.7)), url(${plumbingBg})`
   }
 })
 </script>
@@ -238,6 +245,8 @@ const heroBackgroundStyle = computed(() => {
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 2rem;
   margin-bottom: 3rem;
+  grid-auto-rows: 1fr;
+  justify-items: center;
 }
 
 .technician-card {
@@ -246,6 +255,11 @@ const heroBackgroundStyle = computed(() => {
   overflow: hidden;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  min-height: 420px;
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
 }
 
 .technician-card:hover {
