@@ -30,7 +30,7 @@
             </div>
           </div>
           
-          <button class="about-btn">
+          <button class="about-btn" @click="$router.push('/about')">
             More About Us
           </button>
         </div>

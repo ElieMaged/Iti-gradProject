@@ -8,7 +8,7 @@
         <div class="service-content">
           <h3 class="service-title">{{ service.title }}</h3>
           <p class="service-desc">{{ service.desc }}</p>
-          <button class="service-btn">
+          <button class="service-btn" @click="$router.push(service.route || '#')">
             Book Now
             <span class="arrow">→</span>
           </button>
@@ -26,31 +26,37 @@ export default {
       services: [
         {
           title: 'Plumbing',
+          route: '/plumbing',
           image: '/images/servicesImages/plumbing.png',
           desc: 'While we can customize your cleaning plan to suit your needs, most clients schedule regular maintenance services:',
         },
         {
           title: 'Carpentry',
+          route: '/carpentry',
           image: '/images/servicesImages/Carpentry.png',
           desc: 'While we can customize your cleaning plan to suit your needs, most clients schedule regular maintenance services:',
         },
         {
           title: 'Electricity',
+          route: '/electricity',
           image: '/images/servicesImages/Electrecity.png',
           desc: 'While we can customize your cleaning plan to suit your needs, most clients schedule regular maintenance services:',
         },
         {
           title: 'AC Technicians',
+          route: '/ac-technicians',
           image: '/images/servicesImages/Ac Technicions.png',
           desc: 'While we can customize your cleaning plan to suit your needs, most clients schedule regular maintenance services:',
         },
         {
           title: 'Electrical Appliance Repair',
+          route: '/electrical-appliance-repair',
           image: '/images/servicesImages/electrical appliance repair.png',
           desc: 'While we can customize your cleaning plan to suit your needs, most clients schedule regular maintenance services:',
         },
         {
           title: 'Wall finishing',
+          route: '/wall-finishing',
           image: '/images/servicesImages/wall finishing.png',
           desc: 'While we can customize your cleaning plan to suit your needs, most clients schedule regular maintenance services:',
         },
