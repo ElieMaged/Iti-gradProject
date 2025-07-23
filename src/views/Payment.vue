@@ -1,354 +1,199 @@
 <template>
-  <div class="main-content">
-    <Sidebar
-            :activeMenu="activeMenu"
-            @navigate="handleSidebarNavigate"
-        />
-    <div class="payment-content">
-      <h1 class="payment-title">Payment</h1>
-      <div class="payment-balance-card">
-        <div class="balance-labels">
-          <span class="current-balance-label">Current Balance</span>
-          <span class="pending-label">Pending</span>
-        </div>
-        <div class="balance-amounts">
-          <span class="current-balance-amount">600 EGP</span>
-          <span class="pending-amount">200 EGP</span>
+  <!-- Top Bar -->
+  <div class="bg-primary text-white text-sm">
+    <div class="max-w-7xl mx-auto px-4 py-2 flex justify-between items-center">
+      <div class="flex items-center space-x-6">
+        <span class="flex items-center"><i class="fas fa-phone mr-2"></i>925-465-3762</span>
+        <span class="flex items-center"><i class="fas fa-envelope mr-2"></i>boltfix@gmail.com</span>
+        <span class="flex items-center"><i class="fas fa-map-marker-alt mr-2"></i>4096 Modesto, CA 95350, USA</span>
+      </div>
+      <div class="flex items-center space-x-3">
+        <a href="#" class="text-white hover:text-secondary transition-colors"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" class="text-white hover:text-secondary transition-colors"><i class="fab fa-twitter"></i></a>
+        <a href="#" class="text-white hover:text-secondary transition-colors"><i class="fab fa-linkedin-in"></i></a>
+        <a href="#" class="text-white hover:text-secondary transition-colors"><i class="fab fa-youtube"></i></a>
+      </div>
+    </div>
+  </div>
+  <!-- Header -->
+  <div class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+      <div class="flex items-center">
+        <div class="text-3xl font-bold">
+          <span class="text-primary">B</span>
+          <span class="text-secondary">BoltFix</span>
         </div>
       </div>
-      <div class="payment-method-card">
-        <div class="payment-method-header">
-          <span class="payment-method-title">Your Payment Method</span>
-          <button class="edit-btn">Edit</button>
-        </div>
-        <div class="payment-method-type">Paypal</div>
-        <div class="payment-method-email">exampletech@gmail.com</div>
+      <nav class="flex items-center space-x-8">
+        <a href="#" class="text-text-main hover:text-secondary transition-colors font-medium">{{ $t('home') }}</a>
+        <a href="#" class="text-text-main hover:text-secondary transition-colors font-medium">{{ $t('aboutUs') }}</a>
+        <a href="#" class="text-text-main hover:text-secondary transition-colors font-medium">{{ $t('services') }}</a>
+        <a href="#" class="text-text-main hover:text-secondary transition-colors font-medium">{{ $t('contactUs') }}</a>
+      </nav>
+      <div class="flex items-center space-x-4">
+        <i class="fas fa-bell text-xl text-secondary cursor-pointer"></i>
+        <i class="fas fa-user text-xl text-secondary cursor-pointer"></i>
       </div>
-      <div class="withdraw-card">
-        <div class="withdraw-title">Withdraw Funds</div>
-        <form class="withdraw-form">
-          <div class="withdraw-fields">
-            <div class="withdraw-field">
-              <label>Amount</label>
-              <input type="number" placeholder="Enter amount" />
-            </div>
-            <div class="withdraw-field">
-              <label>Paypal email</label>
-              <input type="email" placeholder="example email" />
+    </div>
+  </div>
+  <!-- Main Container -->
+  <div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <div class="w-64 bg-sidebar flex flex-col items-center pt-10">
+      <a href="profile-view" class="sidebar-item w-full py-4 px-8 flex items-center space-x-4 text-lg font-medium text-secondary">
+        <i class="fas fa-user text-xl"></i>
+        <span>{{ $t('myProfile') }}</span>
+      </a>
+      <a href="profile-edit" class="sidebar-item w-full py-4 px-8 flex items-center space-x-4 text-lg font-medium text-secondary">
+        <i class="fas fa-cog text-xl"></i>
+        <span>{{ $t('settings') }}</span>
+      </a>
+      <a href="previous-services" class="sidebar-item w-full py-4 px-8 flex items-center space-x-4 text-lg font-medium text-secondary">
+        <i class="fas fa-calendar-check text-xl"></i>
+        <span>{{ $t('history') }}</span>
+      </a>
+      <a href="payment" class="sidebar-item active w-full py-4 px-8 flex items-center space-x-4 text-lg font-medium">
+        <i class="fas fa-credit-card text-xl"></i>
+        <span>{{ $t('payment') }}</span>
+      </a>
+      <a href="#" class="sidebar-item w-full py-4 px-8 flex items-center space-x-4 text-lg font-medium text-secondary">
+        <i class="fas fa-sign-out-alt text-xl"></i>
+        <span>{{ $t('logout') }}</span>
+      </a>
+    </div>
+    <!-- Main Content -->
+    <div class="flex-1 p-20">
+      <div class="max-w-7xl mx-auto">
+        <!-- Page Title -->
+        <div class="mb-8">
+          <h1 class="text-3xl font-bold text-text-main">{{ $t('payment') }}</h1>
+        </div>
+        <!-- Grid Container with 12 columns and 20px gutter -->
+        <div class="grid grid-cols-12 gap-5">
+          <!-- Your Last Transactions Section -->
+          <div class="col-span-12">
+            <h2 class="text-2xl font-bold text-text-main mb-6">{{ $t('yourLastTransactions') }}</h2>
+          </div>
+          <div v-for="(transaction, idx) in transactions" :key="transaction.id" class="col-span-12 lg:col-span-6">
+            <div class="transaction-card bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <div class="flex justify-between items-start mb-4">
+                <div class="flex-1">
+                  <div class="space-y-3">
+                    <div class="flex items-center space-x-3"><i class="fas fa-user text-secondary text-sm"></i><span class="text-sm font-medium text-text-main">{{ transaction.technician }}</span></div>
+                    <div class="flex items-center space-x-3"><i class="fas fa-phone text-secondary text-sm"></i><span class="text-sm text-gray-600">{{ transaction.phone }}</span></div>
+                    <div class="flex items-center space-x-3"><i :class="transaction.icon" class="text-secondary text-sm"></i><span class="text-sm text-text-main">{{ transaction.type }}</span></div>
+                    <div class="flex items-center space-x-3"><i class="fas fa-calendar text-secondary text-sm"></i><span class="text-sm text-gray-600">{{ transaction.time }}</span></div>
+                    <div class="flex items-center space-x-3"><span class="text-lg font-bold text-secondary">{{ $t('price') }}: {{ transaction.price }} EGP</span></div>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="text-green-600 text-sm font-medium mb-2">{{ $t('successful') }}</div>
+                  <div class="text-text-main text-sm font-medium">{{ $t('paypal') }}</div>
+                </div>
+              </div>
             </div>
           </div>
-          <button class="withdraw-btn" type="submit">Withdraw</button>
-        </form>
+          <!-- Your Payment Method Section -->
+          <div class="col-span-12 mt-8">
+            <h2 class="text-2xl font-bold text-text-main mb-6">{{ $t('yourPaymentMethod') }}</h2>
+          </div>
+          <!-- Payment Method Card -->
+          <div class="col-span-12 lg:col-span-6">
+            <div class="transaction-card bg-white rounded-xl shadow-lg p-6 border border-gray-100 relative">
+              <button v-if="!editingPaypal" @click="editingPaypal = true" class="edit-btn absolute top-4 right-4 bg-secondary text-white px-3 py-1 rounded-lg text-xs font-medium">{{ $t('edit') }}</button>
+              <div v-if="!editingPaypal" class="space-y-4">
+                <div class="flex items-center space-x-3"><i class="fab fa-paypal text-secondary text-xl"></i><span class="text-lg font-medium text-text-main">{{ $t('paypal') }}</span></div>
+                <div class="flex items-center space-x-3"><i class="fas fa-envelope text-secondary text-sm"></i><span class="text-sm text-gray-600">{{ paypalEmail }}</span></div>
+              </div>
+              <div v-else class="space-y-4">
+                <div class="flex items-center space-x-3"><i class="fab fa-paypal text-secondary text-xl"></i><span class="text-lg font-medium text-text-main">{{ $t('paypal') }}</span></div>
+                <div class="space-y-3">
+                  <label class="block text-sm font-bold text-text-main">{{ $t('paypalEmail') }}</label>
+                  <input v-model="paypalEmailInput" type="email" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent">
+                </div>
+                <div class="flex space-x-2">
+                  <button @click="savePaypal" class="bg-green-600 text-white px-3 py-1 rounded-lg text-xs font-medium hover:bg-green-700">{{ $t('save') }}</button>
+                  <button @click="cancelPaypal" class="bg-gray-500 text-white px-3 py-1 rounded-lg text-xs font-medium hover:bg-gray-600">{{ $t('cancel') }}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-span-12 lg:col-span-6"></div>
+        </div>
       </div>
     </div>
   </div>
 </template>
-
-<script>
-import Sidebar from '../components/Sidebar.vue';
-
-
-export default {
-  components: {
-    Sidebar
-  },
-  data() {
-    return {
-      activeMenu: 'payment',
-    }
-  },
-  methods: {
-    handleSidebarNavigate(path) {
-      this.$router.push(path);
-    }
+<script setup>
+import { ref } from 'vue';
+const transactions = ref([
+  { id: 1, technician: 'Mohsen Ali', phone: '+20 111 555 2365', type: 'Plumbing', icon: 'fas fa-wrench', time: '10:00AM, Friday, July 23', price: 400 },
+  { id: 2, technician: 'Samir Mohamed', phone: '+20 111 555 2365', type: 'Electricity', icon: 'fas fa-lightbulb', time: '2:30PM, Wednesday, July 20', price: 250 },
+  { id: 3, technician: 'Ahmed Hassan', phone: '+20 111 555 2365', type: 'Air Conditioning', icon: 'fas fa-snowflake', time: '11:00AM, Saturday, July 15', price: 500 },
+  { id: 4, technician: 'Mahmoud Omar', phone: '+20 111 555 2365', type: 'Electrical Wiring', icon: 'fas fa-bolt', time: '3:00PM, Thursday, July 12', price: 350 },
+]);
+const paypalEmail = ref('exampletech@gmail.com');
+const paypalEmailInput = ref(paypalEmail.value);
+const editingPaypal = ref(false);
+function savePaypal() {
+  if (paypalEmailInput.value && paypalEmailInput.value.includes('@')) {
+    paypalEmail.value = paypalEmailInput.value;
+    editingPaypal.value = false;
+    alert($t('paypalUpdated'));
+  } else {
+    alert($t('invalidEmail'));
   }
+}
+function cancelPaypal() {
+  paypalEmailInput.value = paypalEmail.value;
+  editingPaypal.value = false;
 }
 </script>
-
 <style scoped>
-.main-content {
-  display: flex;
-  min-height: 100vh;
+.sidebar-item {
+  transition: all 0.2s ease;
 }
-.payment-content {
-  flex: 1;
-  padding: 32px 0 0 0;
+.sidebar-item:hover {
+  background-color: #c5b7e6;
+  color: white;
 }
-.payment-page {
-  background: #f5f5f7;
-  min-height: 100vh;
-  padding: 32px 0 0 0;
+.sidebar-item.active {
+  background-color: #7c6bb0;
+  color: white;
 }
-.payment-title {
-  color: #625397;
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 2rem;
-  font-family: Outfit, sans-serif;
-  margin-left: 48px;
+.transaction-card {
+  transition: all 0.2s ease;
 }
-.payment-balance-card {
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  padding: 32px 40px 24px 40px;
-  margin: 0 0 32px 48px;
-  max-width: 900px;
-}
-.balance-labels {
-  display: flex;
-  justify-content: space-between;
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-.current-balance-label {
-  color: #625397;
-  font-size: 2rem;
-  font-weight: bold;
-  padding-right: 20px;
-}
-.pending-label {
-  color: #222;
-  font-size: 2rem;
-  font-weight: bold;
-  padding-right: 20px;
-}
-.balance-amounts {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-}
-.current-balance-amount {
-  font-size: 2rem;
-  font-weight: bold;
-}
-.pending-amount {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: grey;
-  align-self: center;
-  padding-right: 20px;
-}
-.payment-method-card {
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  padding: 28px 40px 24px 40px;
-  margin: 0 0 32px 48px;
-  max-width: 900px;
-}
-.payment-method-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-.payment-method-title {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #222;
+.transaction-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 .edit-btn {
-  background: #948AB8;
-  color: #fff;
-  border: none;
-  border-radius: 12px;
-  padding: 6px 24px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
 }
 .edit-btn:hover {
-  background: #625397;
+  background-color: #5e4b8b;
+  transform: scale(1.05);
 }
-.payment-method-type {
-  color: #948AB8;
-  font-weight: 600;
-  font-size: 1.1rem;
-  margin-bottom: 2px;
+.bg-primary {
+  background-color: #ffd54f;
 }
-.payment-method-email {
-  color: #222;
-  font-size: 1.1rem;
+.bg-secondary {
+  background-color: #7c6bb0;
 }
-.withdraw-card {
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  padding: 28px 40px 24px 40px;
-  margin: 0 0 32px 48px;
-  max-width: 900px;
+.bg-sidebar {
+  background-color: #ede7f6;
 }
-.withdraw-title {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #222;
-  margin-bottom: 18px;
+.text-primary {
+  color: #ffd54f;
 }
-.withdraw-form {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
+.text-secondary {
+  color: #7c6bb0;
 }
-.withdraw-fields {
-  display: flex;
-  gap: 18px;
-  margin-bottom: 10px;
+.text-text-main {
+  color: #333333;
 }
-.withdraw-field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  flex: 1;
-}
-.withdraw-field label {
-  font-size: 1rem;
-  color: #222;
-  font-weight: 500;
-}
-.withdraw-field input {
-  border: none;
-  background: #ececec;
-  border-radius: 25px;
-  padding: 10px 18px;
-  font-size: 1rem;
-  color: #222;
-  outline: none;
-}
-.withdraw-btn {
-  background: #625397;
-  color: #fff;
-  border: none;
-  border-radius: 25px;
-  padding: 10px 38px;
-  font-size: 1.1rem;
-  font-weight: 700;
-  cursor: pointer;
-  align-self: flex-start;
-  transition: background 0.2s;
-}
-.withdraw-btn:hover {
-  background: #948AB8;
-}
-@media (max-width: 900px) {
-  .main-content {
-    flex-direction: column;
-  }
-  .sidebar {
-    width: 100% !important;
-    max-height: 220px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding: 1rem 0 !important;
-    margin-bottom: 1rem;
-  }
-  .payment-content {
-    padding: 16px 0 0 0;
-  }
-  .payment-balance-card,
-  .payment-method-card,
-  .withdraw-card {
-    margin: 0 0 24px 0;
-    max-width: 100%;
-    padding: 24px 16px 18px 16px;
-  }
-  .payment-title {
-    margin-left: 0;
-  }
-}
-@media (max-width: 768px) {
-  .payment-content {
-    padding: 1rem 0 0 0;
-  }
-  .payment-title {
-    font-size: 1.2rem;
-    margin-left: 0;
-    margin-bottom: 1rem;
-  }
-  .payment-balance-card,
-  .payment-method-card,
-  .withdraw-card {
-    padding: 12px 6px 10px 6px;
-    border-radius: 12px;
-  }
-  .withdraw-btn {
-    padding: 8px 18px;
-    font-size: 1rem;
-  }
-  .edit-btn {
-    padding: 4px 12px;
-    font-size: 0.95rem;
-  }
-  .current-balance-label,
-  .pending-label {
-    font-size: 1.1rem;
-    padding-right: 8px;
-  }
-  .current-balance-amount,
-  .pending-amount {
-    font-size: 1.1rem;
-    padding-right: 8px;
-  }
-}
-@media (max-width: 600px) {
-  .payment-content {
-    padding: 8px 0 0 0;
-  }
-  .payment-title {
-    font-size: 1rem;
-    margin-left: 0;
-    margin-bottom: 0.5rem;
-  }
-  .payment-balance-card,
-  .payment-method-card,
-  .withdraw-card {
-    padding: 8px 2px 6px 2px;
-    border-radius: 10px;
-  }
-  .withdraw-btn {
-    padding: 6px 12px;
-    font-size: 0.95rem;
-  }
-  .edit-btn {
-    padding: 3px 8px;
-    font-size: 0.9rem;
-  }
-  .current-balance-label,
-  .pending-label {
-    font-size: 1rem;
-    padding-right: 4px;
-  }
-  .current-balance-amount,
-  .pending-amount {
-    font-size: 1rem;
-    padding-right: 4px;
-  }
-}
-.payment-balance-card,
-.payment-method-card,
-.withdraw-card {
-  transition: box-shadow 0.2s, border 0.2s;
-  border: 1.5px solid #ececec;
-}
-.payment-balance-card:hover,
-.payment-method-card:hover,
-.withdraw-card:hover {
-  box-shadow: 0 4px 16px rgba(98,83,151,0.10);
-  border: 1.5px solid #948AB8;
-}
-.payment-balance-card:not(:last-child),
-.payment-method-card:not(:last-child),
-.withdraw-card:not(:last-child) {
-  border-bottom: 1px solid #ececec;
-}
-.withdraw-field input:focus {
-  border: 1.5px solid #948AB8;
-  background: #f5f5fa;
-}
-.edit-btn:focus,
-.withdraw-btn:focus {
-  outline: 2px solid #948AB8;
+.text-muted {
+  color: #aaaaaa;
 }
 </style> 

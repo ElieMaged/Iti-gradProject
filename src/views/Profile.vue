@@ -271,42 +271,23 @@ const technicianData = ref(null);
 
 onMounted(async () => {
   try {
-    console.log('Profile component mounted, checking authentication...');
     const currentUser = auth.currentUser;
     if (!currentUser) {
-      console.log('No authenticated user, redirecting to login...');
       router.push('/userlogin');
       return;
     }
-
-    console.log('User authenticated:', currentUser.uid);
-
     // Fetch technician data from Firestore
     const techniciansRef = collection(db, 'technicians');
     const q = query(techniciansRef, where('uid', '==', currentUser.uid));
-    
-    console.log('Querying Firestore for technician data...');
     const querySnapshot = await getDocs(q);
-    
     if (!querySnapshot.empty) {
       const doc = querySnapshot.docs[0];
       technicianData.value = { id: doc.id, ...doc.data() };
-      console.log('Technician data loaded:', technicianData.value);
     } else {
-      console.log('No technician profile found for user:', currentUser.uid);
       error.value = 'Technician profile not found';
     }
   } catch (err) {
-    console.error('Error loading profile:', err);
-    
-    // Provide more specific error messages
-    if (err.code === 'permission-denied') {
-      error.value = 'Permission denied. Please check your Firebase Firestore rules.';
-    } else if (err.code === 'unavailable') {
-      error.value = 'Firestore is currently unavailable. Please try again later.';
-    } else {
-      error.value = 'Error loading profile: ' + err.message;
-    }
+    error.value = 'Error loading profile: ' + err.message;
   } finally {
     loading.value = false;
   }

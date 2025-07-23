@@ -38,15 +38,11 @@
       
       <div class="about-images">
         <div class="image-container">
-          <div class="circular-image top-right">
-            <img src="/images/About-Us images/Rectangle 34624196.png" alt="Network cables work" />
+   
+          <div class="">
+            <img src="/images/About-Us images/allview.png" alt="Carpentry work" />
           </div>
-          <div class="circular-image middle">
-            <img src="/images/About-Us images/Rectangle 34624197.png" alt="Carpentry work" />
-          </div>
-          <div class="circular-image bottom-right">
-            <img src="/images/About-Us images/Rectangle 34624198.png" alt="Plumbing work" />
-          </div>
+        
           
           <!-- Decorative stars -->
           <div class="star star-1"></div>
@@ -72,6 +68,15 @@ export default {
   padding: 80px 0;
   width: 100%;
   position: relative;
+}
+
+@media (max-width: 1000px) {
+  .about-container {
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
 .about-container {

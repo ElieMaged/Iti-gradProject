@@ -1,9 +1,68 @@
 <script>
 import '../style.css'
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { auth } from '../firebase';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import LanguageToggle from './LanguageToggle.vue';
+// Firebase-related imports removed
 
 export default {
-  data() {
+  components: { LanguageToggle },
+  setup() {
+    const user = ref(null);
+    const loading = ref(true);
+    const router = useRouter();
+    const { locale } = useI18n();
+
+    function getRoute(path) {
+      return locale.value === 'ar' ? `/ar/${path}` : `/${path}`;
+    }
+
+    onMounted(() => {
+      onAuthStateChanged(auth, (firebaseUser) => {
+        user.value = firebaseUser;
+        loading.value = false;
+      });
+    });
+
+    const logout = async () => {
+      await signOut(auth);
+      user.value = null;
+      router.push('/');
+    };
+
+    function handleProfileClick() {
+      const currentUser = auth.currentUser;
+      // If the user's email ends with @gmail.com, always go to ProfileView
+      if (currentUser && currentUser.email && currentUser.email.endsWith('@gmail.com')) {
+        router.push(getRoute('profile-view'));
+        return;
+      }
+      // If signed in with Google, always go to ProfileView
+      if (currentUser && currentUser.providerData && currentUser.providerData.some(p => p.providerId === 'google.com')) {
+        router.push(getRoute('profile-view'));
+        return;
+      }
+      // Otherwise, check userType
+      const userType = localStorage.getItem('userType');
+      if (userType === 'technician') {
+        router.push(getRoute('profile'));
+      } else {
+        router.push(getRoute('profile-view'));
+      }
+    }
+
+    function goToUserAccount() {
+      router.push(getRoute('usersignup'));
+    }
+
     return {
+      user,
+      loading,
+      logout,
+      handleProfileClick,
       userButtonClass: " text-gray-600 p-2 rounded-full ",
       loginButtonClass: "",
       categories: [
@@ -17,15 +76,10 @@ export default {
       ]
     };
   },
-  methods: {
-    goToUserAccount() {
-      this.$router.push("/usersignup");
-    },
-    goToRegisterChoice() {
-      this.$router.push("/registerchoice");
-    },
-  },
-};
+    getRoute,
+    goToUserAccount
+  };
+  
 </script>
 
 <template>
@@ -33,9 +87,9 @@ export default {
   <div class="text-white w-full" id="contact-Nav">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center px-4 py-2 gap-2">
       <div class="flex flex-col sm:flex-row gap-2 items-center">
-        <a href="tel:+12095551234" class="text-white no-underline mx-1 flex items-center text-sm"><i class="fa-solid fa-phone px-2"></i>+1 209-555-1234</a>
-        <a href="mailto:Boltfix@gmail.com" class="text-white no-underline mx-1 flex items-center text-sm"><i class="fa-solid fa-envelope px-2"></i>Boltfix@gmail.com</a>
-        <a href="https://www.google.com/maps/place/123+Main+St,+Anytown,+USA" class="text-white no-underline mx-1 flex items-center text-sm"><i class="fa-solid fa-map-marker-alt px-2"></i>123 Main St, Anytown, USA</a>
+        <a href="tel:+12095551234" class="text-white no-underline mx-1 flex items-center text-sm"><i class="fa-solid fa-phone px-2"></i>{{ $t('contactPhone') }}</a>
+        <a href="mailto:Boltfix@gmail.com" class="text-white no-underline mx-1 flex items-center text-sm"><i class="fa-solid fa-envelope px-2"></i>{{ $t('contactEmail') }}</a>
+        <a href="https://www.google.com/maps/place/123+Main+St,+Anytown,+USA" class="text-white no-underline mx-1 flex items-center text-sm"><i class="fa-solid fa-map-marker-alt px-2"></i>{{ $t('contactAddress') }}</a>
       </div>
       <div class="flex gap-2">
         <a href="#" class="flex items-center justify-center rounded-full bg-white text-white w-7 h-7"><i class="fa-brands fa-facebook-f secondary-color"></i></a>
@@ -73,6 +127,35 @@ export default {
 
       <!-- Login/Register -->
       <div class="flex items-center gap-2">
+        <template v-if="loading">
+          <span class="text-gray-500">{{ $t('loading') }}</span>
+        </template>
+        <template v-else>
+          <template v-if="user">
+            <!-- Show user email or UID if logged in -->
+            <span class="flex items-center gap-2">
+              <span class="text-gray-700 font-semibold px-3 py-1 rounded bg-gray-100 cursor-pointer" @click="handleProfileClick">
+                {{ user.email || user.uid }}
+              </span>
+              <i class="fas fa-user-circle text-2xl text-secondary cursor-pointer" @click="handleProfileClick"></i>
+            </span>
+            <button :class="loginButtonClass" id="login-btn" @click="logout">
+              {{ $t('logout') }}
+            </button>
+          </template>
+          <template v-else>
+            <!-- User Icon Button -->
+            <button :class="userButtonClass" @click="goToUserAccount">
+              <i class="fa-regular fa-user"></i>
+            </button>
+            <!-- Log in/Register Button -->
+            <button :class="loginButtonClass" id="login-btn" @click="goToUserAccount">
+              {{ $t('loginRegister') }}
+            </button>
+          </template>
+        </template>
+        <!-- Language Toggle Button -->
+        <LanguageToggle />
         <!-- User Icon Button -->
         <button :class="userButtonClass" @click="goToUserAccount">
           <i class="fa-regular fa-user"></i>

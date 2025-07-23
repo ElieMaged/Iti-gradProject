@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { auth, provider } from '../firebase';
 import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+// Firebase-related imports removed
 
 const email = ref('');
 const password = ref('');
@@ -22,10 +23,16 @@ const handleLogin = async () => {
 const handleGoogleSignIn = async () => {
   error.value = '';
   try {
-    await signInWithPopup(auth, provider);
-    router.push('/');
+    const result = await signInWithPopup(auth, provider);
+    if (result && result.user) {
+      router.push('/');
+    } else {
+      error.value = 'Google sign-in failed. No user returned.';
+      console.error('Google sign-in failed. No user returned.', result);
+    }
   } catch (err) {
     error.value = err.message;
+    console.error('Google sign-in error:', err);
   }
 };
 </script>

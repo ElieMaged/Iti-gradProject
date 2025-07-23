@@ -8,18 +8,26 @@
     "build": "vite build",
     "preview": "vite preview",
     "build:prod": "vite build --mode production",
-    "serve": "vite preview --port 3000"
+    "server": "vite preview --port 3000"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.11",
     "bootstrap": "^5.3.7",
     "firebase": "^12.0.0",
+    "pinia": "^2.1.7",
+    "terser": "^5.43.1",
     "vue": "^3.5.17",
+    "vue-i18n": "^9.14.5",
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.0",
     "autoprefixer": "^10.4.21",
+    "imagemin": "^9.0.1",
+    "imagemin-cli": "^8.0.0",
+    "imagemin-mozjpeg": "^10.0.0",
+    "imagemin-pngquant": "^10.0.0",
+    "imagemin-svgo": "^11.0.1",
     "postcss": "^8.5.6",
     "sass-embedded": "^1.89.2",
     "tailwindcss": "^4.1.11",

@@ -1,5 +1,6 @@
 <template>
-  <section class="services-section ">
+  <section class="services-section">
+    <div class="">
     <h2 class="services-title">What Do You Need Fixed?</h2>
     <hr class="services-divider" />
     <div class="services-grid">
@@ -15,6 +16,7 @@
         </div>
       </div>
     </div>
+  </div>
   </section>
 </template>
 
@@ -72,9 +74,15 @@ export default {
   max-width: 1100px;
   margin: 0 auto 60px auto;
   padding: 40px 0 0 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+
+}
+@media (max-width: 1000px) {
+  .services-section {
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
 }
 .services-title {
   font-size: 2.5rem;
