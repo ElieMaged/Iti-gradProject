@@ -1,5 +1,5 @@
 <template>
-  <div class="tech-register-bg min-h-screen flex items-center justify-content-center">
+  <div class="tech-register-bg flex items-center justify-content-center">
     <div class="tech-register-card w-full max-w-6xl bg-white rounded-3xl shadow-lg p-10 md:p-16">
       <div class="flex flex-col items-center mb-8">
         <img src="/logo/ace04d3b268cf810c91d002fdf7454a6ef778f27.png" alt="BoltFix Logo" class="h-12 mb-2" />
