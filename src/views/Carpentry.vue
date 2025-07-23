@@ -4,11 +4,11 @@
       <section class="hero-section m-5" :style="heroBackgroundStyle">
         <div class="hero-overlay">
           <div class="hero-content">
-            <h1 class="hero-title">Carpentry</h1>
+            <h1 class="hero-title">{{ $t('carpentryTitle') }}</h1>
             <div class="breadcrumbs">
-              <span>Home</span>
+              <span>{{ $t('home') }}</span>
               <span class="separator">•</span>
-              <span>Services</span>
+              <span>{{ $t('services') }}</span>
             </div>
           </div>
         </div>
@@ -18,9 +18,9 @@
       <section class="technicians-section">
         <div class="container">
           <div class="section-header">
-            <h2 class="section-title">Meet Our Technicians Team</h2>
+            <h2 class="section-title">{{ $t('meetTechniciansTeam') }}</h2>
             <p class="section-description">
-              We pride ourselves on being your trusted local plumbing experts. With 20 years of experience serving your city, our mission is to provide high quality, reliable plumbing services that you can depend on, whether it's for your home or business.
+              {{ $t('carpentryTeamDescription') }}
             </p>
           </div>
   
@@ -35,9 +35,9 @@
                   <i class="fa-solid fa-star" v-for="n in 5" :key="n"></i>
                 </div>
                 <p class="technician-description">
-                  Skilled technician with a strong track record of customer satisfaction. professional, and ready for your job.
+                  {{ $t('technicianDescription') }}
                 </p>
-                <button class="view-profile-btn">View Profile</button>
+                <button class="view-profile-btn">{{ $t('viewProfile') }}</button>
               </div>
             </div>
           </div>
@@ -70,7 +70,7 @@
   import profile7 from '../assets/profile/7.png'
   import profile8 from '../assets/profile/8.png'
   import collage1 from '../assets/Professions/Carpentry.jpg'
-  import collage2 from '../assets/Contact/end.png'
+  import collage2 from '../assets/Contact/end.jpg'
   import EndCard from '../components/EndCard.vue'
   
   const technicians = [

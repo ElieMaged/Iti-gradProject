@@ -3,9 +3,9 @@
     <div class="about-container">
       <div class="about-content">
         <div class="about-text">
-          <h2 class="about-title">Over 25+ Year of Experience In Handyman Service</h2>
+          <h2 class="aboutus-title">{{ $t('aboutUsSectionTitle') }}</h2>
           <p class="about-description">
-            With 25+ years of experience, we are the go-to experts for all your handyman service requirements. Trust in our skill and professionalism for top-notch results.
+            {{ $t('aboutUsSectionDesc') }}
           </p>
           
           <div class="about-features">
@@ -14,8 +14,8 @@
                 <img src="/images/About-Us images/Frame 18596.png" alt="Qualified team" />
               </div>
               <div class="feature-content">
-                <h3 class="feature-title">High Quality Work</h3>
-                <p class="feature-description">At vero eos et accusamus et iusto odio dignissimos.</p>
+                <h3 class="feature-title">{{ $t('aboutFeature1Title') }}</h3>
+                <p class="feature-description">{{ $t('aboutFeature1Desc') }}</p>
               </div>
             </div>
             
@@ -24,14 +24,14 @@
                 <img src="/images/About-Us images/Frame 18596.png" alt="Qualified team" />
               </div>
               <div class="feature-content">
-                <h3 class="feature-title">Qualified team</h3>
-                <p class="feature-description">At vero eos et accusamus et iusto odio dignissimos.</p>
+                <h3 class="feature-title">{{ $t('aboutFeature2Title') }}</h3>
+                <p class="feature-description">{{ $t('aboutFeature2Desc') }}</p>
               </div>
             </div>
           </div>
           
           <button class="about-btn">
-            More About Us
+            {{ $t('aboutMoreBtn') }}
           </button>
         </div>
       </div>
@@ -40,7 +40,7 @@
         <div class="image-container">
    
           <div class="">
-            <img src="/images/About-Us images/allview.png" alt="Carpentry work" />
+            <img src="/images/About-Us images/allview.jpg" alt="Carpentry work" />
           </div>
         
           

@@ -8,20 +8,19 @@ import EndCard from '../components/EndCard.vue';
   <div class="">
       <div class="contact-1 m-5">
         <div class="blur"></div>
-        <h1 class="text-center flex flex-row justify-center h1
-  ">About Us</h1>
+        <h1 class="text-center flex flex-row justify-center h1">{{ $t('aboutUsTitle') }}</h1>
     </div>
   </div>
   <div class="flex flex-col md:flex-row m-5 col-span-6">
       <div class="m-5">
-        <h1>Who Are We?</h1>
-At BoltFix, we're redefining how home maintenance is done. As Egypt’s trusted platform for reliable repair and installation services, we connect you with skilled, verified technicians across plumbing, electrical, carpentry, appliance repair, and more — all with a click. Our mission is simple: to bring professionalism, transparency, and peace of mind to every home. Whether it’s a quick fix or a big job, we make sure it’s done right, on time, and with care.
+        <h1>{{ $t('whoAreWeTitle') }}</h1>
+<p>{{ $t('whoAreWeDesc') }}</p>
 <br>
 <br>
 <br>
 <br>
-<h2>Our Mission</h2>
-Our mission at BoltFix is to simplify access to trusted home repair services by empowering skilled technicians and delivering a seamless, dependable experience for every customer. We aim to raise the standard of home maintenance in Egypt through speed, honesty, and quality — ensuring that every task, big or small, is completed with precision, professionalism, and care.
+<h2>{{ $t('ourMissionTitle') }}</h2>
+<p>{{ $t('ourMissionDesc') }}</p>
     </div>
 
 <img class="collage-all" src="../assets/Contact/collageall.png" alt="">
@@ -32,14 +31,14 @@ Our mission at BoltFix is to simplify access to trusted home repair services by 
   </div>
   <!-- About-2 -->
    <div class="container flex flex-col md:flex-row gap-10 md:gap-15 text-center about-2">
-    <h2 class="accolades md:pr-5">150+ Team Member</h2>
-    <h2 class="accolades md:pr-5">100+ Winning Award</h2>
-    <h2 class="accolades md:pr-5">700+ Complete Projects</h2>
-    <h2 class="accolades noBorders">684+ Client Reviews</h2>
+    <h2 class="accolades md:pr-5">{{ $t('teamMembers') }}</h2>
+    <h2 class="accolades md:pr-5">{{ $t('winningAwards') }}</h2>
+    <h2 class="accolades md:pr-5">{{ $t('completeProjects') }}</h2>
+    <h2 class="accolades noBorders">{{ $t('clientReviews') }}</h2>
    </div>
    <!-- About-3 -->
     <div class="mt-20 mb-20">
-   <h1 class="text-center">Why Choose Us?</h1>
+   <h1 class="text-center">{{ $t('whyChooseUsTitle') }}</h1>
    </div>
    <div class="flex flex-row m-20">
        <!-- card   -->
@@ -52,11 +51,10 @@ Our mission at BoltFix is to simplify access to trusted home repair services by 
     <br>
     <br>
   <div class="px-6 py-4">
-    <div class="font-bold text-xl mb-2">Clean Work All Time</div>
-
+    <div class="font-bold text-xl mb-2">{{ $t('cleanWorkAllTime') }}</div>
     <p class="text-gray-700 text-base">
-      We care about details. Expect a clean, neat, and professional service every single time.
-         <a href="">Get Started -></a>
+      {{ $t('cleanWorkAllTimeDesc') }}
+      <a href="">{{ $t('getStarted') }}</a>
     </p>
  
   </div>
@@ -70,11 +68,11 @@ Our mission at BoltFix is to simplify access to trusted home repair services by 
     <br>
     <br>
   <div class="px-6 py-4">
-    <div class="font-bold text-xl mb-2">Clean Work All Time</div>
+    <div class="font-bold text-xl mb-2">{{ $t('cleanWorkAllTime') }}</div>
 
     <p class="text-gray-700 text-base">
-      We care about details. Expect a clean, neat, and professional service every single time.
-         <a href="">Get Started -></a>
+      {{ $t('cleanWorkAllTimeDesc') }}
+         <a href="">{{ $t('getStarted') }}</a>
     </p>
  
   </div>
@@ -88,11 +86,11 @@ Our mission at BoltFix is to simplify access to trusted home repair services by 
     <br>
     <br>
   <div class="px-6 py-4">
-    <div class="font-bold text-xl mb-2">Clean Work All Time</div>
+    <div class="font-bold text-xl mb-2">{{ $t('cleanWorkAllTime') }}</div>
 
     <p class="text-gray-700 text-base">
-      We care about details. Expect a clean, neat, and professional service every single time.
-         <a href="">Get Started -></a>
+      {{ $t('cleanWorkAllTimeDesc') }}
+         <a href="">{{ $t('getStarted') }}</a>
     </p>
  
   </div>
@@ -106,11 +104,11 @@ Our mission at BoltFix is to simplify access to trusted home repair services by 
     <br>
     <br>
   <div class="px-6 py-4">
-    <div class="font-bold text-xl mb-2">Clean Work All Time</div>
+    <div class="font-bold text-xl mb-2">{{ $t('cleanWorkAllTime') }}</div>
 
     <p class="text-gray-700 text-base">
-      We care about details. Expect a clean, neat, and professional service every single time.
-         <a href="">Get Started -></a>
+      {{ $t('cleanWorkAllTimeDesc') }}
+         <a href="">{{ $t('getStarted') }}</a>
     </p>
  
   </div>

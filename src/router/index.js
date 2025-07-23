@@ -20,7 +20,7 @@ import PreviousServices from '../views/PreviousServices.vue'
 import ProfileEdit from '../views/ProfileEdit.vue'
 import Payment from '../views/Payment.vue'
 import FAQ from '../components/FAQ.vue'
-
+import Profile from '../views/Profile.vue'
 
 const routes = [
   { path: '/', component: HomePage },

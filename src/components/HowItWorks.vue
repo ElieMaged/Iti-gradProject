@@ -1,8 +1,8 @@
 <template>
   <section class="how-it-works">
     <div class="flex flex-col items-center justify-center">
-    <h2 class="how-it-works-title">How It Works</h2>
-    <p class="how-it-works-subtitle">Our Work Process</p>
+    <h2 class="how-title">{{ $t('howItWorksTitle') }}</h2>
+    <p class="how-it-works-subtitle">{{ $t('howItWorksSubtitle') }}</p>
     <div class="steps-container">
       <div v-for="(step, index) in steps" :key="index" class="step-item">
                   <div class="step-icon-container">
@@ -13,8 +13,8 @@
               <img src="/images/Booking/Vector.png" alt="arrow" class="arrow-img">
             </div>
           </div>
-        <h3 class="step-title">{{ step.title }}</h3>
-        <p class="step-description">{{ step.description }}</p>
+        <h3 class="step-title">{{ $t(step.title) }}</h3>
+        <p class="step-description">{{ $t(step.description) }}</p>
       </div>
     </div>
   </div>
@@ -29,23 +29,23 @@ export default {
       steps: [
         {
             src: '/images/Booking/booking1.png',
-            title: 'Booking Online',
-            description: 'Competently repurpose forward conveniently target fixed'
+            title: 'howStep1Title',
+            description: 'howStep1Desc'
         },
         {
           src: '/images/Booking/booking2.png',
-          title: 'Confirmation',
-          description: 'Competently repurpose forward conveniently target fixed'
+          title: 'howStep2Title',
+          description: 'howStep2Desc'
         },
         {
           src: '/images/Booking/Details.png',
-          title: 'Estimate Details',
-          description: 'Competently repurpose forward conveniently target fixed'
+          title: 'howStep3Title',
+          description: 'howStep3Desc'
         },
         {
           src: '/images/Booking/Completed.png',
-          title: 'Complete Works',
-          description: 'Competently repurpose forward conveniently target fixed'
+          title: 'howStep4Title',
+          description: 'howStep4Desc'
         }
       ]
     };

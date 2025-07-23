@@ -1,16 +1,16 @@
 <template>
   <section class="services-section">
     <div class="">
-    <h2 class="services-title">What Do You Need Fixed?</h2>
+    <h2 class="services-title">{{ $t('servicesSectionTitle') }}</h2>
     <hr class="services-divider" />
     <div class="services-grid">
       <div v-for="(service, idx) in services" :key="idx" class="service-card">
         <img :src="service.image" :alt="service.title" class="service-image" />
         <div class="service-content">
-          <h3 class="service-title">{{ service.title }}</h3>
-          <p class="service-desc">{{ service.desc }}</p>
+          <h3 class="service-title">{{ $t(service.title) }}</h3>
+          <p class="service-desc">{{ $t(service.desc) }}</p>
           <button class="service-btn">
-            Book Now
+            {{ $t('bookNow') }}
             <span class="arrow">→</span>
           </button>
         </div>
@@ -27,34 +27,34 @@ export default {
     return {
       services: [
         {
-          title: 'Plumbing',
+          title: 'plumbingServiceTitle',
           image: '/images/servicesImages/plumbing.png',
-          desc: 'While we can customize your cleaning plan to suit your needs, most clients schedule regular maintenance services:',
+          desc: 'plumbingServiceDesc',
         },
         {
-          title: 'Carpentry',
+          title: 'carpentryServiceTitle',
           image: '/images/servicesImages/Carpentry.png',
-          desc: 'While we can customize your cleaning plan to suit your needs, most clients schedule regular maintenance services:',
+          desc: 'carpentryServiceDesc',
         },
         {
-          title: 'Electricity',
+          title: 'electricityServiceTitle',
           image: '/images/servicesImages/Electrecity.png',
-          desc: 'While we can customize your cleaning plan to suit your needs, most clients schedule regular maintenance services:',
+          desc: 'electricityServiceDesc',
         },
         {
-          title: 'AC Technicians',
+          title: 'acTechniciansServiceTitle',
           image: '/images/servicesImages/Ac Technicions.png',
-          desc: 'While we can customize your cleaning plan to suit your needs, most clients schedule regular maintenance services:',
+          desc: 'acTechniciansServiceDesc',
         },
         {
-          title: 'Electrical Appliance Repair',
+          title: 'applianceRepairServiceTitle',
           image: '/images/servicesImages/electrical appliance repair.png',
-          desc: 'While we can customize your cleaning plan to suit your needs, most clients schedule regular maintenance services:',
+          desc: 'applianceRepairServiceDesc',
         },
         {
-          title: 'Wall finishing',
+          title: 'wallFinishingServiceTitle',
           image: '/images/servicesImages/wall finishing.png',
-          desc: 'While we can customize your cleaning plan to suit your needs, most clients schedule regular maintenance services:',
+          desc: 'wallFinishingServiceDesc',
         },
       ],
     };

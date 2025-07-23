@@ -1,7 +1,7 @@
 <template>
   <div class="services-header">
-    <h2 class="commitment-title">Our Commitment</h2>
-    <p class="commitment-description">We Treat Every Home Like it's Our Own</p>
+    <h2 class="features-title">{{ $t('servicesFeaturesTitle') }}</h2>
+    <p class="commitment-description">{{ $t('servicesCommitmentDescription') }}</p>
   </div>
   <section class="services-features">
     <div class="services-container">
@@ -9,10 +9,10 @@
         <div class="service-icon">
           <i :class="service.icon" style="color: var(--secondary-color); font-size: 3rem;"></i>
         </div>
-        <h3 class="service-title">{{ service.title }}</h3>
-        <p class="service-description">{{ service.description }}</p>
+        <h3 class="service-title">{{ $t(service.title) }}</h3>
+        <p class="service-description">{{ $t(service.description) }}</p>
         <button class="get-started-btn">
-          Get Started
+          {{ $t('getStartedButtonText') }}
           <i class="fas fa-arrow-right"></i>
         </button>
       </div>
@@ -28,23 +28,23 @@ export default {
       services: [
         {
           icon: 'fa-solid fa-wand-sparkles',
-          title: 'Clean Work, All Time',
-          description: 'We care about details. Expect a clean, neat, and professional service every single time.'
+          title: 'servicesFeature1Title',
+          description: 'servicesFeature1Desc'
         },
         {
           icon: 'fa-solid fa-clock',
-          title: 'Always On Time',
-          description: 'We respect your schedule — our technicians always arrive when expected.'
+          title: 'servicesFeature2Title',
+          description: 'servicesFeature2Desc'
         },
         {
           icon: 'fas fa-phone',
-          title: 'Easy Booking',
-          description: 'Book your service in just a few clicks with our user-friendly platform.'
+          title: 'servicesFeature3Title',
+          description: 'servicesFeature3Desc'
         },
         {
           icon: 'fas fa-award',
-          title: 'Trusted Professionals',
-          description: 'Verified, experienced technicians with real customer reviews and high ratings.'
+          title: 'servicesFeature4Title',
+          description: 'servicesFeature4Desc'
         }
       ]
     };
