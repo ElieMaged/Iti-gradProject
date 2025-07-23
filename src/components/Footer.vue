@@ -34,6 +34,7 @@
                 <router-link class="text-[#e6e3f8]" to="/plumbing">{{ $t('footerPlumbing') }}</router-link>
                 <router-link class="text-[#e6e3f8]" to="/aircondition">{{ $t('footerAirConditioner') }}</router-link>
                 <router-link class="text-[#e6e3f8]" to="/electricity">{{ $t('footerElectricity') }}</router-link>
+                <router-link class="text-[#e6e3f8]" to="/electechnicians">{{ $t('footerElecTechnicians') }}</router-link>
                 <router-link class="text-[#e6e3f8]" to="/wallfinishing">{{ $t('footerWallFinishing') }}</router-link>
                 <router-link class="text-[#e6e3f8]" to="/carpentry">{{ $t('footerCarpentry') }}</router-link>
             </div>

@@ -11,9 +11,9 @@
       <!-- Content Area -->
       <div class="content-area">
         <h1 class="page-title">
-            <span v-if="currentStatus === 'pending'">Pending Bookings</span>
-            <span v-else-if="currentStatus === 'upcoming'">Upcoming Bookings</span>
-            <span v-else-if="currentStatus === 'completed'">Completed Bookings</span>
+            <span v-if="currentStatus === 'pending'">{{ $t('pendingBookingsTitle') }}</span>
+            <span v-else-if="currentStatus === 'upcoming'">{{ $t('upcomingBookingsTitle') }}</span>
+            <span v-else-if="currentStatus === 'completed'">{{ $t('completedBookingsTitle') }}</span>
           </h1>
           <div class="bookings-grid">
             <div v-for="booking in filteredBookings" :key="booking.id" class="booking-card-standard">
@@ -32,34 +32,34 @@
                   </div>
                 </div>
                 <div v-if="currentStatus === 'pending'" class="booking-actions-standard">
-                  <button class="btn-confirm" @click="handleConfirm(booking)">Confirm</button>
-                  <button class="btn-cancel">Cancel</button>
+                  <button class="btn-confirm" @click="handleConfirm(booking)">{{ $t('confirmBooking') }}</button>
+                  <button class="btn-cancel">{{ $t('cancelBooking') }}</button>
                 </div>
                 <div v-else-if="currentStatus === 'upcoming'" class="booking-actions-standard">
-                  <button class="btn-confirmed">Confirmed</button>
-                  <button class="btn-cancel">Cancel</button>
+                  <button class="btn-confirmed">{{ $t('confirmedBooking') }}</button>
+                  <button class="btn-cancel">{{ $t('cancelBooking') }}</button>
                 </div>
                 <div v-else-if="currentStatus === 'completed'" class="booking-actions-standard">
-                  <span class="booking-completed">Completed</span>
+                  <span class="booking-completed">{{ $t('completedBooking') }}</span>
                 </div>
               </div>
               <div class="booking-user-note-row">
                 <div class="booking-user-note">
-                  <strong>User Note:</strong> {{ booking.userNote }}
+                  <strong>{{ $t('userNoteLabel') }}:</strong> {{ booking.userNote }}
                 </div>
-                <div v-if="currentStatus === 'completed'" class="booking-price">Price:250 EGP</div>
-                <div v-else class="booking-price" style="visibility: hidden;">Price:250 EGP</div>
+                <div v-if="currentStatus === 'completed'" class="booking-price">{{ $t('priceLabel') }}:250 EGP</div>
+                <div v-else class="booking-price" style="visibility: hidden;">{{ $t('priceLabel') }}:250 EGP</div>
               </div>
             </div>
           </div>
           <div class="pagination-row">
-            <button class="pagination-btn" :disabled="currentPage === 1">«</button>
-            <button class="pagination-btn" :class="{ active: currentPage === 1 }">1</button>
-            <button class="pagination-btn">2</button>
-            <button class="pagination-btn">3</button>
-            <span class="pagination-ellipsis">...</span>
-            <button class="pagination-btn">10</button>
-            <button class="pagination-btn">»</button>
+            <button class="pagination-btn" :disabled="currentPage === 1">{{ $t('previousPage') }}</button>
+            <button class="pagination-btn" :class="{ active: currentPage === 1 }">{{ $t('page1') }}</button>
+            <button class="pagination-btn">{{ $t('page2') }}</button>
+            <button class="pagination-btn">{{ $t('page3') }}</button>
+            <span class="pagination-ellipsis">{{ $t('ellipsis') }}</span>
+            <button class="pagination-btn">{{ $t('page10') }}</button>
+            <button class="pagination-btn">{{ $t('nextPage') }}</button>
           </div>
       </div>
     </div>

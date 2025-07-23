@@ -64,8 +64,8 @@
     <div class="flex-1 p-8">
       <div class="max-w-6xl mx-auto">
         <div class="mb-8">
-          <h1 class="text-3xl font-bold text-text-main mb-2">{{ $t('previousServices') }}</h1>
-          <p class="text-gray-600">{{ $t('reviewPastServices') }}</p>
+          <h1 class="text-3xl font-bold text-text-main mb-2">{{ $t('previousServicesTitle') }}</h1>
+          <p class="text-gray-600">{{ $t('previousServicesDescription') }}</p>
         </div>
         <!-- Service Cards -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
