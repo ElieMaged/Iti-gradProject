@@ -84,6 +84,9 @@ function goHome() {
   color: #a49ad6;
   font-weight: 600;
 }
+.dark .confirmation-steps {
+  color: var(--primary-text) !important;
+}
 .step {
   display: flex;
   align-items: center;
@@ -92,6 +95,9 @@ function goHome() {
 .step.active {
   color: #7c6bb1;
   font-weight: bold;
+}
+.dark .step.active {
+  color: var(--primary-text) !important;
 }
 .confirmation-main {
   display: flex;
@@ -114,6 +120,9 @@ function goHome() {
   margin-bottom: 0.5rem;
   text-align: center;
 }
+.dark .confirmation-desc {
+  color: var(--primary-text) !important;
+}
 .confirmation-next {
   color: #7c6bb1;
   font-size: 1.1rem;
@@ -131,10 +140,17 @@ function goHome() {
   color: #222;
   font-size: 1rem;
 }
+.dark .confirmation-summary {
+  background: var(--primary-bg) !important;
+  color: var(--primary-text) !important;
+}
 .summary-title {
   color: #7c6bb1;
   font-weight: bold;
   margin-bottom: 0.7rem;
+}
+.dark .summary-title {
+  color: var(--primary-text) !important;
 }
 .back-btn {
   background: #7c6bb1;
@@ -149,7 +165,23 @@ function goHome() {
   align-self: center;
   transition: background 0.2s;
 }
+.dark .back-btn {
+  background: var(--primary-color) !important;
+  color: var(--primary-text) !important;
+}
 .back-btn:hover {
   background: #4a3f7a;
+}
+.dark .back-btn:hover {
+  background: var(--primary-color) !important;
+}
+.dark .confirmation-wrapper {
+  background: var(--primary-bg) !important;
+}
+.dark .confirmation-title {
+  color: var(--primary-text) !important;
+}
+.dark .confirmation-card {
+  background: var(--secondary-bg) !important;
 }
 </style> 

@@ -2,6 +2,7 @@
 
 body {
   box-sizing: border-box;
+  
 }
 
 :root {
@@ -11,7 +12,7 @@ body {
   --secondary: #7c6bb0;
   --sidebar: #ede7f6;
   --text-main: #333333;
-  --text-muted: #aaaaaa;
+  --text-muted: #8C8E90;
   --input-bg: #f8f9fa;
   --input-border: #e0e0e0;
   --success: #22c55e;
@@ -28,9 +29,22 @@ body {
 
 }
 
-  --primary-bg: #181824;
-  --primary-text: #f1f1f1;
-  --secondary-bg: #303033;
+
+--primary-color: #625397;   
+--secondary-color: #ffd54f;
+--primary: #625498;
+--secondary: #FFC230;
+--sidebar: #232336;
+--text-main: #f1f1f1;
+--text-muted: #bdbdbd;
+--input-bg: #232336;
+--input-border: #44445a;
+--success: #22c55e;
+--danger: #ef4444;
+--completed: #bdbdbd;
+--primary-bg: #181824;
+--primary-text: #f1f1f1;
+--secondary-bg: #37373a;
 }
 
 
@@ -43,6 +57,7 @@ body {
 
 .no-underline {
   text-decoration: none;
+  color: var(--primary-text);
 }
 
 

@@ -38,6 +38,9 @@ export default {
   align-items: center;
   background-color: #F4F4F5;
 }
+.dark .trusted-section {
+  background-color: var(--text-color-text-primary, #66666b);
+}
 .trusted-header {
   padding-top: 40px;
   display: flex;
@@ -45,6 +48,9 @@ export default {
   width: 100%;
   max-width: 1100px;
   margin-bottom: 32px;
+}
+.dark .trusted-text {
+  color: var(--text-color-text-primary, #1F2021);
 }
 .trusted-line {
   flex: 1;

@@ -60,6 +60,7 @@ export default {
   border-radius: 16px;
 }
 
+
 .services-header {
   text-align: center;
   margin-bottom: 60px;
@@ -67,6 +68,10 @@ export default {
   color: #333;
   padding: 20px;
   margin-bottom: 0;
+}
+.dark .services-header {
+  background-color: var(--secondary-bg);
+  color: var(--primary-text);
 }
 
 .commitment-title {
@@ -77,6 +82,9 @@ export default {
   line-height: 76px;
   margin-bottom: 16px;
 }
+.dark .commitment-title {
+  color: var(--primary-text);
+}
 
 .commitment-description {
   font-family: Outfit, sans-serif;
@@ -85,6 +93,10 @@ export default {
   font-weight: 600;
   line-height: 24px;
 }
+.dark .commitment-description {
+  color: var(--text-muted);
+}
+
 
 .services-container {
   background: var(--primary-color);
@@ -106,6 +118,10 @@ export default {
   max-width: 280px;
   transition: transform 0.2s;
 }
+.dark .service-card {
+  background: var(--secondary-bg);
+}
+
 
 .service-card:hover {
   transform: translateY(-4px);
@@ -127,7 +143,9 @@ export default {
   margin-bottom: 16px;
   font-family: Outfit, sans-serif;
 }
-
+.dark .service-title {
+  color: var(--primary-text);
+}
 .service-description {
   font-size: 0.95rem;
   color: #666;
@@ -135,7 +153,9 @@ export default {
   margin-bottom: 24px;
   font-family: Outfit, sans-serif;
 }
-
+.dark .service-description {
+  color: var(--text-muted);
+}
 .get-started-btn {
   color: var(--primary-color);
   margin-left: 100px;
@@ -152,7 +172,9 @@ export default {
   transition: background 0.2s;
 
 }
-
+.dark .get-started-btn {
+  color: var(--primary-text);
+}
 .get-started-btn:hover {
   border: 1px solid var(--primary-color);
 }

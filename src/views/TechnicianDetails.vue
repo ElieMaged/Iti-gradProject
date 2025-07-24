@@ -1,8 +1,8 @@
 <template>
     <div>
-        <div class="max-w-4xl mx-auto px-4 py-10">
+        <div class="max-w-4xl mx-auto  px-4 py-10">
         <h1 class="text-3xl font-bold text-secondary mb-8 text-center">Complete Your Booking</h1>
-        <div class="bg-white rounded-2xl border border-gray-300 p-6 md:p-12 shadow-lg">
+        <div class="bg-white card rounded-2xl border border-gray-300 p-6 md:p-12 shadow-lg">
             <!-- Steps -->
             <div class="flex justify-between items-center mb-8">
                 <div class="flex-1 flex flex-col items-center">
@@ -182,11 +182,40 @@ export default {
 
 <style lang="scss" scoped>
 @import '../style.css';
+.dark-mode .step-active {
+  background-color: var(--primary-color);
+  color: #fff;
+}
+.dark-mode .step-inactive {
+  background-color: var(--primary-bg);
+  color: var(--primary-color);
+}
+.dark-mode .input-field {
+  background-color: var(--primary-bg);
+  color: var(--primary-text);
+}
+.dark-mode .input-field:focus {
+  border-color: var(--primary-color);
+}
+
+.dark-mode .btn-secondary:hover {
+  opacity: 0.9;
+}
+.dark-mode .step-active {
+  background-color: var(--secondary);
+  color: #fff;
+}
+.dark-mode .step-inactive {
+  background-color: var(--sidebar);
+  color: var(--secondary);
+}
+
 
 .step-active {
   background-color: var(--secondary);
   color: #fff;
 }
+
 .step-inactive {
   background-color: var(--sidebar);
   color: var(--secondary);
@@ -221,5 +250,30 @@ export default {
 .btn-secondary:hover {
     opacity: 0.9;
 }
-
+.bg-white {
+  background-color: var(--primary-bg);
+}
+.bg-gray-100 {
+  background-color: var(--primary-bg);
+}
+.bg-gray-200 {
+  background-color: var(--primary-bg);
+}
+.dark .bg-white {
+  background-color: var(--secondary-bg) !important;
+}
+.dark .bg-gray-100 {
+  background-color: var(--primary-bg);
+}
+.dark .bg-gray-200 {
+  background-color: var(--primary-bg);
+}
+.card {
+  background-color: var(--primary-bg);
+  color: var(--primary-text);
+}
+.dark .card {
+  background-color: var(--primary-bg);
+  color: var(--primary-text);
+}
 </style>

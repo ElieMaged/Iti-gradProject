@@ -11,14 +11,8 @@
           {{ $t('heroDescription') }}
         </p>
         <div class="mt-6 flex gap-4">
-        <button id="book-btn" class="bg-purple-700 text-white px-4 py-2 rounded-full">
-
-            {{ $t('heroBookBtn') }}
-        </button>
         <button id="service-btn" class="bg-purple-200 text-purple-900 px-4 py-2 rounded-full">
-            {{ $t('heroShowServicesBtn') }}
-          Show all services →
-
+            {{ $t('heroShowServicesBtn') }} →
         </button>
     </div>
     </div>
@@ -26,6 +20,7 @@
 </template>
 
 <script>
+import "../style.css"
     export default {
           methods:{
             goToServices(){
@@ -57,16 +52,26 @@ p {
     font-family: Outfit;
     font-style: normal;
 }
-#book-btn {
-    border-radius: 58px;
+
+#service-btn {
+  border-radius: 58px;
     border: 1px solid var(--border-border-brand, #625397);
     background: var(--surface-color-surface-brand, #625397);
-}
-#service-btn {
-    border-radius: 58px;
-    border: 1px solid var(--border-border-brand, #625397);
-    background: var(--surface-color-surface-clicked, #948AB8);
     color: white;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 24px;
+    font-family: Outfit, sans-serif;
+    font-style: normal;
+    padding: 10px 20px;
+}
+.dark #service-btn {
+  background: var(--surface-color-surface-brand, #625397);
+  color: var(--primary-text);
+}
+.dark #service-btn:hover {
+  background: var(--surface-color-surface-brand, #625397);
+  color: var(--text-muted, #8C8E90);
 }
 
 /* Responsive styles for tablet and mobile only */

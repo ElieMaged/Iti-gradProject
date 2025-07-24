@@ -17,4 +17,13 @@ export default {
   padding: 2rem;
   text-align: center;
 }
+.dark .test-page {
+  background-color: var(--primary-bg);
+}
+.dark .test-page p {
+  color: var(--primary-text);
+}
+.dark .test-page a {
+  color: var(--primary-text);
+}
 </style> 

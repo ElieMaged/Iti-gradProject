@@ -155,13 +155,19 @@ export default {
   margin-bottom: 12px;
   font-family: Outfit, sans-serif;
 }
-
+.dark .step-title {
+  color: var(--primary-text);
+}
+.dark .step-description {
+  color: var(--text-muted);
+}
 .step-description {
   font-size: 0.95rem;
   color: #8c8e90;
   line-height: 1.5;
   text-align: center;
 }
+
 
 /* Responsive design */
 @media (max-width: 1024px) {

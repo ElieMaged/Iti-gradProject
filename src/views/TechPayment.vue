@@ -70,6 +70,8 @@ export default {
   display: flex;
   min-height: 100vh;
 }
+
+
 .payment-content {
   flex: 1;
   padding: 32px 0 0 0;
@@ -79,6 +81,9 @@ export default {
   min-height: 100vh;
   padding: 32px 0 0 0;
 }
+.dark .payment-page {
+  background: var(--primary-bg);
+}
 .payment-title {
   color: #625397;
   font-size: 2rem;
@@ -86,6 +91,9 @@ export default {
   margin-bottom: 2rem;
   font-family: Outfit, sans-serif;
   margin-left: 48px;
+}
+.dark .payment-title {
+  color: var(--primary-text);
 }
 .payment-balance-card {
   background: #fff;
@@ -95,6 +103,10 @@ export default {
   margin: 0 0 32px 48px;
   max-width: 900px;
 }
+.dark .payment-balance-card {
+  background: var(--secondary-bg);
+  color: var(--primary-text) !important;
+}
 .balance-labels {
   display: flex;
   justify-content: space-between;
@@ -102,11 +114,17 @@ export default {
   font-weight: 600;
   margin-bottom: 8px;
 }
+.dark .balance-labels {
+  color: var(--primary-text) !important;
+}
 .current-balance-label {
   color: #625397;
   font-size: 2rem;
   font-weight: bold;
   padding-right: 20px;
+}
+.dark .current-balance-label {
+  color: var(--primary-text) !important;
 }
 .pending-label {
   color: #222;
@@ -114,14 +132,23 @@ export default {
   font-weight: bold;
   padding-right: 20px;
 }
+.dark .pending-label {
+  color: var(--primary-text) !important;
+}
 .balance-amounts {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
 }
+.dark .balance-amounts {
+  color: var(--primary-text) !important;
+}
 .current-balance-amount {
   font-size: 2rem;
   font-weight: bold;
+}
+.dark .current-balance-amount {
+  color: var(--primary-text) !important;
 }
 .pending-amount {
   font-size: 1.5rem;
@@ -130,6 +157,9 @@ export default {
   align-self: center;
   padding-right: 20px;
 }
+.dark .pending-amount {
+  color: var(--primary-text) !important;
+}
 .payment-method-card {
   background: #fff;
   border-radius: 18px;
@@ -137,6 +167,10 @@ export default {
   padding: 28px 40px 24px 40px;
   margin: 0 0 32px 48px;
   max-width: 900px;
+}
+.dark .payment-method-card {
+  background: var(--secondary-bg);
+  color: var(--primary-text) !important;
 }
 .payment-method-header {
   display: flex;
@@ -149,6 +183,9 @@ export default {
   font-weight: 700;
   color: #222;
 }
+.dark .payment-method-title {
+  color: var(--primary-text) !important;
+}
 .edit-btn {
   background: #948AB8;
   color: #fff;
@@ -160,6 +197,9 @@ export default {
   cursor: pointer;
   transition: background 0.2s;
 }
+.dark .edit-btn {
+  background: var(--primary-text) !important;
+}
 .edit-btn:hover {
   background: #625397;
 }
@@ -169,9 +209,15 @@ export default {
   font-size: 1.1rem;
   margin-bottom: 2px;
 }
+.dark .payment-method-type {
+  color: var(--primary-text) !important;
+}
 .payment-method-email {
   color: #222;
   font-size: 1.1rem;
+}
+.dark .payment-method-email {
+  color: var(--primary-text) !important;
 }
 .withdraw-card {
   background: #fff;
@@ -181,21 +227,34 @@ export default {
   margin: 0 0 32px 48px;
   max-width: 900px;
 }
+.dark .withdraw-card {
+  background: var(--secondary-bg);
+  color: var(--primary-text) !important;
+}
 .withdraw-title {
   font-size: 1.2rem;
   font-weight: 700;
   color: #222;
   margin-bottom: 18px;
 }
+.dark .withdraw-title {
+  color: var(--primary-text) !important;
+}
 .withdraw-form {
   display: flex;
   flex-direction: column;
   gap: 18px;
 }
+.dark .withdraw-form {
+  color: var(--primary-text) !important;
+}
 .withdraw-fields {
   display: flex;
   gap: 18px;
   margin-bottom: 10px;
+}
+.dark .withdraw-fields {
+  color: var(--primary-text) !important;
 }
 .withdraw-field {
   display: flex;
@@ -203,10 +262,16 @@ export default {
   gap: 6px;
   flex: 1;
 }
+.dark .withdraw-field {
+  color: var(--primary-text) !important;
+}
 .withdraw-field label {
   font-size: 1rem;
   color: #222;
   font-weight: 500;
+}
+.dark .withdraw-field label {
+  color: var(--primary-text) !important;
 }
 .withdraw-field input {
   border: none;
@@ -216,6 +281,9 @@ export default {
   font-size: 1rem;
   color: #222;
   outline: none;
+}
+.dark .withdraw-field input {
+  color: var(--primary-text) !important;
 }
 .withdraw-btn {
   background: #625397;
@@ -229,8 +297,14 @@ export default {
   align-self: flex-start;
   transition: background 0.2s;
 }
+.dark .withdraw-btn {
+  background: var(--primary-text) !important;
+}
 .withdraw-btn:hover {
   background: #948AB8;
+}
+.dark .withdraw-btn:hover {
+  background: var(--primary-text) !important;
 }
 @media (max-width: 900px) {
   .main-content {

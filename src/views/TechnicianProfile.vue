@@ -108,11 +108,54 @@ function goToBooking() {
   margin: 2rem 0 1rem 0;
   text-align: left;
 }
-.profile-title {
+.dark-mode .profile-title {
+  color: var(--primary-text);
+  background-color: var(--primary-bg);
+}
+.dark-mode .profile-card {
+  background-color: var(--primary-bg);
+  color: var(--primary-text);
+}
+.dark-mode .profile-main {
+  background-color: var(--primary-bg);
+  color: var(--primary-text);
+}
+.dark-mode .profile-booking {
+  background-color: var(--primary-bg);
+  color: var(--primary-text);
+}   
+.dark-mode .profile-reviews {
+  background-color: var(--primary-bg);
+  color: var(--primary-text);
+}
+.dark-mode .review-card {
+  background-color: var(--primary-bg);
+  color: var(--primary-text);
+}
+.dark-mode .profile-title {
   font-size: 2.2rem;
   font-weight: bold;
   color: #625397;
 }
+.dark-mode .profile-name {
+  color: var(--primary-text);
+}
+.dark-mode .profile-role {
+  color: var(--primary-text);
+}
+.dark-mode .profile-meta {
+  color: var(--primary-text);
+}
+.dark-mode .profile-rating {
+  color: var(--primary-text);
+}
+.dark-mode .profile-skills {
+  color: var(--primary-text);
+}
+.dark-mode .profile-skills ul {
+  color: var(--primary-text);
+}
+
 .profile-main {
   display: flex;
   gap: 2rem;

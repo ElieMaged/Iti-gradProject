@@ -18,7 +18,7 @@ import WelcomePage from '../views/WelcomePage.vue'
 import ProfileView from '../views/ProfileView.vue'
 import PreviousServices from '../views/PreviousServices.vue'
 import ProfileEdit from '../views/ProfileEdit.vue'
-import Payment from '../views/TechPayment.vue'
+import Payment from '../views/Payment.vue'
 import FAQ from '../components/FAQ.vue'
 import Profile from '../views/Profile.vue'
 import BookingPage from '../views/BookingPage.vue'
@@ -30,6 +30,7 @@ import TechnicianEditProfile from '../views/TechnichianEditProfile.vue'
 import PendingBookings from '../views/PendingBookings.vue'
 import RegisterChoice from '../views/RegisterChoice.vue'
 import TechnicianAvailability from '../views/TechnicianAvailbility.vue'
+import TechPayment from '../views/TechPayment.vue'
 
 
 const routes = [
@@ -63,6 +64,7 @@ const routes = [
   { path: '/technician/:id', name: 'TechnicianProfile', component: () => import('../views/TechnicianProfile.vue') },
   { path: '/bookingpage', component: BookingPage },
   { path: '/bookingconfirmation', component: BookingConfirmation },
+  { path: '/techpayment', component: TechPayment },
     
 ]
 

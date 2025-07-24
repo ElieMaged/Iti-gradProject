@@ -83,23 +83,34 @@ const handleRegister = async () => {
 body {
     background-color: #d3cfe2;
 }
+.dark body {
+  background-color: var(--primary-bg);
+}
 
  form {
     background-color: white;
     border-radius: 2rem;
  }
-
+ .dark form {
+  background-color: var(--secondary-bg);
+ }
  input {
     background-color: #EAEAEA;
     border-radius: 2rem;
  }
-
+ 
  .signup {
     color: #625397;
  }
-
+ .dark .signup {
+  color: var(--primary-color);
+ }
  button {
     background-color: #625397;
     border-radius: 2rem;
+ }
+ .dark button {
+  background-color: var(--primary-color);
+  color: var(--primary-text);
  }
 </style>

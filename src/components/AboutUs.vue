@@ -97,13 +97,16 @@ export default {
   max-width: 500px;
 }
 
-.about-title {
+.about-title {  
   font-size: 2.5rem;
   font-weight: 700;
   color: #333;
   line-height: 1.2;
   margin-bottom: 24px;
   font-family: Outfit, sans-serif;
+}
+.dark .about-title {
+  color: var(--primary-text);
 }
 
 .about-description {

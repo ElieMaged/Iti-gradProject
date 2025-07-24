@@ -197,4 +197,39 @@ function cancelPaypal() {
 .text-muted {
   color: #aaaaaa;
 }
+.dark .bg-primary {
+  background-color: var(--primary-color) !important;
+}
+.dark .bg-secondary {
+  background-color: var(--secondary-color) !important;
+}
+.dark .bg-sidebar {
+  background-color: var(--sidebar) !important;
+}
+.dark .text-primary {
+  color: var(--primary-color) !important;
+}
+.dark .text-secondary {
+  color: var(--secondary-color) !important;
+}
+.dark .text-text-main {
+  color: var(--primary-text) !important;
+}
+.dark .text-muted {
+  color: var(--primary-text) !important;
+}
+.dark .transaction-card {
+  background-color: var(--secondary-bg) !important;
+}
+
+.dark .sidebar-item {
+  background-color: var(--sidebar) !important;
+}
+.dark .sidebar-item:hover {
+  background-color: var(--primary-color) !important;
+}
+.dark .sidebar-item.active {
+  background-color: var(--primary-color) !important;
+}
+
 </style> 

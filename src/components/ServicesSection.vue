@@ -140,6 +140,9 @@ export default {
 .service-card:hover {
   transform: translateY(-2px);
 }
+.dark .service-card:hover {
+  transform: translateY(-2px);
+}
 .service-image {
   width: 100%;
   height: 180px;
@@ -163,6 +166,9 @@ export default {
   margin-bottom: 18px;
   flex: 1;
 }
+.dark .service-desc {
+  color: var(--text-muted);
+}
 .service-btn {
   background: #625397;
   color: #fff;
@@ -179,8 +185,16 @@ export default {
   max-width: 120px;
   transition: background 0.2s;
 }
+.dark .service-btn {
+  background: var(--primary-color);
+  color: var(--primary-text);
+}
 .service-btn:hover {
   background: #4e3b7a;
+}
+.dark .service-btn:hover {
+  background: var(--primary-color);
+  color: var(--primary-text);
 }
 .arrow {
   

@@ -96,7 +96,10 @@ export default {
   padding: 80px 0;
   width: 100%;
 }
-
+.dark .faq {
+  background: var(--secondary-bg);
+  color: var(--primary-text);
+}
 .faq-content {
   width: 90%;
   max-width: 1200px;
@@ -117,7 +120,9 @@ export default {
   max-width: 300px;
   flex: 0 1 auto;
 }
-
+.dark .faq-title-box {
+  color: var(--primary-text);
+}
 .faq-intro {
   margin-left: auto;
   border-radius: 8px;
@@ -135,7 +140,9 @@ export default {
   font-weight: 400;
   line-height: 24px; 
 }
-
+.dark .faq-intro p {
+  color: var(--text-muted);
+}
 .faq-container {
   width: 90%;
   max-width: 1200px;
@@ -180,27 +187,42 @@ export default {
   cursor: pointer;
   transition: all 0.3s ease;
 }
-
+.dark .faq-item {
+  background: var(--secondary-bg);
+  color: var(--primary-text);
+}
 .faq-item.active {
   background: #625397;
 }
-
+.dark .faq-item.active {
+  background: var(--primary-color);
+  color: var(--primary-text);
+}
 .faq-item.active .question-text {
   color: #fff;
 }
-
+.dark .faq-item.active .question-text {
+  color: var(--primary-text);
+}
 .faq-item.active .faq-icon {
   background: var(--primary-color);
   color: white;
   border: 1px solid white;
 }
-
+.dark .faq-item.active .faq-icon {
+  background: var(--primary-color);
+  color: var(--primary-text);
+  border: 1px solid var(--primary-text);
+}
 .faq-question {
   padding: 20px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 16px;
+}
+.dark .faq-question {
+  color: var(--primary-text);
 }
 
 .question-text {
@@ -211,7 +233,12 @@ export default {
   font-family: Outfit, sans-serif;
   flex: 1;
 }
-
+.dark .question-text {
+  color: var(--primary-text);
+}
+.dark .faq-answer {
+  color: var(--text-muted);
+}
 .faq-icon {
   width: 32px;
   height: 32px;
@@ -236,11 +263,15 @@ export default {
   line-height: 1.6;
   font-family: Outfit, sans-serif;
 }
-
+.dark .faq-item:not(.active) .faq-answer {
+  color: var(--text-muted);
+}
 .faq-item:not(.active) .faq-answer {
   color: var(--primary-color);
 }
-
+.dark .faq-item:not(.active) .faq-answer {
+  color: var(--primary-text);
+}
 /* Responsive design */
 @media (min-width: 769px) {
   .faq-container {

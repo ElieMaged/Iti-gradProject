@@ -150,7 +150,9 @@ export default {
   line-height: 1.2;
   font-family: Outfit, sans-serif;
 }
-
+.dark .team-title {
+  color: var(--primary-text);
+}
 .team-subtitle-section {
   flex: 1;
   max-width: 400px;
@@ -163,20 +165,34 @@ export default {
   margin-bottom: 16px;
   font-family: Outfit, sans-serif;
 }
-
+.dark .team-subtitle {
+  color: var(--primary-text);
+}
 .team-description {
   font-size: 1rem;
   color: #8c8e90;
   line-height: 1.6;
   font-family: Outfit, sans-serif;
 }
-
+.dark .team-description {
+  color: var(--text-muted);
+}
 .team-cards {
   display: flex;
   gap: 20px;
   justify-content: center;
   width: 100%;
 }
+.dark .member-name {
+  color: var(--primary-text);
+}
+.dark .member-description {
+  color: var(--text-muted);
+}
+.dark .member-rating i {
+  color: var(--primary-color);
+}
+
 
 
 .team-card {
@@ -186,6 +202,10 @@ export default {
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(98, 83, 151, 0.1);
   transition: transform 0.2s;
+  border: 1px solid var(--primary-color);
+}
+.dark .team-card {
+  background: var(--secondary-bg);
   border: 1px solid var(--primary-color);
 }
 

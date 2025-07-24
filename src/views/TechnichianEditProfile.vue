@@ -210,22 +210,31 @@
 </script>
 
 <style lang="scss" scoped>
-     .input-field {
-            background-color: white;
-            border: 1px solid #e0e0e0;
-            color: #333333;
-            transition: all 0.2s ease;
-        }
-        .input-field:focus {
-            outline: none;
-            border-color: #7c6bb0;
-            box-shadow: 0 0 0 2px rgba(124, 107, 176, 0.2);
-        }
-        .input-field:disabled {
-            background-color: #f5f5f5;
-            color: #666666;
-            cursor: not-allowed;
-        }
+@import '../style.css';
+
+.input-field {
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    color: #333333;
+    transition: all 0.2s ease;
+}
+.input-field:focus {
+    outline: none;
+    border-color: #7c6bb0;
+    box-shadow: 0 0 0 2px rgba(124, 107, 176, 0.2);
+}
+.input-field:disabled {
+    background-color: #f5f5f5;
+    color: #666666;
+    cursor: not-allowed;
+}
+.bg-white {
+  background-color: var(--primary-bg) !important;
+}
+.dark-mode .bg-white {
+  background-color: var(--secondary-bg) !important;
+}
+
         
 /* Responsive styles for full page (sidebar + main content) */
 @media (max-width: 900px) {

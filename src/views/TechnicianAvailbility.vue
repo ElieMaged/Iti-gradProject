@@ -125,21 +125,39 @@ export default {
 
 <style lang="scss" scoped>
 .input-field {
-            background-color: white;
-            border: 1px solid #e0e0e0;
-            color: #333333;
-            transition: all 0.2s ease;
-        }
-        .input-field:focus {
-            outline: none;
-            border-color: #7c6bb0;
-            box-shadow: 0 0 0 2px rgba(124, 107, 176, 0.2);
-        }
-        .input-field:disabled {
-            background-color: #f5f5f5;
-            color: #666666;
-            cursor: not-allowed;
-        }
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    color: #333333;
+    transition: all 0.2s ease;
+}
+.dark-mode .input-field {
+  background-color: var(--primary-bg);
+  color: var(--primary-text);
+}
+.input-field:focus {
+    outline: none;
+    border-color: #7c6bb0;
+    box-shadow: 0 0 0 2px rgba(124, 107, 176, 0.2);
+}
+.dark-mode .input-field:focus {
+  border-color: var(--primary-color);
+}
+.input-field:disabled {
+    background-color: #f5f5f5;
+    color: #666666;
+    cursor: not-allowed;
+}
+.dark-mode .input-field:disabled {
+  background-color: var(--primary-bg);
+  color: var(--primary-text);
+}
+.bg-gray-100 {
+  background-color: var(--primary-bg);
+}
+.dark-mode .bg-gray-100 {
+  background-color: var(--secondary-bg);
+}
+
 @media (max-width: 900px) {
   .flex {
     flex-direction: column !important;
@@ -198,6 +216,7 @@ export default {
   .bg-secondary.bg-opacity-20.rounded-2xl.p-8.max-w-4xl.mx-auto {
     padding: 0.5rem !important;
   }
+  
   .text-2xl {
     font-size: 1rem !important;
   }

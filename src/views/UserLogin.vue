@@ -111,27 +111,41 @@ const handleGoogleSignIn = async () => {
 body {
     background-color: #d3cfe2;
 }
+.dark body {
+  background-color: var(--primary-bg);
+}
 
  form {
     background-color: white;
     border-radius: 2rem;
+ }
+ .dark form {
+  background-color: var(--secondary-bg);
  }
 
  input {
     background-color: #EAEAEA;
     border-radius: 2rem;
  }
+ .dark input {
+  background-color: var(--secondary-bg);
+ }
 
  .signup {
     color: #625397;
  }
-
+ .dark .signup {
+  color: var(--primary-color);
+ }  
  button {
     background-color: #625397;
     border-radius: 2rem;
     border: black solid .1rem;
  }
-
+ .dark button {
+  background-color: var(--primary-color);
+  color: var(--primary-text);
+ }
  .standing {
     width: 100%;
  }
@@ -139,7 +153,9 @@ body {
  .brand {
     color: #625397;
  }
-
+ .dark .brand {
+  color: var(--primary-color);
+ }
  .google {
     background-color: white;
   }

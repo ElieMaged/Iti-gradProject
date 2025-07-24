@@ -72,14 +72,18 @@ function handleFileChange(event) {
   justify-content: center;
   padding: 2rem;
 }
-
+.dark .welcome-page {
+  background-color: var(--primary-bg);
+}
 .welcome-container {
   max-width: 1200px;
   width: 100%;
   text-align: center;
   background-color: #D3cfe2;
 }
-
+.dark .welcome-container {
+  background-color: var(--primary-bg);
+}
 .welcome-header {
   margin-bottom: 4rem;
 }
@@ -90,13 +94,17 @@ function handleFileChange(event) {
   color: #6B4FA1;
   margin-bottom: 1rem;
 }
-
+.dark .welcome-title {
+  color: var(--primary-text);
+}
 .welcome-subtitle {
   font-size: 1.25rem;
   color: #6b7280;
   margin: 0;
 }
-
+.dark .welcome-subtitle {
+  color: var(--primary-text);
+}
 .cards-container {
   display: flex;
   gap: 3rem;
@@ -114,32 +122,44 @@ function handleFileChange(event) {
   text-align: center;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-
+.dark .role-card {
+  background-color: var(--secondary-bg);
+  color: var(--primary-text);
+}
 .role-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
-
+.dark .role-card:hover {
+  background-color: var(--secondary-bg);
+  color: var(--primary-text);
+}
 .card-icon {
   font-size: 3rem;
   color: #6B4FA1;
   margin-bottom: 1.5rem;
 }
-
+.dark .card-icon {
+  color: var(--primary-text);
+}
 .card-title {
   font-size: 1.5rem;
   font-weight: bold;
   color: #6B4FA1;
   margin-bottom: 1rem;
 }
-
+.dark .card-title {
+  color: var(--primary-text);
+}
 .card-description {
   color: #6b7280;
   line-height: 1.6;
   margin-bottom: 2rem;
   font-size: 1rem;
 }
-
+.dark .card-description {
+  color: var(--primary-text);
+}
 .get-started-btn {
   background: none;
   border: none;
@@ -153,17 +173,27 @@ function handleFileChange(event) {
   margin-left: auto;
   transition: color 0.3s ease;
 }
-
+.dark .get-started-btn {
+  color: var(--primary-text);
+}
 .get-started-btn:hover {
   color: #5a3e8b;
 }
-
+.dark .get-started-btn:hover {
+  color: var(--primary-text);
+}
 .get-started-btn i {
   transition: transform 0.3s ease;
+}
+.dark .get-started-btn i {
+  color: var(--primary-text);
 }
 
 .get-started-btn:hover i {
   transform: translateX(5px);
+}
+.dark .get-started-btn:hover i {
+  color: var(--primary-text);
 }
 
 /* Responsive Design */

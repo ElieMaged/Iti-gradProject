@@ -11,8 +11,8 @@
         />
 
         <div class="flex-1 p-8">
-            <div class="max-w-4xl mx-auto">
-                <div class="bg-white rounded-xl shadow-lg p-8">
+            <div class="max-w-4xl bg-white mx-auto">
+                <div class=" rounded-xl shadow-lg p-8">
                     <h2 class="text-2xl font-bold text-secondary mb-6">Personal Information</h2>
                     <div class="flex flex-col md:flex-row gap-8 items-start">
                         <!-- Info -->
@@ -98,6 +98,25 @@ import Sidebar from '../components/Sidebar.vue';
 </script>
 
 <style lang="scss" scoped>
+.bg-gray-50 {
+  background: var(--primary-bg) !important;
+}
+.dark .bg-gray-50 {
+  background: var(--primary-bg) !important;
+}
+.bg-white {
+  background: var(--secondary-bg) !important;
+}
+.dark .bg-white {
+  background: var(--secondary-bg) !important;
+}
+.text-gray-700  {
+  color: var(--primary-text) !important;
+}
+.dark .text-gray-700 {
+  color: var(--primary-text) !important;
+}
+
 @media (max-width: 900px) {
   .flex {
     flex-direction: column !important;
@@ -119,6 +138,11 @@ import Sidebar from '../components/Sidebar.vue';
   }
   .bg-white.rounded-xl.shadow-lg.p-8 {
     padding: 1.5rem !important;
+  }
+
+  .dark .bg-white.rounded-xl.shadow-lg.p-8 {
+    background: var(--secondary-bg) !important;
+    color: var(--primary-text) !important;
   }
   .w-40.h-40 {
     width: 120px !important;

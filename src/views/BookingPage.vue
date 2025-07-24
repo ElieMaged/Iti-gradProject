@@ -127,6 +127,9 @@ function confirmBooking() {
   min-height: 100vh;
   padding: 2rem 0 4rem 0;
 }
+.dark .booking-wrapper {
+  background: var(--primary-bg) !important;
+}
 .booking-title {
   text-align: center;
   color: #7c6bb1;
@@ -134,6 +137,10 @@ function confirmBooking() {
   font-weight: bold;
   margin-bottom: 2rem;
 }
+.dark .booking-title {
+  color: var(--primary-text) !important;
+}
+
 .booking-card {
   background: #fff;
   border-radius: 18px;
@@ -141,6 +148,10 @@ function confirmBooking() {
   max-width: 800px;
   margin: 0 auto;
   padding: 2.5rem 2rem;
+}
+.dark .booking-card {
+  background: var(--secondary-bg) !important;
+  color: var(--primary-text) !important;
 }
 .booking-steps {
   display: flex;
@@ -150,6 +161,9 @@ function confirmBooking() {
   color: #a49ad6;
   font-weight: 600;
 }
+.dark .booking-steps {
+  color: var(--primary-text) !important;
+}
 .step {
   display: flex;
   align-items: center;
@@ -158,6 +172,9 @@ function confirmBooking() {
 .step.active {
   color: #7c6bb1;
   font-weight: bold;
+}
+.dark .step.active {
+  color: var(--primary-text) !important;
 }
 .booking-main {
   display: flex;
@@ -170,6 +187,9 @@ function confirmBooking() {
   align-items: center;
   justify-content: flex-start;
   gap: 0.5rem;
+}
+.dark .booking-profile {
+  background: var(--secondary-bg) !important;
 }
 .profile-img {
   width: 80px;
@@ -190,12 +210,19 @@ function confirmBooking() {
   color: #625397;
   font-weight: 600;
 }
+.dark .profile-role {
+  color: var(--primary-text) !important;
+}
 .booking-form {
   flex: 3;
   display: flex;
   flex-wrap: wrap;
   gap: 1.5rem;
   align-items: flex-start;
+}
+.dark .booking-form {
+  background: var(--secondary-bg) !important;
+  color: var(--primary-text) !important;
 }
 .form-section {
   flex: 1 1 220px;
@@ -210,6 +237,10 @@ input, select {
   padding: 0.5rem 1rem;
   font-size: 1rem;
   margin-bottom: 0.5rem;
+}
+.dark input, select {
+  border: 1px solid var(--primary-bg) !important;
+  color: var(--primary-text) !important;
 }
 .payment-methods {
   display: flex;
@@ -235,7 +266,14 @@ input, select {
   align-self: flex-end;
   transition: background 0.2s;
 }
+.dark .confirm-btn {
+  background: var(--primary-color) !important;
+  color: var(--primary-text) !important;
+}
 .confirm-btn:hover {
   background: #4a3f7a;
+}
+.dark .confirm-btn:hover {
+  background: var(--primary-color) !important;
 }
 </style> 

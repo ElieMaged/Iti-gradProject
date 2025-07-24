@@ -174,7 +174,9 @@ const heroBackgroundStyle = computed(() => {
 .plumbing-page {
   width: 100%;
 }
-
+.dark .hero-section {
+  background-color: var(--primary-bg);
+}
 /* Hero Section */
 .hero-section {
   position: relative;
@@ -186,7 +188,9 @@ const heroBackgroundStyle = computed(() => {
   justify-content: center;
   text-align: center;
 }
-
+.dark .hero-content {
+  color: var(--primary-text);
+}
 .hero-content {
   color: white;
 }
@@ -197,7 +201,9 @@ const heroBackgroundStyle = computed(() => {
   margin-bottom: 1rem;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
-
+.dark .hero-title {
+  color: var(--primary-text);
+}
 .breadcrumbs {
   font-size: 1.1rem;
   opacity: 0.9;
@@ -213,25 +219,33 @@ const heroBackgroundStyle = computed(() => {
   padding: 4rem 0;
   background-color: #f8f9fa;
 }
-
+.dark .technicians-section {
+  background-color: var(--primary-bg);
+}
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 2rem;
 }
-
+.dark .container {
+  background-color: var(--primary-bg);
+}
 .section-header {
   text-align: center;
   margin-bottom: 3rem;
 }
-
+.dark .section-header {
+  color: var(--primary-text);
+}
 .section-title {
   font-size: 2.5rem;
   font-weight: bold;
   color: #333;
   margin-bottom: 1rem;
 }
-
+.dark .section-title {
+  color: var(--primary-text);
+}
 .section-description {
   font-size: 1.1rem;
   color: #666;
@@ -239,7 +253,9 @@ const heroBackgroundStyle = computed(() => {
   margin: 0 auto;
   line-height: 1.6;
 }
-
+.dark .section-description {
+  color: var(--primary-text);
+}
 .technicians-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -248,7 +264,9 @@ const heroBackgroundStyle = computed(() => {
   grid-auto-rows: 1fr;
   justify-items: center;
 }
-
+.dark .technicians-grid {
+  background-color: var(--primary-bg);
+}
 .technician-card {
   background: white;
   border-radius: 12px;
@@ -261,7 +279,10 @@ const heroBackgroundStyle = computed(() => {
   display: flex;
   flex-direction: column;
 }
-
+.dark .technician-card {
+  background-color: var(--secondary-bg);
+  color: var(--primary-text);
+}
 .technician-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
@@ -273,14 +294,20 @@ const heroBackgroundStyle = computed(() => {
   align-items: center;
   justify-content: center;
 }
-
+.dark .technician-image {
+  background-color: var(--secondary-bg);
+  color: var(--primary-text);
+}
 .technician-image img {
   width: 100%;
   height: 100%;
   border-radius: 8px;
   object-fit: cover;
 }
-
+.dark .technician-image img {
+  background-color: var(--secondary-bg);
+  color: var(--primary-text);
+}
 .technician-info {
   padding: 1.5rem;
 }
@@ -291,23 +318,31 @@ const heroBackgroundStyle = computed(() => {
   color: #333;
   margin-bottom: 0.5rem;
 }
-
+.dark .technician-name {
+  color: var(--primary-text);
+}
 .rating {
   margin-bottom: 1rem;
 }
-
+.dark .rating {
+  color: var(--primary-text);
+}
 .rating i {
   color: #FFC230;
   margin-right: 0.2rem;
 }
-
+.dark .rating i {
+  color: var(--primary-text);
+}
 .technician-description {
   color: #666;
   font-size: 0.95rem;
   line-height: 1.5;
   margin-bottom: 1.5rem;
 }
-
+.dark .technician-description {
+  color: var(--primary-text);
+}
 .view-profile-btn {
   background-color: var(--primary-color);
   color: white;
@@ -319,7 +354,10 @@ const heroBackgroundStyle = computed(() => {
   transition: background-color 0.3s ease;
   width: 100%;
 }
-
+.dark .view-profile-btn {
+  background-color: var(--primary-color);
+  color: var(--primary-text);
+}
 .view-profile-btn:hover {
   background-color: #4a3f7a;
 }
@@ -330,6 +368,9 @@ const heroBackgroundStyle = computed(() => {
   justify-content: center;
   align-items: center;
   gap: 0.5rem;
+}
+.dark .pagination {
+  color: var(--primary-text);
 }
 
 .pagination-btn {
@@ -345,23 +386,34 @@ const heroBackgroundStyle = computed(() => {
   transition: all 0.3s ease;
   font-weight: 600;
 }
-
+.dark .pagination-btn {
+  background-color: var(--primary-color);
+  color: var(--primary-text);
+}
 .pagination-btn:hover {
   border-color: var(--primary-color);
   color: var(--primary-color);
 }
-
+.dark .pagination-btn:hover {
+  background-color: var(--primary-color);
+  color: var(--primary-text);
+}
 .pagination-btn.active {
   background-color: var(--primary-color);
   color: white;
   border-color: var(--primary-color);
 }
-
+.dark .pagination-btn.active {
+  background-color: var(--primary-color);
+  color: var(--primary-text);
+}
 .pagination-dots {
   color: #666;
   font-weight: bold;
 }
-
+.dark .pagination-dots {
+  color: var(--primary-text);
+}
 /* Call to Action Section */
 .cta-section {
   position: relative;
@@ -373,27 +425,35 @@ const heroBackgroundStyle = computed(() => {
   justify-content: center;
   text-align: center;
 }
-
+.dark .cta-section {
+  background-color: var(--primary-bg);
+}
 .cta-content {
   color: white;
   max-width: 600px;
   padding: 0 2rem;
 }
-
+.dark .cta-content {
+  color: var(--primary-text);
+}
 .cta-title {
   font-size: 3rem;
   font-weight: bold;
   margin-bottom: 1rem;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
-
+.dark .cta-title {
+  color: var(--primary-text);
+}
 .cta-description {
   font-size: 1.2rem;
   margin-bottom: 2rem;
   line-height: 1.6;
   opacity: 0.9;
 }
-
+.dark .cta-description {
+  color: var(--primary-text);
+}
 .cta-btn {
   background-color: var(--primary-color);
   color: white;
@@ -408,19 +468,29 @@ const heroBackgroundStyle = computed(() => {
   align-items: center;
   gap: 0.5rem;
 }
-
+.dark .cta-btn {
+  background-color: var(--primary-color);
+  color: var(--primary-text);
+}
 .cta-btn:hover {
   background-color: #4a3f7a;
 }
-
+.dark .cta-btn:hover {
+  background-color: var(--primary-color);
+  color: var(--primary-text);
+}     
 .cta-btn i {
   transition: transform 0.3s ease;
 }
-
+.dark .cta-btn i {
+  color: var(--primary-text);
+} 
 .cta-btn:hover i {
   transform: translateX(5px);
 }
-
+.dark .cta-btn:hover i {
+  color: var(--primary-text);
+}
 /* Responsive Design */
 @media (max-width: 768px) {
   .hero-title {

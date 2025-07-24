@@ -3,76 +3,71 @@
 </script>
 
 <template>
-    <footer class="flex flex-col justify-between bg-[#625397] p-6 mt-1 rounded text-white">
-        <div class="flex flex-col md:flex-row justify-between gap-8">
-            <!-- quick info -->
-            <div class="flex flex-col mb-6 md:mb-0">
-                <img class="w-20 pb-2" src="../assets/Logo.png" alt="BoltFix logo">
-                <p class="text-left w-60">{{ $t('footerQuickInfo') }}</p>
-                <p class="text-2xl font-bold mt-4">{{ $t('footerSocialLinks') }}</p>
-                <div class="flex gap-3 mt-2">
-                    <a href="https://www.facebook.com/" target="_blank" aria-label="Facebook"><i class="fa-brands fa-facebook"></i></a>
-                    <a href="https://twitter.com/" target="_blank" aria-label="Twitter"><i class="fa-brands fa-twitter"></i></a>
-                    <a href="https://www.instagram.com/" target="_blank" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-                    <a href="https://www.linkedin.com/" target="_blank" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
-                </div>
-            </div>
-
-            <!-- quick links -->
-            <div class="flex flex-col mb-6 md:mb-0">
-                <p class="text-2xl font-bold mb-2">{{ $t('footerQuickLink') }}</p>
-                <router-link to="/">{{ $t('footerHome') }}</router-link>
-                <router-link to="/about">{{ $t('footerAboutUs') }}</router-link>
-                <router-link to="/services">{{ $t('footerServices') }}</router-link>
-                <router-link to="/contact">{{ $t('footerContactUs') }}</router-link>
-                <router-link to="/faqs">{{ $t('footerFaqs') }}</router-link>
-            </div>
-
-            <!-- services -->
-            <div class="flex flex-col mb-6 md:mb-0">
-                <p class="text-2xl font-bold mb-2">{{ $t('footerService') }}</p>
-                <router-link class="text-[#e6e3f8]" to="/plumbing">{{ $t('footerPlumbing') }}</router-link>
-                <router-link class="text-[#e6e3f8]" to="/aircondition">{{ $t('footerAirConditioner') }}</router-link>
-                <router-link class="text-[#e6e3f8]" to="/electricity">{{ $t('footerElectricity') }}</router-link>
-                <router-link class="text-[#e6e3f8]" to="/electechnicians">{{ $t('footerElecTechnicians') }}</router-link>
-                <router-link class="text-[#e6e3f8]" to="/wallfinishing">{{ $t('footerWallFinishing') }}</router-link>
-                <router-link class="text-[#e6e3f8]" to="/carpentry">{{ $t('footerCarpentry') }}</router-link>
-            </div>
-
-            <!-- contact us -->
-            <div class="flex flex-col gap-2">
-                <p class="text-2xl font-bold mb-2">{{ $t('footerContactUs') }}</p>
-                <div class="flex items-center gap-3">
-                    <i class="fa-solid fa-phone text-[#c3b0f4] text-base text-center"></i>
-                    <span class="text-[#e6e3f8]">{{ $t('footerPhone') }}</span>
-                </div>
-                <div class="flex items-center gap-3">
-                    <i class="fa-solid fa-envelope text-[#c3b0f4] text-base text-center"></i>
-                    <span class="text-[#e6e3f8]">{{ $t('footerEmail') }}</span>
-                </div>
-                <div class="flex items-center gap-3">
-                    <i class="fa-solid fa-location-dot text-[#c3b0f4] text-base text-center"></i>
-                    <span class="text-[#e6e3f8]">{{ $t('footerAddress') }}</span>
-                </div>
-            </div>
+  <footer class="footer">
+    <div class="footer__main">
+      <!-- Quick Info -->
+      <div class="footer__col footer__col--desc">
+        <div class="footer__logo-row">
+          <img class="footer__logo" src="../assets/Logo.png" alt="BoltFix logo">
         </div>
-        <div class="footer__bottom">
-          <hr class="footer__divider" />
-          <div class="footer__bottom-row">
-            <span>{{ $t('footerCopyright') }}</span>
-            <div class="footer__bottom-links">
-              <a href="#">{{ $t('footerPrivacyPolicy') }}</a>
-              <span class="footer__bottom-sep">|</span>
-              <a href="#">{{ $t('footerTermsOfService') }}</a>
-            </div>
-          </div>
+        <p class="footer__desc">{{ $t('footerQuickInfo') }}</p>
+        <div class="footer__social-label">{{ $t('footerSocialLinks') }}</div>
+        <div class="footer__social-row">
+          <a href="https://www.facebook.com/" target="_blank" aria-label="Facebook" class="footer__social-icon"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="https://twitter.com/" target="_blank" aria-label="X" class="footer__social-icon"><i class="fa-brands fa-x-twitter"></i></a>
+          <a href="https://www.linkedin.com/" target="_blank" aria-label="LinkedIn" class="footer__social-icon"><i class="fa-brands fa-linkedin-in"></i></a>
+          <a href="https://www.youtube.com/" target="_blank" aria-label="YouTube" class="footer__social-icon"><i class="fa-brands fa-youtube"></i></a>
         </div>
-    </footer>
+      </div>
+      <!-- Quick Links -->
+      <div class="footer__col">
+        <div class="footer__col-title">{{ $t('footerQuickLink') }}</div>
+        <ul class="footer__list">
+          <li><router-link to="/">{{ $t('footerHome') }}</router-link></li>
+          <li><router-link to="/about">{{ $t('footerAboutUs') }}</router-link></li>
+          <li><router-link to="/services">{{ $t('footerServices') }}</router-link></li>
+          <li><router-link to="/contact">{{ $t('footerContactUs') }}</router-link></li>
+          <li><router-link to="/faqs">{{ $t('footerFaqs') }}</router-link></li>
+        </ul>
+      </div>
+      <!-- Services -->
+      <div class="footer__col">
+        <div class="footer__col-title">{{ $t('footerService') }}</div>
+        <ul class="footer__list">
+          <li><router-link to="/plumbing">{{ $t('footerPlumbing') }}</router-link></li>
+          <li><router-link to="/aircondition">{{ $t('footerAirConditioner') }}</router-link></li>
+          <li><router-link to="/electricity">{{ $t('footerElectricity') }}</router-link></li>
+          <li><router-link to="/wallfinishing">{{ $t('footerWallFinishing') }}</router-link></li>
+          <li><router-link to="/carpentry">{{ $t('footerCarpentry') }}</router-link></li>
+        </ul>
+      </div>
+      <!-- Contact Us -->
+      <div class="footer__col footer__col--contact">
+        <div class="footer__col-title">{{ $t('footerContactUs') }}</div>
+        <ul class="footer__contact-list">
+          <li><i class="fa-solid fa-phone footer__contact-icon"></i><span>{{ $t('footerPhone') }}</span></li>
+          <li><i class="fa-solid fa-envelope footer__contact-icon"></i><span>{{ $t('footerEmail') }}</span></li>
+          <li><i class="fa-solid fa-location-dot footer__contact-icon"></i><span>{{ $t('footerAddress') }}</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <hr class="footer__divider" />
+      <div class="footer__bottom-row">
+        <span>{{ $t('footerCopyright') }}</span>
+        <div class="footer__bottom-links">
+          <a href="#">{{ $t('footerPrivacyPolicy') }}</a>
+          <span class="footer__bottom-sep">|</span>
+          <a href="#">{{ $t('footerTermsOfService') }}</a>
+        </div>
+      </div>
+    </div>
+  </footer>
 </template>
 
 <style lang="scss" scoped>
 .footer {
-  background: var(--primary-color);
+  background: #6B5FA7;
   color: #fff;
   border-radius: 20px 20px 0 0;
   font-family: 'Nunito', Arial, sans-serif;
@@ -116,7 +111,7 @@
     color: #fff;
   }
   &__brand--fix {
-    color: var(--secondry);
+    color: #FFD230;
   }
   &__desc {
     font-size: 1rem;
@@ -138,19 +133,19 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     background: #fff;
-    color: #625397;
+    color: #6B5FA7;
     font-size: 1.3rem;
     transition: background 0.2s, color 0.2s;
     border: none;
     text-decoration: none;
   }
   &__social-icon:hover {
-    background: #ffe066;
-    color: #625397;
+    background: #FFD230;
+    color: #6B5FA7;
   }
   &__col-title {
     font-weight: 700;
@@ -172,7 +167,7 @@
     transition: color 0.2s;
   }
   &__list li a:hover {
-    color: var(--secondary-color);
+    color: #FFD230;
   }
   &__col--contact {
     min-width: 220px;
@@ -190,7 +185,7 @@
   &__contact-icon {
     margin-right: 0.7rem;
     font-size: 1.1rem;
-    color: #ffe066;
+    color: #FFD230;
     width: 20px;
     text-align: center;
   }
@@ -221,7 +216,7 @@
     transition: color 0.2s;
   }
   &__bottom-links a:hover {
-    color: #ffe066;
+    color: #FFD230;
   }
   &__bottom-sep {
     color: #fff;
@@ -252,8 +247,6 @@
   }
 }
 
-
-
 @media (max-width: 768px) {
   .footer {
     padding: 3rem 1rem 1rem 1rem;
@@ -279,7 +272,6 @@
     font-size: 1rem;
   }
 }
-
 
 @media (max-width: 480px) {
   .footer {

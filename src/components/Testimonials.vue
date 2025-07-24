@@ -59,6 +59,10 @@ export default {
   padding: 80px 0;
   width: 100%;
 }
+.dark .testimonials {
+  background-color: var(--secondary-bg);
+  color: var(--primary-text);
+}
 
 .testimonials-container {
   width: 100%;
@@ -89,7 +93,9 @@ export default {
   font-family: Outfit, sans-serif;
   display: flex;
 }
-
+.dark .testimonials-title {
+  color: var(--primary-text);
+}
 .header-right {
   flex: 1;
   max-width: 500px;
@@ -111,7 +117,10 @@ export default {
   max-width: 1200px;
   margin: 0 auto;
 }
-
+.dark .testimonial-card {
+  background: var(--secondary-bg);
+  color: var(--primary-text);
+}
 .testimonial-content {
   display: flex;
   gap: 40px;
@@ -143,7 +152,9 @@ export default {
   margin-bottom: 16px;
   font-family: Outfit, sans-serif;
 }
-
+.dark .testimonial-heading {
+  color: var(--primary-text);
+}
 .testimonial-rating {
   margin-bottom: 20px;
   color: #625397;
@@ -162,7 +173,9 @@ export default {
   margin-bottom: 24px;
   font-family: Outfit, sans-serif;
 }
-
+.dark .testimonial-text-content {
+  color: var(--text-muted);
+}
 .client-info {
   margin-top: 20px;
 }
@@ -174,13 +187,17 @@ export default {
   margin-bottom: 4px;
   font-family: Outfit, sans-serif;
 }
-
+.dark .client-name {
+  color: var(--primary-text);
+}
 .client-title {
   font-size: 0.9rem;
   color: #888;
   font-family: Outfit, sans-serif;
 }
-
+.dark .client-title {
+  color: var(--text-muted);
+}
 .testimonial-nav {
   position: absolute;
   bottom: 30px;
@@ -202,7 +219,10 @@ export default {
   justify-content: center;
   transition: background 0.2s;
 }
-
+.dark .nav-btn {
+  background: var(--primary-color);
+  color: var(--primary-text);
+} 
 .nav-btn:hover {
   background: #4e3b7a;
 }

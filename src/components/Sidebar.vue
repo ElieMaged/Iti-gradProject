@@ -104,6 +104,10 @@ function navigateBookingStatus(status) {
   overflow-y: auto;
   overflow-x: hidden;
 }
+.dark .sidebar {
+  background: var(--secondary-bg);
+  color: var(--primary-text);
+}
 .sidebar-menu {
   display: flex;
   flex-direction: column;
@@ -125,6 +129,10 @@ function navigateBookingStatus(status) {
   background: #625397;
   color: #fff;
 }
+.dark .menu-item.active {
+  background: var(--primary-color);
+  color: var(--primary-text);
+}
 .menu-item.dropdown {
   cursor: pointer;
 }
@@ -135,11 +143,18 @@ function navigateBookingStatus(status) {
 .dropdown-arrow.rotated {
   transform: rotate(180deg);
 }
+.dark .dropdown-arrow {
+  color: var(--primary-text);
+}
 .submenu {
   display: flex;
   flex-direction: column;
   gap: 4px;
   transition: all 0.3s ease;
+}
+.dark .submenu {
+  background: var(--secondary-bg);
+  color: var(--primary-text);
 }
 .submenu-item {
   padding: 8px 16px;
@@ -149,6 +164,10 @@ function navigateBookingStatus(status) {
   background: #948AB8;
   font-size: 0.9rem;
   border-radius: 8px;
+}
+.dark .submenu-item {
+  background: var(--secondary-bg);
+  color: var(--primary-text);
 }
 .submenu-item.active {
   background: #625397;

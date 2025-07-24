@@ -3,7 +3,7 @@
 </script>
 
 <template>
-    <div class="flex flex-col md:grid md:grid-cols-12 m-3">
+    <div class="flex flex-col md:grid md:grid-cols-12 m-3 container">
 
   
     <div class="col-span-5 ">
@@ -87,4 +87,12 @@ background-color: #7563b7;
 button:active {
     background-color: #433867;
 }
+.dark .title {
+    color: var(--primary-text) !important;
+}
+.dark input, textarea {
+    background-color: var(--secondary-bg) !important;
+    color: var(--primary-text) !important;
+}
+
 </style>
