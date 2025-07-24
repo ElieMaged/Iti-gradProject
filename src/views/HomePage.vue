@@ -9,6 +9,7 @@ import ServicesFeatures from '../components/ServicesFeatures.vue';
 import Testimonials from '../components/Testimonials.vue';
 import FAQ from '../components/FAQ.vue';
 import HeroSection from '../components/HeroSection.vue';
+import ChatbotIcon from '../components/chatbotIcon.vue';
 </script>
 
 <template>
@@ -23,5 +24,6 @@ import HeroSection from '../components/HeroSection.vue';
     <Testimonials />
     <FAQ />
     <HeroSection />
+    <ChatbotIcon />
   </div>
 </template>

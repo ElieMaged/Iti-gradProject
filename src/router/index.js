@@ -31,6 +31,9 @@ import PendingBookings from '../views/PendingBookings.vue'
 import RegisterChoice from '../views/RegisterChoice.vue'
 import TechnicianAvailability from '../views/TechnicianAvailbility.vue'
 import TechPayment from '../views/TechPayment.vue'
+import Chatbot from '../components/chatbot.vue'
+
+
 
 
 const routes = [
@@ -65,7 +68,7 @@ const routes = [
   { path: '/bookingpage', component: BookingPage },
   { path: '/bookingconfirmation', component: BookingConfirmation },
   { path: '/techpayment', component: TechPayment },
-    
+  { path: '/chatbot', component: Chatbot },
 ]
 
 const router = createRouter({
