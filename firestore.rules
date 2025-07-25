@@ -5,5 +5,9 @@ service cloud.firestore {
     match /team/{document} {
       allow read: if true;
     }
+    // Allow read and write access to bookings collection for all users (for testing)
+    match /bookings/{document} {
+      allow read, write: if true;
+    }
   }
 } 
