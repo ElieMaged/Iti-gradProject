@@ -1,0 +1,60 @@
+STEP 1: Create an EmailJS Account
+----------------------------------
+1. Go to https://www.emailjs.com/ and sign up for a free account.
+2. After signing up, go to the Email Services section and connect your Gmail (or other email provider).
+
+STEP 2: Create an Email Template
+-------------------------------
+1. In the EmailJS dashboard, go to 'Email Templates'.
+2. Click 'Create New Template'.
+3. Add variables like: to_email, technician_name, date, time, payment (these will be filled from your app).
+4. Save the template. Note the TEMPLATE ID.
+
+STEP 3: Get Your Service ID and User ID
+---------------------------------------
+1. Go to 'Email Services' and note your SERVICE ID.
+2. Go to 'Account' and note your PUBLIC KEY (User ID).
+
+STEP 4: Install EmailJS in Your Project
+---------------------------------------
+1. Open a terminal in your project root.
+2. Run:
+   npm install emailjs-com
+
+STEP 5: Add EmailJS Code to Your Vue Component
+----------------------------------------------
+1. In BookingPage.vue (or wherever you want to send the email), add at the top:
+   import emailjs from 'emailjs-com';
+
+2. Add this function:
+
+function sendConfirmationEmail(userEmail, technicianName, date, time, payment) {
+  emailjs.send(
+    'YOUR_SERVICE_ID',
+    'YOUR_TEMPLATE_ID',
+    {
+      to_email: userEmail,
+      technician_name: technicianName,
+      date,
+      time,
+      payment
+    },
+    'YOUR_USER_ID'
+  ).then((response) => {
+    console.log('Email sent!', response.status, response.text);
+  }, (err) => {
+    console.error('Failed to send email:', err);
+  });
+}
+
+3. Call this function after booking is confirmed, passing the user's email and booking details.
+
+STEP 6: Replace the Placeholders
+--------------------------------
+- Replace 'YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', and 'YOUR_USER_ID' with the actual values from your EmailJS dashboard.
+
+STEP 7: Test It!
+----------------
+- Book a technician and check your email inbox for the confirmation email.
+
+If you want a sample template or more help, just ask! 

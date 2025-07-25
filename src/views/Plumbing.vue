@@ -52,7 +52,6 @@
               </div>
               <p class="technician-description">{{ $t('technicianDescription') }}</p>
               <button class="view-profile-btn" @click="viewProfile(technician.id)">{{ $t('viewProfile') }}</button>
-              <button class="view-profile-btn" @click="goToBooking(technician.id)">{{ $t('bookNow') }}</button>
             </div>
           </div>
         </div>
@@ -137,12 +136,7 @@ onMounted(async () => {
     .map((t, idx) => ({ ...t, id: idx + 1, isStock: true }));
   // Fetch registered
   const registered = await fetchRegisteredTechnicians();
-  // Map Firestore technicians to use uploaded photo as image
-  const registeredWithImage = registered.map(t => ({
-    ...t,
-    image: t.idPhotoUrl || profile1 // fallback to a default image if missing
-  }));
-  allTechnicians.value = [...stock, ...registeredWithImage];
+  allTechnicians.value = [...stock, ...registered];
   loading.value = false;
 });
 
@@ -199,10 +193,6 @@ function onSort(option) {
 
 function viewProfile(id) {
   router.push({ name: 'TechnicianProfile', params: { id } })
-}
-
-function goToBooking(id) {
-  router.push({ path: '/bookingpage', query: { techId: id } })
 }
 
 const heroBackgroundStyle = computed(() => {

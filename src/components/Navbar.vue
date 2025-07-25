@@ -55,8 +55,9 @@ export default {
       const currentUser = auth.currentUser;
       const userType = localStorage.getItem('userType');
       if (userType === 'technician') {
-        // Redirect to TechnicionProfile.vue (not TechnicianProfile.vue)
         router.push({ path: '/technicion-profile' });
+      } else if (userType === 'user') {
+        router.push({ path: '/profile-view' });
       } else {
         router.push(getRoute('profile-view'));
       }

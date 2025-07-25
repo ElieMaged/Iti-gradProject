@@ -1,0 +1,43 @@
+1. Open a terminal in your project root.
+
+2. Run this command for detailed error output:
+   firebase deploy --only functions --debug
+   - If you see an error, copy the full output and save it for review.
+
+3. Check your Node.js version:
+   node -v
+   - Should be v14, v16, or v18.
+
+4. Check your Firebase CLI version:
+   firebase --version
+   - If below 11, update with:
+     npm install -g firebase-tools
+
+5. Check your functions directory:
+   - Should contain:
+     functions/
+       index.js
+       package.json
+       node_modules/
+   - If node_modules is missing, run:
+     cd functions
+     npm install
+
+6. Try a clean install:
+   cd functions
+   rm -rf node_modules
+   npm install
+
+7. Try deploying again:
+   cd ..
+   firebase deploy --only functions
+
+8. Check Firebase Console > Functions > Logs for errors.
+   - Look for sendBookingConfirmation logs and any error messages.
+
+9. Check your Gmail account for security alerts or blocked sign-in attempts.
+   - Make sure you used an App Password, not your main Gmail password.
+
+10. Check your spam/junk folder for the confirmation email.
+
+11. If you still have issues, copy any error messages or logs and save them for further help. 
