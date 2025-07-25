@@ -180,8 +180,8 @@ export default {
       <div class="flex flex-col sm:flex-row gap-2 items-center">
         <a href="tel:+12095551234" class="text-white no-underline mx-1 flex items-center text-sm"><i
             class="fa-solid fa-phone px-2"></i>{{ $t('contactPhone') }}</a>
-        <a :href="`mailto:${$t('contactEmail')}`" class="text-white no-underline mx-1 flex items-center text-sm"><i
-            class="fa-solid fa-envelope px-2"></i>{{ $t('contactEmail') }}</a>
+        <a :href="`mailto:Boltfix@gmail.com`" class="text-white no-underline mx-1 flex items-center text-sm"><i
+            class="fa-solid fa-envelope px-2"></i>boltfix@gmail.com</a>
         <a href="https://www.google.com/maps/place/123+Main+St,+Anytown,+USA"
           class="text-white no-underline mx-1 flex items-center text-sm"><i
             class="fa-solid fa-map-marker-alt px-2"></i>{{ $t('contactAddress') }}</a>
