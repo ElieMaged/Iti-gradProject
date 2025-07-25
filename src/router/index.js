@@ -33,6 +33,21 @@ import TechnicianAvailability from '../views/TechnicianAvailbility.vue'
 import TechPayment from '../views/TechPayment.vue'
 import Chatbot from '../components/chatbot.vue'
 
+//admin
+import AdminUsers from '../views/adminDashboard/admin-users.vue'
+import BookingCanceled from '../views/adminDashboard/Booking-canceled.vue'
+import BookingCompleted from '../views/adminDashboard/Booking-completed.vue'
+import BookingPending from '../views/adminDashboard/Booking-pending.vue'
+import BookingUpcoming from '../views/adminDashboard/Booking-upComing.vue'
+import AdminDashboard from '../views/adminDashboard/admin-dashboard.vue'
+import AdminProfile from '../views/adminDashboard/admin-profile.vue'
+import AdminEditProfile from '../views/adminDashboard/admin-edit-profile.vue'
+import AdminPayment from '../views/adminDashboard/admin-payment.vue'
+import AdminSendMoney from '../views/adminDashboard/admin-sendMoney.vue'
+import AdminWalletDetails from '../views/adminDashboard/admin-WalletDetails.vue'
+
+
+
 
 
 
@@ -69,6 +84,19 @@ const routes = [
   { path: '/bookingconfirmation', component: BookingConfirmation },
   { path: '/techpayment', component: TechPayment },
   { path: '/chatbot', component: Chatbot },
+
+  //admin
+  { path: '/admin-users', component: AdminUsers },
+  { path: '/booking-canceled', component: BookingCanceled },
+  { path: '/booking-completed', component: BookingCompleted },
+  { path: '/booking-pending', component: BookingPending },
+  { path: '/booking-upcoming', component: BookingUpcoming },
+  { path: '/admin-dashboard', component: AdminDashboard },
+  { path: '/admin-profile', component: AdminProfile },
+  { path: '/admin-edit-profile', component: AdminEditProfile },
+  { path: '/admin-payment', component: AdminPayment },
+  { path: '/admin-send-money', component: AdminSendMoney },
+  { path: '/admin-wallet-details', component: AdminWalletDetails },
 ]
 
 const router = createRouter({
