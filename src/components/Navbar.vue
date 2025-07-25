@@ -199,7 +199,7 @@ export default {
     </div>
   </div>
   <!-- Navbar -->
-  <nav class="navbar  py-3 flex justify-between items-center container relative">
+  <nav class="navbar p-3 flex justify-between items-center relative">
     <!-- Logo -->
     <div class="flex items-center gap-2 text-2xl font-bold">
       <img src="/logo/ace04d3b268cf810c91d002fdf7454a6ef778f27.png" alt="Logo" class="h-8" id="logo" />
