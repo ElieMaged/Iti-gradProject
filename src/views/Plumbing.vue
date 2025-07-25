@@ -5,7 +5,7 @@
     <section class="hero-section m-5" :style="heroBackgroundStyle">
       <div class="hero-overlay">
         <div class="hero-content">
-          <h1 class="hero-title">{{ $t('plumbingTitle') }}</h1>
+          <h1 class="hero-title">{{ $t('wallFinishingTitle') }}</h1>
           <SearchBar
             :filterOptions="[
               { value: 'price', label: 'Select a price' },
@@ -37,11 +37,11 @@
       <div class="container">
         <div class="section-header">
           <h2 class="section-title">{{ $t('meetTechniciansTeam') }}</h2>
-          <p class="section-description">{{ $t('plumbingTeamDescription') }}</p>
+          <p class="section-description">{{ $t('wallFinishingTeamDescription') }}</p>
         </div>
 
         <div class="technicians-grid">
-          <div class="technician-card" v-for="technician in paginatedTechnicians" :key="technician.id">
+          <div v-for="technician in displayedTechnicians" :key="technician.id" class="technician-card">
             <div class="technician-image" :style="{ backgroundColor: technician.bgColor }">
               <img :src="technician.image" :alt="technician.name" />
             </div>
@@ -52,24 +52,12 @@
               </div>
               <p class="technician-description">{{ $t('technicianDescription') }}</p>
               <button class="view-profile-btn" @click="viewProfile(technician.id)">{{ $t('viewProfile') }}</button>
+              <button class="view-profile-btn" @click="goToBooking(technician.id)">{{ $t('bookNow') }}</button>
             </div>
           </div>
         </div>
 
-        <!-- Pagination -->
-        <div class="pagination">
-          <button class="pagination-btn" :disabled="currentPage === 1" @click="goToPage(currentPage - 1)"><i class="fa-solid fa-chevron-left"></i></button>
-          <button
-            v-for="page in totalPages"
-            :key="page"
-            class="pagination-btn"
-            :class="{ active: currentPage === page }"
-            @click="goToPage(page)"
-          >
-            {{ page }}
-          </button>
-          <button class="pagination-btn" :disabled="currentPage === totalPages" @click="goToPage(currentPage + 1)"><i class="fa-solid fa-chevron-right"></i></button>
-        </div>
+        <!-- Remove pagination controls -->
       </div>
     </section>
 <EndCard />
@@ -93,56 +81,54 @@ import profile6 from '../assets/profile/6.png'
 import profile7 from '../assets/profile/7.png'
 import profile8 from '../assets/profile/8.png'
 import plumbingBg from '../assets/Professions/Plumbing.jpg'
-import { stockTechnicians } from '../assets/stockTechnicians.js';
 
 const router = useRouter()
-const loading = ref(true);
-const error = ref('');
-const search = ref('');
-const allTechnicians = ref([]);
+const stockTechnicians = [
+  // Example stock wall finishing technicians (update these as needed)
+  { id: 'stock-1', name: 'Ahmed Salah', image: profile1, bgColor: '#E8E4F3', price: 200, description: 'Experienced Plumbing with 10+ years in the field.', rating: 5, specialization: 'Plumbing' },
+  { id: 'stock-2', name: 'Mohammed Ali', image: profile2, bgColor: '#E3F2FD', price: 180, description: 'Expert in Plumbing.', rating: 5, specialization: 'Plumbing' },
+  // Add more stock wall finishing technicians as needed
+]
+const firebaseTechnicians = ref([])
+const searchQuery = ref('')
 const filterOption = ref('')
 const sortOption = ref('')
 const techniciansPerPage = 8;
 const currentPage = ref(1);
 
-// Fetch registered technicians from Firestore
-async function fetchRegisteredTechnicians() {
-  try {
-    const querySnapshot = await getDocs(collection(db, 'technicians'));
-    let registered = [];
-    let idCounter = 9;
-    querySnapshot.forEach(doc => {
-      const data = doc.data();
-      if (data.specialization && data.specialization.toLowerCase() === 'plumbing') {
-        registered.push({
-          ...data,
-          id: idCounter++, // Assign id 9+ for registered
-          isStock: false
-        });
-      }
-    });
-    return registered;
-  } catch (err) {
-    error.value = 'Error loading technicians: ' + err.message;
-    return [];
-  }
+async function fetchTechnicians() {
+  const querySnapshot = await getDocs(collection(db, 'technicians'))
+  firebaseTechnicians.value = querySnapshot.docs
+    .map(doc => ({ id: doc.id, ...doc.data() }))
+    .filter(tech => tech.specialization === 'Plumbing')
 }
 
-onMounted(async () => {
-  loading.value = true;
-  // Filter stock technicians for plumbing
-  const stock = stockTechnicians
-    .filter(t => t.skills && t.skills.some(skill => skill.toLowerCase().includes('plumb')))
-    .map((t, idx) => ({ ...t, id: idx + 1, isStock: true }));
-  // Fetch registered
-  const registered = await fetchRegisteredTechnicians();
-  allTechnicians.value = [...stock, ...registered];
-  loading.value = false;
-});
+onMounted(fetchTechnicians)
+
+const mergedTechnicians = computed(() => {
+  // Only include stock wall finishing technicians
+  const allTechs = [...stockTechnicians.filter(t => t.specialization === 'Plumbing')]
+  firebaseTechnicians.value.forEach(fbTech => {
+    if (!allTechs.some(t => t.name === fbTech.fullName && t.price == fbTech.basePrice)) {
+      // Use uploaded photo if available, fallback to placeholder
+      allTechs.push({
+        id: fbTech.id,
+        name: fbTech.fullName,
+        image: fbTech.idPhotoUrl || profile1, // fallback to a default image if needed
+        bgColor: '#E8E4F3', // or any default color
+        price: fbTech.basePrice,
+        description: fbTech.bio,
+        rating: 5, // or fbTech.rating if available
+        specialization: fbTech.specialization
+      })
+    }
+  })
+  return allTechs
+})
 
 const filteredTechnicians = computed(() => {
-  let list = allTechnicians.value;
-  const query = search.value.trim().toLowerCase()
+  let list = mergedTechnicians.value
+  const query = searchQuery.value.trim().toLowerCase()
   if (query) {
     list = list.filter(t => t.name && t.name.toLowerCase().includes(query))
   }
@@ -165,24 +151,17 @@ const filteredTechnicians = computed(() => {
   return list
 })
 
-const totalPages = computed(() => {
-  return Math.ceil(filteredTechnicians.value.length / techniciansPerPage);
-});
+// Remove pagination logic
+// Instead, show up to 20 technicians from the merged list
 
-const paginatedTechnicians = computed(() => {
-  const start = (currentPage.value - 1) * techniciansPerPage;
-  const end = start + techniciansPerPage;
-  return filteredTechnicians.value.slice(start, end);
-});
+const maxTechniciansToShow = 20;
 
-function goToPage(page) {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page;
-  }
-}
+const displayedTechnicians = computed(() => {
+  return filteredTechnicians.value.slice(0, maxTechniciansToShow);
+});
 
 function onSearch(query) {
-  search.value = query
+  searchQuery.value = query
 }
 function onFilter(option) {
   filterOption.value = option
@@ -193,6 +172,10 @@ function onSort(option) {
 
 function viewProfile(id) {
   router.push({ name: 'TechnicianProfile', params: { id } })
+}
+
+function goToBooking(id) {
+  router.push({ path: '/bookingpage', query: { techId: id } })
 }
 
 const heroBackgroundStyle = computed(() => {
@@ -206,7 +189,9 @@ const heroBackgroundStyle = computed(() => {
 .plumbing-page {
   width: 100%;
 }
-
+.dark .hero-section {
+  background-color: var(--primary-bg);
+}
 /* Hero Section */
 .hero-section {
   position: relative;
@@ -218,7 +203,9 @@ const heroBackgroundStyle = computed(() => {
   justify-content: center;
   text-align: center;
 }
-
+.dark .hero-content {
+  color: var(--primary-text);
+}
 .hero-content {
   color: white;
 }
@@ -229,7 +216,9 @@ const heroBackgroundStyle = computed(() => {
   margin-bottom: 1rem;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
-
+.dark .hero-title {
+  color: var(--primary-text);
+}
 .breadcrumbs {
   font-size: 1.1rem;
   opacity: 0.9;
@@ -245,25 +234,33 @@ const heroBackgroundStyle = computed(() => {
   padding: 4rem 0;
   background-color: #f8f9fa;
 }
-
+.dark .technicians-section {
+  background-color: var(--primary-bg);
+}
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 2rem;
 }
-
+.dark .container {
+  background-color: var(--primary-bg);
+}
 .section-header {
   text-align: center;
   margin-bottom: 3rem;
 }
-
+.dark .section-header {
+  color: var(--primary-text);
+}
 .section-title {
   font-size: 2.5rem;
   font-weight: bold;
   color: #333;
   margin-bottom: 1rem;
 }
-
+.dark .section-title {
+  color: var(--primary-text);
+}
 .section-description {
   font-size: 1.1rem;
   color: #666;
@@ -271,7 +268,9 @@ const heroBackgroundStyle = computed(() => {
   margin: 0 auto;
   line-height: 1.6;
 }
-
+.dark .section-description {
+  color: var(--primary-text);
+}
 .technicians-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -280,7 +279,9 @@ const heroBackgroundStyle = computed(() => {
   grid-auto-rows: 1fr;
   justify-items: center;
 }
-
+.dark .technicians-grid {
+  background-color: var(--primary-bg);
+}
 .technician-card {
   background: white;
   border-radius: 12px;
@@ -293,7 +294,10 @@ const heroBackgroundStyle = computed(() => {
   display: flex;
   flex-direction: column;
 }
-
+.dark .technician-card {
+  background-color: var(--secondary-bg);
+  color: var(--primary-text);
+}
 .technician-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
@@ -305,14 +309,20 @@ const heroBackgroundStyle = computed(() => {
   align-items: center;
   justify-content: center;
 }
-
+.dark .technician-image {
+  background-color: var(--secondary-bg);
+  color: var(--primary-text);
+}
 .technician-image img {
   width: 100%;
   height: 100%;
   border-radius: 8px;
   object-fit: cover;
 }
-
+.dark .technician-image img {
+  background-color: var(--secondary-bg);
+  color: var(--primary-text);
+}
 .technician-info {
   padding: 1.5rem;
 }
@@ -323,23 +333,31 @@ const heroBackgroundStyle = computed(() => {
   color: #333;
   margin-bottom: 0.5rem;
 }
-
+.dark .technician-name {
+  color: var(--primary-text);
+}
 .rating {
   margin-bottom: 1rem;
 }
-
+.dark .rating {
+  color: var(--primary-text);
+}
 .rating i {
   color: #FFC230;
   margin-right: 0.2rem;
 }
-
+.dark .rating i {
+  color: var(--primary-text);
+}
 .technician-description {
   color: #666;
   font-size: 0.95rem;
   line-height: 1.5;
   margin-bottom: 1.5rem;
 }
-
+.dark .technician-description {
+  color: var(--primary-text);
+}
 .view-profile-btn {
   background-color: var(--primary-color);
   color: white;
@@ -350,8 +368,12 @@ const heroBackgroundStyle = computed(() => {
   cursor: pointer;
   transition: background-color 0.3s ease;
   width: 100%;
+  margin-bottom: 0.5rem; /* Added margin to separate buttons */
 }
-
+.dark .view-profile-btn {
+  background-color: var(--primary-color);
+  color: var(--primary-text);
+}
 .view-profile-btn:hover {
   background-color: #4a3f7a;
 }
@@ -362,6 +384,9 @@ const heroBackgroundStyle = computed(() => {
   justify-content: center;
   align-items: center;
   gap: 0.5rem;
+}
+.dark .pagination {
+  color: var(--primary-text);
 }
 
 .pagination-btn {
@@ -377,23 +402,34 @@ const heroBackgroundStyle = computed(() => {
   transition: all 0.3s ease;
   font-weight: 600;
 }
-
+.dark .pagination-btn {
+  background-color: var(--primary-color);
+  color: var(--primary-text);
+}
 .pagination-btn:hover {
   border-color: var(--primary-color);
   color: var(--primary-color);
 }
-
+.dark .pagination-btn:hover {
+  background-color: var(--primary-color);
+  color: var(--primary-text);
+}
 .pagination-btn.active {
   background-color: var(--primary-color);
   color: white;
   border-color: var(--primary-color);
 }
-
+.dark .pagination-btn.active {
+  background-color: var(--primary-color);
+  color: var(--primary-text);
+}
 .pagination-dots {
   color: #666;
   font-weight: bold;
 }
-
+.dark .pagination-dots {
+  color: var(--primary-text);
+}
 /* Call to Action Section */
 .cta-section {
   position: relative;
@@ -405,27 +441,35 @@ const heroBackgroundStyle = computed(() => {
   justify-content: center;
   text-align: center;
 }
-
+.dark .cta-section {
+  background-color: var(--primary-bg);
+}
 .cta-content {
   color: white;
   max-width: 600px;
   padding: 0 2rem;
 }
-
+.dark .cta-content {
+  color: var(--primary-text);
+}
 .cta-title {
   font-size: 3rem;
   font-weight: bold;
   margin-bottom: 1rem;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
-
+.dark .cta-title {
+  color: var(--primary-text);
+}
 .cta-description {
   font-size: 1.2rem;
   margin-bottom: 2rem;
   line-height: 1.6;
   opacity: 0.9;
 }
-
+.dark .cta-description {
+  color: var(--primary-text);
+}
 .cta-btn {
   background-color: var(--primary-color);
   color: white;
@@ -440,19 +484,29 @@ const heroBackgroundStyle = computed(() => {
   align-items: center;
   gap: 0.5rem;
 }
-
+.dark .cta-btn {
+  background-color: var(--primary-color);
+  color: var(--primary-text);
+}
 .cta-btn:hover {
   background-color: #4a3f7a;
 }
-
+.dark .cta-btn:hover {
+  background-color: var(--primary-color);
+  color: var(--primary-text);
+}     
 .cta-btn i {
   transition: transform 0.3s ease;
 }
-
+.dark .cta-btn i {
+  color: var(--primary-text);
+} 
 .cta-btn:hover i {
   transform: translateX(5px);
 }
-
+.dark .cta-btn:hover i {
+  color: var(--primary-text);
+}
 /* Responsive Design */
 @media (max-width: 768px) {
   .hero-title {
