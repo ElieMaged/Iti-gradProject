@@ -17,8 +17,9 @@ const handleRegister = async () => {
     return;
   }
   try {
-    await createUserWithEmailAndPassword(auth, email.value, password.value);
+    const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
     router.push('/'); // Redirect to home page after registration
+    localStorage.setItem('userType', 'user');
   } catch (err) {
     error.value = err.message;
   }

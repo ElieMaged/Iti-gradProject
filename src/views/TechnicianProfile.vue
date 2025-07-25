@@ -1,5 +1,11 @@
 <template>
-  <div v-if="technician">
+  <div v-if="loading">
+    <p>{{ $t('loading') }}</p>
+  </div>
+  <div v-else-if="error">
+    <p class="text-red-500">{{ error }}</p>
+  </div>
+  <div v-else-if="technician">
     <div class="profile-hero">
       <h1 class="profile-title">{{ $t('technicianProfileTitle') }}</h1>
     </div>
@@ -24,6 +30,7 @@
               <li v-for="skill in technician.skills || []" :key="skill">{{ skill }}</li>
             </ul>
           </div>
+          <button class="view-profile-btn" @click="goToBooking(technician.id)">{{ $t('bookNow') }}</button>
         </div>
       </div>
       <div class="profile-booking">
@@ -81,6 +88,8 @@ import { stockTechnicians } from '../assets/stockTechnicians'
 const route = useRoute()
 const router = useRouter()
 const technician = ref(null)
+const loading = ref(true)
+const error = ref('')
 
 onMounted(async () => {
   const id = route.params.id
@@ -88,18 +97,34 @@ onMounted(async () => {
   const stock = stockTechnicians.find(t => t.id === id)
   if (stock) {
     technician.value = stock
+    loading.value = false
     return
   }
   // Otherwise, fetch from Firestore
-  const docRef = doc(db, 'technicians', id)
-  const docSnap = await getDoc(docRef)
-  if (docSnap.exists()) {
-    technician.value = docSnap.data()
+  try {
+    const docRef = doc(db, 'technicians', id)
+    const docSnap = await getDoc(docRef)
+    if (docSnap.exists()) {
+      const data = docSnap.data()
+      technician.value = {
+        ...data,
+        name: data.fullName,
+        location: data.government,
+        price: data.basePrice,
+        image: data.idPhotoUrl || 'https://randomuser.me/api/portraits/men/32.jpg' // fallback to a default image if missing
+      }
+    } else {
+      error.value = 'Technician profile not found.'
+    }
+  } catch (e) {
+    error.value = 'Error loading profile.'
+  } finally {
+    loading.value = false
   }
 })
 
-function goToBooking() {
-  router.push({ path: '/bookingpage', query: { techId: technician.value.id } })
+const goToBooking = (id) => {
+  router.push({ path: '/bookingpage', query: { techId: id } })
 }
 </script>
 

@@ -1,0 +1,5 @@
+cd functions
+npm init -y
+npm install firebase-functions@latest firebase-admin@latest nodemailer
+cd ..
+firebase deploy --only functions 

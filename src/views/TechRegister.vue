@@ -112,9 +112,12 @@
 <script setup>
 import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
-import { auth, db } from '../firebase';
+import { auth, db, storage } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, serverTimestamp, doc, setDoc } from 'firebase/firestore';
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
 
 const router = useRouter();
 const fileInput = ref(null);
@@ -136,7 +139,8 @@ const formData = reactive({
   district: '',
   willingToTravel: '',
   confirmInfo: false,
-  agreeTerms: false
+  agreeTerms: false,
+  idPhotoBase64: null // New field to store Base64 string
 });
 
 function triggerFileInput() {
@@ -146,8 +150,12 @@ function triggerFileInput() {
 function handleFileChange(event) {
   const file = event.target.files[0];
   if (file) {
-    previewUrl.value = URL.createObjectURL(file);
-    formData.idPhoto = file; // Store the file for upload
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      previewUrl.value = e.target.result; // For preview
+      formData.idPhotoBase64 = e.target.result; // Save Base64 string
+    };
+    reader.readAsDataURL(file);
   }
 }
 
@@ -157,12 +165,12 @@ async function handleRegister() {
   
   // Validation
   if (formData.password !== formData.confirmPassword) {
-    error.value = $t('passwordsDoNotMatch');
+    error.value = t('passwordsDoNotMatch');
     return;
   }
   
   if (!formData.confirmInfo || !formData.agreeTerms) {
-    error.value = $t('pleaseConfirmCheckboxes');
+    error.value = t('pleaseConfirmCheckboxes');
     return;
   }
   
@@ -177,7 +185,7 @@ async function handleRegister() {
       formData.email, 
       formData.password
     );
-    // Save technician data to Firestore
+    // Save technician data to Firestore, using Base64 image
     const technicianData = {
       uid: userCredential.user.uid,
       fullName: formData.fullName,
@@ -189,18 +197,20 @@ async function handleRegister() {
       government: formData.government,
       district: formData.district,
       willingToTravel: formData.willingToTravel,
-      idPhotoUrl: previewUrl.value, // For now, just store the preview URL
+      idPhotoUrl: formData.idPhotoBase64 || '', // Save Base64 string
       status: 'pending', // Admin approval status
       createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
+      updatedAt: serverTimestamp(),
+      role: 'technician' // Add role field
     };
-    const docRef = await addDoc(collection(db, 'technicians'), technicianData);
-    
-    success.value = $t('registrationSuccessful');
-    
+    // Use setDoc with UID as document ID
+    await setDoc(doc(db, 'technicians', userCredential.user.uid), technicianData);
+    // Set userType in localStorage
+    localStorage.setItem('userType', 'technician');
+    success.value = t('registrationSuccessful');
     // Redirect after a short delay
     setTimeout(() => {
-      router.push('/profile');
+      router.push({ name: 'TechnicianProfile', params: { id: userCredential.user.uid } });
     }, 2000);
     
   } catch (err) {
@@ -218,7 +228,7 @@ async function handleRegister() {
     // } else if (err.message.includes('Missing or insufficient permissions')) {
     //   error.value = 'Database permissions error. Please contact support or try again later.';
     // } else {
-      error.value = $t('registrationFailed', { err: err.message });
+      error.value = t('registrationFailed', { err: err.message });
     // }
   } finally {
     loading.value = false;

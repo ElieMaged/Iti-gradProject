@@ -61,7 +61,7 @@
         <i class="fas fa-user text-xl"></i>
         <span>{{ $t('myProfile') }}</span>
       </router-link>
-      <router-link :to="getRoute('profile-edit')" class="sidebar-item w-full py-4 px-8 flex items-center space-x-4 text-lg font-medium text-secondary">
+      <router-link :to="{ path: '/profile-edit' }" class="sidebar-item w-full py-4 px-8 flex items-center space-x-4 text-lg font-medium text-secondary">
         <i class="fas fa-cog text-xl"></i>
         <span>{{ $t('settings') }}</span>
       </router-link>

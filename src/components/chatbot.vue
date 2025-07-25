@@ -1,27 +1,30 @@
 <template>
-  <div class="flex min-h-screen items-center justify-center px-2 sm:px-4 bg-[#fafbfc]">
-    <div class="w-full max-w-2xl chatbot bg-white rounded-2xl shadow p-2 sm:p-8 flex flex-col h-[90vh] sm:h-[70vh] mt-4 sm:mt-8 border border-gray-100 relative">
-      <h2 class="text-xl sm:text-2xl font-bold text-secondary mb-4 sm:mb-6">AI Assistant</h2>
-      <div id="chatWindow" ref="chatWindow" class="flex-1 overflow-y-auto mb-4 sm:mb-6 flex flex-col gap-2 sm:gap-4 min-h-[200px]">
-        <div v-for="(msg, idx) in messages" :key="idx" :class="['chat-bubble', msg.sender, 'flex items-start gap-2 sm:gap-3']">
-          <img v-if="msg.sender === 'ai'" src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" alt="AI" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full" />
-          <span class="text-sm sm:text-base" v-html="msg.text"></span>
-          <img v-if="msg.sender === 'user'" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="User" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full" />
-        </div>
-      </div>
-      <form class="flex items-center gap-2 sm:gap-4 mt-2" @submit.prevent="sendMessage">
-        <input type="text" class="flex-1 input-text rounded-full border border-gray-300 px-3 py-2 sm:px-4 sm:py-2 focus:outline-none focus:border-secondary text-sm sm:text-base" placeholder="Type your message..." v-model="input">
-        <button type="submit" id="send-btn" class="bg-secondary text-white px-4 py-2 sm:px-6 sm:py-2 rounded-full font-semibold hover:bg-primary transition-colors text-base sm:text-base" :disabled="loading">
-          <i class="fas fa-paper-plane"></i>
-        </button>
-      </form>
+  <div class="chatbot bg-white rounded-2xl shadow border border-gray-100 relative" style="margin:0;">
+    <!-- Fixed AI image at top left -->
+    <div class="fixed-ai-image">
+      <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" alt="AI" class="w-16 h-16 rounded-full" />
     </div>
+    <h2 class="text-xl font-bold text-secondary mb-2 mt-20">AI Assistant</h2>
+    <div id="chatWindow" ref="chatWindow" class="flex flex-col gap-2 min-h-[20px]" style="margin-top:0;">
+      <div v-for="(msg, idx) in messages" :key="idx" :class="['chat-bubble', msg.sender, 'flex items-start gap-2']">
+        <img v-if="msg.sender === 'ai'" src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" alt="AI" class="w-7 h-7 rounded-full" />
+        <span class="text-sm" v-html="msg.text"></span>
+        <img v-if="msg.sender === 'user'" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="User" class="w-7 h-7 rounded-full" />
+      </div>
+    </div>
+    <form class="flex items-center gap-2 mt-2" @submit.prevent="sendMessage">
+      <input type="text" class="flex-1 input-text rounded-full border border-gray-300 px-3 py-2 focus:outline-none focus:border-secondary text-sm" placeholder="Type your message..." v-model="input">
+      <button type="submit" id="send-btn" class="bg-secondary text-white px-4 py-2 rounded-full font-semibold hover:bg-primary transition-colors text-base" :disabled="loading">
+        <i class="fas fa-paper-plane"></i>
+      </button>
+    </form>
   </div>
 </template>
 
 <script>
 
 import { db } from '../firebase.js'; // adjust the path as needed
+import { stockTechnicians } from '../assets/stockTechnicians.js';
 
 export default {
   name: 'chatbot',
@@ -33,7 +36,8 @@ export default {
       ],
       loading: false,
       suggestedProfession: null,
-      suggestedTechnicians: []
+      suggestedTechnicians: [],
+      suggestedStockTechnicians: []
     }
   },
   methods: {
@@ -89,26 +93,48 @@ export default {
       this.scrollToBottom();
     },
     async fetchTechnicians(profession) {
+      // Fetch registered technicians from Firestore
+      let registered = [];
       try {
         const querySnapshot = await db.collection('technicians').where('profession', '==', profession).get();
-        this.suggestedTechnicians = [];
+        registered = [];
         querySnapshot.forEach(doc => {
-          this.suggestedTechnicians.push(doc.data());
+          registered.push(doc.data());
         });
-        if (this.suggestedTechnicians.length > 0) {
-          this.messages.push({
-            sender: 'ai',
-            text: 'Suggested technicians:<br>' + this.suggestedTechnicians.map(t => t.name + ' - ' + t.phone).join('<br>')
-          });
-        } else {
-          this.messages.push({ sender: 'ai', text: 'Sorry, no technicians found for this profession.' });
-        }
-        this.scrollToBottom();
       } catch (e) {
         console.error('Firebase error:', e);
         this.messages.push({ sender: 'ai', text: 'Sorry, there was an error connecting to the technician database.' });
-        this.scrollToBottom();
       }
+      // Filter stock technicians by profession
+      const stock = stockTechnicians.filter(t => {
+        // Normalize profession for stock technicians (assume a 'profession' field or use skills/description)
+        if (t.profession) {
+          return t.profession.toLowerCase() === profession;
+        }
+        // Fallback: try to match profession in description or skills
+        if (t.skills && t.skills.some(skill => skill.toLowerCase().includes(profession))) {
+          return true;
+        }
+        if (t.description && t.description.toLowerCase().includes(profession)) {
+          return true;
+        }
+        return false;
+      });
+      this.suggestedTechnicians = registered;
+      this.suggestedStockTechnicians = stock;
+      // Compose message
+      let msg = '';
+      if (registered.length > 0) {
+        msg += '<b>Registered Technicians:</b><br>' + registered.map(t => `${t.name} - ${t.phone || ''}`).join('<br>') + '<br>';
+      }
+      if (stock.length > 0) {
+        msg += '<b>Stock Technicians:</b><br>' + stock.map(t => `${t.name} - ${t.phone || ''}`).join('<br>');
+      }
+      if (!msg) {
+        msg = 'Sorry, no technicians found for this profession.';
+      }
+      this.messages.push({ sender: 'ai', text: msg });
+      this.scrollToBottom();
     },
     scrollToBottom() {
       this.$nextTick(() => {
@@ -150,15 +176,17 @@ export default {
 
 }
 .chatbot {
-  height: 500px;
-  min-height: 200px;
-  overflow-x: hidden;
-  overflow-y: scroll;
-  padding: 20px !important;
-  /* Hide scrollbar for Chrome, Safari and Opera */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none;  /* IE and Edge */
-  margin-bottom: 20px !important;
+  /* Double the height of the chat window */
+  padding: 0 !important;
+  margin: 0 !important;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  width: 100%;
+  max-width: 1000px;
+  min-height: 450px;
+  max-height: 450px;
+  display: flex;
+  flex-direction: column;
 }
 .dark .chatbot {
   background-color: var(--secondary-bg) !important;
@@ -202,6 +230,27 @@ export default {
 .input-text {
   border-radius: 20px !important;
   border: 1px solid #7c6bb0 !important;
+}
+.fixed-ai-image {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 10;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#chatWindow {
+  margin-top: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
 }
 @media (min-width: 640px) {
   .chat-bubble {

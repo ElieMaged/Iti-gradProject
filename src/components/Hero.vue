@@ -1,6 +1,6 @@
 <template>
   <section
-    class="bg-cover bg-no-repeat p-10 flex items-center umg-fluid"
+    class="bg-cover bg-no-repeat p-10 flex items-center umg-fluid imgy"
     style="background-image: url('/images/7fc6779f3c036fdfd70e0846072d5fced1bbd2c6.png')" >
     <div class="text-left w-full max-w-xl mx-15">
         
@@ -119,5 +119,8 @@ p {
     font-size: 0.98rem;
     padding: 10px 0;
   }
+}
+.imgy {
+  background-size: cover;
 }
 </style>
