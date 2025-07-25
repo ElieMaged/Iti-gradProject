@@ -95,6 +95,50 @@
               </div>
             </div>
           </div>
+          <div class="mt-10">
+            <h3 class="text-xl font-bold mb-4">{{ $t('upcomingBookings') }}</h3>
+            <div v-if="upcomingBookings.length === 0" class="text-gray-500">{{ $t('noUpcomingBookings') }}</div>
+            <div v-for="booking in upcomingBookings" :key="booking.id" class="bg-gray-100 rounded-lg p-4 mb-4 flex flex-col md:flex-row md:items-center md:justify-between">
+              <div>
+                <div><b>{{ $t('user') }}:</b> {{ booking.userName }} ({{ booking.userEmail }})</div>
+                <div><b>{{ $t('date') }}:</b> {{ booking.date }}</div>
+                <div><b>{{ $t('time') }}:</b> {{ booking.time }}</div>
+                <div><b>{{ $t('payment') }}:</b> {{ booking.payment }}</div>
+              </div>
+              <div class="flex gap-2 mt-2 md:mt-0">
+                <button class="bg-green-500 text-white px-4 py-2 rounded" @click="confirmBooking(booking.id)">{{ $t('confirm') }}</button>
+                <button class="bg-red-500 text-white px-4 py-2 rounded" @click="cancelBooking(booking.id)">{{ $t('cancel') }}</button>
+              </div>
+            </div>
+
+            <h3 class="text-xl font-bold mb-4 mt-8">{{ $t('pendingBookings') }}</h3>
+            <div v-if="pendingBookings.length === 0" class="text-gray-500">{{ $t('noPendingBookings') }}</div>
+            <div v-for="booking in pendingBookings" :key="booking.id" class="bg-yellow-100 rounded-lg p-4 mb-4 flex flex-col md:flex-row md:items-center md:justify-between">
+              <div>
+                <div><b>{{ $t('user') }}:</b> {{ booking.userName }} ({{ booking.userEmail }})</div>
+                <div><b>{{ $t('date') }}:</b> {{ booking.date }}</div>
+                <div><b>{{ $t('time') }}:</b> {{ booking.time }}</div>
+                <div><b>{{ $t('payment') }}:</b> {{ booking.payment }}</div>
+              </div>
+              <div class="flex gap-2 mt-2 md:mt-0">
+                <span class="text-yellow-800 font-bold">{{ $t('pendingStatus') }}</span>
+              </div>
+            </div>
+
+            <h3 class="text-xl font-bold mb-4 mt-8">{{ $t('completedBookings') }}</h3>
+            <div v-if="completedBookings.length === 0" class="text-gray-500">{{ $t('noCompletedBookings') }}</div>
+            <div v-for="booking in completedBookings" :key="booking.id" class="bg-green-100 rounded-lg p-4 mb-4 flex flex-col md:flex-row md:items-center md:justify-between">
+              <div>
+                <div><b>{{ $t('user') }}:</b> {{ booking.userName }} ({{ booking.userEmail }})</div>
+                <div><b>{{ $t('date') }}:</b> {{ booking.date }}</div>
+                <div><b>{{ $t('time') }}:</b> {{ booking.time }}</div>
+                <div><b>{{ $t('payment') }}:</b> {{ booking.payment }}</div>
+              </div>
+              <div class="flex gap-2 mt-2 md:mt-0">
+                <span class="text-green-800 font-bold">{{ $t('completedStatus') }}</span>
+              </div>
+            </div>
+          </div>
           <div class="flex justify-end mt-8">
             <button class="bg-secondary text-white px-10 py-2 rounded-full text-lg font-medium hover:bg-opacity-90 transition-colors" @click="saveProfile">{{ $t('saveChangesButton') }}</button>
           </div>
@@ -107,7 +151,7 @@
 <script>
 import Sidebar from '../components/Sidebar.vue';
 import { auth, db } from '../firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs, updateDoc } from 'firebase/firestore';
 
 export default {
   components: { Sidebar },
@@ -128,7 +172,8 @@ export default {
         government: '',
         district: '',
         willingToTravel: '',
-      }
+      },
+      allBookings: [] // <-- all bookings for this technician
     }
   },
   async mounted() {
@@ -157,10 +202,27 @@ export default {
       } else {
         this.error = 'Technician profile not found.';
       }
+      // Fetch all bookings for this technician (except cancelled)
+      const q = query(collection(db, 'bookings'), where('technicianId', '==', user.uid));
+      const snap = await getDocs(q);
+      this.allBookings = snap.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }))
+        .filter(b => b.status !== 'cancelled');
     } catch (e) {
       this.error = 'Error loading profile.';
     } finally {
       this.loading = false;
+    }
+  },
+  computed: {
+    upcomingBookings() {
+      return this.allBookings.filter(b => b.status === 'new');
+    },
+    pendingBookings() {
+      return this.allBookings.filter(b => b.status === 'pending');
+    },
+    completedBookings() {
+      return this.allBookings.filter(b => b.status === 'completed');
     }
   },
   methods: {
@@ -183,6 +245,18 @@ export default {
     saveProfile() {
       // Implement save logic here (e.g., update Firestore)
       alert('Profile saved!');
+    },
+    async confirmBooking(bookingId) {
+      await updateDoc(doc(db, 'bookings', bookingId), { status: 'pending' });
+      const idx = this.allBookings.findIndex(b => b.id === bookingId);
+      if (idx !== -1) {
+        this.allBookings[idx] = { ...this.allBookings[idx], status: 'pending' };
+        this.allBookings = [...this.allBookings]; // force reactivity
+      }
+    },
+    async cancelBooking(bookingId) {
+      await updateDoc(doc(db, 'bookings', bookingId), { status: 'cancelled' });
+      this.allBookings = this.allBookings.filter(b => b.id !== bookingId);
     }
   }
 }

@@ -30,6 +30,8 @@
             <input v-model="form.fullName" :placeholder="$t('enterFullName')" required />
             <label>{{ $t('phoneNumber') }}</label>
             <input v-model="form.phone" :placeholder="$t('enterPhoneNumber')" required />
+            <label>{{ $t('yourEmail') }}</label>
+            <input v-model="form.email" type="email" :placeholder="$t('yourEmail')" required />
           </div>
           <div class="form-section">
             <label>{{ $t('note') }}</label>
@@ -69,8 +71,11 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { stockTechnicians } from '../assets/stockTechnicians'
-import { doc, getDoc } from 'firebase/firestore'
-import { db } from '../firebase'
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { auth } from '../firebase';
+import emailjs from 'emailjs-com';
+import { db } from '../firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const route = useRoute()
 const router = useRouter()
@@ -92,6 +97,7 @@ const form = ref({
   time: availableTimes[0],
   fullName: '',
   phone: '',
+  email: '', // <-- Add email field
   note: '',
   city: 'Cairo',
   area: 'Giza',
@@ -100,37 +106,70 @@ const form = ref({
   payment: 'Paypal'
 })
 
-onMounted(async () => {
+onMounted(() => {
   const id = route.query.techId
   const stock = stockTechnicians.find(t => t.id === id)
   if (stock) {
     technician.value = stock
-    return
   }
-  // Fetch from Firestore if not found in stock
-  if (id) {
-    const docRef = doc(db, 'technicians', id)
-    const docSnap = await getDoc(docRef)
-    if (docSnap.exists()) {
-      const data = docSnap.data()
-      technician.value = {
-        ...data,
-        image: data.idPhotoUrl || 'https://randomuser.me/api/portraits/men/32.jpg' // fallback to a default image if missing
-      }
-    }
-  }
+  // You can add Firestore fetch here for dynamic technicians
 })
 
-function confirmBooking() {
+function sendConfirmationEmail(userEmail, technicianName, date, time, payment) {
+  const data = {
+    to_email: userEmail,
+    technician_name: technicianName,
+    date,
+    time,
+    payment
+  };
+  console.log('EmailJS data:', data);
+  emailjs.send(
+    '123321',
+    'template_68btlks',
+    data,
+    'kGW9e5lc8iBvIT3Qw'
+  ).then((response) => {
+    console.log('Email sent!', response.status, response.text);
+  }, (err) => {
+    console.error('Failed to send email:', err);
+  });
+}
+
+async function confirmBooking() {
   const bookingData = {
+    technicianId: technician.value.uid || technician.value.id, // use UID if available
     technicianName: technician.value.name,
-    technicianRole: 'Plumber',
+    userName: form.value.fullName,
+    userEmail: form.value.email,
+    userPhone: form.value.phone,
     date: form.value.date,
     time: form.value.time,
-    technicianPhone: technician.value.phone || '+20 111 252 6565',
-    payment: form.value.payment
+    payment: form.value.payment,
+    status: 'new',
+    createdAt: serverTimestamp()
   };
   localStorage.setItem('bookingData', JSON.stringify(bookingData));
+
+  // Save booking to Firestore
+  try {
+    await addDoc(collection(db, 'bookings'), bookingData);
+  } catch (e) {
+    alert('Failed to save booking. Please try again.');
+    return;
+  }
+
+  // Always use the email directly from the form
+  const userEmail = form.value.email;
+  console.log('About to send email to:', userEmail, 'form.email:', form.value.email);
+  if (userEmail) {
+    sendConfirmationEmail(userEmail, technician.value.name, form.value.date, form.value.time, form.value.payment);
+  } else {
+    sendConfirmationEmail('test@example.com', technician.value.name, form.value.date, form.value.time, form.value.payment);
+    alert('Email was empty, sent to test@example.com for debug.');
+    return;
+  }
+
   router.push('/bookingconfirmation');
 }
 </script>

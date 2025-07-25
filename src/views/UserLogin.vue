@@ -14,6 +14,8 @@ const handleLogin = async () => {
   error.value = '';
   try {
     await signInWithEmailAndPassword(auth, email.value, password.value);
+    // After successful login
+    localStorage.setItem('userType', 'user');
     router.push('/');
   } catch (err) {
     error.value = err.message;
@@ -25,6 +27,7 @@ const handleGoogleSignIn = async () => {
   try {
     const result = await signInWithPopup(auth, provider);
     if (result && result.user) {
+      localStorage.setItem('userType', 'user'); // Set userType
       router.push('/');
     } else {
       error.value = 'Google sign-in failed. No user returned.';

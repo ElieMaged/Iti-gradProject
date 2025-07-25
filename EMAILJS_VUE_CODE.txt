@@ -1,0 +1,25 @@
+// Add this to the top of your BookingPage.vue or the relevant component
+import emailjs from 'emailjs-com';
+
+// Call this function after booking is confirmed
+function sendConfirmationEmail(userEmail, technicianName, date, time, payment) {
+  emailjs.send(
+    '123321', // Your Service ID
+    'template_68btlks', // Your Template ID
+    {
+      to_email: userEmail,
+      technician_name: technicianName,
+      date,
+      time,
+      payment
+    },
+    'kGW9e5lc8iBvIT3Qw' // Your Public Key (User ID)
+  ).then((response) => {
+    console.log('Email sent!', response.status, response.text);
+  }, (err) => {
+    console.error('Failed to send email:', err);
+  });
+}
+
+// Example usage after booking is confirmed:
+// sendConfirmationEmail(user.email, technician.value.name, form.value.date, form.value.time, form.value.payment); 
