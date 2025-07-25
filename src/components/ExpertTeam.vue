@@ -9,12 +9,12 @@
         <p class="team-description">{{ $t('expertTeamDescription') }}</p>
       </div>
     </div>
-    
+
     <div v-if="loading" class="loading-container">
       <div class="loading-spinner"></div>
       <p>{{ $t('loadingTeamMembers') }}</p>
     </div>
-    
+
     <div v-else class="team-cards">
       <div v-for="(member, index) in teamMembers" :key="member.id" class="team-card">
         <div class="member-image">
@@ -49,28 +49,28 @@ export default {
         {
           id: '1',
           name: 'teamMember1Name',
-          image: '/public/images/Image.png',
+          image: '/images/Image.png',
           description: 'teamMember1Desc',
           rating: 5
         },
         {
           id: '2',
           name: 'teamMember2Name',
-          image: '/public/images/Image.png',
+          image: '/images/Image.png',
           description: 'teamMember2Desc',
           rating: 5
         },
         {
           id: '3',
           name: 'teamMember3Name',
-          image: '/public/images/Image.png',
+          image: '/images/Image.png',
           description: 'teamMember3Desc',
           rating: 5
         },
         {
           id: '4',
           name: 'teamMember4Name',
-          image: '/public/images/Image.png',
+          image: '/images/Image.png',
           description: 'teamMember4Desc',
           rating: 5
         }
@@ -150,9 +150,11 @@ export default {
   line-height: 1.2;
   font-family: Outfit, sans-serif;
 }
+
 .dark .team-title {
   color: var(--primary-text);
 }
+
 .team-subtitle-section {
   flex: 1;
   max-width: 400px;
@@ -165,30 +167,37 @@ export default {
   margin-bottom: 16px;
   font-family: Outfit, sans-serif;
 }
+
 .dark .team-subtitle {
   color: var(--primary-text);
 }
+
 .team-description {
   font-size: 1rem;
   color: #8c8e90;
   line-height: 1.6;
   font-family: Outfit, sans-serif;
 }
+
 .dark .team-description {
   color: var(--text-muted);
 }
+
 .team-cards {
   display: flex;
   gap: 20px;
   justify-content: center;
   width: 100%;
 }
+
 .dark .member-name {
   color: var(--primary-text);
 }
+
 .dark .member-description {
   color: var(--text-muted);
 }
+
 .dark .member-rating i {
   color: var(--primary-color);
 }
@@ -204,6 +213,7 @@ export default {
   transition: transform 0.2s;
   border: 1px solid var(--primary-color);
 }
+
 .dark .team-card {
   background: var(--secondary-bg);
   border: 1px solid var(--primary-color);
@@ -305,13 +315,19 @@ export default {
   animation: spin 1s linear infinite;
   margin-bottom: 16px;
 }
+
 .arrow-right {
   transform: rotate(-45deg);
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Responsive design */
@@ -320,7 +336,7 @@ export default {
     flex-wrap: wrap;
     gap: 20px;
   }
-  
+
   .team-card {
     flex: 1 1 calc(50% - 20px);
     min-width: 280px;
@@ -332,32 +348,32 @@ export default {
     margin: 0 auto 40px auto;
     padding: 30px 0;
   }
-  
+
   .team-header {
     flex-direction: column;
     gap: 24px;
     margin-bottom: 32px;
   }
-  
+
   .team-title {
     font-size: 2rem;
   }
-  
+
   .team-subtitle {
     font-size: 1.3rem;
   }
-  
+
   .team-cards {
     flex-direction: column;
     align-items: center;
     gap: 20px;
   }
-  
+
   .team-card {
     width: 100%;
     max-width: 320px;
   }
-  
+
   .member-image {
     height: 250px;
   }
@@ -369,53 +385,53 @@ export default {
     margin: 0 auto 30px auto;
     padding: 20px 0;
   }
-  
+
   .team-header {
     gap: 16px;
     margin-bottom: 24px;
     text-align: center;
   }
-  
+
   .team-title {
     font-size: 1.8rem;
     text-align: center;
   }
-  
+
   .team-subtitle {
     font-size: 1.2rem;
     text-align: center;
   }
-  
+
   .team-description {
     font-size: 0.9rem;
     text-align: center;
   }
-  
+
   .team-cards {
     gap: 16px;
   }
-  
+
   .team-card {
     max-width: 280px;
   }
-  
+
   .member-image {
     height: 200px;
   }
-  
+
   .member-info {
     padding: 20px 16px;
     text-align: center;
   }
-  
+
   .member-name {
     font-size: 1.2rem;
     text-align: center;
   }
-  
+
   .member-description {
     font-size: 0.85rem;
     text-align: center;
   }
 }
-</style> 
+</style>
