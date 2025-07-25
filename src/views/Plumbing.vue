@@ -41,7 +41,7 @@
         </div>
 
         <div class="technicians-grid">
-          <div class="technician-card" v-for="technician in filteredTechnicians" :key="technician.id">
+          <div class="technician-card" v-for="technician in paginatedTechnicians" :key="technician.id">
             <div class="technician-image" :style="{ backgroundColor: technician.bgColor }">
               <img :src="technician.image" :alt="technician.name" />
             </div>
@@ -52,19 +52,24 @@
               </div>
               <p class="technician-description">{{ $t('technicianDescription') }}</p>
               <button class="view-profile-btn" @click="viewProfile(technician.id)">{{ $t('viewProfile') }}</button>
+              <button class="view-profile-btn" @click="goToBooking(technician.id)">{{ $t('bookNow') }}</button>
             </div>
           </div>
         </div>
 
         <!-- Pagination -->
         <div class="pagination">
-          <button class="pagination-btn"><i class="fa-solid fa-chevron-left"></i></button>
-          <button class="pagination-btn active">1</button>
-          <button class="pagination-btn">2</button>
-          <button class="pagination-btn">3</button>
-          <span class="pagination-dots">...</span>
-          <button class="pagination-btn">10</button>
-          <button class="pagination-btn"><i class="fa-solid fa-chevron-right"></i></button>
+          <button class="pagination-btn" :disabled="currentPage === 1" @click="goToPage(currentPage - 1)"><i class="fa-solid fa-chevron-left"></i></button>
+          <button
+            v-for="page in totalPages"
+            :key="page"
+            class="pagination-btn"
+            :class="{ active: currentPage === page }"
+            @click="goToPage(page)"
+          >
+            {{ page }}
+          </button>
+          <button class="pagination-btn" :disabled="currentPage === totalPages" @click="goToPage(currentPage + 1)"><i class="fa-solid fa-chevron-right"></i></button>
         </div>
       </div>
     </section>
@@ -89,44 +94,61 @@ import profile6 from '../assets/profile/6.png'
 import profile7 from '../assets/profile/7.png'
 import profile8 from '../assets/profile/8.png'
 import plumbingBg from '../assets/Professions/Plumbing.jpg'
+import { stockTechnicians } from '../assets/stockTechnicians.js';
 
 const router = useRouter()
-const stockTechnicians = [
-  { id: 'stock-1', name: 'Ahmed Salah', image: profile1, bgColor: '#E8E4F3', price: 200, description: 'Experienced plumber with 10+ years in the field.', rating: 5 },
-  { id: 'stock-2', name: 'Mohammed Ali', image: profile2, bgColor: '#E3F2FD', price: 180, description: 'Expert in residential plumbing.', rating: 5 },
-  { id: 'stock-3', name: 'Omar Hassan', image: profile3, bgColor: '#FFF3E0', price: 220, description: 'Specialist in pipe installation and repair.', rating: 5 },
-  { id: 'stock-4', name: 'Youssef Ahmed', image: profile4, bgColor: '#F3E5F5', price: 210, description: 'Professional with a focus on customer satisfaction.', rating: 5 },
-  { id: 'stock-5', name: 'Karim Mahmoud', image: profile5, bgColor: '#E8F5E8', price: 190, description: 'Reliable and efficient plumbing solutions.', rating: 5 },
-  { id: 'stock-6', name: 'Hassan Ibrahim', image: profile6, bgColor: '#FFF8E1', price: 205, description: 'Expert in leak detection and repair.', rating: 5 },
-  { id: 'stock-7', name: 'Mahmoud Ali', image: profile7, bgColor: '#F1F8E9', price: 195, description: 'Specialist in bathroom and kitchen plumbing.', rating: 5 },
-  { id: 'stock-8', name: 'Ibrahim Hassan', image: profile8, bgColor: '#E0F2F1', price: 215, description: 'Trusted by hundreds of satisfied customers.', rating: 5 }
-]
-const firebaseTechnicians = ref([])
-const searchQuery = ref('')
+const loading = ref(true);
+const error = ref('');
+const search = ref('');
+const allTechnicians = ref([]);
 const filterOption = ref('')
 const sortOption = ref('')
+const techniciansPerPage = 8;
+const currentPage = ref(1);
 
-async function fetchTechnicians() {
-  const querySnapshot = await getDocs(collection(db, 'technicians'))
-  firebaseTechnicians.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+// Fetch registered technicians from Firestore
+async function fetchRegisteredTechnicians() {
+  try {
+    const querySnapshot = await getDocs(collection(db, 'technicians'));
+    let registered = [];
+    let idCounter = 9;
+    querySnapshot.forEach(doc => {
+      const data = doc.data();
+      if (data.specialization && data.specialization.toLowerCase() === 'plumbing') {
+        registered.push({
+          ...data,
+          id: idCounter++, // Assign id 9+ for registered
+          isStock: false
+        });
+      }
+    });
+    return registered;
+  } catch (err) {
+    error.value = 'Error loading technicians: ' + err.message;
+    return [];
+  }
 }
 
-onMounted(fetchTechnicians)
-
-const mergedTechnicians = computed(() => {
-  // Avoid duplicate names/IDs with stock
-  const allTechs = [...stockTechnicians]
-  firebaseTechnicians.value.forEach(fbTech => {
-    if (!allTechs.some(t => t.name === fbTech.name && t.price === fbTech.price)) {
-      allTechs.push(fbTech)
-    }
-  })
-  return allTechs
-})
+onMounted(async () => {
+  loading.value = true;
+  // Filter stock technicians for plumbing
+  const stock = stockTechnicians
+    .filter(t => t.skills && t.skills.some(skill => skill.toLowerCase().includes('plumb')))
+    .map((t, idx) => ({ ...t, id: idx + 1, isStock: true }));
+  // Fetch registered
+  const registered = await fetchRegisteredTechnicians();
+  // Map Firestore technicians to use uploaded photo as image
+  const registeredWithImage = registered.map(t => ({
+    ...t,
+    image: t.idPhotoUrl || profile1 // fallback to a default image if missing
+  }));
+  allTechnicians.value = [...stock, ...registeredWithImage];
+  loading.value = false;
+});
 
 const filteredTechnicians = computed(() => {
-  let list = mergedTechnicians.value
-  const query = searchQuery.value.trim().toLowerCase()
+  let list = allTechnicians.value;
+  const query = search.value.trim().toLowerCase()
   if (query) {
     list = list.filter(t => t.name && t.name.toLowerCase().includes(query))
   }
@@ -149,8 +171,24 @@ const filteredTechnicians = computed(() => {
   return list
 })
 
+const totalPages = computed(() => {
+  return Math.ceil(filteredTechnicians.value.length / techniciansPerPage);
+});
+
+const paginatedTechnicians = computed(() => {
+  const start = (currentPage.value - 1) * techniciansPerPage;
+  const end = start + techniciansPerPage;
+  return filteredTechnicians.value.slice(start, end);
+});
+
+function goToPage(page) {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+  }
+}
+
 function onSearch(query) {
-  searchQuery.value = query
+  search.value = query
 }
 function onFilter(option) {
   filterOption.value = option
@@ -161,6 +199,10 @@ function onSort(option) {
 
 function viewProfile(id) {
   router.push({ name: 'TechnicianProfile', params: { id } })
+}
+
+function goToBooking(id) {
+  router.push({ path: '/bookingpage', query: { techId: id } })
 }
 
 const heroBackgroundStyle = computed(() => {

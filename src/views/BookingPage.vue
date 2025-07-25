@@ -69,6 +69,8 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { stockTechnicians } from '../assets/stockTechnicians'
+import { doc, getDoc } from 'firebase/firestore'
+import { db } from '../firebase'
 
 const route = useRoute()
 const router = useRouter()
@@ -98,13 +100,25 @@ const form = ref({
   payment: 'Paypal'
 })
 
-onMounted(() => {
+onMounted(async () => {
   const id = route.query.techId
   const stock = stockTechnicians.find(t => t.id === id)
   if (stock) {
     technician.value = stock
+    return
   }
-  // You can add Firestore fetch here for dynamic technicians
+  // Fetch from Firestore if not found in stock
+  if (id) {
+    const docRef = doc(db, 'technicians', id)
+    const docSnap = await getDoc(docRef)
+    if (docSnap.exists()) {
+      const data = docSnap.data()
+      technician.value = {
+        ...data,
+        image: data.idPhotoUrl || 'https://randomuser.me/api/portraits/men/32.jpg' // fallback to a default image if missing
+      }
+    }
+  }
 })
 
 function confirmBooking() {

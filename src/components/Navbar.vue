@@ -34,7 +34,8 @@ export default {
     });
 
     function getRoute(path) {
-      return locale.value === 'ar' ? `/ar/${path}` : `/${path}`;
+      // Always return the same route, no language prefix
+      return path ? `/${path}` : '/';
     }
 
     onMounted(() => {
@@ -52,17 +53,10 @@ export default {
 
     function handleProfileClick() {
       const currentUser = auth.currentUser;
-      if (currentUser && currentUser.email && currentUser.email.endsWith('@gmail.com')) {
-        router.push(getRoute('profile-view'));
-        return;
-      }
-      if (currentUser && currentUser.providerData && currentUser.providerData.some(p => p.providerId === 'google.com')) {
-        router.push(getRoute('profile-view'));
-        return;
-      }
       const userType = localStorage.getItem('userType');
       if (userType === 'technician') {
-        router.push(getRoute('profile'));
+        // Redirect to TechnicionProfile.vue (not TechnicianProfile.vue)
+        router.push({ path: '/technicion-profile' });
       } else {
         router.push(getRoute('profile-view'));
       }

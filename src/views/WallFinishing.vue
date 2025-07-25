@@ -41,7 +41,7 @@
         </div>
 
         <div class="technicians-grid">
-          <div class="technician-card" v-for="technician in filteredTechnicians" :key="technician.id">
+          <div v-for="technician in displayedTechnicians" :key="technician.id" class="technician-card">
             <div class="technician-image" :style="{ backgroundColor: technician.bgColor }">
               <img :src="technician.image" :alt="technician.name" />
             </div>
@@ -52,20 +52,12 @@
               </div>
               <p class="technician-description">{{ $t('technicianDescription') }}</p>
               <button class="view-profile-btn" @click="viewProfile(technician.id)">{{ $t('viewProfile') }}</button>
+              <button class="view-profile-btn" @click="goToBooking(technician.id)">{{ $t('bookNow') }}</button>
             </div>
           </div>
         </div>
 
-        <!-- Pagination -->
-        <div class="pagination">
-          <button class="pagination-btn"><i class="fa-solid fa-chevron-left"></i></button>
-          <button class="pagination-btn active">1</button>
-          <button class="pagination-btn">2</button>
-          <button class="pagination-btn">3</button>
-          <span class="pagination-dots">...</span>
-          <button class="pagination-btn">10</button>
-          <button class="pagination-btn"><i class="fa-solid fa-chevron-right"></i></button>
-        </div>
+        <!-- Remove pagination controls -->
       </div>
     </section>
 <EndCard />
@@ -92,33 +84,43 @@ import plumbingBg from '../assets/Professions/wall.jpg'
 
 const router = useRouter()
 const stockTechnicians = [
-  { id: 'stock-1', name: 'Ahmed Salah', image: profile1, bgColor: '#E8E4F3', price: 200, description: 'Experienced plumber with 10+ years in the field.', rating: 5 },
-  { id: 'stock-2', name: 'Mohammed Ali', image: profile2, bgColor: '#E3F2FD', price: 180, description: 'Expert in residential plumbing.', rating: 5 },
-  { id: 'stock-3', name: 'Omar Hassan', image: profile3, bgColor: '#FFF3E0', price: 220, description: 'Specialist in pipe installation and repair.', rating: 5 },
-  { id: 'stock-4', name: 'Youssef Ahmed', image: profile4, bgColor: '#F3E5F5', price: 210, description: 'Professional with a focus on customer satisfaction.', rating: 5 },
-  { id: 'stock-5', name: 'Karim Mahmoud', image: profile5, bgColor: '#E8F5E8', price: 190, description: 'Reliable and efficient plumbing solutions.', rating: 5 },
-  { id: 'stock-6', name: 'Hassan Ibrahim', image: profile6, bgColor: '#FFF8E1', price: 205, description: 'Expert in leak detection and repair.', rating: 5 },
-  { id: 'stock-7', name: 'Mahmoud Ali', image: profile7, bgColor: '#F1F8E9', price: 195, description: 'Specialist in bathroom and kitchen plumbing.', rating: 5 },
-  { id: 'stock-8', name: 'Ibrahim Hassan', image: profile8, bgColor: '#E0F2F1', price: 215, description: 'Trusted by hundreds of satisfied customers.', rating: 5 }
+  // Example stock wall finishing technicians (update these as needed)
+  { id: 'stock-1', name: 'Ahmed Salah', image: profile1, bgColor: '#E8E4F3', price: 200, description: 'Experienced wall finisher with 10+ years in the field.', rating: 5, specialization: 'Wall Finishing' },
+  { id: 'stock-2', name: 'Mohammed Ali', image: profile2, bgColor: '#E3F2FD', price: 180, description: 'Expert in residential wall finishing.', rating: 5, specialization: 'Wall Finishing' },
+  // Add more stock wall finishing technicians as needed
 ]
 const firebaseTechnicians = ref([])
 const searchQuery = ref('')
 const filterOption = ref('')
 const sortOption = ref('')
+const techniciansPerPage = 8;
+const currentPage = ref(1);
 
 async function fetchTechnicians() {
   const querySnapshot = await getDocs(collection(db, 'technicians'))
-  firebaseTechnicians.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+  firebaseTechnicians.value = querySnapshot.docs
+    .map(doc => ({ id: doc.id, ...doc.data() }))
+    .filter(tech => tech.specialization === 'Wall Finishing')
 }
 
 onMounted(fetchTechnicians)
 
 const mergedTechnicians = computed(() => {
-  // Avoid duplicate names/IDs with stock
-  const allTechs = [...stockTechnicians]
+  // Only include stock wall finishing technicians
+  const allTechs = [...stockTechnicians.filter(t => t.specialization === 'Wall Finishing')]
   firebaseTechnicians.value.forEach(fbTech => {
-    if (!allTechs.some(t => t.name === fbTech.name && t.price === fbTech.price)) {
-      allTechs.push(fbTech)
+    if (!allTechs.some(t => t.name === fbTech.fullName && t.price == fbTech.basePrice)) {
+      // Use uploaded photo if available, fallback to placeholder
+      allTechs.push({
+        id: fbTech.id,
+        name: fbTech.fullName,
+        image: fbTech.idPhotoUrl || profile1, // fallback to a default image if needed
+        bgColor: '#E8E4F3', // or any default color
+        price: fbTech.basePrice,
+        description: fbTech.bio,
+        rating: 5, // or fbTech.rating if available
+        specialization: fbTech.specialization
+      })
     }
   })
   return allTechs
@@ -149,6 +151,15 @@ const filteredTechnicians = computed(() => {
   return list
 })
 
+// Remove pagination logic
+// Instead, show up to 20 technicians from the merged list
+
+const maxTechniciansToShow = 20;
+
+const displayedTechnicians = computed(() => {
+  return filteredTechnicians.value.slice(0, maxTechniciansToShow);
+});
+
 function onSearch(query) {
   searchQuery.value = query
 }
@@ -161,6 +172,10 @@ function onSort(option) {
 
 function viewProfile(id) {
   router.push({ name: 'TechnicianProfile', params: { id } })
+}
+
+function goToBooking(id) {
+  router.push({ path: '/bookingpage', query: { techId: id } })
 }
 
 const heroBackgroundStyle = computed(() => {
@@ -353,6 +368,7 @@ const heroBackgroundStyle = computed(() => {
   cursor: pointer;
   transition: background-color 0.3s ease;
   width: 100%;
+  margin-bottom: 0.5rem; /* Added margin to separate buttons */
 }
 .dark .view-profile-btn {
   background-color: var(--primary-color);
