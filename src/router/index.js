@@ -54,6 +54,8 @@ import AdminUserProfile from '../views/adminDashboard/admin-userProfile.vue'
 import AdminPendingTech from '../views/adminDashboard/admin-pending-tech.vue'
 import AdminPendingTechProfile from '../views/adminDashboard/admin-pending-techProfile.vue'
 import PendingApplication from '../views/PendingApplication.vue'
+import AdminBookingDetails from '../views/adminDashboard/AdminBookingDetails.vue'
+import AdminBookingEdit from '../views/adminDashboard/AdminBookingEdit.vue'
 
 
 
@@ -111,6 +113,8 @@ const routes = [
   {path: '/admin-pending-tech', component: AdminPendingTech},
   {path: '/admin-pending-tech/pending-technician-profile/:id', component: AdminPendingTechProfile},
   {path: '/pending-application', component: PendingApplication},
+  {path: '/admin-booking-details/:id', name: 'admin-booking-details', component: AdminBookingDetails},
+  {path: '/admin-booking-edit/:id', name: 'admin-booking-edit', component: AdminBookingEdit},
 ]
 
 const router = createRouter({

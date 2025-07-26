@@ -23,6 +23,7 @@
                 <th>Address</th>
                 <th>Price</th>
                 <th>Status</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -34,7 +35,26 @@
                 <td>{{ booking.time }}</td>
                 <td>{{ booking.address }}</td>
                 <td>{{ booking.price }}</td>
-                <td class="booking-status">{{ booking.status }}</td>
+                                 <td class="booking-status">{{ booking.status }}</td>
+                                   <td>
+                    <div class="action-buttons">
+                      <button 
+                        class="edit-btn" 
+                        @click="editBooking(booking)"
+                        title="Edit Booking"
+                      >
+                        <i class="fas fa-pen"></i>
+                      </button>
+                      <button 
+                        class="delete-btn" 
+                        @click="cancelBooking(booking.id)" 
+                        :disabled="actionLoading === booking.id"
+                        title="Delete Booking"
+                      >
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
               </tr>
             </tbody>
           </table>
@@ -47,19 +67,54 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
+import { useRouter } from 'vue-router';
 import AdminSidebar from '../../components/admin-sidebar.vue';
 import Pagination from '../../components/pagination.vue';
 
 const bookings = ref([]);
 const searchQuery = ref('');
+const actionLoading = ref(null);
+const router = useRouter();
 
 onMounted(async () => {
+  await fetchBookings();
+});
+
+async function fetchBookings() {
   const q = query(collection(db, 'bookings'), where('status', '==', 'upcoming'));
   const querySnapshot = await getDocs(q);
   bookings.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-});
+}
+
+function editBooking(booking) {
+  router.push({
+    name: 'admin-booking-details',
+    params: { id: booking.id },
+    query: { edit: 'true' },
+    state: { booking }
+  });
+}
+
+async function cancelBooking(bookingId) {
+  if (!confirm('Are you sure you want to cancel this booking? This action cannot be undone.')) {
+    return;
+  }
+  
+  actionLoading.value = bookingId;
+  try {
+    await deleteDoc(doc(db, 'bookings', bookingId));
+    // Remove the booking from the local array
+    bookings.value = bookings.value.filter(booking => booking.id !== bookingId);
+    alert('Booking cancelled successfully!');
+  } catch (error) {
+    console.error('Error cancelling booking:', error);
+    alert('Failed to cancel booking. Please try again.');
+  } finally {
+    actionLoading.value = null;
+  }
+}
 
 const filteredBookings = computed(() => {
   if (!searchQuery.value.trim()) return bookings.value;
@@ -182,12 +237,54 @@ const filteredBookings = computed(() => {
 }
 
 .booking-status {
-  background: #dbeafe;
-  color: #1e40af;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
+  background: none;
+  color: #6b7280;
+  padding: 0.2rem 0.6rem;
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
   font-weight: 600;
+  text-transform: capitalize;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.edit-btn {
+  background: none;
+  color: #f59e0b;
+  border: none;
+  padding: 0.3rem 0.8rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: color 0.2s;
+}
+
+.edit-btn:hover {
+  color: #d97706;
+}
+
+.delete-btn {
+  background: none;
+  color: #ef4444;
+  border: none;
+  padding: 0.3rem 0.8rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: color 0.2s;
+}
+
+.delete-btn:hover {
+  color: #dc2626;
+}
+
+.delete-btn:disabled {
+  background: #fecaca;
+  cursor: not-allowed;
 }
 
 @media (max-width: 768px) {
