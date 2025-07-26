@@ -54,12 +54,36 @@ export default {
     function handleProfileClick() {
       const currentUser = auth.currentUser;
       const userType = localStorage.getItem('userType');
-      if (userType === 'technician') {
+      if (userType === 'admin') {
+        router.push({ path: '/admin-dashboard' });
+      } else if (userType === 'technician') {
         router.push({ path: '/technicion-profile' });
-      } else if (userType === 'user') {
-        router.push({ path: '/profile-view' });
+      } else if (userType === 'pending') {
+        router.push({ path: '/pending-application' });
       } else {
         router.push(getRoute('profile-view'));
+      }
+    }
+
+    // Get user role for display
+    function getUserRole() {
+      return localStorage.getItem('userType') || 'user';
+    }
+
+    // Get role display text
+    function getRoleDisplayText() {
+      const role = getUserRole();
+      switch (role) {
+        case 'admin':
+          return 'Admin';
+        case 'technician':
+          return 'Technician';
+        case 'pending':
+          return 'Pending';
+        case 'user':
+          return 'User';
+        default:
+          return 'User';
       }
     }
 
@@ -159,6 +183,8 @@ export default {
       hideDropdown,
       toggleDropdownMobile,
       isMobile,
+      getUserRole,
+      getRoleDisplayText,
       categories: [
         { name: 'Plumbing', route: '/plumbing' },
         { name: 'Electricity', route: '/electricity' },
@@ -250,6 +276,7 @@ export default {
           <span class="flex items-center gap-2 rounded bg-gray-100 cursor-pointer" @click="handleProfileClick">
             <span class="text-gray-700 font-semibold px-3 py-1">
               {{ user.email || user.uid }}
+              <span class="text-xs text-gray-500 ml-2">({{ getRoleDisplayText() }})</span>
             </span>
             <i class="fas fa-user-circle text-secondary text-2xl px-3"></i>
           </span>
@@ -323,6 +350,7 @@ export default {
                   <span class="text-gray-700 font-semibold px-3 py-1 rounded bg-gray-100 cursor-pointer"
                     @click="handleProfileClick">
                     {{ user.email || user.uid }}
+                    <span class="text-xs text-gray-500 ml-2">({{ getRoleDisplayText() }})</span>
                   </span>
                   <i class="fas fa-user-circle text-2xl text-secondary cursor-pointer" @click="handleProfileClick"></i>
                 </span>

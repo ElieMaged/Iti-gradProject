@@ -1,10 +1,9 @@
 <template>
-  <div class="admin-dashboard-layout">
-    <admin-sidebar />
+  <div class="technician-dashboard-layout">
     <div class="booking-main">
       <div class="booking-container">
         <div class="title-search-row">
-          <h2 class="booking-title">Pending Booking</h2>
+          <h2 class="booking-title">{{ pageTitle }}</h2>
           <div class="search-wrapper">
             <input v-model="searchQuery" class="search-input" type="text" placeholder="Search" />
             <span class="search-icon"><i class="fas fa-search"></i></span>
@@ -49,7 +48,9 @@
                 <td>{{ booking.time }}</td>
                 <td>{{ booking.address }}</td>
                 <td>{{ booking.price }}</td>
-                <td><span class="status-pending">{{ booking.status }}</span></td>
+                <td>
+                  <span :class="statusClass(booking.status)">{{ booking.status }}</span>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -57,67 +58,95 @@
 
         <!-- Empty State -->
         <div v-else class="empty-state">
-          <p>No pending bookings found.</p>
+          <p>No bookings found.</p>
         </div>
-        <pagination />
       </div>
     </div>
   </div>
 </template>
 
-<script>
-import AdminSidebar from '../../components/admin-sidebar.vue';
-import Pagination from '../../components/pagination.vue';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../../firebase';
+<script setup>
+import { ref, computed, onMounted, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { db } from '../firebase';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
-export default {
-  name: 'PendingBooking',
-  components: {
-    AdminSidebar,
-    Pagination
-  },
-  data() {
-    return {
-      searchQuery: '',
-      bookings: [],
-      loading: true,
-      error: null
-    };
-  },
-  computed: {
-    filteredBookings() {
-      const q = this.searchQuery.toLowerCase();
-      return this.bookings.filter(b =>
-        Object.values(b).some(val => String(val).toLowerCase().includes(q))
-      );
-    },
-  },
-  async mounted() {
-    await this.fetchBookings();
-  },
-  methods: {
-    async fetchBookings() {
-      try {
-        this.loading = true;
-        this.error = null;
-        const snapshot = await getDocs(collection(db, 'bookings'));
-        this.bookings = snapshot.docs
-          .map(doc => ({ id: doc.id, ...doc.data() }))
-          .filter(booking => booking.status && booking.status.toLowerCase() === 'pending');
-      } catch (e) {
-        this.error = 'Failed to fetch bookings';
-      } finally {
-        this.loading = false;
-      }
+const route = useRoute();
+const router = useRouter();
+const searchQuery = ref('');
+const bookings = ref([]);
+const loading = ref(true);
+const error = ref(null);
+const technicianUid = ref(null);
+const status = ref(route.query.status || 'pending');
+
+const pageTitle = computed(() => {
+  if (status.value === 'pending') return 'Pending Bookings';
+  if (status.value === 'upcoming') return 'Upcoming Bookings';
+  if (status.value === 'completed') return 'Completed Bookings';
+  return 'Bookings';
+});
+
+const filteredBookings = computed(() => {
+  const q = searchQuery.value.toLowerCase();
+  return bookings.value.filter(b =>
+    Object.values(b).some(val => String(val).toLowerCase().includes(q))
+  );
+});
+
+function statusClass(statusVal) {
+  if (!statusVal) return '';
+  const s = statusVal.toLowerCase();
+  if (s === 'pending') return 'status-pending';
+  if (s === 'upcoming') return 'booking-status';
+  if (s === 'completed') return 'status-completed';
+  return '';
+}
+
+async function fetchBookings() {
+  try {
+    loading.value = true;
+    error.value = null;
+    if (!technicianUid.value) {
+      error.value = 'Technician not authenticated.';
+      return;
     }
+    let q = query(
+      collection(db, 'bookings'),
+      where('technicianId', '==', technicianUid.value),
+      where('status', '==', status.value)
+    );
+    const snapshot = await getDocs(q);
+    bookings.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (e) {
+    error.value = 'Failed to fetch bookings';
+  } finally {
+    loading.value = false;
   }
-};
+}
+
+onMounted(() => {
+  const auth = getAuth();
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      technicianUid.value = user.uid;
+      fetchBookings();
+    } else {
+      error.value = 'Technician not authenticated.';
+      loading.value = false;
+    }
+  });
+});
+
+watch(() => route.query.status, (newStatus) => {
+  status.value = newStatus || 'pending';
+  fetchBookings();
+});
 </script>
 
 <style scoped>
-.admin-dashboard-layout {
-  display: flex;
+.technician-dashboard-layout {
   min-height: 100vh;
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
   background: #faf8fd;
@@ -185,7 +214,6 @@ export default {
   font-size: 1.1rem;
 }
 
-/* Loading State */
 .loading-state {
   display: flex;
   flex-direction: column;
@@ -212,7 +240,6 @@ export default {
   100% { transform: rotate(360deg); }
 }
 
-/* Error State */
 .error-state {
   display: flex;
   flex-direction: column;
@@ -244,7 +271,6 @@ export default {
   background: #6b5fa7;
 }
 
-/* Empty State */
 .empty-state {
   display: flex;
   align-items: center;
@@ -307,6 +333,24 @@ export default {
   font-weight: 600;
 }
 
+.booking-status {
+  background: #dbeafe;
+  color: #1e40af;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-completed {
+  background: #dcfce7;
+  color: #166534;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
 @media (max-width: 768px) {
   .booking-main {
     padding: 1rem;
@@ -328,5 +372,4 @@ export default {
     padding: 0.5rem 0.5rem;
   }
 }
-</style>
-  
+</style> 

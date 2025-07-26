@@ -1,0 +1,202 @@
+ADMIN ROLE ENFORCEMENT FOR elie1400674@gmail.com
+==================================================
+
+This implementation ensures that elie1400674@gmail.com ALWAYS has admin role, no questions asked.
+
+1. UTILITY FILE: src/utils/userRole.js
+=====================================
+
+import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { db } from '../firebase';
+
+// Set or update the user's role in Firestore
+export async function ensureUserRole(user) {
+  if (!user) return;
+  
+  const userRef = doc(db, 'users', user.uid);
+  const userSnap = await getDoc(userRef);
+  
+  let role = 'user';
+  
+  // ALWAYS enforce admin role for this specific email
+  if (user.email === 'elie1400674@gmail.com') {
+    role = 'admin';
+  }
+  
+  if (!userSnap.exists()) {
+    // Create new user document
+    await setDoc(userRef, {
+      email: user.email,
+      role: role,
+      createdAt: new Date()
+    });
+  } else {
+    // Update existing user document - ALWAYS enforce admin role for the specific email
+    const data = userSnap.data();
+    if (user.email === 'elie1400674@gmail.com') {
+      // Force admin role for this email, no matter what
+      await setDoc(userRef, { 
+        ...data, 
+        role: 'admin',
+        email: user.email 
+      });
+    } else if (data.role !== role) {
+      // Update role for other users if it changed
+      await setDoc(userRef, { ...data, role: role });
+    }
+  }
+  
+  // Set localStorage immediately
+  localStorage.setItem('userType', role);
+  return role;
+}
+
+// Fetch the user's role from Firestore and store in localStorage
+export async function fetchUserRole(user) {
+  if (!user) return null;
+  
+  const userRef = doc(db, 'users', user.uid);
+  const userSnap = await getDoc(userRef);
+  
+  if (userSnap.exists()) {
+    const data = userSnap.data();
+    let role = data.role;
+    
+    // ALWAYS enforce admin role for this email, even when fetching
+    if (user.email === 'elie1400674@gmail.com') {
+      role = 'admin';
+      // Update Firestore if it's not already set to admin
+      if (data.role !== 'admin') {
+        await setDoc(userRef, { ...data, role: 'admin' });
+      }
+    }
+    
+    localStorage.setItem('userType', role);
+    return role;
+  }
+  
+  // If document doesn't exist, create it with proper role
+  return await ensureUserRole(user);
+}
+
+2. UPDATED UserLogin.vue
+========================
+
+// Add this import at the top:
+import { ensureUserRole, fetchUserRole } from '../utils/userRole';
+
+// Replace the handleLogin function:
+const handleLogin = async () => {
+  error.value = '';
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email.value, password.value);
+    // Enforce persistent admin role for elie1400674@gmail.com
+    await ensureUserRole(userCredential.user);
+    await fetchUserRole(userCredential.user);
+    router.push('/');
+  } catch (err) {
+    error.value = err.message;
+  }
+};
+
+// Replace the handleGoogleSignIn function:
+const handleGoogleSignIn = async () => {
+  error.value = '';
+  try {
+    const result = await signInWithPopup(auth, provider);
+    if (result && result.user) {
+      // Enforce persistent admin role for elie1400674@gmail.com
+      await ensureUserRole(result.user);
+      await fetchUserRole(result.user);
+      router.push('/');
+    } else {
+      error.value = 'Google sign-in failed. No user returned.';
+      console.error('Google sign-in failed. No user returned.', result);
+    }
+  } catch (err) {
+    error.value = err.message;
+    console.error('Google sign-in error:', err);
+  }
+};
+
+3. UPDATED UserSignUp.vue
+=========================
+
+// Add this import at the top:
+import { ensureUserRole, fetchUserRole } from '../utils/userRole';
+
+// Replace the handleRegister function:
+const handleRegister = async () => {
+  error.value = '';
+  if (password.value !== confirmPass.value) {
+    error.value = "Passwords do not match.";
+    return;
+  }
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
+    // Enforce persistent admin role for elie1400674@gmail.com
+    await ensureUserRole(userCredential.user);
+    await fetchUserRole(userCredential.user);
+    router.push('/'); // Redirect to home page after registration
+  } catch (err) {
+    error.value = err.message;
+  }
+};
+
+4. UPDATED TechRegister.vue
+===========================
+
+// Add this import at the top:
+import { ensureUserRole, fetchUserRole } from '../utils/userRole';
+
+// In the handleRegister function, after saving technician data:
+// Use setDoc with UID as document ID
+await setDoc(doc(db, 'technicians', userCredential.user.uid), technicianData);
+
+// Enforce persistent admin role for elie1400674@gmail.com
+await ensureUserRole(userCredential.user);
+await fetchUserRole(userCredential.user);
+
+success.value = t('registrationSuccessful');
+// Redirect after a short delay
+setTimeout(() => {
+  router.push({ name: 'TechnicianProfile', params: { id: userCredential.user.uid } });
+}, 2000);
+
+5. UPDATED firestore.rules
+==========================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow read and write access to users collection for authenticated users
+    match /users/{userId} {
+      allow read, write: if request.auth != null;
+    }
+    // Allow read and write access to bookings collection for all users (for testing)
+    match /bookings/{document} {
+      allow read, write: if true;
+    }
+    // Allow read access to team collection
+    match /team/{document} {
+      allow read: if true;
+    }
+  }
+}
+
+6. DEPLOY THE RULES
+===================
+
+Run this command to deploy the updated Firestore rules:
+firebase deploy --only firestore:rules
+
+SUMMARY
+=======
+
+This implementation ensures that:
+- elie1400674@gmail.com ALWAYS gets admin role on login/registration
+- The admin role is enforced every time the user logs in
+- Even if someone manually changes the role in Firestore, it will be reset to admin on next login
+- The role is stored both in Firestore and localStorage
+- Works for email/password login, Google sign-in, and technician registration
+- Firestore rules allow authenticated users to read/write their user documents 

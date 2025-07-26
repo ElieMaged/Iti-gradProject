@@ -32,6 +32,9 @@ import RegisterChoice from '../views/RegisterChoice.vue'
 import TechnicianAvailability from '../views/TechnicianAvailbility.vue'
 import TechPayment from '../views/TechPayment.vue'
 import Chatbot from '../components/chatbot.vue'
+import TechnicianBookingPending from '../views/TechnicianBookingPending.vue'
+import TechnicianBookingUpcoming from '../views/TechnicianBookingUpcoming.vue'
+import TechnicianBookingCompleted from '../views/TechnicianBookingCompleted.vue'
 
 //admin
 import AdminUsers from '../views/adminDashboard/admin-users.vue'
@@ -50,6 +53,7 @@ import AllTechnician from '../views/adminDashboard/All-Technician.vue'
 import AdminUserProfile from '../views/adminDashboard/admin-userProfile.vue'
 import AdminPendingTech from '../views/adminDashboard/admin-pending-tech.vue'
 import AdminPendingTechProfile from '../views/adminDashboard/admin-pending-techProfile.vue'
+import PendingApplication from '../views/PendingApplication.vue'
 
 
 
@@ -79,13 +83,15 @@ const routes = [
   {path: '/technician-details', component: TechnicianDetails },
   {path: '/technicion-profile', component: TechnicionProfile },
   {path: '/technician-edit-profile', component: TechnicianEditProfile },
-  {path: '/booking', component: PendingBookings },
   {path: '/technicianavailbility', component: TechnicianAvailability },
   { path: '/technician/:id', name: 'TechnicianProfile', component: () => import('../views/TechnicianProfile.vue') },
   { path: '/bookingpage', component: BookingPage },
   { path: '/bookingconfirmation', component: BookingConfirmation },
   { path: '/techpayment', component: TechPayment },
   { path: '/chatbot', component: Chatbot },
+  { path: '/technician-booking-pending', component: TechnicianBookingPending },
+  { path: '/technician-booking-upcoming', component: TechnicianBookingUpcoming },
+  { path: '/technician-booking-completed', component: TechnicianBookingCompleted },
 
   //admin
   { path: '/admin-users', component: AdminUsers },
@@ -104,6 +110,7 @@ const routes = [
   {path: '/admin-user-profile/:id', component: AdminUserProfile},
   {path: '/admin-pending-tech', component: AdminPendingTech},
   {path: '/admin-pending-tech/pending-technician-profile/:id', component: AdminPendingTechProfile},
+  {path: '/pending-application', component: PendingApplication},
 ]
 
 const router = createRouter({

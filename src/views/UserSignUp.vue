@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { auth } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { ensureUserRole, fetchUserRole } from '../utils/userRole';
 
 const email = ref('');
 const password = ref('');
@@ -18,8 +19,10 @@ const handleRegister = async () => {
   }
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
+    // Enforce persistent admin role for elie1400674@gmail.com
+    await ensureUserRole(userCredential.user);
+    await fetchUserRole(userCredential.user);
     router.push('/'); // Redirect to home page after registration
-    localStorage.setItem('userType', 'user');
   } catch (err) {
     error.value = err.message;
   }

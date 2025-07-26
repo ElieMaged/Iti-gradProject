@@ -1,7 +1,8 @@
 <template>
   <div class="booking-wrapper">
     <h1 class="booking-title">{{ $t('completeYourBooking') }}</h1>
-    <div class="booking-card">
+    <div v-if="errorMsg" class="error-message" style="color: red; text-align: center; margin-bottom: 1rem;">{{ errorMsg }}</div>
+    <div v-if="!errorMsg" class="booking-card">
       <div class="booking-steps">
         <div class="step active">1 <span>{{ $t('detailsAndPayment') }}</span></div>
         <div class="step">2 <span>{{ $t('confirmation') }}</span></div>
@@ -68,24 +69,37 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { stockTechnicians } from '../assets/stockTechnicians'
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { auth } from '../firebase';
 import emailjs from 'emailjs-com';
 import { db } from '../firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
 
 const route = useRoute()
 const router = useRouter()
 const technician = ref({})
+const errorMsg = ref('')
 
-const availableDates = [
-  '7/5/2025 Friday',
-  '7/6/2025 Saturday',
-  '7/7/2025 Sunday'
-]
+// Dynamically generate the next three days for the date dropdown
+const availableDates = computed(() => {
+  const days = [];
+  const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const today = new Date();
+  for (let i = 1; i <= 3; i++) {
+    const nextDay = new Date(today);
+    nextDay.setDate(today.getDate() + i);
+    const month = nextDay.getMonth() + 1;
+    const date = nextDay.getDate();
+    const year = nextDay.getFullYear();
+    const dayOfWeek = dayNames[nextDay.getDay()];
+    days.push(`${month}/${date}/${year} ${dayOfWeek}`);
+  }
+  return days;
+});
+
 const availableTimes = [
   '01:00 PM - 11:00 PM',
   '12:00 PM - 12:00 PM',
@@ -93,7 +107,7 @@ const availableTimes = [
 ]
 
 const form = ref({
-  date: availableDates[0],
+  date: '', // will be set on mount
   time: availableTimes[0],
   fullName: '',
   phone: '',
@@ -106,13 +120,40 @@ const form = ref({
   payment: 'Paypal'
 })
 
-onMounted(() => {
+onMounted(async () => {
   const id = route.query.techId
+  if (!id) {
+    errorMsg.value = 'Technician ID is missing. Please try again or contact support.';
+    return;
+  }
+  // Try to find in stockTechnicians first
   const stock = stockTechnicians.find(t => t.id === id)
   if (stock) {
     technician.value = stock
+  } else {
+    // Try to fetch from Firestore (pendingTechnicians or technicians)
+    let docRef = doc(db, 'technicians', id);
+    let docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) {
+      // Try pendingTechnicians (if not yet approved)
+      docRef = doc(db, 'pendingTechnicians', id);
+      docSnap = await getDoc(docRef);
+    }
+    if (docSnap.exists()) {
+      const techData = docSnap.data();
+      technician.value = {
+        ...techData,
+        uid: id, // Ensure uid is set for consistency
+        name: techData.fullName || techData.name // Map fullName to name for consistency
+      };
+    } else {
+      errorMsg.value = 'Technician not found. Please try again or contact support.';
+    }
   }
-  // You can add Firestore fetch here for dynamic technicians
+  // Set default date to the first available date
+  if (availableDates.value.length > 0) {
+    form.value.date = availableDates.value[0];
+  }
 })
 
 function sendConfirmationEmail(userEmail, technicianName, date, time, payment) {
@@ -146,15 +187,17 @@ async function confirmBooking() {
     date: form.value.date,
     time: form.value.time,
     payment: form.value.payment,
-    status: 'new',
+    status: 'pending', // Changed from 'new' to 'pending' to match technician booking page
     createdAt: serverTimestamp()
   };
+  console.log('Booking data to be saved:', bookingData); // DEBUG
   localStorage.setItem('bookingData', JSON.stringify(bookingData));
 
   // Save booking to Firestore
   try {
     await addDoc(collection(db, 'bookings'), bookingData);
   } catch (e) {
+    console.error('Booking Firestore error:', e); // DEBUG
     alert('Failed to save booking. Please try again.');
     return;
   }

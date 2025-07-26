@@ -1,13 +1,25 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow read access to team collection
-    match /team/{document} {
-      allow read: if true;
+    // Allow read and write access to users collection for authenticated users
+    match /users/{userId} {
+      allow read, write: if request.auth != null;
+    }
+    // Allow read and write access to technicians collection for authenticated users
+    match /technicians/{technicianId} {
+      allow read, write: if request.auth != null;
+    }
+    // Allow read and write access to pendingTechnicians collection for authenticated users
+    match /pendingTechnicians/{pendingTechnicianId} {
+      allow read, write: if request.auth != null;
     }
     // Allow read and write access to bookings collection for all users (for testing)
     match /bookings/{document} {
       allow read, write: if true;
+    }
+    // Allow read access to team collection
+    match /team/{document} {
+      allow read: if true;
     }
   }
 } 

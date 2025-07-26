@@ -91,7 +91,13 @@ function toggleBookingDropdown() {
   if (!isBookingDropdownOpen.value) return;
 }
 function navigateBookingStatus(status) {
-  router.push({ path: '/booking', query: { status } });
+  if (status === 'pending') {
+    router.push('/technician-booking-pending');
+  } else if (status === 'upcoming') {
+    router.push('/technician-booking-upcoming');
+  } else if (status === 'completed') {
+    router.push('/technician-booking-completed');
+  }
 }
 </script>
 

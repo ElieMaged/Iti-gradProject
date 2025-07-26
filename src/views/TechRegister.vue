@@ -117,6 +117,8 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { collection, serverTimestamp, doc, setDoc } from 'firebase/firestore';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useI18n } from 'vue-i18n';
+import { ensureUserRole, fetchUserRole } from '../utils/userRole';
+
 const { t } = useI18n();
 
 const router = useRouter();
@@ -201,16 +203,26 @@ async function handleRegister() {
       status: 'pending', // Admin approval status
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
-      role: 'technician' // Add role field
+      role: 'pending' // Set as pending until admin approves
     };
-    // Use setDoc with UID as document ID
-    await setDoc(doc(db, 'technicians', userCredential.user.uid), technicianData);
-    // Set userType in localStorage
-    localStorage.setItem('userType', 'technician');
-    success.value = t('registrationSuccessful');
-    // Redirect after a short delay
+    
+    // Save to pending applications collection
+    await setDoc(doc(db, 'pendingTechnicians', userCredential.user.uid), technicianData);
+    
+    // Also save to users collection with pending role
+    await setDoc(doc(db, 'users', userCredential.user.uid), {
+      email: formData.email,
+      role: 'pending',
+      createdAt: serverTimestamp()
+    });
+    
+    // Set localStorage to pending
+    localStorage.setItem('userType', 'pending');
+    
+    success.value = t('applicationSubmitted');
+    // Redirect to pending status page
     setTimeout(() => {
-      router.push({ name: 'TechnicianProfile', params: { id: userCredential.user.uid } });
+      router.push('/pending-application');
     }, 2000);
     
   } catch (err) {
@@ -234,6 +246,42 @@ async function handleRegister() {
     loading.value = false;
   }
 }
+
+// TEMPORARY ADMIN UTILITY: Promote a user by email to technician
+async function promoteUserToTechnician(email) {
+  const auth = getAuth();
+  // Get all users is not available in client SDK, so this only works if the user is currently logged in
+  const user = auth.currentUser;
+  if (!user || user.email !== email) {
+    alert('Please log in as the user you want to promote: ' + email);
+    return;
+  }
+  const technicianData = {
+    uid: user.uid,
+    fullName: user.displayName || 'Technician',
+    email: user.email,
+    specialization: '',
+    experience: '',
+    bio: '',
+    basePrice: '',
+    government: '',
+    district: '',
+    willingToTravel: '',
+    idPhotoUrl: '',
+    status: 'pending',
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    role: 'pending'
+  };
+  await setDoc(doc(db, 'pendingTechnicians', user.uid), technicianData);
+  await setDoc(doc(db, 'users', user.uid), {
+    email: user.email,
+    role: 'pending',
+    createdAt: serverTimestamp()
+  });
+  alert('User promoted to technician!');
+}
+// Usage: Call promoteUserToTechnician('narutossj123@yahoo.com') in the browser console after logging in as that user.
 </script>
 
 <style scoped>

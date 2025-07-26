@@ -1,70 +1,129 @@
 <template>
   <div class="admin-dashboard-layout">
     <admin-sidebar />
-    <div class="pending-tech-main">
-      <div class="pending-tech-container">
-        <h2 class="pending-tech-title">Technician Management</h2>
+    <div class="pending-main">
+      <div class="pending-container">
+        <h2 class="pending-title">Pending Technician Applications</h2>
         <div class="subtitle-search-row">
-          <div class="pending-tech-subtitle">Pending Technicians</div>
+          <div class="pending-subtitle">Review Applications</div>
           <div class="search-wrapper">
             <input 
               type="text" 
-              v-model="searchQuery" 
-              placeholder="Search" 
-              class="search-input" 
+              placeholder="Search applications" 
+              v-model="searchQuery"
+              class="search-input"
             />
             <span class="search-icon"><i class="fas fa-search"></i></span>
           </div>
         </div>
-        <div class="table-wrapper">
-          <table class="pending-tech-table">
-            <thead>
-              <tr class="table-header">
-                <th>No</th>
-                <th>Technician</th>
-                <th>ID Number</th>
-                <th>Specialization</th>
-                <th>Location</th>
-                <th>Mail</th>
-                <th>Contact</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr 
-                v-for="(technician, index) in paginatedTechnicians" 
-                :key="technician.id" 
-                class="table-row"
-              >
-                <td>{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
-                <td class="technician-cell">
-                  <img :src="technician.avatar" :alt="technician.name" class="technician-avatar">
-                  {{ technician.name }}
-                </td>
-                <td>{{ technician.idNumber }}</td>
-                <td>{{ technician.specialization }}</td>
-                <td>{{ technician.location }}</td>
-                <td>{{ technician.email }}</td>
-                <td>{{ technician.contact }}</td>
-                <td class="action-cell">
-                  <a @click="viewTechnician(technician)" class="action-btn view-btn">
-                    <i class="fas fa-eye"></i>
-                  </a>
-                  <button @click="deleteTechnician(technician)" class="action-btn delete-btn">
-                    <i class="fas fa-trash-alt"></i>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+
+        <!-- Loading State -->
+        <div v-if="loading" class="loading-state">
+          <div class="loading-spinner"></div>
+          <p>Loading pending applications...</p>
+        </div>
+
+        <!-- Error State -->
+        <div v-else-if="error" class="error-state">
+          <p class="error-message">{{ error }}</p>
+          <button @click="fetchPendingApplications" class="retry-btn">Retry</button>
+        </div>
+
+        <!-- Applications List -->
+        <div v-else-if="applications.length > 0" class="applications-grid">
+          <div 
+            v-for="(application, index) in paginatedApplications" 
+            :key="application.id" 
+            class="application-card"
+          >
+            <div class="card-header">
+              <div class="applicant-info">
+                <img :src="application.idPhotoUrl || 'https://randomuser.me/api/portraits/men/1.jpg'" 
+                     :alt="application.fullName" 
+                     class="applicant-avatar" />
+                <div>
+                  <h3 class="applicant-name">{{ application.fullName }}</h3>
+                  <p class="applicant-email">{{ application.email }}</p>
+                </div>
+              </div>
+              <div class="application-number">#{{ (currentPage - 1) * itemsPerPage + index + 1 }}</div>
+            </div>
+
+            <div class="card-content">
+              <div class="info-row">
+                <span class="info-label">Specialization:</span>
+                <span class="info-value">{{ application.specialization }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Experience:</span>
+                <span class="info-value">{{ application.experience }} years</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Location:</span>
+                <span class="info-value">{{ application.government }}, {{ application.district }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Base Price:</span>
+                <span class="info-value">${{ application.basePrice }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Willing to Travel:</span>
+                <span class="info-value">{{ application.willingToTravel === 'yes' ? 'Yes' : 'No' }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Bio:</span>
+                <span class="info-value bio-text">{{ application.bio }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Applied:</span>
+                <span class="info-value">{{ formatDate(application.createdAt) }}</span>
+              </div>
+            </div>
+
+            <div class="card-actions">
+              <button @click="viewIdPhoto(application)" class="action-btn view-btn">
+                <i class="fas fa-id-card"></i> View ID
+              </button>
+              <button @click="acceptApplication(application)" class="action-btn accept-btn">
+                <i class="fas fa-check"></i> Accept
+              </button>
+              <button @click="rejectApplication(application)" class="action-btn reject-btn">
+                <i class="fas fa-times"></i> Reject
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div v-else class="empty-state">
+          <p>No pending technician applications found.</p>
         </div>
         
-        <pagination 
+        <pagination
           :current-page="currentPage"
           :total-pages="totalPages"
           @prev-page="prevPage"
           @next-page="nextPage"
         />
+      </div>
+    </div>
+
+    <!-- ID Photo Modal -->
+    <div v-if="showIdModal" class="modal-overlay" @click="closeIdModal">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>ID Photo - {{ selectedApplication?.fullName }}</h3>
+          <button @click="closeIdModal" class="modal-close">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <img v-if="selectedApplication?.idPhotoUrl" 
+               :src="selectedApplication.idPhotoUrl" 
+               alt="ID Photo" 
+               class="id-photo" />
+          <p v-else class="no-photo">No ID photo uploaded</p>
+        </div>
       </div>
     </div>
   </div>
@@ -73,9 +132,12 @@
 <script>
 import AdminSidebar from '../../components/admin-sidebar.vue';
 import Pagination from '../../components/pagination.vue';
+import { collection, getDocs, doc, deleteDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { db } from '../../firebase';
 
 export default {
-  components: { 
+  name: 'AdminPendingTech',
+  components: {
     AdminSidebar,
     Pagination
   },
@@ -83,125 +145,156 @@ export default {
     return {
       searchQuery: '',
       currentPage: 1,
-      itemsPerPage: 5,
-      pendingTechnicians: [
-        {
-          id: 1,
-          name: 'Ahmed Hassan',
-          avatar: 'https://randomuser.me/api/portraits/men/75.jpg',
-          idNumber: '30303078800526',
-          specialization: 'Carpentry',
-          location: 'Giza',
-          email: 'test123@gmail.com',
-          contact: '82486 69086'
-        },
-        {
-          id: 2,
-          name: 'Mohamed Ali',
-          avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-          idNumber: '30303078800527',
-          specialization: 'Plumbing',
-          location: 'Cairo',
-          email: 'mohamed@gmail.com',
-          contact: '82486 69087'
-        },
-        {
-          id: 3,
-          name: 'Omar Hassan',
-          avatar: 'https://randomuser.me/api/portraits/men/45.jpg',
-          idNumber: '30303078800528',
-          specialization: 'Electrical',
-          location: 'Alexandria',
-          email: 'omar@gmail.com',
-          contact: '82486 69088'
-        },
-        {
-          id: 4,
-          name: 'Ahmed Ali',
-          avatar: 'https://randomuser.me/api/portraits/men/67.jpg',
-          idNumber: '30303078800529',
-          specialization: 'Carpentry',
-          location: 'Giza',
-          email: 'ahmed@gmail.com',
-          contact: '82486 69089'
-        },
-        {
-          id: 5,
-          name: 'Mahmoud Hassan',
-          avatar: 'https://randomuser.me/api/portraits/men/89.jpg',
-          idNumber: '30303078800530',
-          specialization: 'Plumbing',
-          location: 'Cairo',
-          email: 'mahmoud@gmail.com',
-          contact: '82486 69090'
-        },
-        {
-          id: 6,
-          name: 'Karim Ali',
-          avatar: 'https://randomuser.me/api/portraits/men/12.jpg',
-          idNumber: '30303078800531',
-          specialization: 'Electrical',
-          location: 'Alexandria',
-          email: 'karim@gmail.com',
-          contact: '82486 69091'
-        },
-        {
-          id: 7,
-          name: 'Samir Hassan',
-          avatar: 'https://randomuser.me/api/portraits/men/34.jpg',
-          idNumber: '30303078800532',
-          specialization: 'Carpentry',
-          location: 'Giza',
-          email: 'samir@gmail.com',
-          contact: '82486 69092'
-        },
-        {
-          id: 8,
-          name: 'Youssef Ali',
-          avatar: 'https://randomuser.me/api/portraits/men/56.jpg',
-          idNumber: '30303078800533',
-          specialization: 'Plumbing',
-          location: 'Cairo',
-          email: 'youssef@gmail.com',
-          contact: '82486 69093'
-        }
-      ]
+      itemsPerPage: 6,
+      applications: [],
+      loading: true,
+      error: null,
+      showIdModal: false,
+      selectedApplication: null
     };
   },
   computed: {
-    filteredTechnicians() {
-      if (!this.searchQuery.trim()) return this.pendingTechnicians;
+    filteredApplications() {
+      if (!this.searchQuery.trim()) return this.applications;
       const q = this.searchQuery.toLowerCase();
-      return this.pendingTechnicians.filter(technician =>
-        Object.values(technician).some(val => String(val).toLowerCase().includes(q))
+      return this.applications.filter(app =>
+        app.fullName?.toLowerCase().includes(q) ||
+        app.email?.toLowerCase().includes(q) ||
+        app.specialization?.toLowerCase().includes(q) ||
+        app.government?.toLowerCase().includes(q)
       );
     },
     totalPages() {
-      return Math.ceil(this.filteredTechnicians.length / this.itemsPerPage);
+      return Math.ceil(this.filteredApplications.length / this.itemsPerPage);
     },
-    paginatedTechnicians() {
+    paginatedApplications() {
       const start = (this.currentPage - 1) * this.itemsPerPage;
       const end = start + this.itemsPerPage;
-      return this.filteredTechnicians.slice(start, end);
+      return this.filteredApplications.slice(start, end);
     }
   },
+  async mounted() {
+    await this.fetchPendingApplications();
+  },
   methods: {
-    viewTechnician(technician) {
-      this.$router.push(`/admin-pending-tech/pending-technician-profile/${technician.id}`);
-    },
-    deleteTechnician(technician) {
-      if (confirm(`Are you sure you want to delete ${technician.name}?`)) {
-        const index = this.pendingTechnicians.findIndex(t => t.id === technician.id);
-        if (index > -1) {
-          this.pendingTechnicians.splice(index, 1);
-        }
+    async fetchPendingApplications() {
+      try {
+        this.loading = true;
+        this.error = null;
+        
+        console.log('🔍 Fetching pending technician applications...');
+        
+        const pendingCollection = collection(db, 'pendingTechnicians');
+        const snapshot = await getDocs(pendingCollection);
+        
+        this.applications = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        console.log('✅ Pending applications loaded:', this.applications.length);
+        
+      } catch (error) {
+        console.error('❌ Error fetching applications:', error);
+        this.error = 'Failed to fetch applications';
+      } finally {
+        this.loading = false;
       }
     },
+
+    async acceptApplication(application) {
+      if (!confirm(`Are you sure you want to accept ${application.fullName} as a technician?`)) {
+        return;
+      }
+
+      try {
+        console.log('✅ Accepting application for:', application.fullName);
+        
+        // Move to technicians collection
+        await setDoc(doc(db, 'technicians', application.id), {
+          ...application,
+          status: 'approved',
+          role: 'technician',
+          approvedAt: new Date(),
+          updatedAt: new Date()
+        });
+        
+        // Update user role in users collection
+        await updateDoc(doc(db, 'users', application.id), {
+          role: 'technician',
+          updatedAt: new Date()
+        });
+        
+        // Remove from pending applications
+        await deleteDoc(doc(db, 'pendingTechnicians', application.id));
+        
+        // Remove from local array
+        const index = this.applications.findIndex(app => app.id === application.id);
+        if (index > -1) {
+          this.applications.splice(index, 1);
+        }
+        
+        alert(`Application for ${application.fullName} has been approved!`);
+        
+      } catch (error) {
+        console.error('❌ Error accepting application:', error);
+        alert('Failed to accept application. Please try again.');
+      }
+    },
+
+    async rejectApplication(application) {
+      if (!confirm(`Are you sure you want to reject ${application.fullName}'s application?`)) {
+        return;
+      }
+
+      try {
+        console.log('❌ Rejecting application for:', application.fullName);
+        
+        // Update user role to rejected
+        await updateDoc(doc(db, 'users', application.id), {
+          role: 'rejected',
+          updatedAt: new Date()
+        });
+        
+        // Remove from pending applications
+        await deleteDoc(doc(db, 'pendingTechnicians', application.id));
+        
+        // Remove from local array
+        const index = this.applications.findIndex(app => app.id === application.id);
+        if (index > -1) {
+          this.applications.splice(index, 1);
+        }
+        
+        alert(`Application for ${application.fullName} has been rejected.`);
+        
+      } catch (error) {
+        console.error('❌ Error rejecting application:', error);
+        alert('Failed to reject application. Please try again.');
+      }
+    },
+
+    viewIdPhoto(application) {
+      this.selectedApplication = application;
+      this.showIdModal = true;
+    },
+
+    closeIdModal() {
+      this.showIdModal = false;
+      this.selectedApplication = null;
+    },
+
+    formatDate(timestamp) {
+      if (!timestamp) return 'N/A';
+      const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+      return date.toLocaleDateString();
+    },
+
     prevPage() {
       if (this.currentPage > 1) {
         this.currentPage--;
       }
     },
+
     nextPage() {
       if (this.currentPage < this.totalPages) {
         this.currentPage++;
@@ -224,17 +317,17 @@ export default {
   background: #faf8fd;
 }
 
-.pending-tech-main {
+.pending-main {
   flex: 1;
   padding: 2.5rem;
 }
 
-.pending-tech-container {
+.pending-container {
   max-width: 80rem;
   margin: 0 auto;
 }
 
-.pending-tech-title {
+.pending-title {
   font-size: 2rem;
   font-weight: bold;
   color: #7c6bb0;
@@ -248,7 +341,7 @@ export default {
   margin-bottom: 1.5rem;
 }
 
-.pending-tech-subtitle {
+.pending-subtitle {
   font-size: 1.2rem;
   font-weight: 600;
   color: #7c6bb0;
@@ -292,93 +385,264 @@ export default {
   font-size: 1.1rem;
 }
 
-.table-wrapper {
-  overflow-x: auto;
-  border-radius: 0.75rem;
-  background: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+.applications-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
 }
 
-.pending-tech-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: #fff;
-  border-radius: 0.75rem;
+.application-card {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.table-header {
-  background: rgba(124, 107, 176, 0.2);
-  color: #333;
+.application-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
-.table-header th {
-  padding: 0.75rem 1rem;
-  text-align: left;
-  font-weight: 600;
-  font-size: 0.9rem;
+.card-header {
+  background: linear-gradient(135deg, #7c6bb0, #6b5fa7);
+  color: white;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.table-row {
-  border-bottom: 1px solid #e5e7eb;
-  transition: background-color 0.2s;
-}
-
-.table-row:hover {
-  background: #ede7f6;
-}
-
-.table-row td {
-  padding: 0.75rem 1rem;
-  font-size: 0.9rem;
-  color: #333;
-}
-
-.technician-cell {
+.applicant-info {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 1rem;
 }
 
-.technician-avatar {
-  width: 2rem;
-  height: 2rem;
+.applicant-avatar {
+  width: 3rem;
+  height: 3rem;
   border-radius: 50%;
   object-fit: cover;
+  border: 2px solid white;
 }
 
-.action-cell {
+.applicant-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.applicant-email {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.application-number {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  font-weight: 600;
+}
+
+.card-content {
+  padding: 1.5rem;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #6b7280;
+  min-width: 120px;
+}
+
+.info-value {
+  color: #374151;
+  text-align: right;
+  flex: 1;
+}
+
+.bio-text {
+  font-style: italic;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-actions {
+  padding: 1rem 1.5rem;
+  background: #f9fafb;
   display: flex;
   gap: 0.5rem;
+  justify-content: center;
 }
 
 .action-btn {
-  background: none;
+  padding: 0.5rem 1rem;
   border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
   cursor: pointer;
-  padding: 0.25rem;
-  border-radius: 0.25rem;
   transition: all 0.2s;
-  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
 }
 
 .view-btn {
-  color: #3b82f6;
+  background: #3b82f6;
+  color: white;
 }
 
 .view-btn:hover {
-  background: #dbeafe;
+  background: #2563eb;
 }
 
-.delete-btn {
-  color: #ef4444;
+.accept-btn {
+  background: #10b981;
+  color: white;
 }
 
-.delete-btn:hover {
-  background: #fee2e2;
+.accept-btn:hover {
+  background: #059669;
+}
+
+.reject-btn {
+  background: #ef4444;
+  color: white;
+}
+
+.reject-btn:hover {
+  background: #dc2626;
+}
+
+.loading-state, .error-state, .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #7c6bb0;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-message {
+  color: #dc2626;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.retry-btn {
+  background: #7c6bb0;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.retry-btn:hover {
+  background: #5a4a8c;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 1rem;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #374151;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #6b7280;
+}
+
+.modal-close:hover {
+  color: #374151;
+}
+
+.modal-body {
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.id-photo {
+  max-width: 100%;
+  max-height: 60vh;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.no-photo {
+  color: #6b7280;
+  font-style: italic;
 }
 
 @media (max-width: 768px) {
-  .pending-tech-main {
+  .pending-main {
     padding: 1rem;
   }
   .subtitle-search-row {
@@ -390,12 +654,11 @@ export default {
     width: 100%;
     max-width: none;
   }
-  .table-wrapper {
-    font-size: 0.8rem;
+  .applications-grid {
+    grid-template-columns: 1fr;
   }
-  .table-header th,
-  .table-row td {
-    padding: 0.5rem 0.5rem;
+  .card-actions {
+    flex-direction: column;
   }
 }
 </style>

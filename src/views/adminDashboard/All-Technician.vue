@@ -16,24 +16,38 @@
             <span class="search-icon"><i class="fas fa-search"></i></span>
           </div>
         </div>
-        <div class="table-wrapper">
+
+        <!-- Loading State -->
+        <div v-if="loading" class="loading-state">
+          <div class="loading-spinner"></div>
+          <p>Loading technicians...</p>
+        </div>
+
+        <!-- Error State -->
+        <div v-else-if="error" class="error-state">
+          <p class="error-message">{{ error }}</p>
+          <button @click="fetchTechnicians" class="retry-btn">Retry</button>
+        </div>
+
+        <!-- Technicians Table -->
+        <div v-else-if="filteredTechnicians.length > 0" class="table-wrapper">
           <table class="technicians-table">
             <thead>
               <tr class="table-header">
                 <th>No</th>
                 <th>Technician</th>
-                <th>ID Number</th>
                 <th>Specialization</th>
                 <th>Location</th>
-                <th>Mail</th>
-                <th>Contact</th>
+                <th>Email</th>
+                <th>Experience</th>
+                <th>Base Price</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody>
               <tr 
                 v-for="(technician, index) in filteredTechnicians" 
-                :key="index" 
+                :key="technician.id" 
                 class="table-row"
               >
                 <td>{{ index + 1 }}</td>
@@ -41,11 +55,11 @@
                   <img :src="technician.avatar" :alt="technician.name" class="technician-avatar">
                   {{ technician.name }}
                 </td>
-                <td>{{ technician.idNumber }}</td>
                 <td>{{ technician.specialization }}</td>
                 <td>{{ technician.location }}</td>
                 <td>{{ technician.email }}</td>
-                <td>{{ technician.contact }}</td>
+                <td>{{ technician.experience }} years</td>
+                <td>${{ technician.basePrice }}</td>
                 <td class="action-cell">
                   <a @click="viewTechnician(technician)" class="action-btn view-btn">
                     <i class="fas fa-eye"></i>
@@ -58,6 +72,11 @@
             </tbody>
           </table>
         </div>
+
+        <!-- Empty State -->
+        <div v-else class="empty-state">
+          <p>No technicians found in the database.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -65,94 +84,17 @@
 
 <script>
 import AdminSidebar from '../../components/admin-sidebar.vue';
+import { collection, getDocs, doc, deleteDoc } from 'firebase/firestore';
+import { db } from '../../firebase';
 
 export default {
   components: { AdminSidebar },
   data() {
     return {
       searchQuery: '',
-      technicians: [
-        {
-          id: 1,
-          name: 'Ahmed Hassan',
-          avatar: 'https://randomuser.me/api/portraits/men/75.jpg',
-          idNumber: '30303078800526',
-          specialization: 'Carpentry',
-          location: 'Giza',
-          email: 'test123@gmail.com',
-          contact: '82486 69086'
-        },
-        {
-          id: 2,
-          name: 'Mohamed Ali',
-          avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-          idNumber: '30303078800527',
-          specialization: 'Plumbing',
-          location: 'Cairo',
-          email: 'mohamed@gmail.com',
-          contact: '82486 69087'
-        },
-        {
-          id: 3,
-          name: 'Omar Hassan',
-          avatar: 'https://randomuser.me/api/portraits/men/45.jpg',
-          idNumber: '30303078800528',
-          specialization: 'Electrical',
-          location: 'Alexandria',
-          email: 'omar@gmail.com',
-          contact: '82486 69088'
-        },
-        {
-          id: 4,
-          name: 'Ahmed Ali',
-          avatar: 'https://randomuser.me/api/portraits/men/67.jpg',
-          idNumber: '30303078800529',
-          specialization: 'Carpentry',
-          location: 'Giza',
-          email: 'ahmed@gmail.com',
-          contact: '82486 69089'
-        },
-        {
-          id: 5,
-          name: 'Mahmoud Hassan',
-          avatar: 'https://randomuser.me/api/portraits/men/89.jpg',
-          idNumber: '30303078800530',
-          specialization: 'Plumbing',
-          location: 'Cairo',
-          email: 'mahmoud@gmail.com',
-          contact: '82486 69090'
-        },
-        {
-          id: 6,
-          name: 'Karim Ali',
-          avatar: 'https://randomuser.me/api/portraits/men/12.jpg',
-          idNumber: '30303078800531',
-          specialization: 'Electrical',
-          location: 'Alexandria',
-          email: 'karim@gmail.com',
-          contact: '82486 69091'
-        },
-        {
-          id: 7,
-          name: 'Samir Hassan',
-          avatar: 'https://randomuser.me/api/portraits/men/34.jpg',
-          idNumber: '30303078800532',
-          specialization: 'Carpentry',
-          location: 'Giza',
-          email: 'samir@gmail.com',
-          contact: '82486 69092'
-        },
-        {
-          id: 8,
-          name: 'Youssef Ali',
-          avatar: 'https://randomuser.me/api/portraits/men/56.jpg',
-          idNumber: '30303078800533',
-          specialization: 'Plumbing',
-          location: 'Cairo',
-          email: 'youssef@gmail.com',
-          contact: '82486 69093'
-        }
-      ]
+      technicians: [],
+      loading: true,
+      error: null
     };
   },
   computed: {
@@ -160,20 +102,87 @@ export default {
       if (!this.searchQuery.trim()) return this.technicians;
       const q = this.searchQuery.toLowerCase();
       return this.technicians.filter(technician =>
-        Object.values(technician).some(val => String(val).toLowerCase().includes(q))
+        technician.name?.toLowerCase().includes(q) ||
+        technician.email?.toLowerCase().includes(q) ||
+        technician.specialization?.toLowerCase().includes(q) ||
+        technician.location?.toLowerCase().includes(q)
       );
     }
   },
+  async mounted() {
+    await this.fetchTechnicians();
+  },
   methods: {
+    async fetchTechnicians() {
+      try {
+        this.loading = true;
+        this.error = null;
+        
+        console.log('🔍 Fetching technicians from Firebase...');
+        
+        const techniciansCollection = collection(db, 'technicians');
+        const snapshot = await getDocs(techniciansCollection);
+        
+        this.technicians = snapshot.docs.map(doc => {
+          const data = doc.data();
+          console.log('📄 Technician data:', { id: doc.id, ...data });
+          
+          return {
+            id: doc.id,
+            name: data.fullName || 'Unknown',
+            avatar: data.idPhotoUrl || 'https://randomuser.me/api/portraits/men/1.jpg',
+            specialization: data.specialization || 'N/A',
+            location: `${data.government || 'N/A'}, ${data.district || 'N/A'}`,
+            email: data.email || 'N/A',
+            experience: data.experience || 'N/A',
+            basePrice: data.basePrice || 'N/A',
+            bio: data.bio || 'No bio available',
+            willingToTravel: data.willingToTravel || 'No',
+            createdAt: data.createdAt,
+            updatedAt: data.updatedAt
+          };
+        });
+        
+        console.log('✅ Technicians loaded:', this.technicians.length);
+        
+      } catch (error) {
+        console.error('❌ Error fetching technicians:', error);
+        this.error = 'Failed to fetch technicians';
+      } finally {
+        this.loading = false;
+      }
+    },
+    
     viewTechnician(technician) {
       this.$router.push(`/technician-profile/${technician.id}`);
     },
-    deleteTechnician(technician) {
-      if (confirm(`Are you sure you want to delete ${technician.name}?`)) {
+    
+    async deleteTechnician(technician) {
+      if (!confirm(`Are you sure you want to delete ${technician.name}? This action cannot be undone.`)) {
+        return;
+      }
+
+      try {
+        console.log('🗑️ Deleting technician:', technician.name, 'with ID:', technician.id);
+        
+        // Remove from technicians collection
+        const technicianDoc = doc(db, 'technicians', technician.id);
+        await deleteDoc(technicianDoc);
+        console.log('✅ Technician document deleted from Firestore');
+
+        // Remove from local array immediately for UI update
         const index = this.technicians.findIndex(t => t.id === technician.id);
         if (index > -1) {
           this.technicians.splice(index, 1);
+          console.log('✅ Technician removed from local array');
         }
+
+        // Show success message
+        alert(`Technician ${technician.name} has been deleted successfully from the database!`);
+        
+      } catch (error) {
+        console.error('❌ Error deleting technician:', error);
+        alert('Failed to delete technician. Please try again.');
       }
     }
   }
@@ -253,6 +262,78 @@ export default {
   top: 50%;
   transform: translateY(-50%);
   color: #b6a7e6;
+  font-size: 1.1rem;
+}
+
+/* Loading State */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  background: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #7c6bb0;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error State */
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  background: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.error-message {
+  color: #ef4444;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.retry-btn {
+  background: #7c6bb0;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.retry-btn:hover {
+  background: #6b5fa7;
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  background: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  color: #666;
   font-size: 1.1rem;
 }
 

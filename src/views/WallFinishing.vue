@@ -41,7 +41,23 @@
         </div>
 
         <div class="technicians-grid">
-          <div v-for="technician in displayedTechnicians" :key="technician.id" class="technician-card">
+          <!-- Loading Skeleton Cards -->
+          <div v-if="loading" v-for="n in 8" :key="`skeleton-${n}`" class="technician-card skeleton-card">
+            <div class="skeleton-image"></div>
+            <div class="technician-info">
+              <div class="skeleton-name"></div>
+              <div class="skeleton-rating">
+                <div class="skeleton-star" v-for="star in 5" :key="star"></div>
+              </div>
+              <div class="skeleton-description"></div>
+              <div class="skeleton-description short"></div>
+              <div class="skeleton-button"></div>
+              <div class="skeleton-button"></div>
+            </div>
+          </div>
+
+          <!-- Actual Technician Cards -->
+          <div v-else v-for="technician in displayedTechnicians" :key="technician.id" class="technician-card">
             <div class="technician-image" :style="{ backgroundColor: technician.bgColor }">
               <img :src="technician.image" :alt="technician.name" />
             </div>
@@ -83,6 +99,7 @@ import profile8 from '../assets/profile/8.png'
 import plumbingBg from '../assets/Professions/wall.jpg'
 
 const router = useRouter()
+const loading = ref(true)
 const stockTechnicians = [
   // Example stock wall finishing technicians (update these as needed)
   { id: 'stock-1', name: 'Ahmed Salah', image: profile1, bgColor: '#E8E4F3', price: 200, description: 'Experienced wall finisher with 10+ years in the field.', rating: 5, specialization: 'Wall Finishing' },
@@ -97,10 +114,17 @@ const techniciansPerPage = 8;
 const currentPage = ref(1);
 
 async function fetchTechnicians() {
-  const querySnapshot = await getDocs(collection(db, 'technicians'))
-  firebaseTechnicians.value = querySnapshot.docs
-    .map(doc => ({ id: doc.id, ...doc.data() }))
-    .filter(tech => tech.specialization === 'Wall Finishing')
+  try {
+    loading.value = true
+    const querySnapshot = await getDocs(collection(db, 'technicians'))
+    firebaseTechnicians.value = querySnapshot.docs
+      .map(doc => ({ id: doc.id, ...doc.data() }))
+      .filter(tech => tech.specialization === 'Wall Finishing')
+  } catch (error) {
+    console.error('Error fetching technicians:', error)
+  } finally {
+    loading.value = false
+  }
 }
 
 onMounted(fetchTechnicians)
@@ -561,5 +585,101 @@ const heroBackgroundStyle = computed(() => {
     height: 35px;
     font-size: 0.9rem;
   }
+}
+
+/* Skeleton Loading Animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.skeleton-card {
+  pointer-events: none;
+}
+
+.skeleton-image {
+  height: 300px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+.dark .skeleton-image {
+  background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+  background-size: 200px 100%;
+}
+
+.skeleton-name {
+  height: 24px;
+  width: 70%;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.dark .skeleton-name {
+  background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+  background-size: 200px 100%;
+}
+
+.skeleton-rating {
+  display: flex;
+  gap: 0.2rem;
+  margin-bottom: 1rem;
+}
+
+.skeleton-star {
+  width: 16px;
+  height: 16px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 2px;
+}
+
+.dark .skeleton-star {
+  background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+  background-size: 200px 100%;
+}
+
+.skeleton-description {
+  height: 16px;
+  width: 100%;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.skeleton-description.short {
+  width: 60%;
+}
+
+.dark .skeleton-description {
+  background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+  background-size: 200px 100%;
+}
+
+.skeleton-button {
+  height: 44px;
+  width: 100%;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 25px;
+  margin-bottom: 0.5rem;
+}
+
+.dark .skeleton-button {
+  background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+  background-size: 200px 100%;
 }
 </style>

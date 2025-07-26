@@ -1,0 +1,106 @@
+NAVBAR ROLE DISPLAY IMPLEMENTATION
+==================================
+
+This implementation adds the user's role next to their email in the navbar.
+
+1. UPDATED Navbar.vue - SCRIPT SECTION
+=====================================
+
+// Add these functions in the setup() function, after handleProfileClick:
+
+// Get user role for display
+function getUserRole() {
+  return localStorage.getItem('userType') || 'user';
+}
+
+// Get role display text
+function getRoleDisplayText() {
+  const role = getUserRole();
+  switch (role) {
+    case 'admin':
+      return 'Admin';
+    case 'technician':
+      return 'Technician';
+    case 'user':
+      return 'User';
+    default:
+      return 'User';
+  }
+}
+
+// Add these to the return statement:
+return {
+  // ... existing returns
+  getUserRole,
+  getRoleDisplayText,
+  // ... rest of existing returns
+};
+
+2. UPDATED Navbar.vue - TEMPLATE SECTION (DESKTOP)
+==================================================
+
+// Replace the desktop user display section:
+<template v-if="user">
+  <span class="flex items-center gap-2 rounded bg-gray-100 cursor-pointer" @click="handleProfileClick">
+    <span class="text-gray-700 font-semibold px-3 py-1">
+      {{ user.email || user.uid }}
+      <span class="text-xs text-gray-500 ml-2">({{ getRoleDisplayText() }})</span>
+    </span>
+    <i class="fas fa-user-circle text-secondary text-2xl px-3"></i>
+  </span>
+  <button :class="loginButtonClass" id="login-btn" @click="logout">
+    {{ $t('logout') }}
+  </button>
+</template>
+
+3. UPDATED Navbar.vue - TEMPLATE SECTION (MOBILE)
+=================================================
+
+// Replace the mobile user display section:
+<template v-if="user">
+  <span class="flex items-center gap-2">
+    <span class="text-gray-700 font-semibold px-3 py-1 rounded bg-gray-100 cursor-pointer"
+      @click="handleProfileClick">
+      {{ user.email || user.uid }}
+      <span class="text-xs text-gray-500 ml-2">({{ getRoleDisplayText() }})</span>
+    </span>
+    <i class="fas fa-user-circle text-2xl text-secondary cursor-pointer" @click="handleProfileClick"></i>
+  </span>
+  <button :class="loginButtonClass" id="login-btn" @click="logout">
+    {{ $t('logout') }}
+  </button>
+</template>
+
+4. COMPLETE IMPLEMENTATION SUMMARY
+==================================
+
+The changes will:
+- Display the user's role in parentheses next to their email
+- Show "Admin" for admin users
+- Show "Technician" for technician users  
+- Show "User" for regular users
+- Work on both desktop and mobile versions
+- Use the role stored in localStorage (which is set by the admin role enforcement system)
+
+5. EXAMPLE OUTPUT
+=================
+
+Before: elie1400674@gmail.com
+After:  elie1400674@gmail.com (Admin)
+
+Before: technician@example.com
+After:  technician@example.com (Technician)
+
+Before: user@example.com
+After:  user@example.com (User)
+
+6. STYLING
+==========
+
+The role is displayed in:
+- Smaller font size (text-xs)
+- Gray color (text-gray-500)
+- Left margin (ml-2)
+- Parentheses for clear separation
+
+This provides a clean, professional look that clearly shows the user's role without being intrusive. 
