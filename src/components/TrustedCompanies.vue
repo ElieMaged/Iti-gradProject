@@ -39,7 +39,7 @@ export default {
   background-color: #F4F4F5;
 }
 .dark .trusted-section {
-  background-color: var(--text-color-text-primary, #66666b);
+  background-color: var(--grey-bg);
 }
 .trusted-header {
   padding-top: 40px;
@@ -50,7 +50,7 @@ export default {
   margin-bottom: 32px;
 }
 .dark .trusted-text {
-  color: var(--text-color-text-primary, #1F2021);
+  color: var(--primary-text);
 }
 .trusted-line {
   flex: 1;
@@ -58,6 +58,9 @@ export default {
   border-top: 1px solid #bdbdbd;
   height: 1px;
   margin: 0 16px;
+}
+.dark .trusted-line {
+  border-top: 1px solid var(--primary-text);
 }
 .trusted-text {
   color: #8c8e90;

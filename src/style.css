@@ -32,19 +32,21 @@ body {
 
 --primary-color: #625397;   
 --secondary-color: #ffd54f;
---primary: #625498;
---secondary: #FFC230;
+--primary: #7B6FA8;
+--secondary: #FFCC51;
 --sidebar: #232336;
 --text-main: #f1f1f1;
---text-muted: #bdbdbd;
+--text-muted: #484B4D;
 --input-bg: #232336;
 --input-border: #44445a;
 --success: #22c55e;
 --danger: #ef4444;
 --completed: #bdbdbd;
 --primary-bg: #181824;
---primary-text: #f1f1f1;
+--primary-text: #F4F4F5;
+--primary-text-dark: #000000;
 --secondary-bg: #37373a;
+--grey-bg: #87838D;
 }
 
 

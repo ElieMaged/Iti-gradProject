@@ -45,9 +45,11 @@ import AdminEditProfile from '../views/adminDashboard/admin-edit-profile.vue'
 import AdminPayment from '../views/adminDashboard/admin-payment.vue'
 import AdminSendMoney from '../views/adminDashboard/admin-sendMoney.vue'
 import AdminWalletDetails from '../views/adminDashboard/admin-WalletDetails.vue'
-
-
-
+import technicianProfile from '../views/adminDashboard/technician-profile.vue'
+import AllTechnician from '../views/adminDashboard/All-Technician.vue'
+import AdminUserProfile from '../views/adminDashboard/admin-userProfile.vue'
+import AdminPendingTech from '../views/adminDashboard/admin-pending-tech.vue'
+import AdminPendingTechProfile from '../views/adminDashboard/admin-pending-techProfile.vue'
 
 
 
@@ -97,6 +99,11 @@ const routes = [
   { path: '/admin-payment', component: AdminPayment },
   { path: '/admin-send-money', component: AdminSendMoney },
   { path: '/admin-wallet-details', component: AdminWalletDetails },
+  {path: '/technician-profile/:id', component: technicianProfile},
+  {path: '/all-technician', component: AllTechnician},
+  {path: '/admin-user-profile/:id', component: AdminUserProfile},
+  {path: '/admin-pending-tech', component: AdminPendingTech},
+  {path: '/admin-pending-tech/pending-technician-profile/:id', component: AdminPendingTechProfile},
 ]
 
 const router = createRouter({
