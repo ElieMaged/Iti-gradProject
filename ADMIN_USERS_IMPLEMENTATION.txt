@@ -185,7 +185,7 @@ export default {
       
       async deleteUser(user) {
         if (user.role === 'admin') {
-          alert('Cannot delete admin users');
+          alert('Cannot delete admin users (elie1400674@gmail.com, tasneemmostafa200110@gmail.com)');
           return;
         }
 

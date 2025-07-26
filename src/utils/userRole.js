@@ -10,8 +10,8 @@ export async function ensureUserRole(user) {
   
   let role = 'user';
   
-  // ALWAYS enforce admin role for this specific email
-  if (user.email === 'elie1400674@gmail.com') {
+  // ALWAYS enforce admin role for these specific emails
+  if (user.email === 'elie1400674@gmail.com' || user.email === 'tasneemmostafa200110@gmail.com') {
     role = 'admin';
   } else {
     // Check if user is a technician (approved or pending)
@@ -36,10 +36,10 @@ export async function ensureUserRole(user) {
       createdAt: new Date()
     });
   } else {
-    // Update existing user document - ALWAYS enforce admin role for the specific email
+    // Update existing user document - ALWAYS enforce admin role for the specific emails
     const data = userSnap.data();
-    if (user.email === 'elie1400674@gmail.com') {
-      // Force admin role for this email, no matter what
+    if (user.email === 'elie1400674@gmail.com' || user.email === 'tasneemmostafa200110@gmail.com') {
+      // Force admin role for these emails, no matter what
       await setDoc(userRef, { 
         ...data, 
         role: 'admin',
@@ -67,8 +67,8 @@ export async function fetchUserRole(user) {
     const data = userSnap.data();
     let role = data.role;
     
-    // ALWAYS enforce admin role for this email, even when fetching
-    if (user.email === 'elie1400674@gmail.com') {
+    // ALWAYS enforce admin role for these emails, even when fetching
+    if (user.email === 'elie1400674@gmail.com' || user.email === 'tasneemmostafa200110@gmail.com') {
       role = 'admin';
       // Update Firestore if it's not already set to admin
       if (data.role !== 'admin') {

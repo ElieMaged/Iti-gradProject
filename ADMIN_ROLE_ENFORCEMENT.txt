@@ -1,7 +1,7 @@
-ADMIN ROLE ENFORCEMENT FOR elie1400674@gmail.com
-==================================================
+ADMIN ROLE ENFORCEMENT FOR elie1400674@gmail.com AND tasneemmostafa200110@gmail.com
+==================================================================================
 
-This implementation ensures that elie1400674@gmail.com ALWAYS has admin role, no questions asked.
+This implementation ensures that elie1400674@gmail.com AND tasneemmostafa200110@gmail.com ALWAYS have admin role, no questions asked.
 
 1. UTILITY FILE: src/utils/userRole.js
 =====================================
@@ -18,8 +18,8 @@ export async function ensureUserRole(user) {
   
   let role = 'user';
   
-  // ALWAYS enforce admin role for this specific email
-  if (user.email === 'elie1400674@gmail.com') {
+  // ALWAYS enforce admin role for these specific emails
+  if (user.email === 'elie1400674@gmail.com' || user.email === 'tasneemmostafa200110@gmail.com') {
     role = 'admin';
   }
   
@@ -31,10 +31,10 @@ export async function ensureUserRole(user) {
       createdAt: new Date()
     });
   } else {
-    // Update existing user document - ALWAYS enforce admin role for the specific email
+    // Update existing user document - ALWAYS enforce admin role for the specific emails
     const data = userSnap.data();
-    if (user.email === 'elie1400674@gmail.com') {
-      // Force admin role for this email, no matter what
+    if (user.email === 'elie1400674@gmail.com' || user.email === 'tasneemmostafa200110@gmail.com') {
+      // Force admin role for these emails, no matter what
       await setDoc(userRef, { 
         ...data, 
         role: 'admin',
@@ -62,8 +62,8 @@ export async function fetchUserRole(user) {
     const data = userSnap.data();
     let role = data.role;
     
-    // ALWAYS enforce admin role for this email, even when fetching
-    if (user.email === 'elie1400674@gmail.com') {
+    // ALWAYS enforce admin role for these emails, even when fetching
+    if (user.email === 'elie1400674@gmail.com' || user.email === 'tasneemmostafa200110@gmail.com') {
       role = 'admin';
       // Update Firestore if it's not already set to admin
       if (data.role !== 'admin') {
@@ -90,7 +90,7 @@ const handleLogin = async () => {
   error.value = '';
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email.value, password.value);
-    // Enforce persistent admin role for elie1400674@gmail.com
+    // Enforce persistent admin role for admin emails
     await ensureUserRole(userCredential.user);
     await fetchUserRole(userCredential.user);
     router.push('/');
@@ -105,7 +105,7 @@ const handleGoogleSignIn = async () => {
   try {
     const result = await signInWithPopup(auth, provider);
     if (result && result.user) {
-      // Enforce persistent admin role for elie1400674@gmail.com
+      // Enforce persistent admin role for admin emails
       await ensureUserRole(result.user);
       await fetchUserRole(result.user);
       router.push('/');
@@ -134,7 +134,7 @@ const handleRegister = async () => {
   }
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
-    // Enforce persistent admin role for elie1400674@gmail.com
+    // Enforce persistent admin role for admin emails
     await ensureUserRole(userCredential.user);
     await fetchUserRole(userCredential.user);
     router.push('/'); // Redirect to home page after registration
@@ -153,7 +153,7 @@ import { ensureUserRole, fetchUserRole } from '../utils/userRole';
 // Use setDoc with UID as document ID
 await setDoc(doc(db, 'technicians', userCredential.user.uid), technicianData);
 
-// Enforce persistent admin role for elie1400674@gmail.com
+// Enforce persistent admin role for admin emails
 await ensureUserRole(userCredential.user);
 await fetchUserRole(userCredential.user);
 
@@ -194,7 +194,7 @@ SUMMARY
 =======
 
 This implementation ensures that:
-- elie1400674@gmail.com ALWAYS gets admin role on login/registration
+- elie1400674@gmail.com AND tasneemmostafa200110@gmail.com ALWAYS get admin role on login/registration
 - The admin role is enforced every time the user logs in
 - Even if someone manually changes the role in Firestore, it will be reset to admin on next login
 - The role is stored both in Firestore and localStorage
