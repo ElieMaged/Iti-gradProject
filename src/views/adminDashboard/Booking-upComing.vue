@@ -2,48 +2,46 @@
 <template>
   <div class="admin-dashboard-layout">
     <admin-sidebar />
-    <main id="main-content">
-      <div id="upcoming-booking-wrapper">
-        <div id="upcoming-booking-container">
-          <h2 id="upcoming-booking-title">Upcoming Booking</h2>
-          <div id="booking-search-bar-wrapper">
-            <div id="booking-search-input-wrapper">
-              <input v-model="searchQuery" type="text" id="booking-search-input" placeholder="Search" />
-              <span id="booking-search-icon"><i class="fas fa-search"></i></span>
-            </div>
+    <div class="booking-main">
+      <div class="booking-container">
+        <div class="title-search-row">
+          <h2 class="booking-title">Upcoming Booking</h2>
+          <div class="search-wrapper">
+            <input v-model="searchQuery" type="text" class="search-input" placeholder="Search" />
+            <span class="search-icon"><i class="fas fa-search"></i></span>
           </div>
-          <div id="booking-table-wrapper">
-            <table id="booking-table">
-              <thead>
-                <tr id="booking-table-header">
-                  <th>User Name</th>
-                  <th>Technician Name</th>
-                  <th>Specialization</th>
-                  <th>Date</th>
-                  <th>Time</th>
-                  <th>Address</th>
-                  <th>Price</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="booking in filteredBookings" :key="booking.id" class="booking-row">
-                  <td>{{ booking.userName }}</td>
-                  <td>{{ booking.technicianName }}</td>
-                  <td>{{ booking.specialization }}</td>
-                  <td>{{ booking.date }}</td>
-                  <td>{{ booking.time }}</td>
-                  <td>{{ booking.address }}</td>
-                  <td>{{ booking.price }}</td>
-                  <td class="booking-status">{{ booking.status }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <pagination />
         </div>
+        <div class="table-wrapper">
+          <table class="booking-table">
+            <thead>
+              <tr class="table-header">
+                <th>User Name</th>
+                <th>Technician Name</th>
+                <th>Specialization</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Address</th>
+                <th>Price</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="booking in filteredBookings" :key="booking.id" class="table-row">
+                <td>{{ booking.userName }}</td>
+                <td>{{ booking.technicianName }}</td>
+                <td>{{ booking.specialization }}</td>
+                <td>{{ booking.date }}</td>
+                <td>{{ booking.time }}</td>
+                <td>{{ booking.address }}</td>
+                <td>{{ booking.price }}</td>
+                <td class="booking-status">{{ booking.status }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <pagination />
       </div>
-    </main>
+    </div>
   </div>
 </template>
 
@@ -79,92 +77,138 @@ const filteredBookings = computed(() => {
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
   background: #faf8fd;
 }
-#main-content {
+
+.booking-main {
   flex: 1;
-  padding: 2rem;
+  padding: 2.5rem;
 }
 
-#upcoming-booking-wrapper {
-  display: flex;
-  min-height: 100vh;
-}
-
-#upcoming-booking-container {
-  flex: 1;
-  padding: 2rem;
-  max-width: 1120px;
+.booking-container {
+  max-width: 80rem;
   margin: 0 auto;
 }
 
-#upcoming-booking-title {
-  font-size: 1.5rem;
+.title-search-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.booking-title {
+  font-size: 2rem;
   font-weight: bold;
   color: #7c6bb0;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0;
 }
 
-#booking-search-bar-wrapper {
+.search-wrapper {
   display: flex;
-  justify-content: flex-end;
-  margin-bottom: 1rem;
-}
-
-#booking-search-input-wrapper {
+  align-items: center;
+  width: 411px;
+  height: 50px;
+  padding: 10px;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-bottom: 16px;
   position: relative;
-  width: 100%;
-  max-width: 20rem;
 }
 
-#booking-search-input {
-  padding: 0.5rem 1rem 0.5rem 2.5rem;
-  border-radius: 9999px;
-  border: 1px solid #ccc;
+.search-input {
   width: 100%;
+  height: 100%;
+  border-radius: 48px;
+  border: 1px solid var(--border-border-primary, #C2C3C4);
+  background: var(--grey-50, #EAEAEA);
+  font-size: 1rem;
+  color: #6B5FA7;
+  outline: none;
+  padding: 0 16px 0 40px;
+  transition: border 0.2s;
 }
 
-#booking-search-icon {
+.search-input:focus {
+  border: 1.5px solid #6B5FA7;
+}
+
+.search-icon {
   position: absolute;
-  top: 0.625rem;
-  left: 0.75rem;
-  color: #ccc;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #b6a7e6;
+  font-size: 1.1rem;
 }
 
-#booking-table-wrapper {
+.table-wrapper {
   overflow-x: auto;
   border-radius: 0.75rem;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-#booking-table {
+.booking-table {
   width: 100%;
-  background-color: white;
+  border-collapse: collapse;
+  background: #fff;
   border-radius: 0.75rem;
 }
 
-#booking-table-header {
-  background-color: rgba(124, 107, 176, 0.2);
+.table-header {
+  background: rgba(124, 107, 176, 0.2);
   color: #333;
-  text-align: left;
 }
 
-#booking-table-header th {
+.table-header th {
   padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.9rem;
 }
 
-.booking-row {
-  border-bottom: 1px solid #ddd;
+.table-row {
+  border-bottom: 1px solid #e5e7eb;
   transition: background-color 0.2s;
 }
 
-.booking-row:hover {
-  background-color: #ede7f6;
+.table-row:hover {
+  background: #ede7f6;
 }
 
-.booking-row td {
+.table-row td {
   padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  color: #333;
 }
 
 .booking-status {
-  color: #22c55e;
+  background: #dbeafe;
+  color: #1e40af;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
   font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .booking-main {
+    padding: 1rem;
+  }
+  .title-search-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .search-wrapper {
+    width: 100%;
+    max-width: none;
+  }
+  .table-wrapper {
+    font-size: 0.8rem;
+  }
+  .table-header th,
+  .table-row td {
+    padding: 0.5rem 0.5rem;
+  }
 }
 </style>

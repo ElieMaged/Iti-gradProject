@@ -1,19 +1,19 @@
 <template>
   <div class="admin-dashboard-layout">
     <admin-sidebar />
-    <main id="main-content">
-      <div id="container">
-        <h2 id="page-title">Canceled Booking</h2>
-        <div id="search-wrapper">
-          <div id="search-input-wrapper">
-            <input v-model="searchQuery" id="search-input" type="text" placeholder="Search" />
-            <span id="search-icon"><i class="fas fa-search"></i></span>
+    <div class="booking-main">
+      <div class="booking-container">
+        <div class="title-search-row">
+          <h2 class="booking-title">Canceled Booking</h2>
+          <div class="search-wrapper">
+            <input v-model="searchQuery" class="search-input" type="text" placeholder="Search" />
+            <span class="search-icon"><i class="fas fa-search"></i></span>
           </div>
         </div>
-        <div id="table-wrapper">
-          <table>
+        <div class="table-wrapper">
+          <table class="booking-table">
             <thead>
-              <tr>
+              <tr class="table-header">
                 <th>User Name</th>
                 <th>Technician Name</th>
                 <th>Specialization</th>
@@ -25,7 +25,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(booking, index) in filteredBookings" :key="index">
+              <tr v-for="(booking, index) in filteredBookings" :key="index" class="table-row">
                 <td>{{ booking.userName }}</td>
                 <td>{{ booking.technicianName }}</td>
                 <td>{{ booking.specialization }}</td>
@@ -40,7 +40,7 @@
         </div>
         <pagination />
       </div>
-    </main>
+    </div>
   </div>
 </template>
 
@@ -94,83 +94,137 @@ export default {
   background: #faf8fd;
 }
 
-#main-content {
+.booking-main {
   flex: 1;
-  padding: 2rem;
+  padding: 2.5rem;
 }
 
-#container {
-  max-width: 1120px;
+.booking-container {
+  max-width: 80rem;
   margin: 0 auto;
 }
 
-#page-title {
-  font-size: 1.5rem;
+.title-search-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.booking-title {
+  font-size: 2rem;
   font-weight: bold;
   color: #7c6bb0;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0;
 }
 
-#search-wrapper {
+.search-wrapper {
   display: flex;
-  justify-content: flex-end;
-  margin-bottom: 1rem;
-}
-
-#search-input-wrapper {
+  align-items: center;
+  width: 411px;
+  height: 50px;
+  padding: 10px;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-bottom: 16px;
   position: relative;
-  width: 100%;
-  max-width: 256px;
 }
 
-#search-input {
-  padding: 0.5rem 1rem 0.5rem 2.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 9999px;
+.search-input {
   width: 100%;
+  height: 100%;
+  border-radius: 48px;
+  border: 1px solid var(--border-border-primary, #C2C3C4);
+  background: var(--grey-50, #EAEAEA);
+  font-size: 1rem;
+  color: #6B5FA7;
+  outline: none;
+  padding: 0 16px 0 40px;
+  transition: border 0.2s;
 }
 
-#search-icon {
+.search-input:focus {
+  border: 1.5px solid #6B5FA7;
+}
+
+.search-icon {
   position: absolute;
-  top: 0.625rem;
-  left: 0.75rem;
-  color: #9ca3af;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #b6a7e6;
+  font-size: 1.1rem;
 }
 
-#table-wrapper {
+.table-wrapper {
   overflow-x: auto;
   border-radius: 0.75rem;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-table {
+.booking-table {
   width: 100%;
-  background-color: white;
-  border-radius: 0.75rem;
   border-collapse: collapse;
+  background: #fff;
+  border-radius: 0.75rem;
 }
 
-thead tr {
-  background-color: rgba(124, 107, 176, 0.2);
-  color: #333333;
-  text-align: left;
+.table-header {
+  background: rgba(124, 107, 176, 0.2);
+  color: #333;
 }
 
-th,
-td {
+.table-header th {
   padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.9rem;
 }
 
-tbody tr {
+.table-row {
   border-bottom: 1px solid #e5e7eb;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s;
 }
 
-tbody tr:hover {
-  background-color: #ede7f6;
+.table-row:hover {
+  background: #ede7f6;
+}
+
+.table-row td {
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  color: #333;
 }
 
 .status-canceled {
-  color: #dc2626;
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
   font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .booking-main {
+    padding: 1rem;
+  }
+  .title-search-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .search-wrapper {
+    width: 100%;
+    max-width: none;
+  }
+  .table-wrapper {
+    font-size: 0.8rem;
+  }
+  .table-header th,
+  .table-row td {
+    padding: 0.5rem 0.5rem;
+  }
 }
 </style>

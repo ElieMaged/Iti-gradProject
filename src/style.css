@@ -32,7 +32,7 @@ body {
 
 --primary-color: #625397;   
 --secondary-color: #ffd54f;
---primary: #625498;
+--primary: #7B6FA8;
 --secondary: #FFC230;
 --sidebar: #232336;
 --text-main: #f1f1f1;
@@ -44,6 +44,7 @@ body {
 --completed: #bdbdbd;
 --primary-bg: #181824;
 --primary-text: #f1f1f1;
+--primary-text-dark: #000000;
 --secondary-bg: #37373a;
 }
 
