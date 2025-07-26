@@ -1,0 +1,134 @@
+TECHNICIAN PROFILE FIELDS UPDATE
+================================
+
+This document summarizes the changes made to the public technician profile page
+to remove gender and nationality fields and ensure only fields from the techregister
+are displayed.
+
+CHANGES MADE:
+============
+
+1. REMOVED FIELDS FROM PUBLIC PROFILE:
+   ===================================
+   - Removed 'gender' field display
+   - Removed 'nationality' field display
+   
+   These fields were previously displayed in the profile-meta section but are not
+   collected during technician registration, so they have been removed from the
+   public profile view.
+
+2. UPDATED PROFILE META SECTION:
+   =============================
+   
+   **Before:**
+   - location: technician.location
+   - gender: technician.gender
+   - nationality: technician.nationality  
+   - yearsOfExperience: technician.yearsOfExperience
+   
+   **After:**
+   - location: technician.government + technician.district (or fallback to location)
+   - yearsOfExperience: technician.experience (or fallback to yearsOfExperience)
+   - baseVisitPrice: technician.basePrice (if available)
+   - willingToTravel: technician.willingToTravel (if available)
+
+3. ADDED NEW FIELDS FROM TECHPREGISTER:
+   ====================================
+   
+   **Base Visit Price:**
+   - Displays the technician's base visit price from their registration
+   - Shows in format: "Base Visit Price: [amount] EGP"
+   - Only displays if the field is available
+   
+   **Willing to Travel:**
+   - Displays whether the technician is willing to travel
+   - Shows as "Yes" or "No" based on the stored value
+   - Only displays if the field is available
+   
+   **Bio/About Section:**
+   - Added a new section to display the technician's bio/description
+   - Shows the brief description provided during registration
+   - Styled with a distinctive border and background
+   - Only displays if the bio field is available
+
+4. TRANSLATION UPDATES:
+   ====================
+   
+   **Added to src/i18n.js:**
+   - English: 'egp': 'EGP'
+   - Arabic: 'egp': 'جنيه مصري'
+   - English: 'about': 'About'
+   - Arabic: 'about': 'حول'
+   
+   **Existing translations used:**
+   - 'baseVisitPrice': 'Base Visit Price' / 'سعر الزيارة الأساسي'
+   - 'willingToTravel': 'Willing to Travel' / 'سعي للسفر'
+   - 'yes': 'Yes' / 'نعم'
+   - 'no': 'No' / 'لا'
+
+5. STYLING ENHANCEMENTS:
+   =====================
+   
+   **New CSS Classes Added:**
+   - .profile-bio: Main container for bio section
+   - .profile-bio b: Styling for "About" label
+   - .profile-bio p: Styling for bio text content
+   
+   **Design Features:**
+   - Consistent with existing profile styling
+   - Uses the same color scheme (#7c6bb0 primary)
+   - Left border accent for visual distinction
+   - Proper spacing and typography
+
+6. FIELD MAPPING LOGIC:
+   ====================
+   
+   **Location Display Logic:**
+   ```javascript
+   technician.government && technician.district ? 
+     `${technician.government}, ${technician.district}` : 
+     (technician.location || $t('technicianNotAvailable'))
+   ```
+   
+   **Experience Display Logic:**
+   ```javascript
+   technician.experience || technician.yearsOfExperience || $t('noExperienceInfo')
+   ```
+   
+   This ensures backward compatibility while prioritizing the correct field names
+   from the techregister form.
+
+CURRENT PROFILE FIELDS DISPLAYED:
+================================
+
+1. **Basic Information:**
+   - Name (technician.name)
+   - Specialization (technician.specialization)
+   
+2. **Location & Experience:**
+   - Location (government + district, or fallback)
+   - Years of Experience (experience field)
+   
+3. **Professional Details:**
+   - Base Visit Price (if available)
+   - Willing to Travel (if available)
+   
+4. **Skills & Bio:**
+   - Skills list (if available)
+   - Bio/About section (if available)
+   
+5. **Reviews & Ratings:**
+   - Average rating display
+   - Review submission form
+   - Reviews list
+
+FILES MODIFIED:
+==============
+1. src/views/TechnicianProfile.vue - Updated profile display logic
+2. src/i18n.js - Added new translation keys
+
+STATUS: COMPLETE ✅
+The public technician profile now only displays fields that are collected during
+the technician registration process, with gender and nationality fields removed.
+The profile shows relevant professional information that customers need to make
+informed decisions about booking technicians. 

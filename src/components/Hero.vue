@@ -45,32 +45,28 @@
   </section>
 </template>
 
-<script>
+<script setup>
+import { ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import "../style.css"
-    export default {
-          data() {
-            return {
-              isRTL: false
-            }
-          },
-          methods:{
-            goToServices(){
-              return this.$router.push('/plumbing')
-            },
-            toggleLanguage() {
-              this.isRTL = !this.isRTL;
-              this.$emit('language-changed', this.isRTL);
-            }
-          },
-          watch: {
-            '$i18n.locale': {
-              handler(newLocale) {
-                this.isRTL = newLocale === 'ar' || newLocale === 'he' || newLocale === 'fa';
-              },
-              immediate: true
-            }
-          }
-    }
+
+const { locale } = useI18n()
+const router = useRouter()
+const isRTL = ref(false)
+
+const goToServices = () => {
+  return router.push('/plumbing')
+}
+
+const toggleLanguage = () => {
+  isRTL.value = !isRTL.value
+}
+
+// Watch for locale changes to update RTL
+watch(locale, (newLocale) => {
+  isRTL.value = newLocale === 'ar' || newLocale === 'he' || newLocale === 'fa'
+}, { immediate: true })
 </script>
 
 <style scoped>

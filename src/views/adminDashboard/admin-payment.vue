@@ -1,117 +1,225 @@
 <template>
   <div class="admin-dashboard-layout">
     <admin-sidebar />
-    <div class="payment-main">
-      <div class="payment-container">
-        <h2 class="payment-title">Payouts Management</h2>
-        <div class="title-search-row">
-          <div class="payment-subtitle">All Transactions</div>
-          <div class="filter-search-bar">
-            <button class="filter-btn"><i class="fas fa-filter"></i> Filter</button>
-            <div class="search-wrapper">
-              <span class="search-icon"><i class="fas fa-search"></i></span>
-              <input type="text" v-model="search" placeholder="Search Field" class="search-input" />
+    <div class="dashboard-main">
+      <div class="dashboard-container">
+        <h2 class="dashboard-title">Payment Management</h2>
+        
+        <!-- Payment Summary Cards -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-header">
+              <i class="fas fa-wallet stat-icon"></i>
+              <span class="stat-number">{{ totalAmount }} EGP</span>
+            </div>
+            <div class="stat-title">Total Revenue</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-header">
+              <i class="fas fa-clock stat-icon"></i>
+              <span class="stat-number">{{ pendingTransactions.length }}</span>
+            </div>
+            <div class="stat-title">Pending Transactions</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-header">
+              <i class="fas fa-check-circle stat-icon"></i>
+              <span class="stat-number">{{ approvedTransactions.length }}</span>
+            </div>
+            <div class="stat-title">Approved Transactions</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-header">
+              <i class="fas fa-times-circle stat-icon"></i>
+              <span class="stat-number">{{ rejectedTransactions.length }}</span>
+            </div>
+            <div class="stat-title">Rejected Transactions</div>
+          </div>
+        </div>
+
+        <!-- Transactions Table -->
+        <div class="transactions-table">
+          <div class="table-header">
+            <h3>Payment Transactions</h3>
+            <div class="filter-buttons">
+              <button class="filter-btn" @click="filterByStatus('all')" :class="{ active: currentFilter === 'all' }">All</button>
+              <button class="filter-btn" @click="filterByStatus('pending')" :class="{ active: currentFilter === 'pending' }">Pending</button>
+              <button class="filter-btn" @click="filterByStatus('approved')" :class="{ active: currentFilter === 'approved' }">Approved</button>
+              <button class="filter-btn" @click="filterByStatus('rejected')" :class="{ active: currentFilter === 'rejected' }">Rejected</button>
             </div>
           </div>
-        </div>
-        <div class="quick-actions-section">
-          <div class="quick-actions">
-            <a href="/admin-send-money" class="quick-action">
-              <i class="fas fa-paper-plane"></i>
-              <span>Send Money</span>
-            </a>
-            <a href="/admin-wallet-details" class="quick-action">
-              <i class="fas fa-wallet"></i>
-              <span>Wallet Details</span>
-            </a>
-            <a href="/admin-payment" class="quick-action active">
-              <i class="fas fa-list"></i>
-              <span>All transaction</span>
-            </a>
+          
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Technician</th>
+                  <th>Customer</th>
+                  <th>Amount</th>
+                  <th>PayPal Order ID</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="transaction in filteredTransactions" :key="transaction.id">
+                  <td>{{ formatDate(transaction.paymentDate) }}</td>
+                  <td>{{ transaction.technicianName }}</td>
+                  <td>{{ transaction.userName }}</td>
+                  <td>{{ transaction.amount }} {{ transaction.currency }}</td>
+                  <td class="order-id">{{ transaction.paypalOrderId }}</td>
+                  <td>
+                    <span class="status-badge" :class="getStatusBadgeClass(transaction.status)">
+                      {{ transaction.status }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="action-buttons" v-if="transaction.status === 'pending'">
+                      <button class="approve-btn" @click="approveTransaction(transaction.id)">
+                        <i class="fas fa-check"></i> Approve
+                      </button>
+                      <button class="reject-btn" @click="rejectTransaction(transaction.id)">
+                        <i class="fas fa-times"></i> Reject
+                      </button>
+                    </div>
+                    <div v-else class="action-info">
+                      {{ transaction.adminAction }} by {{ transaction.adminActionBy }}
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-        </div>
-        <div class="top-row">
-          <div class="paypal-card-search-row">
-            <div class="payment-right">
-              <div class="paypal-card">
-                <div class="paypal-card-header">
-                  <span class="paypal-card-title">Pay<span class="bold">Pal</span> <span class="ml-2">Cash</span></span>
-                  <span class="paypal-card-type">debit</span>
-                </div>
-                <div class="paypal-card-icon">
-                  <i class="fab fa-cc-paypal"></i>
-                </div>
-                <div class="paypal-card-footer">
-                  <span class="paypal-card-admin">ADMIN BOLTFIX</span>
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Mastercard-logo.png" alt="Mastercard" class="paypal-card-logo" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="table-wrapper">
-          <table class="payment-table">
-            <thead>
-              <tr class="table-header">
-                <th>Technicians</th>
-                <th>Payout ID</th>
-                <th>Payout Type</th>
-                <th>Amount</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(row, i) in filteredRows" :key="i" class="table-row">
-                <td><input type="checkbox" /> {{ row.technician }}</td>
-                <td>{{ row.payoutId }}</td>
-                <td>{{ row.payoutType }}</td>
-                <td>{{ row.amount }}</td>
-                <td>
-                  <span :class="['status-badge', row.status.toLowerCase()]">{{ row.status }}</span>
-                </td>
-                <td>
-                  <button class="delete-btn"><i class="fas fa-trash-alt"></i></button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<script>
-import AdminSidebar from '../../components/admin-sidebar.vue';
-export default {
-  components: { AdminSidebar },
-  data() {
-    return {
-      search: '',
-      rows: [
-        { technician: 'Ahmed Hassan', payoutId: '1049014598', payoutType: 'Paypal', amount: 250, status: 'Pending' },
-        { technician: 'Mahmoud Ali', payoutId: '1049014598', payoutType: 'Paypal', amount: 300, status: 'Rejected' },
-        { technician: 'Selim Morad', payoutId: '1049014598', payoutType: 'Paypal', amount: 200, status: 'Pending' },
-        { technician: 'Noah Hamdy', payoutId: '1049014598', payoutType: 'Paypal', amount: 300, status: 'Pending' },
-        { technician: 'Romy Seyed', payoutId: '1049014598', payoutType: 'Paypal', amount: 500, status: 'Completed' },
-        { technician: 'Ahmed Ali', payoutId: '1049014598', payoutType: 'Paypal', amount: 700, status: 'Pending' },
-        { technician: 'Samir Lasheen', payoutId: '1049014598', payoutType: 'Paypal', amount: 120, status: 'Completed' },
-        { technician: 'Maged Osama', payoutId: '1049014598', payoutType: 'Paypal', amount: 200, status: 'Rejected' },
-        { technician: 'Karim Naguib', payoutId: '1049014598', payoutType: 'Paypal', amount: 230, status: 'Pending' },
-      ]
-    };
-  },
-  computed: {
-    filteredRows() {
-      if (!this.search.trim()) return this.rows;
-      const q = this.search.toLowerCase();
-      return this.rows.filter(row =>
-        Object.values(row).some(val => String(val).toLowerCase().includes(q))
-      );
-    }
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import { collection, getDocs, doc, updateDoc, serverTimestamp, query, orderBy } from 'firebase/firestore'
+import { db, auth } from '../../firebase'
+import AdminSidebar from '../../components/admin-sidebar.vue'
+
+const transactions = ref([])
+const currentFilter = ref('all')
+const loading = ref(true)
+
+// Computed properties
+const filteredTransactions = computed(() => {
+  if (currentFilter.value === 'all') {
+    return transactions.value
   }
-};
+  return transactions.value.filter(t => t.status === currentFilter.value)
+})
+
+const pendingTransactions = computed(() => 
+  transactions.value.filter(t => t.status === 'pending')
+)
+
+const approvedTransactions = computed(() => 
+  transactions.value.filter(t => t.status === 'approved')
+)
+
+const rejectedTransactions = computed(() => 
+  transactions.value.filter(t => t.status === 'rejected')
+)
+
+const totalAmount = computed(() => {
+  return approvedTransactions.value
+    .reduce((sum, t) => sum + parseFloat(t.amount), 0)
+    .toFixed(2)
+})
+
+// Methods
+async function fetchTransactions() {
+  try {
+    loading.value = true
+    const q = query(collection(db, 'paymentTransactions'), orderBy('paymentDate', 'desc'))
+    const snapshot = await getDocs(q)
+    transactions.value = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }))
+  } catch (error) {
+    console.error('Error fetching transactions:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+async function approveTransaction(transactionId) {
+  try {
+    const transactionRef = doc(db, 'paymentTransactions', transactionId)
+    await updateDoc(transactionRef, {
+      status: 'approved',
+      adminAction: 'approved',
+      adminActionDate: serverTimestamp(),
+      adminActionBy: auth.currentUser?.email || 'Admin'
+    })
+    
+    // Update the local state
+    const transaction = transactions.value.find(t => t.id === transactionId)
+    if (transaction) {
+      transaction.status = 'approved'
+      transaction.adminAction = 'approved'
+      transaction.adminActionDate = new Date()
+      transaction.adminActionBy = auth.currentUser?.email || 'Admin'
+    }
+  } catch (error) {
+    console.error('Error approving transaction:', error)
+  }
+}
+
+async function rejectTransaction(transactionId) {
+  try {
+    const transactionRef = doc(db, 'paymentTransactions', transactionId)
+    await updateDoc(transactionRef, {
+      status: 'rejected',
+      adminAction: 'rejected',
+      adminActionDate: serverTimestamp(),
+      adminActionBy: auth.currentUser?.email || 'Admin'
+    })
+    
+    // Update the local state
+    const transaction = transactions.value.find(t => t.id === transactionId)
+    if (transaction) {
+      transaction.status = 'rejected'
+      transaction.adminAction = 'rejected'
+      transaction.adminActionDate = new Date()
+      transaction.adminActionBy = auth.currentUser?.email || 'Admin'
+    }
+  } catch (error) {
+    console.error('Error rejecting transaction:', error)
+  }
+}
+
+function filterByStatus(status) {
+  currentFilter.value = status
+}
+
+function getStatusBadgeClass(status) {
+  return {
+    'badge-pending': status === 'pending',
+    'badge-approved': status === 'approved',
+    'badge-rejected': status === 'rejected'
+  }
+}
+
+function formatDate(date) {
+  if (!date) return '-'
+  const d = date.toDate ? date.toDate() : new Date(date)
+  return d.toLocaleDateString() + ' ' + d.toLocaleTimeString()
+}
+
+onMounted(() => {
+  fetchTransactions()
+})
 </script>
 
 <style scoped>
@@ -119,338 +227,193 @@ export default {
   display: flex;
   min-height: 100vh;
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
-  background: #faf8fd;
+  background: #f9fafb;
 }
 
-.payment-main {
+.dashboard-main {
   flex: 1;
   padding: 2.5rem;
 }
 
-.payment-container {
+.dashboard-container {
   max-width: 80rem;
   margin: 0 auto;
 }
 
-.payment-title {
+.dashboard-title {
   font-size: 2rem;
   font-weight: bold;
   color: #7c6bb0;
-  margin-bottom: 0;
+  margin-bottom: 2rem;
 }
 
-.title-search-row {
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.stat-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
-}
-
-.payment-subtitle {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #7c6bb0;
-}
-
-.filter-search-bar {
-  display: flex;
-  width: 685px;
-  height: 61px;
   justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.stat-icon {
+  font-size: 1.5rem;
+  color: #7c6bb0;
+  margin-right: 0.5rem;
+}
+
+.stat-number {
+  font-size: 1.875rem;
+  font-weight: bold;
+  color: #1f2937;
+}
+
+.stat-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.transactions-table {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 9px;
-  flex-shrink: 0;
-  border-radius: 58px;
-  background: #D3CFE2;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.table-header h3 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 0.5rem;
 }
 
 .filter-btn {
-  display: flex;
-  width: 97px;
-  height: 39px;
-  padding: 8px;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-  border-radius: 58px;
-  border: 1px solid var(--border-border-primary, #C2C3C4);
-  color: #C2C3C4;
-  background: var(--surface-color-surface-primary, #FFF);
-  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  background: white;
+  color: #6b7280;
   cursor: pointer;
   transition: all 0.2s;
 }
 
-.filter-btn i {
-  font-size: 1.1rem;
-}
-
-.filter-btn:hover {
-  background: var(--sidebar-color);
-  color: var(--primary-color);
-}
-
-.search-wrapper {
-  display: flex;
-  width: 439px;
-  height: 39px;
-  padding: 8px;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-  border-radius: 58px;
-  border: 1px solid var(--border-border-primary, #C2C3C4);
-  background: var(--surface-color-surface-primary, #FFF);
-}
-
-.search-icon {
-  color: #b8a4e3;
-  font-size: 1.1rem;
-  margin-right: 0.7rem;
-}
-
-.search-input {
-  border: none;
-  outline: none;
-  background: transparent;
-  font-size: 1rem;
-  color: #333;
-  width: 100%;
-}
-
-.search-input::placeholder {
-  color: #b8a4e3;
-  opacity: 1;
-}
-
-.quick-actions-section {
-  margin-bottom: 2rem;
-}
-
-.quick-actions {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-}
-
-.quick-action {
-  background: #fff;
-  border-radius: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  padding: 1rem 1.5rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 1.1rem;
-  transition: background 0.2s, color 0.2s;
-  cursor: pointer;
-  color: #333;
-  min-width: 120px;
-}
-
-.quick-action i {
-  font-size: 1.7rem;
-  margin-bottom: 0.5rem;
-}
-
-.quick-action:hover {
+.filter-btn.active {
   background: #7c6bb0;
-  color: #fff;
+  color: white;
+  border-color: #7c6bb0;
 }
 
-.quick-action.active {
-  background: #7c6bb0;
-  color: #fff;
-}
-
-.top-row {
-  margin-bottom: 2rem;
-}
-
-.paypal-card-search-row {
-  display: flex;
-  justify-content: center;
-}
-
-.payment-right {
-  display: flex;
-  justify-content: center;
-}
-
-.paypal-card {
-  background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
-  color: #fff;
-  border-radius: 1.5rem;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
-  padding: 1.5rem;
-  min-width: 260px;
-  max-width: 320px;
-  height: 130px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  position: relative;
-  overflow: hidden;
-}
-
-.paypal-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.paypal-card-title {
-  font-size: 1.1rem;
-  font-weight: 500;
-}
-
-.paypal-card-title .bold {
-  font-weight: bold;
-}
-
-.paypal-card-type {
-  text-transform: uppercase;
-  font-size: 0.8rem;
-  font-weight: bold;
-  letter-spacing: 2px;
-}
-
-.paypal-card-icon {
-  position: absolute;
-  left: 1.2rem;
-  top: 2.5rem;
-  font-size: 2.5rem;
-  opacity: 0.18;
-}
-
-.paypal-card-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 1.2rem;
-}
-
-.paypal-card-admin {
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 2px;
-}
-
-.paypal-card-logo {
-  width: 32px;
-  height: 22px;
-  object-fit: contain;
-}
-
-.table-wrapper {
+.table-container {
   overflow-x: auto;
-  border-radius: 0.75rem;
-  background: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.payment-table {
+table {
   width: 100%;
   border-collapse: collapse;
-  background: #fff;
-  border-radius: 0.75rem;
 }
 
-.table-header {
-  background: rgba(124, 107, 176, 0.2);
-  color: #333;
-}
-
-.table-header th {
-  padding: 0.75rem 1rem;
+th, td {
+  padding: 1rem;
   text-align: left;
-  font-weight: 600;
-  font-size: 0.9rem;
-}
-
-.table-row {
   border-bottom: 1px solid #e5e7eb;
-  transition: background-color 0.2s;
 }
 
-.table-row:hover {
-  background: #ede7f6;
-}
-
-.table-row td {
-  padding: 0.75rem 1rem;
-  font-size: 0.9rem;
-  color: #333;
+th {
+  background: #f9fafb;
+  font-weight: 600;
+  color: #374151;
 }
 
 .status-badge {
-  display: inline-block;
-  padding: 0.3rem 1.2rem;
-  border-radius: 9999px;
-  font-size: 0.9rem;
-  font-weight: bold;
-  color: #fff;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
-.status-badge.pending {
-  background: #60a5fa;
+.badge-pending {
+  background: #fef3c7;
+  color: #92400e;
 }
 
-.status-badge.completed {
-  background: #22c55e;
+.badge-approved {
+  background: #d1fae5;
+  color: #065f46;
 }
 
-.status-badge.rejected {
-  background: #f472b6;
+.badge-rejected {
+  background: #fee2e2;
+  color: #991b1b;
 }
 
-.delete-btn {
-  background: none;
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.approve-btn, .reject-btn {
+  padding: 0.25rem 0.75rem;
   border: none;
-  color: #f44336;
-  font-size: 1.2rem;
+  border-radius: 0.25rem;
   cursor: pointer;
-  transition: color 0.2s;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s;
 }
 
-.delete-btn:hover {
-  color: #b71c1c;
+.approve-btn {
+  background: #22c55e;
+  color: white;
 }
 
-@media (max-width: 768px) {
-  .payment-main {
-    padding: 1rem;
-  }
-  .title-search-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-  .filter-search-bar {
-    width: 100%;
-    flex-direction: column;
-    height: auto;
-    padding: 1rem;
-  }
-  .search-wrapper {
-    width: 100%;
-  }
-  .quick-actions {
-    flex-direction: column;
-    align-items: center;
-  }
-  .quick-action {
-    width: 100%;
-    max-width: 200px;
-  }
-  .table-wrapper {
-    font-size: 0.8rem;
-  }
-  .table-header th,
-  .table-row td {
-    padding: 0.5rem 0.5rem;
-  }
+.approve-btn:hover {
+  background: #16a34a;
+}
+
+.reject-btn {
+  background: #ef4444;
+  color: white;
+}
+
+.reject-btn:hover {
+  background: #dc2626;
+}
+
+.action-info {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.order-id {
+  font-family: monospace;
+  font-size: 0.875rem;
+  color: #6b7280;
 }
 </style>

@@ -204,9 +204,6 @@
                     <div class="bar-label">{{ bar.day }}</div>
                   </div>
                 </div>
-                <div class="chart-x-labels">
-                  <span v-for="day in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']" :key="day">{{ day }}</span>
-                </div>
               </div>
             </div>
             <div class="chart-legend">
@@ -255,13 +252,8 @@ export default {
         { x: 550, y: 140, value: 88 }
       ],
       attendanceLabels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-      bookingsData: [
-        { day: 'Mon', current: 25, previous: 20 },
-        { day: 'Tue', current: 42, previous: 35 },
-        { day: 'Wed', current: 67, previous: 50 },
-        { day: 'Thu', current: 33, previous: 28 },
-        { day: 'Fri', current: 17, previous: 15 }
-      ],
+      bookingsData: [],
+      realBookingsData: [],
       hoveredPoint: null,
       tooltip: null
     };
@@ -287,6 +279,7 @@ export default {
     this.updateTime();
     setInterval(this.updateTime, 1000);
     this.animateCharts();
+    this.fetchWeeklyBookings();
   },
   methods: {
     updateTime() {
@@ -342,6 +335,132 @@ export default {
           }
           this.tooltip = null;
         }, 200);
+      }
+    },
+    
+    async fetchWeeklyBookings() {
+      try {
+        const { collection, getDocs, query, where, orderBy } = await import('firebase/firestore');
+        const { db } = await import('../../../firebase');
+        
+        // Get current week (Monday to Sunday)
+        const now = new Date();
+        const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+        const daysFromMonday = currentDay === 0 ? 6 : currentDay - 1; // Adjust for Monday start
+        const monday = new Date(now);
+        monday.setDate(now.getDate() - daysFromMonday);
+        monday.setHours(0, 0, 0, 0);
+        
+        const sunday = new Date(monday);
+        sunday.setDate(monday.getDate() + 6);
+        sunday.setHours(23, 59, 59, 999);
+        
+        // Get previous week
+        const previousMonday = new Date(monday);
+        previousMonday.setDate(monday.getDate() - 7);
+        
+        const previousSunday = new Date(sunday);
+        previousSunday.setDate(sunday.getDate() - 7);
+        
+        console.log('Week boundaries:', {
+          currentMonday: monday.toDateString(),
+          currentSunday: sunday.toDateString(),
+          previousMonday: previousMonday.toDateString(),
+          previousSunday: previousSunday.toDateString()
+        });
+        
+        // Fetch current week bookings
+        const currentWeekQuery = query(
+          collection(db, 'bookings'),
+          where('createdAt', '>=', monday),
+          where('createdAt', '<=', sunday),
+          orderBy('createdAt', 'desc')
+        );
+        
+        const currentWeekSnapshot = await getDocs(currentWeekQuery);
+        const currentWeekBookings = currentWeekSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        // Fetch previous week bookings
+        const previousWeekQuery = query(
+          collection(db, 'bookings'),
+          where('createdAt', '>=', previousMonday),
+          where('createdAt', '<=', previousSunday),
+          orderBy('createdAt', 'desc')
+        );
+        
+        const previousWeekSnapshot = await getDocs(previousWeekQuery);
+        const previousWeekBookings = previousWeekSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        console.log('Bookings found:', {
+          currentWeek: currentWeekBookings.length,
+          previousWeek: previousWeekBookings.length
+        });
+        
+        // Create a simple array for weekdays
+        const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+        
+        // Initialize counters for each day
+        const currentWeekCounts = [0, 0, 0, 0, 0]; // Mon, Tue, Wed, Thu, Fri
+        const previousWeekCounts = [0, 0, 0, 0, 0]; // Mon, Tue, Wed, Thu, Fri
+        
+        // Count current week bookings by day
+        currentWeekBookings.forEach(booking => {
+          const bookingDate = booking.createdAt?.toDate ? booking.createdAt.toDate() : new Date(booking.createdAt);
+          const dayOfWeek = bookingDate.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+          
+          // Only count Monday (1) to Friday (5)
+          if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+            const dayIndex = dayOfWeek - 1; // Convert to 0-based index
+            currentWeekCounts[dayIndex]++;
+          }
+        });
+        
+        // Count previous week bookings by day
+        previousWeekBookings.forEach(booking => {
+          const bookingDate = booking.createdAt?.toDate ? booking.createdAt.toDate() : new Date(booking.createdAt);
+          const dayOfWeek = bookingDate.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+          
+          // Only count Monday (1) to Friday (5)
+          if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+            const dayIndex = dayOfWeek - 1; // Convert to 0-based index
+            previousWeekCounts[dayIndex]++;
+          }
+        });
+        
+        console.log('Day counts:', {
+          currentWeek: currentWeekCounts,
+          previousWeek: previousWeekCounts
+        });
+        
+        // Create chart data (Monday to Friday)
+        this.bookingsData = weekDays.map((day, index) => ({
+          day,
+          current: currentWeekCounts[index] || 0,
+          previous: previousWeekCounts[index] || 0
+        }));
+        
+        console.log('Final bookings data:', this.bookingsData);
+        
+        // Update dashboard stats
+        this.dashboardStats.totalBookings = currentWeekBookings.length;
+        this.dashboardStats.previousWeekBookings = previousWeekBookings.length;
+        
+      } catch (error) {
+        console.error('Error fetching weekly bookings:', error);
+        // Fallback to static data if there's an error
+        this.bookingsData = [
+          { day: 'Mon', current: 25, previous: 20 },
+          { day: 'Tue', current: 42, previous: 35 },
+          { day: 'Wed', current: 67, previous: 50 },
+          { day: 'Thu', current: 33, previous: 28 },
+          { day: 'Fri', current: 17, previous: 15 }
+        ];
       }
     }
   }

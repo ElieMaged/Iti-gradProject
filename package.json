@@ -11,6 +11,8 @@
     "server": "vite preview --port 3000"
   },
   "dependencies": {
+    "@paypal/checkout-server-sdk": "^1.0.3",
+    "@paypal/react-paypal-js": "^8.8.3",
     "@sendgrid/mail": "^8.1.5",
     "@tailwindcss/vite": "^4.1.11",
     "bootstrap": "^5.3.7",
