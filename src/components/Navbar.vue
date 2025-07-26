@@ -178,22 +178,22 @@ export default {
   <div class=" w-full" id="contact-Nav">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center px-4 py-2 gap-2">
       <div class="flex flex-col sm:flex-row gap-2 items-center">
-        <a href="tel:+12095551234" class="text-white no-underline mx-1 flex items-center text-sm"><i
+        <a href="tel:+12095551234" class="contact-links no-underline mx-1 flex items-center text-sm"><i
             class="fa-solid fa-phone px-2"></i>{{ $t('contactPhone') }}</a>
-        <a :href="`mailto:Boltfix@gmail.com`" class="text-white no-underline mx-1 flex items-center text-sm"><i
+        <a :href="`mailto:Boltfix@gmail.com`" class="contact-links no-underline mx-1 flex items-center text-sm"><i
             class="fa-solid fa-envelope px-2"></i>boltfix@gmail.com</a>
         <a href="https://www.google.com/maps/place/123+Main+St,+Anytown,+USA"
-          class="text-white no-underline mx-1 flex items-center text-sm"><i
+          class="contact-links no-underline mx-1 flex items-center text-sm"><i
             class="fa-solid fa-map-marker-alt px-2"></i>{{ $t('contactAddress') }}</a>
       </div>
       <div class="flex gap-2">
-        <a href="#" class="flex items-center justify-center rounded-full bg-white text-white w-7 h-7"><i
+        <a href="#" class="flex items-center justify-center rounded-full social-media-links w-7 h-7"><i
             class="fa-brands fa-facebook-f secondary-color"></i></a>
-        <a href="#" class="flex items-center justify-center rounded-full bg-white text-white w-7 h-7"><i
+        <a href="#" class="flex items-center justify-center rounded-full social-media-links w-7 h-7"><i
             class="fa-brands fa-x-twitter secondary-color"></i></a>
-        <a href="#" class="flex items-center justify-center rounded-full bg-white text-white w-7 h-7"><i
+        <a href="#" class="flex items-center justify-center rounded-full social-media-links w-7 h-7"><i
             class="fa-brands fa-linkedin-in secondary-color"></i></a>
-        <a href="#" class="flex items-center justify-center rounded-full bg-white text-white w-7 h-7"><i
+        <a href="#" class="flex items-center justify-center rounded-full social-media-links w-7 h-7"><i
             class="fab fa-youtube secondary-color"></i></a>
       </div>
     </div>
@@ -356,6 +356,24 @@ export default {
   background-color: var(--secondary-color);
   width: 100%;
   padding: 0;
+}
+.contact-links {
+  color: white;
+}
+.dark .contact-links {
+  color: var(--primary-text-dark);
+}
+.social-media-links {
+  background-color: white;
+  color: var(white);
+}
+.dark .social-media-links {
+  background-color: var(--primary-text-dark);
+  color: var(--primary-text-dark);
+}
+.dark #contact-Nav {
+  background-color: var(--secondary) !important;
+  color: var(--primary-text-dark) !important;
 }
 
 #logo {
