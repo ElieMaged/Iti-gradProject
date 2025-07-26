@@ -6,7 +6,7 @@
           <span>My Profile</span>
         </a>
   
-        <a href="admin-users.html" class="sidebar-item">
+        <a href="admin-users" class="sidebar-item">
           <i class="fas fa-users"></i>
           <span>Users</span>
         </a>
@@ -19,8 +19,8 @@
             <i class="fas fa-chevron-down chevron-icon"></i>
           </div>
           <div class="dropdown-menu" v-show="showTechnicians">
-            <a href="admin-technicians.html">All Technicians</a>
-            <a href="admin-technicians-pending.html">Pending Technicians</a>
+            <a href="admin-technicians">All Technicians</a>
+            <a href="admin-technicians-pending">Pending Technicians</a>
           </div>
         </div>
   
