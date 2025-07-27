@@ -126,4 +126,24 @@ const router = createRouter({
   routes,
 })
 
+// Add global navigation guard for debugging
+router.beforeEach((to, from, next) => {
+  console.log('Navigation:', { from: from.path, to: to.path });
+  
+  // Check if trying to access admin routes
+  if (to.path.startsWith('/admin-')) {
+    console.log('Attempting to access admin route:', to.path);
+    const userType = localStorage.getItem('userType');
+    console.log('User type:', userType);
+    
+    if (userType !== 'admin') {
+      console.log('User is not admin, redirecting to home');
+      next('/');
+      return;
+    }
+  }
+  
+  next();
+});
+
 export default router

@@ -226,6 +226,7 @@
 <script>
 import AdminSidebar from '../../components/admin-sidebar.vue';
 import { useI18n } from 'vue-i18n';
+import { auth } from '../../firebase'; // Added import for auth
 
 export default {
   name: 'AdminDashboard',
@@ -240,14 +241,6 @@ export default {
       selectedPeriod: 'daily',
       currentTime: '8:02:09 AM',
       chartPeriods: ['daily', 'weekly', 'monthly'],
-      dashboardStats: {
-        totalTechnicians: 452,
-        newTechnicians: 2,
-        totalCustomers: 360,
-        customerChange: t('plus10PercentLessThanYesterday'),
-        platformGrowth: 30,
-        growthChange: t('plus3PercentIncreaseThanYesterday')
-      },
       attendanceData: [
         { x: 50, y: 180, value: 91 },
         { x: 150, y: 120, value: 85 },
@@ -264,6 +257,16 @@ export default {
     };
   },
   computed: {
+    dashboardStats() {
+      return {
+        totalTechnicians: 452,
+        newTechnicians: 2,
+        totalCustomers: 360,
+        customerChange: this.t('plus10PercentLessThanYesterday'),
+        platformGrowth: 30,
+        growthChange: this.t('plus3PercentIncreaseThanYesterday')
+      };
+    },
     linePath() {
       if (this.attendanceData.length === 0) return '';
       
@@ -281,6 +284,27 @@ export default {
     }
   },
   mounted() {
+    // Add authentication check and debugging
+    console.log('Admin Dashboard mounted');
+    console.log('Current user:', auth.currentUser);
+    console.log('User type from localStorage:', localStorage.getItem('userType'));
+    
+    // Check if user is authenticated and is admin
+    const userType = localStorage.getItem('userType');
+    if (!auth.currentUser) {
+      console.log('No authenticated user, redirecting to login');
+      this.$router.push('/userlogin');
+      return;
+    }
+    
+    if (userType !== 'admin') {
+      console.log('User is not admin, redirecting to home');
+      this.$router.push('/');
+      return;
+    }
+    
+    console.log('User is authenticated as admin, proceeding with dashboard');
+    
     this.updateTime();
     setInterval(this.updateTime, 1000);
     this.animateCharts();
@@ -346,7 +370,7 @@ export default {
     async fetchWeeklyBookings() {
       try {
         const { collection, getDocs, query, where, orderBy } = await import('firebase/firestore');
-        const { db } = await import('../../../firebase');
+        const { db } = await import('../../firebase');
         
         // Get current week (Monday to Sunday)
         const now = new Date();

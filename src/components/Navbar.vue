@@ -54,13 +54,21 @@ export default {
     function handleProfileClick() {
       const currentUser = auth.currentUser;
       const userType = localStorage.getItem('userType');
+      
+      console.log('Profile click - Current user:', currentUser);
+      console.log('Profile click - User type:', userType);
+      
       if (userType === 'admin') {
+        console.log('Navigating to admin-dashboard');
         router.push({ path: '/admin-dashboard' });
       } else if (userType === 'technician') {
+        console.log('Navigating to technician profile');
         router.push({ path: '/technicion-profile' });
       } else if (userType === 'pending') {
+        console.log('Navigating to pending application');
         router.push({ path: '/pending-application' });
       } else {
+        console.log('Navigating to profile view');
         router.push(getRoute('profile-view'));
       }
     }
