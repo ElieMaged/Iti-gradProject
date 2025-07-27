@@ -529,14 +529,15 @@ const messages = {
     noReviewsYet: 'No reviews yet',
     beFirstToReview: 'Be the first to review this technician!',
     retry: 'Retry',
-    // Review Form Messages
-    reviewSubmitted: 'Review submitted successfully!',
-    reviewSubmissionFailed: 'Failed to submit review. Please try again.',
-    pleaseSelectRating: 'Please select a rating',
-    reviewTooShort: 'Review must be at least 10 characters long',
-    reviewTooLong: 'Review cannot exceed 500 characters',
-    loginRequired: 'Please log in to submit a review',
-    thankYouForReview: 'Thank you for your review!',
+      // Review Form Messages
+  reviewSubmitted: 'Review submitted successfully!',
+  reviewSubmissionFailed: 'Failed to submit review. Please try again.',
+  pleaseSelectRating: 'Please select a rating',
+  reviewTooShort: 'Review must be at least 10 characters long',
+  reviewTooLong: 'Review cannot exceed 500 characters',
+  loginRequired: 'Please log in to submit a review',
+  thankYouForReview: 'Thank you for your review!',
+  submitting: 'Submitting...',
 
     
     // Services Overview Section
@@ -1125,14 +1126,15 @@ const messages = {
     noReviewsYet: 'لا توجد تقييمات بعد',
     beFirstToReview: 'كن أول من يقيم هذا الفني!',
     retry: 'إعادة المحاولة',
-    // Review Form Messages
-    reviewSubmitted: 'تم إرسال التقييم بنجاح!',
-    reviewSubmissionFailed: 'فشل في إرسال التقييم. يرجى المحاولة مرة أخرى.',
-    pleaseSelectRating: 'يرجى اختيار تقييم',
-    reviewTooShort: 'يجب أن يكون التقييم 10 أحرف على الأقل',
-    reviewTooLong: 'لا يمكن أن يتجاوز التقييم 500 حرف',
-    loginRequired: 'يرجى تسجيل الدخول لإرسال تقييم',
-    thankYouForReview: 'شكراً لك على تقييمك!',
+      // Review Form Messages
+  reviewSubmitted: 'تم إرسال التقييم بنجاح!',
+  reviewSubmissionFailed: 'فشل في إرسال التقييم. يرجى المحاولة مرة أخرى.',
+  pleaseSelectRating: 'يرجى اختيار تقييم',
+  reviewTooShort: 'يجب أن يكون التقييم 10 أحرف على الأقل',
+  reviewTooLong: 'لا يمكن أن يتجاوز التقييم 500 حرف',
+  loginRequired: 'يرجى تسجيل الدخول لإرسال تقييم',
+  thankYouForReview: 'شكراً لك على تقييمك!',
+  submitting: 'جاري الإرسال...',
   }
 };
 
