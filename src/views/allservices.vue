@@ -484,6 +484,7 @@ import { stockTechnicians } from '../assets/stockTechnicians.js';
   display: flex;
   align-items: center;
   justify-content: center;
+  color: white;
   margin-bottom: 1.5rem;
 }
 
