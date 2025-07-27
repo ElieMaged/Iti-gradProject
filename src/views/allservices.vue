@@ -77,6 +77,7 @@
             </div>
             <div class="service-content">
               <h3 class="service-title">{{ technician.name }}</h3>
+              <div class="technician-specialization">{{ technician.specialization || 'General' }}</div>
               <p class="service-desc">{{ technician.description }}</p>
               <div class="service-meta">
                 <span class="service-rating">
@@ -274,32 +275,74 @@ import { stockTechnicians } from '../assets/stockTechnicians.js';
       try {
         this.loading = true;
         
-        // Try to fetch from Firebase first
+        // Fetch from Firebase technicians collection
         const techniciansCollection = collection(db, 'technicians');
         const techniciansSnapshot = await getDocs(techniciansCollection);
         
         const firebaseTechnicians = [];
         techniciansSnapshot.forEach(doc => {
           const data = doc.data();
-          if (data.status === 'approved' || data.status === 'active') {
-            firebaseTechnicians.push({
-              id: doc.id,
-              ...data,
-              // Add default values for missing fields
-              rating: data.rating || 4.5,
-              price: data.hourlyRate || 200,
-              location: data.location || 'Cairo',
-              yearsOfExperience: data.yearsOfExperience || 5,
-              skills: data.skills || ['General Repair'],
-              specialization: data.specialization || 'General'
-            });
-          }
+          console.log('Technician data:', { id: doc.id, ...data });
+          
+          // Include all technicians regardless of status for now
+          // You can add status filtering later if needed
+          firebaseTechnicians.push({
+            id: doc.id,
+            name: data.fullName || data.name || 'Unknown Technician',
+            image: data.idPhotoUrl || data.profileImage || '/images/Avatar.png',
+            description: data.bio || data.description || 'Professional technician with years of experience.',
+            rating: data.averageRating || 4.5,
+            price: data.basePrice || data.hourlyRate || 200,
+            location: data.government || data.location || 'Cairo',
+            yearsOfExperience: data.yearsOfExperience || 5,
+            skills: data.skills || ['General Repair'],
+            specialization: data.specialization || 'General',
+            phone: data.phone || '',
+            gender: data.gender || 'Male',
+            nationality: data.nationality || 'Egyptian'
+          });
         });
 
+        // Also check pendingTechnicians collection for any approved technicians
+        try {
+          const pendingTechniciansCollection = collection(db, 'pendingTechnicians');
+          const pendingSnapshot = await getDocs(pendingTechniciansCollection);
+          
+          pendingSnapshot.forEach(doc => {
+            const data = doc.data();
+            console.log('Pending technician data:', { id: doc.id, ...data });
+            
+            // Only include if they have some approval status or are active
+            if (data.status === 'approved' || data.status === 'active' || !data.status) {
+              firebaseTechnicians.push({
+                id: doc.id,
+                name: data.fullName || data.name || 'Unknown Technician',
+                image: data.idPhotoUrl || data.profileImage || '/images/Avatar.png',
+                description: data.bio || data.description || 'Professional technician with years of experience.',
+                rating: data.averageRating || 4.5,
+                price: data.basePrice || data.hourlyRate || 200,
+                location: data.government || data.location || 'Cairo',
+                yearsOfExperience: data.yearsOfExperience || 5,
+                skills: data.skills || ['General Repair'],
+                specialization: data.specialization || 'General',
+                phone: data.phone || '',
+                gender: data.gender || 'Male',
+                nationality: data.nationality || 'Egyptian'
+              });
+            }
+          });
+        } catch (pendingError) {
+          console.log('Error fetching pending technicians:', pendingError);
+        }
+
+        console.log('Firebase technicians found:', firebaseTechnicians.length);
+        
         // If we have Firebase data, use it; otherwise use stock data
         if (firebaseTechnicians.length > 0) {
           this.technicians = firebaseTechnicians;
+          console.log('Using Firebase technicians');
         } else {
+          console.log('No Firebase technicians found, using stock data');
           // Use stock data with some modifications for variety
           this.technicians = stockTechnicians.map((tech, index) => ({
             ...tech,
@@ -360,11 +403,9 @@ import { stockTechnicians } from '../assets/stockTechnicians.js';
     bookTechnician(technician) {
       // Navigate to booking page with technician info
       this.$router.push({
-        path: '/booking',
+        path: '/bookingpage',
         query: {
-          technicianId: technician.id,
-          technicianName: technician.name,
-          service: technician.specialization
+          techId: technician.id
         }
       });
     },
@@ -723,6 +764,19 @@ import { stockTechnicians } from '../assets/stockTechnicians.js';
 
 .dark .service-title {
   color: var(--primary-text);
+}
+
+.technician-specialization {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #625397;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dark .technician-specialization {
+  color: #8b7bb8;
 }
 
 .service-desc {

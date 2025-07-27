@@ -33,6 +33,9 @@
             <div class="rating-text">
               {{ averageRating.toFixed(1) }} ({{ reviews.length }} {{ $t('reviews') }})
             </div>
+            <div v-if="reviews.length === 0" class="no-rating">
+              {{ $t('noReviewsYet') }}
+            </div>
           </div>
           <div class="profile-skills">
             <b>{{ $t('skills') }}</b>
@@ -70,8 +73,8 @@
           </div>
         </div>
         <div class="action-buttons">
-          <button class="book-now-btn">{{ $t('bookNow') }}</button>
-          <button class="view-services-btn">{{ $t('viewAllServices') }}</button>
+          <button @click="bookNow" class="book-now-btn">{{ $t('bookNow') }}</button>
+          <button @click="viewAllServices" class="view-services-btn">{{ $t('viewAllServices') }}</button>
         </div>
       </div>
       
@@ -79,13 +82,24 @@
       <div class="reviews-section">
         <div class="reviews-header">
           <h2 class="reviews-title">{{ $t('reviews') }}</h2>
-          <button 
-            v-if="!showReviewForm" 
-            @click="showReviewForm = true" 
-            class="add-review-btn"
-          >
-            {{ $t('addReview') }}
-          </button>
+          <div v-if="!showReviewForm" class="review-actions">
+            <button 
+              v-if="canReview" 
+              @click="showReviewForm = true" 
+              class="add-review-btn"
+            >
+              {{ $t('addReview') }}
+            </button>
+            <div v-else-if="!auth.currentUser" class="review-notice">
+              {{ $t('loginToReview') }}
+            </div>
+            <div v-else-if="reviews.find(r => r.userEmail === auth.currentUser?.email)" class="review-notice">
+              {{ $t('thankYouForReview') }}
+            </div>
+            <div v-else class="review-notice">
+              {{ $t('bookingRequiredToReview') }}
+            </div>
+          </div>
         </div>
 
         <!-- Review Submission Form -->
@@ -98,8 +112,11 @@
                 v-for="n in 5" 
                 :key="n" 
                 class="fa-solid fa-star star-input"
-                :class="{ 'filled': n <= newReview.rating, 'empty': n > newReview.rating }"
-                @click="newReview.rating = n"
+                :class="{ 
+                  'filled': n <= (hoverRating || newReview.rating), 
+                  'empty': n > (hoverRating || newReview.rating) 
+                }"
+                @click="setRating(n)"
                 @mouseenter="hoverRating = n"
                 @mouseleave="hoverRating = 0"
               ></i>
@@ -117,8 +134,8 @@
             <div class="char-count">{{ newReview.text.length }}/500</div>
           </div>
           <div class="form-actions">
-            <button @click="submitReview" :disabled="!isValidReview" class="submit-btn">
-              {{ $t('submitReview') }}
+            <button @click="submitReview" :disabled="!isValidReview || submittingReview" class="submit-btn">
+              {{ submittingReview ? $t('submitting') : $t('submitReview') }}
             </button>
             <button @click="cancelReview" class="cancel-btn">
               {{ $t('cancel') }}
@@ -133,20 +150,20 @@
             <p>{{ $t('loadingReviews') }}</p>
           </div>
           <div v-else-if="reviewsError" class="error-state">
-            <p class="error-message">{{ reviewsError }}</p>
             <button @click="fetchReviews" class="retry-btn">{{ $t('retry') }}</button>
           </div>
           <div v-else-if="reviews.length > 0" class="reviews-container">
             <div v-for="review in reviews" :key="review.id" class="review-card">
               <div class="review-header">
-                <div class="review-rating">
-                  <i 
-                    v-for="n in 5" 
-                    :key="n" 
-                    class="fa-solid fa-star"
-                    :class="{ 'filled': n <= review.rating, 'empty': n > review.rating }"
-                  ></i>
-                </div>
+                              <div class="review-rating">
+                <i 
+                  v-for="n in 5" 
+                  :key="n" 
+                  class="fa-solid fa-star"
+                  :class="{ 'filled': n <= review.rating, 'empty': n > review.rating }"
+                ></i>
+                <span class="rating-number">({{ review.rating }}/5)</span>
+              </div>
                 <div class="review-meta">
                   <span class="review-author">{{ review.userName || review.userEmail }}</span>
                   <span class="review-date">{{ formatDate(review.createdAt) }}</span>
@@ -176,7 +193,6 @@
             <p>{{ $t('loadingBookings') }}</p>
           </div>
           <div v-else-if="bookingsError" class="error-state">
-            <p class="error-message">{{ bookingsError }}</p>
             <button @click="fetchBookings" class="retry-btn">{{ $t('retry') }}</button>
           </div>
           <div v-else-if="filteredBookings.length > 0" class="table-wrapper">
@@ -223,13 +239,14 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { doc, getDoc, collection, getDocs, query, where, addDoc, orderBy } from 'firebase/firestore'
 import { db, auth } from '../firebase'
 import { stockTechnicians } from '../assets/stockTechnicians'
 
 const route = useRoute()
+const router = useRouter()
 const { t } = useI18n()
 const technician = ref(null)
 const loading = ref(true)
@@ -251,6 +268,8 @@ const newReview = ref({
   text: ''
 })
 
+const submittingReview = ref(false)
+
 const filteredBookings = computed(() => {
   const q = searchQuery.value.toLowerCase();
   return bookings.value.filter(b =>
@@ -266,6 +285,25 @@ const averageRating = computed(() => {
 
 const isValidReview = computed(() => {
   return newReview.value.rating > 0 && newReview.value.text.trim().length >= 10;
+})
+
+const canReview = computed(() => {
+  if (!auth.currentUser) return false;
+  
+  // Check if user has already reviewed this technician
+  const existingReview = reviews.value.find(review => 
+    review.userEmail === auth.currentUser.email
+  );
+  
+  if (existingReview) return false;
+  
+  // Check if user has booked with this technician
+  const userBookings = bookings.value.filter(booking => 
+    booking.userEmail === auth.currentUser.email && 
+    booking.technicianId === route.params.id
+  );
+  
+  return userBookings.length > 0;
 })
 
 onMounted(async () => {
@@ -340,12 +378,23 @@ async function submitReview() {
     return
   }
 
+  if (!canReview.value) {
+    alert(t('bookingRequiredToReview'))
+    return
+  }
+
   if (!isValidReview.value) {
-    alert(t('pleaseSelectRating') + ' ' + t('reviewTooShort'))
+    if (newReview.value.rating === 0) {
+      alert(t('pleaseSelectRating'))
+    } else if (newReview.value.text.trim().length < 10) {
+      alert(t('reviewTooShort'))
+    }
     return
   }
 
   try {
+    submittingReview.value = true
+    
     const reviewData = {
       technicianId: route.params.id,
       userId: auth.currentUser.uid,
@@ -353,7 +402,8 @@ async function submitReview() {
       userName: auth.currentUser.displayName || auth.currentUser.email,
       rating: newReview.value.rating,
       text: newReview.value.text.trim(),
-      createdAt: new Date()
+      createdAt: new Date(),
+      technicianName: technician.value?.name || technician.value?.fullName || 'Unknown'
     }
 
     await addDoc(collection(db, 'reviews'), reviewData)
@@ -361,6 +411,7 @@ async function submitReview() {
     // Reset form
     newReview.value = { rating: 0, text: '' }
     showReviewForm.value = false
+    hoverRating.value = 0
     
     // Refresh reviews
     await fetchReviews()
@@ -369,18 +420,37 @@ async function submitReview() {
   } catch (error) {
     console.error('Error submitting review:', error)
     alert(t('reviewSubmissionFailed'))
+  } finally {
+    submittingReview.value = false
   }
+}
+
+function setRating(rating) {
+  newReview.value.rating = rating
 }
 
 function cancelReview() {
   newReview.value = { rating: 0, text: '' }
   showReviewForm.value = false
+  hoverRating.value = 0
 }
 
 function formatDate(date) {
   if (!date) return ''
   const d = date.toDate ? date.toDate() : new Date(date)
   return d.toLocaleDateString()
+}
+
+function bookNow() {
+  const technicianId = route.params.id
+  router.push({
+    path: '/bookingpage',
+    query: { techId: technicianId }
+  })
+}
+
+function viewAllServices() {
+  router.push('/allservices')
 }
 
 function getSpecializationTranslation(specialization) {
@@ -493,6 +563,13 @@ function getSpecializationTranslation(specialization) {
 .rating-text {
   color: #666;
   font-size: 0.9rem;
+}
+
+.no-rating {
+  color: #999;
+  font-size: 0.9rem;
+  font-style: italic;
+  margin-top: 0.5rem;
 }
 
 .profile-skills {
@@ -659,6 +736,21 @@ function getSpecializationTranslation(specialization) {
   background: #5a6fd8;
 }
 
+.review-actions {
+  display: flex;
+  align-items: center;
+}
+
+.review-notice {
+  color: #666;
+  font-size: 0.9rem;
+  font-style: italic;
+  padding: 0.5rem 1rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 3px solid #667eea;
+}
+
 /* Review Form */
 .review-form {
   background: #f8f9fa;
@@ -687,12 +779,13 @@ function getSpecializationTranslation(specialization) {
 .stars {
   display: flex;
   gap: 0.2rem;
+  cursor: pointer;
 }
 
 .star-input {
   font-size: 1.5rem;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: all 0.2s ease;
 }
 
 .star-input.filled {
@@ -705,6 +798,19 @@ function getSpecializationTranslation(specialization) {
 
 .star-input:hover {
   color: #FFC230;
+  transform: scale(1.1);
+}
+
+.stars {
+  display: flex;
+  gap: 0.2rem;
+  cursor: pointer;
+}
+
+.star-input {
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .form-group {
@@ -811,6 +917,13 @@ function getSpecializationTranslation(specialization) {
 
 .review-rating .empty {
   color: #ddd;
+}
+
+.rating-number {
+  margin-left: 0.5rem;
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
 }
 
 .review-meta {

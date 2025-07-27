@@ -13,7 +13,7 @@ import ChatbotIcon from '../components/chatbotIcon.vue';
 </script>
 
 <template>
-  <div>
+  <div class="home-page">
     <Hero />
     <TrustedCompanies />
     <ServicesSection />

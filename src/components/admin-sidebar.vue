@@ -135,7 +135,11 @@
     // Prevent default behavior for href links
     event.preventDefault();
     const href = event.currentTarget.getAttribute('href');
+    console.log('Admin sidebar navigation - href:', href);
+    console.log('Admin sidebar navigation - current route:', route.path);
+    
     if (href) {
+      console.log('Navigating to:', href);
       router.push(href);
     }
   }
