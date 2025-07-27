@@ -1,6 +1,6 @@
 <template>
-  <div class="services-header">
-    <h2 class="features-title">{{ $t('servicesFeaturesTitle') }}</h2>
+  <div class="services-header m-20">
+    <h2 class="commitment-title">{{ $t('servicesFeaturesTitle') }}</h2>
     <p class="commitment-description">{{ $t('servicesCommitmentDescription') }}</p>
   </div>
   <section class="services-features">
@@ -11,7 +11,7 @@
         </div>
         <h3 class="service-title">{{ $t(service.title) }}</h3>
         <p class="service-description">{{ $t(service.description) }}</p>
-        <button class="get-started-btn">
+        <button class="get-started-btn" @click="$router.push('/allservices')">
           {{ $t('getStartedButtonText') }}
           <i class="fas fa-arrow-right"></i>
         </button>
@@ -64,10 +64,10 @@ export default {
 .services-header {
   text-align: center;
   margin-bottom: 60px;
-  background-color: #F4F4F5;
   color: #333;
   padding: 20px;
-  margin-bottom: 0;
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
 .dark .services-header {
   background-color: var(--secondary-bg);
@@ -76,11 +76,12 @@ export default {
 
 .commitment-title {
   font-family: Outfit, sans-serif;
-  font-size: 64px;
+  font-size: 2.5rem;
   font-style: normal;
-  font-weight: 600;
-  line-height: 76px;
-  margin-bottom: 16px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 10px;
+  color: #333;
 }
 .dark .commitment-title {
   color: var(--primary-text);
@@ -202,8 +203,8 @@ export default {
   }
   
   .commitment-title {
-    font-size: 48px;
-    line-height: 56px;
+    font-size: 2rem;
+    line-height: 1.2;
   }
   
   .commitment-description {

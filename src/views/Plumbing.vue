@@ -5,7 +5,7 @@
     <section class="hero-section m-5" :style="heroBackgroundStyle">
       <div class="hero-overlay">
         <div class="hero-content">
-          <h1 class="hero-title">{{ $t('wallFinishingTitle') }}</h1>
+          <h1 class="hero-title">{{ $t('plumbingTitle') }}</h1>
           <SearchBar
             :filterOptions="[
               { value: 'price', label: 'Select a price' },

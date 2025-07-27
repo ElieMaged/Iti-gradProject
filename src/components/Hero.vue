@@ -1,7 +1,7 @@
 <template>
   <section
-    class="bg-cover bg-no-repeat p-10 flex items-center umg-fluid imgy">
-    <div class=" w-full max-w-xl mx-15" :class="{ 'text-right': isRTL }">
+    class=" bg-cover bg-no-repeat  flex items-center umg-fluid imgy">
+    <div class=" w-full max-w-xl mx-20" :class="{ 'text-right': isRTL }">
         
         <h1 class=" font-extrabold text-gray-900 leading-tight">
           {{ $t('heroTitle') }}
@@ -10,7 +10,7 @@
           {{ $t('heroDescription') }}
         </p>
         <div class="mt-6 flex gap-4">
-        <button id="service-btn" class="bg-purple-200 text-purple-900 px-4 py-2 rounded-full">
+        <button id="service-btn"  @click="$router.push('/allservices')" class="bg-purple-200 text-purple-900 px-4 py-2 rounded-full">
             {{ $t('heroShowServicesBtn') }} →
         </button>
     </div>
@@ -214,55 +214,132 @@ line-height: 28px; /* 140% */
 @media (max-width: 600px) {
   section {
     height: auto;
-    min-height: 180px;
-    padding: 12px 0;
+    min-height: 100vh;
+    padding: 20px 0;
     flex-direction: column !important;
+    justify-content: flex-start;
+    align-items: center;
   }
-  .hero-vector-bg {
-    position: relative;
-    width: 250px;
-    height: 206px;
-    margin: 20px auto 10px;
-    transform: none;
-  }
-  .hero-vector-fg {
-    position: relative;
-    width: 200px;
-    height: 197px;
+  
+  /* Reorder content: vectors first, then text */
+  .w-full {
+    order: 2;
+    text-align: center;
     margin: 0 auto;
-    transform: none;
-    right: auto;
+    padding: 0 20px;
+    max-width: 100%;
   }
-  .hero-image {
+  
+  .hero-vector-container {
+    order: 1;
     position: relative;
-    width: 200px;
-    height: 200px;
-    margin: 20px auto;
-    transform: none;
-    right: auto;
+    margin: 0;
+    height: 300px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 30px;
   }
-  .text-left {
-    text-align: center !important;
-    margin: 0 auto !important;
-    padding: 0 6px;
+  
+  .hero-vector {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    flex-shrink: 0;
+    z-index: 1;
   }
+  
+  .hero-vector-bg {
+    width: 280px;
+    height: 231px;
+    z-index: 3;
+    right: 90px;
+  }
+  
+  .hero-vector-fg,
+  .hero-vector-group {
+    width: 220px;
+    height: 217px;
+    z-index: 2;
+    right: 90px;
+  }
+  
+  .hero-vector-fg {
+    z-index: 1;
+  }
+  
   h1 {
-    font-size: 22px;
-    line-height: 30px;
+    font-size: 28px;
+    line-height: 38px;
+    width: 100%;
+    margin-bottom: 15px;
   }
+  
   p {
-    font-size: 13px;
-    line-height: 18px;
+    font-size: 16px;
+    line-height: 22px;
+    margin-bottom: 20px;
   }
+  
   .flex {
     flex-direction: column !important;
-    gap: 0.7rem !important;
+    gap: 1rem !important;
     align-items: center !important;
   }
-  #book-btn, #service-btn {
-    width: 100%;
-    font-size: 0.98rem;
-    padding: 10px 0;
+  
+  #service-btn {
+    width: auto;
+    font-size: 16px;
+    padding: 12px 24px;
+    min-width: 200px;
+  }
+}
+
+@media (max-width: 480px) {
+  section {
+    padding: 15px 0;
+  }
+  
+  .hero-vector-container {
+    height: 250px;
+    margin-bottom: 20px;
+  }
+  
+  .hero-vector-bg {
+    width: 250px;
+    height: 206px;
+    z-index: 3;
+    right: 90px;
+  }
+  
+  .hero-vector-fg,
+  .hero-vector-group {
+    width: 200px;
+    height: 197px;
+    z-index: 2;
+    right: 90px;
+  }
+  
+  .hero-vector-fg {
+    z-index: 1;
+  }
+  
+  h1 {
+    font-size: 24px;
+    line-height: 32px;
+  }
+  
+  p {
+    font-size: 14px;
+    line-height: 20px;
+  }
+  
+  #service-btn {
+    font-size: 14px;
+    padding: 10px 20px;
+    min-width: 180px;
   }
 }
 .imgy {

@@ -1,5 +1,5 @@
 <template>
-  <section class="how-it-works">
+  <section class="how-it-works m-20">
     <div class="flex flex-col items-center justify-center">
     <h2 class="how-title">{{ $t('howItWorksTitle') }}</h2>
     <p class="how-it-works-subtitle">{{ $t('howItWorksSubtitle') }}</p>

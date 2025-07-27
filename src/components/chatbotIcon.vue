@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="m-20">
     <div
       class="fixed-chatbot-icon"
       @click="showChatbot = !showChatbot"

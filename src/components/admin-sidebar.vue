@@ -1,6 +1,6 @@
 <template>
     <div class="layout">
-      <div class="sidebar">
+      <div class="sidebar m-20">
         <a href="/admin-profile" 
            class="sidebar-item" 
            :class="{ active: isActive('/admin-profile') }"

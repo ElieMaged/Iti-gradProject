@@ -1,6 +1,6 @@
 <script>
 import '../style.css'
-import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue';
+import { ref, onMounted, onBeforeUnmount, watch, computed, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { auth } from '../firebase';
@@ -88,7 +88,7 @@ export default {
     }
 
     function signUpOptions() {
-      router.push(getRoute('RegisterChoice'));
+      router.push(getRoute('welcomepage'));
     }
 
     function closeMobileMenu() {
@@ -148,15 +148,36 @@ export default {
     const isDark = ref(false);
 
     function toggleDarkMode() {
-      isDark.value = !isDark.value;
+      try {
+        isDark.value = !isDark.value;
+        nextTick(() => {
+          // Ensure DOM is updated before any additional operations
+        });
+      } catch (error) {
+        console.error('Error toggling dark mode:', error);
+      }
     }
+    
     watch(isDark, (val) => {
-      document.documentElement.classList.toggle('dark', val);
-      localStorage.setItem('theme', val ? 'dark' : 'light');
+      try {
+        if (document && document.documentElement) {
+          document.documentElement.classList.toggle('dark', val);
+          localStorage.setItem('theme', val ? 'dark' : 'light');
+        }
+      } catch (error) {
+        console.error('Error updating dark mode:', error);
+      }
     });
+    
     onMounted(() => {
-      isDark.value = localStorage.getItem('theme') === 'dark' ||
-        (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      try {
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        isDark.value = savedTheme === 'dark' || (!savedTheme && prefersDark);
+      } catch (error) {
+        console.error('Error initializing dark mode:', error);
+        isDark.value = false;
+      }
     });
 
     const iconClass = computed(() => isDark.value ? 'fas fa-moon' : 'fas fa-sun');
@@ -202,7 +223,7 @@ export default {
 <template>
   <!-- Top Bar -->
   <div class=" w-full" id="contact-Nav">
-    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center px-4 py-2 gap-2">
+    <div class="max-w-7xl mx-20 flex flex-col sm:flex-row justify-between items-center py-2 gap-2">
       <div class="flex flex-col sm:flex-row gap-2 items-center">
         <a href="tel:+12095551234" class="contact-links no-underline mx-1 flex items-center text-sm"><i
             class="fa-solid fa-phone px-2"></i>{{ $t('contactPhone') }}</a>
@@ -225,7 +246,7 @@ export default {
     </div>
   </div>
   <!-- Navbar -->
-  <nav class="navbar p-3 flex justify-between items-center relative">
+  <nav class="mx-20 navbar py-3 flex justify-between items-center relative">
     <!-- Logo -->
     <div class="flex items-center gap-2 text-2xl font-bold">
       <img src="/logo/ace04d3b268cf810c91d002fdf7454a6ef778f27.png" alt="Logo" class="h-8" id="logo" />
@@ -255,7 +276,7 @@ export default {
         </span>
         <div
           :class="['services-dropdown', isMobile ? 'static mt-2 relative w-full' : 'absolute left-0 mt-2 shadow-lg rounded z-50']"
-          v-show="true" @mouseenter="!isMobile && showDropdown"> <router-link to="/">All services</router-link>
+          v-show="true" @mouseenter="!isMobile && showDropdown"> <router-link to="/allservices">All services</router-link>
           <router-link to="/plumbing">{{ $t('navPlumbing') }}</router-link>
 
           <router-link to="/aircondition">{{ $t('navAirConditioner') }}</router-link>
@@ -274,7 +295,7 @@ export default {
       <template v-else>
         <template v-if="user">
           <span class="flex items-center gap-2 rounded bg-gray-100 cursor-pointer" @click="handleProfileClick">
-            <span class="text-gray-700 font-semibold px-3 py-1">
+              <span class="text-gray-700 font-semibold px-3 py-1">
               {{ user.email || user.uid }}
               <span class="text-xs text-gray-500 ml-2">({{ getRoleDisplayText() }})</span>
             </span>
@@ -285,16 +306,21 @@ export default {
           </button>
         </template>
         <template v-else>
-          <button :class="`${loginButtonClass} flex items-center`" id="login-btn" @click="goToUserAccount">
-            <i :class="userButtonClass" class="fas fa-user text-secondary text-xl"></i>
-            <span class="mx-2">{{ $t('loginRegister') }}</span>
+          <button :class="userButtonClass" @click="goToUserAccount" aria-label="User account">
+            <i class="fas fa-user text-secondary text-xl"></i>
+          </button>
+          <button :class="loginButtonClass" id="login-btn" @click="goToUserAccount">
+            <span class="">{{ $t('loginRegister') }}</span>
           </button>
         </template>
       </template>
       <LanguageToggle />
-      <button @click="toggleDarkMode()" class="ml-2 darkmode-btn"
-        :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'">
-        <i :key="isDark" :class="iconClass"></i>
+      <button 
+        @click="toggleDarkMode" 
+        class="ml-2 darkmode-btn"
+        :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+        type="button">
+        <i :class="iconClass"></i>
       </button>
     </div>
     <!-- Mobile Menu & Overlay -->
@@ -329,7 +355,7 @@ export default {
               </span>
               <div
                 :class="['services-dropdown', isMobile ? 'static mt-2 relative w-full' : 'absolute left-0 mt-2 shadow-lg rounded z-50']"
-                v-show="servicesDropdownOpen" @mouseenter="!isMobile && showDropdown"> <router-link to="/">All
+                v-show="servicesDropdownOpen" @mouseenter="!isMobile && showDropdown"> <router-link to="/allservices">All
                   services</router-link>
                 <router-link to="/plumbing">{{ $t('navPlumbing') }}</router-link>
                 <router-link to="/aircondition">{{ $t('navAirConditioner') }}</router-link>
@@ -359,8 +385,8 @@ export default {
                 </button>
               </template>
               <template v-else>
-                <button :class="userButtonClass" @click="goToUserAccount">
-                  <i class="fa-regular fa-user"></i>
+                <button :class="userButtonClass" @click="goToUserAccount" aria-label="User account">
+                  <i class="fas fa-user text-secondary text-xl"></i>
                 </button>
                 <button :class="loginButtonClass" id="login-btn" @click="goToUserAccount">
                   {{ $t('loginRegister') }}
@@ -368,9 +394,12 @@ export default {
               </template>
             </template>
             <LanguageToggle />
-            <button @click="toggleDarkMode" class="ml-2 darkmode-btn"
-              :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'">
-              <i :class="isDark ? 'fa fa-sun' : 'fa fa-moon'"></i>
+            <button 
+              @click="toggleDarkMode" 
+              class="ml-2 darkmode-btn"
+              :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+              type="button">
+              <i :class="iconClass"></i>
             </button>
           </div>
         </div>
@@ -458,6 +487,29 @@ export default {
 .user-btn:hover,
 .darkmode-btn:hover {
   color: var(--primary-color);
+}
+
+/* User button specific styling */
+.user-btn {
+  margin-right: 0.5rem;
+  background: #f3f0fa;
+  border: 1px solid #e0d5f0;
+}
+
+.user-btn:hover {
+  background: #e8e0f5;
+  color: var(--primary-color);
+}
+
+.dark .user-btn {
+  background: var(--secondary-bg);
+  border-color: var(--border-color);
+  color: var(--primary-text);
+}
+
+.dark .user-btn:hover {
+  background: var(--primary-color);
+  color: white;
 }
 
 .services-color {

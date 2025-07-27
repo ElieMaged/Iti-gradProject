@@ -14,6 +14,7 @@ import WallFinishing from '../views/WallFinishing.vue'
 import Carpentry from '../views/Carpentry.vue'
 import ElecTechnicians from '../views/ElecTechnicians.vue'
 import TechRegister from '../views/TechRegister.vue'
+import Services from '../views/allservices.vue'
 import WelcomePage from '../views/WelcomePage.vue'
 import ProfileView from '../views/ProfileView.vue'
 import PreviousServices from '../views/PreviousServices.vue'
@@ -28,7 +29,7 @@ import TechnicianDetails from '../views/TechnicianDetails.vue'
 import TechnicionProfile from '../views/TechnicionProfile.vue'
 import TechnicianEditProfile from '../views/TechnichianEditProfile.vue'
 import PendingBookings from '../views/PendingBookings.vue'
-import RegisterChoice from '../views/RegisterChoice.vue'
+  
 import TechnicianAvailability from '../views/TechnicianAvailbility.vue'
 import TechPayment from '../views/TechPayment.vue'
 import Chatbot from '../components/chatbot.vue'
@@ -69,7 +70,7 @@ const routes = [
   { path: '/wallfinishing', component: WallFinishing },
   { path: '/carpentry', component: Carpentry },
   { path: '/elecTechnicians', component: ElecTechnicians },
-  {path: '/RegisterChoice', component: RegisterChoice },
+
   { path: '/test', component: TestPage },
   { path: '/usersignup', component: UserSignUp },
   { path: '/userlogin', component: UserLogin },
@@ -82,6 +83,9 @@ const routes = [
   { path: '/payment', component: Payment },
   { path: '/profile', component: Profile },
   {path: '/faq', component: FAQ },
+  {path: '/faqs', component: FAQ },
+  {path: '/allservices', component: Services },
+  {path: '/services', redirect: '/allservices' },
   {path: '/technician-details', component: TechnicianDetails },
   {path: '/technicion-profile', component: TechnicionProfile },
   {path: '/technician-edit-profile', component: TechnicianEditProfile },

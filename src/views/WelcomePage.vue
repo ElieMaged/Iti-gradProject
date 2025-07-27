@@ -72,7 +72,7 @@ function handleFileChange(event) {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: 40px;
 }
 
 .dark .welcome-page {
@@ -80,25 +80,26 @@ function handleFileChange(event) {
 }
 
 .welcome-container {
-  max-width: 1200px;
+  max-width: 800px;
   width: 100%;
   text-align: center;
-  background-color: #D3cfe2;
+  background-color: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  padding: 32px 24px 28px 24px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .dark .welcome-container {
   background-color: var(--primary-bg);
 }
 
-.welcome-header {
-  margin-bottom: 4rem;
-}
-
 .welcome-title {
-  font-size: 3rem;
-  font-weight: bold;
+  font-size: 2.5rem;
+  font-weight: 700;
   color: #6B4FA1;
-  margin-bottom: 1rem;
+  margin-bottom: 10px;
+  font-family: Outfit, sans-serif;
 }
 
 .dark .welcome-title {
@@ -109,6 +110,7 @@ function handleFileChange(event) {
   font-size: 1.25rem;
   color: #6b7280;
   margin: 0;
+  font-family: Outfit, sans-serif;
 }
 
 .dark .welcome-subtitle {
@@ -126,11 +128,12 @@ function handleFileChange(event) {
   background-color: white;
   border: 2px solid #fbbf24;
   border-radius: 1rem;
-  padding: 2.5rem;
+  padding: 1.2rem;
   width: 350px;
   max-width: 100%;
   text-align: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .dark .role-card {
@@ -139,8 +142,9 @@ function handleFileChange(event) {
 }
 
 .role-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(98,83,151,0.15);
+  border-color: #6B4FA1;
 }
 
 .dark .role-card:hover {
@@ -160,9 +164,10 @@ function handleFileChange(event) {
 
 .card-title {
   font-size: 1.5rem;
-  font-weight: bold;
+  font-weight: 700;
   color: #6B4FA1;
   margin-bottom: 1rem;
+  font-family: Outfit, sans-serif;
 }
 
 .dark .card-title {
@@ -174,6 +179,7 @@ function handleFileChange(event) {
   line-height: 1.6;
   margin-bottom: 2rem;
   font-size: 1rem;
+  font-family: Outfit, sans-serif;
 }
 
 .dark .card-description {
@@ -192,6 +198,7 @@ function handleFileChange(event) {
   gap: 0.5rem;
   margin-left: auto;
   transition: color 0.3s ease;
+  font-family: Outfit, sans-serif;
 }
 
 .dark .get-started-btn {
@@ -225,7 +232,7 @@ function handleFileChange(event) {
 /* Responsive Design */
 @media (max-width: 768px) {
   .welcome-title {
-    font-size: 2.5rem;
+    font-size: 2rem;
   }
 
   .welcome-subtitle {
@@ -247,11 +254,11 @@ function handleFileChange(event) {
 
 @media (max-width: 480px) {
   .welcome-page {
-    padding: 1rem;
+    padding: 40px;
   }
 
   .welcome-title {
-    font-size: 2rem;
+    font-size: 1.8rem;
   }
 
   .role-card {

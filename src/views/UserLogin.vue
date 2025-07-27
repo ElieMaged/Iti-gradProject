@@ -100,177 +100,341 @@ const handleForgotPassword = async () => {
 </script>
 
 <template>
-
-<body>
-    
-<div class="container pt-5  flex flex-col lg:flex-row">
-<form class="flex flex-col justify-center align-items-center ml-10 mr-10 p-20 px-40" @submit.prevent="handleLogin">
-    <img class="w-40" src="../assets/logo-secondary.png" alt="">
-    <h1 class="title signup 3xl mb-5">{{ $t('welcomeBack') }}</h1>
-    <p class="title">{{ $t('dontHaveAccount') }} <a href="/usersignup" class="brand">{{ $t('signUpNow') }}</a></p>
-
-  <div class="mb-3">
-    <label for="email" class="block mb-2 text-sm font-medium text-gray-900 "></label>
-    <input v-model="email" type="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block md:w-120 p-3 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400  dark:focus:ring-blue-500 dark:focus:border-blue-500" :placeholder="$t('email')" required />
-  </div>
-<div class="relative mb-5">
-    <input
-      type="password"
-      v-model="password"
-      :placeholder="$t('enterPassword')"
-      class="w-120 px-4 pr-10 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-    />
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      class="h-5 w-5 text-gray-400 absolute top-1/2 right-3 transform -translate-y-1/2 pointer-events-none"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-      />
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-      />
-    </svg>
-  </div>
-      <!-- Remember me -->
-<div class="flex flex-col md:flex-row  mb-5 ">
-
-<div class="flex flex-row h-5">
-      <input id="remember" type="checkbox" value="" class="w-4 h-4 border border-gray-300 rounded-sm bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 " required />
-    </div>
-    <label for="remember" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">{{ $t('rememberMe') }}</label>
-    <div class="md:ml-30"><a href="#" @click.prevent="openForgotPasswordModal" class="forgot-password-link">{{ $t('forgotPassword') }}</a></div>
-</div>
-<!-- Login button -->
-  <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium text-sm px-20 md:px-36 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 flex flex-row gap-x-3 mb-3">{{ $t('login') }}</button>
-  <p v-if="error" class="text-red-500 mb-2">{{ error }}</p>
-<p>{{ $t('or') }}</p>
-  <button type="button" @click="handleGoogleSignIn" class=" hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium text-sm px-20 py-2.5 text-center bg-white text-black dark:hover:bg-blue-700 dark:focus:ring-blue-800 flex flex-row gap-x-3 mb-3"> <img class="w-5 h-5" src="../assets/Icons/google.png" alt="">{{ $t('signInWithGoogle') }}
-  </button>
-
-
-
-</form>
-<div>
-<img class="md:mt-20 standing" src="../assets/login/standing.png" alt="">
-
-</div>
-</div>
-
-<!-- Forgot Password Modal -->
-<div v-if="showForgotPasswordModal" class="modal-overlay" @click="closeForgotPasswordModal">
-  <div class="modal-content" @click.stop>
-    <div class="modal-header">
-      <h2 class="modal-title">{{ $t('forgotPassword') }}</h2>
-      <button @click="closeForgotPasswordModal" class="modal-close">&times;</button>
-    </div>
-    <div class="modal-body">
-      <p class="modal-description">{{ $t('forgotPasswordDescription') }}</p>
-      <div class="form-group">
-        <label for="forgot-email" class="form-label">{{ $t('email') }}</label>
-        <input
-          id="forgot-email"
-          v-model="forgotPasswordEmail"
-          type="email"
-          :placeholder="$t('enterYourEmail')"
-          class="form-input"
-          required
-        />
+  <!-- Main Content -->
+  <div class="main-container">
+    <!-- Login Form Card -->
+    <div class="login-card">
+      <div class="logo-container">
+        <img class="logo-image" src="../assets/logo-secondary.png" alt="BoltFix Logo">
       </div>
-      <div v-if="forgotPasswordError" class="error-message">
-        {{ forgotPasswordError }}
-      </div>
-      <div v-if="forgotPasswordSuccess" class="success-message">
-        {{ forgotPasswordSuccess }}
-      </div>
+      <h1 class="welcome-text">{{ $t('welcomeBack') }}</h1>
+      <p class="signup-text">{{ $t('dontHaveAccount') }} <a href="/usersignup" class="signup-link">{{ $t('signUpNow') }}</a></p>
+
+      <form @submit.prevent="handleLogin" class="login-form">
+        <div class="input-group">
+          <input 
+            v-model="email" 
+            type="email" 
+            :placeholder="$t('email')" 
+            class="form-input" 
+            required 
+          />
+        </div>
+        
+        <div class="input-group password-group">
+          <input
+            v-model="password"
+            type="password"
+            :placeholder="$t('enterPassword')"
+            class="form-input"
+            required
+          />
+          <i class="fa-solid fa-eye password-toggle"></i>
+        </div>
+
+        <div class="form-options">
+          <div class="remember-me">
+            <input id="remember" type="checkbox" class="checkbox" />
+            <label for="remember">{{ $t('rememberMe') }}</label>
+          </div>
+          <a href="#" @click.prevent="openForgotPasswordModal" class="forgot-password-link">
+            {{ $t('forgotPassword') }}
+          </a>
+        </div>
+
+        <button type="submit" class="login-btn">
+          {{ $t('login') }}
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+        
+        <p v-if="error" class="error-message">{{ error }}</p>
+        
+        <div class="divider">
+          <span>{{ $t('or') }}</span>
+        </div>
+        
+        <button type="button" @click="handleGoogleSignIn" class="google-btn">
+          <img src="../assets/Icons/google.png" alt="Google" class="google-icon" />
+          {{ $t('signInWithGoogle') }}
+        </button>
+      </form>
     </div>
-    <div class="modal-footer">
-      <button @click="closeForgotPasswordModal" class="btn-secondary">
-        {{ $t('cancel') }}
-      </button>
-      <button @click="handleForgotPassword" class="btn-primary">
-        {{ $t('sendResetEmail') }}
-      </button>
+
+    <!-- Worker Image -->
+    <div class="worker-image-container">
+      <img src="../assets/login/standing.png" alt="Worker" class="worker-image" />
     </div>
   </div>
-</div>
-</body>
 
+  <!-- Forgot Password Modal -->
+  <div v-if="showForgotPasswordModal" class="modal-overlay" @click="closeForgotPasswordModal">
+    <div class="modal-content" @click.stop>
+      <div class="modal-header">
+        <h2 class="modal-title">{{ $t('forgotPassword') }}</h2>
+        <button @click="closeForgotPasswordModal" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-description">{{ $t('forgotPasswordDescription') }}</p>
+        <div class="form-group">
+          <label for="forgot-email" class="form-label">{{ $t('email') }}</label>
+          <input
+            id="forgot-email"
+            v-model="forgotPasswordEmail"
+            type="email"
+            :placeholder="$t('enterYourEmail')"
+            class="form-input"
+            required
+          />
+        </div>
+        <div v-if="forgotPasswordError" class="error-message">
+          {{ forgotPasswordError }}
+        </div>
+        <div v-if="forgotPasswordSuccess" class="success-message">
+          {{ forgotPasswordSuccess }}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button @click="closeForgotPasswordModal" class="btn-secondary">
+          {{ $t('cancel') }}
+        </button>
+        <button @click="handleForgotPassword" class="btn-primary">
+          {{ $t('sendResetEmail') }}
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped>
-body {
-    background-color: #d3cfe2;
+/* Main Container */
+.main-container {
+  background-color: #d3cfe2;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
 }
-.dark body {
+.dark .main-container {
   background-color: var(--primary-bg);
+} 
+/* Login Card */
+.login-card {
+  background-color: white;
+  border-radius: 32px;
+  padding: 40px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+.dark .login-card {
+  background-color: var(--secondary-bg);
 }
 
- form {
-    background-color: white;
-    border-radius: 2rem;
- }
- .dark form {
-  background-color: var(--secondary-bg);
- }
+.logo-container {
+  text-align: center;
+  margin-bottom: 20px;
+  display: flex;
+justify-content: center;
+align-items: center;
+}
 
- input {
-    background-color: #EAEAEA;
-    border-radius: 2rem;
- }
- .dark input {
-  background-color: var(--secondary-bg);
- }
+.logo-image {
+  width: 106.437px;
+height: 101px;
+flex-shrink: 0;
+aspect-ratio: 106.44/101.00;
 
- .signup {
-    color: #625397;
- }
- .dark .signup {
-  color: var(--primary-color);
- }  
- button {
-    background-color: #625397;
-    border-radius: 2rem;
-    border: black solid .1rem;
- }
- .dark button {
-  background-color: var(--primary-color);
-  color: var(--primary-text);
- }
- .standing {
-    width: 100%;
- }
+}
 
- .brand {
-    color: #625397;
- }
- .dark .brand {
-  color: var(--primary-color);
- }
- .google {
-    background-color: white;
-  }
+.welcome-text {
+  font-size: 28px;
+  font-weight: bold;
+  color: #625397;
+  text-align: center;
+  margin-bottom: 10px;
+}
 
- .forgot-password-link {
-    color: #625397;
-    text-decoration: none;
-    cursor: pointer;
- }
- .dark .forgot-password-link {
-  color: var(--primary-color);
- }
- .forgot-password-link:hover {
-    text-decoration: underline;
- }
+.signup-text {
+  text-align: center;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.signup-link {
+  color: #625397;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.signup-link:hover {
+  text-decoration: underline;
+}
+
+/* Form Styles */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.input-group {
+  position: relative;
+}
+
+.form-input {
+  width: 100%;
+  padding: 15px;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px !important;
+  background-color: #f9fafb;
+  font-size: 16px;
+  transition: border-color 0.3s;
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #625397;
+  background-color: white;
+}
+
+.password-group {
+  position: relative;
+}
+
+.password-group .form-input {
+  border-radius: 16px !important;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  cursor: pointer;
+}
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 10px 0;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: #625397;
+}
+
+.forgot-password-link {
+  color: #625397;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.forgot-password-link:hover {
+  text-decoration: underline;
+}
+
+.login-btn {
+  background-color: #625397;
+  color: white;
+  border: none;
+  padding: 15px;
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: background-color 0.3s;
+}
+
+.login-btn:hover {
+  background-color: #4c3d7a;
+}
+
+.error-message {
+  color: #dc2626;
+  text-align: center;
+  font-size: 14px;
+}
+
+.divider {
+  text-align: center;
+  position: relative;
+  margin: 20px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background-color: #e5e7eb;
+}
+
+.divider span {
+  padding: 0 15px;
+  color: #666;
+  font-size: 14px;
+  margin: 0 10px;
+}
+
+.google-btn {
+  background-color: white;
+  color: #000;
+  border: 1px solid #e5e7eb;
+  padding: 15px;
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s;
+}
+
+.google-btn:hover {
+  background-color: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.google-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Worker Image */
+.worker-image-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 600px;
+}
+
+.worker-image {
+  width: 437px;
+height: 466px;
+flex-shrink: 0;
+}
 
 /* Modal Styles */
 .modal-overlay {
@@ -297,11 +461,6 @@ body {
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
-.dark .modal-content {
-  background-color: var(--secondary-bg);
-  color: var(--primary-text);
-}
-
 .modal-header {
   display: flex;
   justify-content: space-between;
@@ -310,19 +469,11 @@ body {
   border-bottom: 1px solid #e5e7eb;
 }
 
-.dark .modal-header {
-  border-bottom-color: #374151;
-}
-
 .modal-title {
   font-size: 1.25rem;
   font-weight: 600;
   color: #111827;
   margin: 0;
-}
-
-.dark .modal-title {
-  color: var(--primary-text);
 }
 
 .modal-close {
@@ -345,11 +496,6 @@ body {
   color: #374151;
 }
 
-.dark .modal-close:hover {
-  background-color: #374151;
-  color: var(--primary-text);
-}
-
 .modal-body {
   padding: 1.5rem;
 }
@@ -358,10 +504,6 @@ body {
   color: #6b7280;
   margin-bottom: 1.5rem;
   line-height: 1.5;
-}
-
-.dark .modal-description {
-  color: #9ca3af;
 }
 
 .form-group {
@@ -376,37 +518,6 @@ body {
   margin-bottom: 0.5rem;
 }
 
-.dark .form-label {
-  color: var(--primary-text);
-}
-
-.form-input {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  background-color: white;
-  color: #111827;
-}
-
-.dark .form-input {
-  background-color: var(--primary-bg);
-  border-color: #4b5563;
-  color: var(--primary-text);
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: #625397;
-  box-shadow: 0 0 0 3px rgba(98, 83, 151, 0.1);
-}
-
-.dark .form-input:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(124, 107, 176, 0.1);
-}
-
 .error-message {
   background-color: #fef2f2;
   border: 1px solid #fecaca;
@@ -415,12 +526,6 @@ body {
   border-radius: 0.5rem;
   margin-bottom: 1rem;
   font-size: 0.875rem;
-}
-
-.dark .error-message {
-  background-color: #450a0a;
-  border-color: #7f1d1d;
-  color: #fca5a5;
 }
 
 .success-message {
@@ -433,22 +538,12 @@ body {
   font-size: 0.875rem;
 }
 
-.dark .success-message {
-  background-color: #052e16;
-  border-color: #166534;
-  color: #86efac;
-}
-
 .modal-footer {
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
   padding: 0 1.5rem 1.5rem 1.5rem;
   border-top: 1px solid #e5e7eb;
-}
-
-.dark .modal-footer {
-  border-top-color: #374151;
 }
 
 .btn-secondary {
@@ -463,20 +558,9 @@ body {
   transition: all 0.2s;
 }
 
-.dark .btn-secondary {
-  background-color: #374151;
-  color: var(--primary-text);
-  border-color: #4b5563;
-}
-
 .btn-secondary:hover {
   background-color: #e5e7eb;
   border-color: #9ca3af;
-}
-
-.dark .btn-secondary:hover {
-  background-color: #4b5563;
-  border-color: #6b7280;
 }
 
 .btn-primary {
@@ -491,25 +575,19 @@ body {
   transition: all 0.2s;
 }
 
-.dark .btn-primary {
-  background-color: var(--primary-color);
-  color: var(--primary-text);
-}
-
 .btn-primary:hover {
   background-color: #4c3d7a;
 }
 
-.dark .btn-primary:hover {
-  background-color: #5a4b8a;
-}
-
-.btn-primary:disabled {
-  background-color: #9ca3af;
-  cursor: not-allowed;
-}
-
-.dark .btn-primary:disabled {
-  background-color: #6b7280;
+/* Responsive Design */
+@media (max-width: 768px) {
+  .main-container {
+    flex-direction: column;
+    gap: 30px;
+  }
+  
+  .login-card {
+    padding: 30px 20px;
+  }
 }
 </style>

@@ -1,5 +1,85 @@
-<script setup>
+<script>
 import EndCard from '../components/EndCard.vue';
+export default {
+  name: 'About',
+  data() {
+    return {
+      services: [
+        {
+          icon: 'fa-solid fa-wand-sparkles',
+          title: 'servicesFeature1Title',
+          description: 'servicesFeature1Desc'
+        },
+        {
+          icon: 'fa-solid fa-clock',
+          title: 'servicesFeature2Title',
+          description: 'servicesFeature2Desc'
+        },
+        {
+          icon: 'fas fa-phone',
+          title: 'servicesFeature3Title',
+          description: 'servicesFeature3Desc'
+        },
+        {
+          icon: 'fas fa-award',
+          title: 'servicesFeature4Title',
+          description: 'servicesFeature4Desc'
+        }
+      ],
+      stats: [
+        { target: 150, current: 0, label: 'teamMembers', suffix: '+' },
+        { target: 100, current: 0, label: 'winningAwards', suffix: '+' },
+        { target: 700, current: 0, label: 'completeProjects', suffix: '+' },
+        { target: 684, current: 0, label: 'clientReviews', suffix: '+' }
+      ],
+      countersStarted: false
+    };
+  },
+  components: {
+    EndCard
+  },
+  mounted() {
+    this.startCounters();
+  },
+  methods: {
+    startCounters() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && !this.countersStarted) {
+            this.countersStarted = true;
+            this.animateCounters();
+          }
+        });
+      }, { threshold: 0.5 });
+
+      const statsSection = document.querySelector('.about-2');
+      if (statsSection) {
+        observer.observe(statsSection);
+      }
+    },
+    animateCounters() {
+      this.stats.forEach((stat, index) => {
+        const duration = 2000; // 2 seconds
+        const steps = 60;
+        const increment = stat.target / steps;
+        const stepDuration = duration / steps;
+        
+        let currentStep = 0;
+        const timer = setInterval(() => {
+          currentStep++;
+          this.stats[index].current = Math.min(
+            Math.round(increment * currentStep),
+            stat.target
+          );
+          
+          if (currentStep >= steps) {
+            clearInterval(timer);
+          }
+        }, stepDuration);
+      });
+    }
+  }
+};
 </script>
 
 
@@ -11,113 +91,50 @@ import EndCard from '../components/EndCard.vue';
         <h1 class="text-center flex flex-row justify-center h1">{{ $t('aboutUsTitle') }}</h1>
     </div>
   </div>
-  <div class="flex flex-col md:flex-row m-5 col-span-6">
-      <div class="m-5">
-        <h1>{{ $t('whoAreWeTitle') }}</h1>
-<p>{{ $t('whoAreWeDesc') }}</p>
-<br>
-<br>
-<br>
-<br>
-<h2>{{ $t('ourMissionTitle') }}</h2>
-<p>{{ $t('ourMissionDesc') }}</p>
-    </div>
+  <div class="who-we-are-section">
+    <div class="who-we-are-container">
+      <div class="text-content">
+        <h1 class="who-we-are-title">{{ $t('whoAreWeTitle') }}</h1>
+        <p class="who-we-are-desc">{{ $t('whoAreWeDesc') }}</p>
+        <p class="who-we-are-desc">We believe in professionalism, transparency, and building a strong community where service providers and customers can connect with ease.</p>
+        <h2 class="our-mission-title">{{ $t('ourMissionTitle') }}</h2>
+        <p class="our-mission-desc">{{ $t('ourMissionDesc') }}</p>
+      </div>
 
-<img class="collage-all" src="../assets/Contact/collageall.png" alt="">
-
-          <div class="flex flex-col md:mr-3 col-span-3">
-
+      <div class="image-grid">
+        <img class="technician-img" src="../assets/Contact/collage-1.jpg" alt="Plumber working under sink">
+        <img class="technician-img" src="../assets/Contact/collage-2.jpg" alt="Technician installing device">
+        <img class="technician-img" src="../assets/Contact/collage-3.png" alt="Electronic components work">
+        <img class="technician-img" src="../assets/Contact/collageall.png" alt="Wood carving with chisel">
+      </div>
     </div>
   </div>
-  <!-- About-2 -->
-   <div class="container flex flex-col md:flex-row gap-10 md:gap-15 text-center about-2">
-    <h2 class="accolades md:pr-5">{{ $t('teamMembers') }}</h2>
-    <h2 class="accolades md:pr-5">{{ $t('winningAwards') }}</h2>
-    <h2 class="accolades md:pr-5">{{ $t('completeProjects') }}</h2>
-    <h2 class="accolades noBorders">{{ $t('clientReviews') }}</h2>
+     <!-- About-2 -->
+   <div class="container flex flex-col md:flex-row gap-10 md:gap-15 text-center about-2 p-8">
+    <div v-for="(stat, index) in stats" :key="index" class="flex-1">
+      <h2 class="text-4xl font-bold mb-2 counter-number">{{ stat.current }}{{ stat.suffix }}</h2>
+      <p class="text-lg">{{ $t(stat.label) }}</p>
+    </div>
    </div>
    <!-- About-3 -->
     <div class="mt-20 mb-20">
    <h1 class="text-center">{{ $t('whyChooseUsTitle') }}</h1>
    </div>
-   <div class="flex flex-row m-20">
-       <!-- card   -->
-<div class="flex flex-col md:flex-row md:m-15">
-    <div class="bg-white max-w-sm overflow-hidden rounded-md flex-col-3 border-1 w-100 m-1">
-   <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-stars" viewBox="0 0 16 16">
-  <path d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937-.645a2.89 2.89 0 0 0 1.828-1.828zM3.794 1.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387A1.73 1.73 0 0 0 4.593 5.69l-.387 1.162a.217.217 0 0 1-.412 0L3.407 5.69A1.73 1.73 0 0 0 2.31 4.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387A1.73 1.73 0 0 0 3.407 2.31zM10.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.16 1.16 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.16 1.16 0 0 0-.732-.732L9.1 2.137a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732z"/>
-</svg>
-    <br>
-    <br>
-    <br>
-  <div class="px-6 py-4">
-    <div class="font-bold text-xl mb-2">{{ $t('cleanWorkAllTime') }}</div>
-    <p class="text-gray-700 text-base">
-      {{ $t('cleanWorkAllTimeDesc') }}
-      <a href="">{{ $t('getStarted') }}</a>
-    </p>
- 
-  </div>
-  
-</div>
-    <div class="bg-white max-w-sm overflow-hidden rounded-md flex-col-3 border-1 w-100 m-1">
-   <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-stars" viewBox="0 0 16 16">
-  <path d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937-.645a2.89 2.89 0 0 0 1.828-1.828zM3.794 1.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387A1.73 1.73 0 0 0 4.593 5.69l-.387 1.162a.217.217 0 0 1-.412 0L3.407 5.69A1.73 1.73 0 0 0 2.31 4.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387A1.73 1.73 0 0 0 3.407 2.31zM10.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.16 1.16 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.16 1.16 0 0 0-.732-.732L9.1 2.137a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732z"/>
-</svg>
-    <br>
-    <br>
-    <br>
-  <div class="px-6 py-4">
-    <div class="font-bold text-xl mb-2">{{ $t('cleanWorkAllTime') }}</div>
-
-    <p class="text-gray-700 text-base">
-      {{ $t('cleanWorkAllTimeDesc') }}
-         <a href="">{{ $t('getStarted') }}</a>
-    </p>
- 
-  </div>
-  
-</div>
-<div class="bg-white max-w-sm overflow-hidden rounded-md flex-col-3 border-1 w-100 m-1">
-   <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-stars" viewBox="0 0 16 16">
-  <path d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937-.645a2.89 2.89 0 0 0 1.828-1.828zM3.794 1.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387A1.73 1.73 0 0 0 4.593 5.69l-.387 1.162a.217.217 0 0 1-.412 0L3.407 5.69A1.73 1.73 0 0 0 2.31 4.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387A1.73 1.73 0 0 0 3.407 2.31zM10.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.16 1.16 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.16 1.16 0 0 0-.732-.732L9.1 2.137a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732z"/>
-</svg>
-    <br>
-    <br>
-    <br>
-  <div class="px-6 py-4">
-    <div class="font-bold text-xl mb-2">{{ $t('cleanWorkAllTime') }}</div>
-
-    <p class="text-gray-700 text-base">
-      {{ $t('cleanWorkAllTimeDesc') }}
-         <a href="">{{ $t('getStarted') }}</a>
-    </p>
- 
-  </div>
-  
-</div>
-<div class="bg-white max-w-sm overflow-hidden rounded-md flex-col-3 border-1 w-100 m-1">
-   <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-stars" viewBox="0 0 16 16">
-  <path d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937-.645a2.89 2.89 0 0 0 1.828-1.828zM3.794 1.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387A1.73 1.73 0 0 0 4.593 5.69l-.387 1.162a.217.217 0 0 1-.412 0L3.407 5.69A1.73 1.73 0 0 0 2.31 4.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387A1.73 1.73 0 0 0 3.407 2.31zM10.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.16 1.16 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.16 1.16 0 0 0-.732-.732L9.1 2.137a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732z"/>
-</svg>
-    <br>
-    <br>
-    <br>
-  <div class="px-6 py-4">
-    <div class="font-bold text-xl mb-2">{{ $t('cleanWorkAllTime') }}</div>
-
-    <p class="text-gray-700 text-base">
-      {{ $t('cleanWorkAllTimeDesc') }}
-         <a href="">{{ $t('getStarted') }}</a>
-    </p>
- 
-  </div>
-  
-</div>
-</div>
-<div>
-</div>
-</div>
+   <section class="services-features">
+    <div class="services-container">
+      <div v-for="(service, index) in services" :key="index" class="service-card">
+        <div class="service-icon">
+          <i :class="service.icon" style="color: var(--secondary-color); font-size: 3rem;"></i>
+        </div>
+        <h3 class="service-title">{{ $t(service.title) }}</h3>
+        <p class="service-description">{{ $t(service.description) }}</p>
+        <button class="get-started-btn" @click="$router.push('/allservices')">
+          {{ $t('getStartedButtonText') }}
+          <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </section>
 <EndCard />
 <!-- <div class="flex flex-col justify-center end md:m-20 align-items-center">
 <h2 class="h1">We're Here to Help You.</h2>
@@ -133,86 +150,418 @@ import EndCard from '../components/EndCard.vue';
 
 
 <style scoped>
-img {
-  width: 60rem;
-  height: 20rem;
-  border-radius: 1rem;
+.services-features {
+  padding: 80px 0;
+  width: 100%;
+  border-radius: 16px;
 }
+
+
+.services-header {
+  text-align: center;
+  margin-bottom: 60px;
+  background-color: #F4F4F5;
+  color: #333;
+  padding: 20px;
+  margin-bottom: 0;
+}
+.dark .services-header {
+  background-color: var(--secondary-bg);
+  color: var(--primary-text);
+}
+
+
+
+.services-container {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+}
+
+.service-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 24px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  flex: 1;
+  max-width: 280px;
+  transition: transform 0.2s;
+}
+.dark .service-card {
+  background: var(--secondary-bg);
+}
+
+
+.service-card:hover {
+  transform: translateY(-4px);
+}
+
+.service-icon {
+  margin-bottom: 20px;
+}
+
+.service-icon i {
+  font-size: 3.5rem;
+  color: var(--secondary-color);
+}
+
+.service-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 16px;
+  font-family: Outfit, sans-serif;
+}
+.dark .service-title {
+  color: var(--primary-text);
+}
+.service-description {
+  font-size: 0.95rem;
+  color: #666;
+  line-height: 1.5;
+  margin-bottom: 24px;
+  font-family: Outfit, sans-serif;
+}
+.dark .service-description {
+  color: var(--text-muted);
+}
+.get-started-btn {
+  color: var(--primary-color);
+  margin-left: 100px;
+  border: none;
+  border-radius: 25px;
+  padding: 10px 16px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+  transition: background 0.2s;
+
+}
+.dark .get-started-btn {
+  color: var(--primary-text);
+}
+.get-started-btn:hover {
+  border: 1px solid var(--primary-color);
+}
+
+.get-started-btn i {
+  font-size: 0.8rem;
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .services-container {
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  
+  .service-card {
+    flex: 1 1 calc(50% - 20px);
+    min-width: 280px;
+  }
+}
+
+@media (max-width: 768px) {
+  .services-header {
+    padding: 16px;
+  }
+  
+  .commitment-title {
+    font-size: 48px;
+    line-height: 56px;
+  }
+  
+  .commitment-description {
+    font-size: 14px;
+    line-height: 20px;
+  }
+  
+  .services-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  
+  .service-card {
+    width: 100%;
+    max-width: 320px;
+  }
+}
+
+@media (max-width: 480px) {
+  .commitment-title {
+    font-size: 36px;
+    line-height: 42px;
+  }
+  
+  .service-card {
+    padding: 24px 16px;
+    text-align: center;
+  }
+  
+  .service-title {
+    text-align: center;
+  }
+  
+  .service-description {
+    text-align: center;
+  }
+  
+  .get-started-btn {
+    margin: 0 auto;
+    justify-content: center;
+  }
+}
+
+.service-container {
+  background-color: var(--primary-bg);
+}
+.who-we-are-section {
+  padding: 4rem 0;
+  margin: 2rem 0;
+}
+
+.dark .who-we-are-section {
+  background-color: var(--primary-bg);
+  color: var(--primary-text);
+}
+
+.who-we-are-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  gap: 3rem;
+  align-items: center;
+  padding: 0 2rem;
+}
+
+.text-content {
+  flex: 1;
+}
+
+.who-we-are-title {
+  color: black;
+  /* 40/Semibold */
+  font-family: Outfit, sans-serif;
+  font-size: 40px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  margin-bottom: 1.5rem;
+}
+
+.dark .who-we-are-title {
+  color: var(--primary-text);
+}
+
+.who-we-are-desc {
+  color: var(--text-muted);
+  /* 16/Regular */
+  font-family: Outfit, sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 24px; /* 150% */
+  margin-bottom: 1.5rem;
+}
+
+.dark .who-we-are-desc {
+  color: var(--text-muted);
+}
+
+.our-mission-title {
+  color: var(--text-color-text-primary, #1F2021);
+  /* Paragraph Medium/Medium */
+  font-family: Outfit, sans-serif;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 26px; /* 144.444% */
+  margin-bottom: 1rem;
+}
+.dark .our-mission-title {
+  color: var(--primary-text);
+}
+.our-mission-desc {
+    color: var(--text-color-text-secondary, #8C8E90);
+
+  /* 16/Regular */
+  font-family: Outfit, sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 24px; /* 150% */
+}
+
+.image-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  max-width: 500px;
+}
+
+.technician-img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 0.5rem;
+}
+
 .bg-white {
   background: var(--secondary-bg) !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease-in-out;
 }
+
+.bg-white:hover {
+  transform: translateY(-2px);
+}
+
 .dark .bg-white {
   background: var(--secondary-bg) !important;
 }
+
 .text-gray-700 {
   color: var(--primary-text) !important;
 }
+
 .dark .text-gray-700 {
   color: var(--primary-text) !important;
 }
+
 .dark .accolades {
   color: var(--primary-text) !important;
 }
 
-
 .contact-1 {
   background-image: url('../assets/Contact/aboutUs.jpg');
-  filter: blur(.3px);
-  display:flex;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  height:20rem;
+  height: 20rem;
   color: white;
-  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif ;
-  font-size: 100rem;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  font-size: 3rem;
   border-radius: 2rem;
+  overflow: hidden;
 }
+
+.contact-1::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+}
+
+.contact-1 h1,
+.contact-1 .breadcrumb {
+  position: relative;
+  z-index: 2;
+}
+
+.breadcrumb {
+  font-size: 1rem;
+  margin-top: 1rem;
+}
+
 .accolades {
-    border-right: solid rgb(255, 255, 255) .1rem;
-    margin-top:2rem;
-    margin-bottom:2rem;
+  border-right: solid rgb(255, 255, 255) 0.1rem;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
 }
+
 .dark .accolades {
   color: var(--primary-text) !important;
 }
 
 .noBorders {
-    border:0rem;
+  border: 0rem;
 }
+
 .collage-all {
   background-color: var(--primary-bg) !important;
 }
+
 .dark .collage-all {
   background-color: var(--primary-bg) !important;
 }
 
 .about-2 {
-    background-color: #FAE084;
-    border-radius: 1rem;
+  background-color: #FAE084;
+  border-radius: 1rem;
+  padding: 2rem;
 }
-.dark .about-2 {
-    background-color: var(--secondary-bg) !important;
-    color: var(--primary-text) !important;
-} 
 
+.dark .about-2 {
+  background-color: var(--secondary-bg) !important;
+  color: var(--primary-text) !important;
+}
+
+.counter-number {
+  transition: all 0.3s ease;
+  font-weight: bold;
+  color: #333;
+}
+
+.dark .counter-number {
+  color: var(--primary-text);
+}
 
 .collage-all {
-    width:300rem;
-    height:100%;
-}
-/* .end {
-    background-image: url('../assets/Contact/end.png');
-    color: white;
-    object-fit: cover;
-    height:30rem;
-    border-radius: 5rem;
-    background-repeat: no-repeat;
-
-
+  width: 300rem;
+  height: 100%;
 }
 
-.buttony {
-    background-color: #625498;
-    border-radius: 2rem;
-} */
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .contact-1 {
+    font-size: 2rem;
+    height: 15rem;
+  }
+  
+  .about-2 {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .about-2 > div {
+    margin-bottom: 1rem;
+  }
+  
+  .who-we-are-container {
+    flex-direction: column;
+    gap: 2rem;
+    padding: 0 1rem;
+  }
+  
+  .who-we-are-title {
+    
+    background-color: black;
+  }
+  
+  .image-grid {
+    max-width: 100%;
+  }
+  
+  .technician-img {
+    height: 120px;
+  }
+}
 </style>

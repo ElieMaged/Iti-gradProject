@@ -1,5 +1,5 @@
 <template>
-  <section class="services-section">
+  <section class="services-section m-20">
     <div class="">
       <h2 class="services-title">{{ $t('servicesSectionTitle') }}</h2>
       <hr class="services-divider" />
@@ -92,13 +92,7 @@ export default {
 </script>
 
 <style scoped>
-.services-section {
-  width: 90%;
-  max-width: 1100px;
-  margin: 0 auto 60px auto;
-  padding: 40px 0 0 0;
 
-}
 @media (max-width: 1000px) {
   .services-section {
     display:flex;
@@ -132,16 +126,22 @@ export default {
   display: flex;
   flex-direction: column;
   transition: transform 0.2s;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 .dark .service-card {
   background: var(--secondary-bg);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .service-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
 }
 .dark .service-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
 }
 .service-image {
   width: 100%;
@@ -162,7 +162,7 @@ export default {
 }
 .service-desc {
   font-size: 0.98rem;
-  color: #8c8e90;
+  color: var(--text-muted);
   margin-bottom: 18px;
   flex: 1;
 }

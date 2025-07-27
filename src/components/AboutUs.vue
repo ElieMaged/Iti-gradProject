@@ -1,6 +1,6 @@
 <template>
-  <section class="about-us">
-    <div class="about-container">
+  <section class="about-us ">
+    <div class="about-container mx-20">
       <div class="about-content">
         <div class="about-text">
           <h2 class="aboutus-title">{{ $t('aboutUsSectionTitle') }}</h2>

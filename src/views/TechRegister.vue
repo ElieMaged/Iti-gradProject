@@ -12,8 +12,38 @@
           <h3 class="font-bold text-[#6B4FA1] mb-2">{{ $t('personalInformation') }}</h3>
           <input v-model="formData.fullName" type="text" :placeholder="$t('fullName')" class="input-field" required />
           <input v-model="formData.email" type="email" :placeholder="$t('emailAddress')" class="input-field" required />
-          <input v-model="formData.password" type="password" :placeholder="$t('password')" class="input-field" required />
-          <input v-model="formData.confirmPassword" type="password" :placeholder="$t('confirmPassword')" class="input-field" required />
+          <div class="password-field-container">
+            <input v-model="formData.password" type="password" :placeholder="$t('password')" class="input-field" required />
+            <!-- Password validation indicators -->
+            <div class="password-validation" v-if="formData.password">
+              <div class="validation-item" :class="{ 'valid': passwordValidation.length }">
+                <span class="validation-icon">{{ passwordValidation.length ? '✓' : '✗' }}</span>
+                <span class="validation-text">{{ $t('atLeast8Characters') }}</span>
+              </div>
+              <div class="validation-item" :class="{ 'valid': passwordValidation.uppercase }">
+                <span class="validation-icon">{{ passwordValidation.uppercase ? '✓' : '✗' }}</span>
+                <span class="validation-text">{{ $t('oneUppercaseLetter') }}</span>
+              </div>
+              <div class="validation-item" :class="{ 'valid': passwordValidation.lowercase }">
+                <span class="validation-icon">{{ passwordValidation.lowercase ? '✓' : '✗' }}</span>
+                <span class="validation-text">{{ $t('oneLowercaseLetter') }}</span>
+              </div>
+              <div class="validation-item" :class="{ 'valid': passwordValidation.number }">
+                <span class="validation-icon">{{ passwordValidation.number ? '✓' : '✗' }}</span>
+                <span class="validation-text">{{ $t('oneNumber') }}</span>
+              </div>
+              <div class="validation-item" :class="{ 'valid': passwordValidation.special }">
+                <span class="validation-icon">{{ passwordValidation.special ? '✓' : '✗' }}</span>
+                <span class="validation-text">{{ $t('oneSpecialCharacter') }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="password-field-container">
+            <input v-model="formData.confirmPassword" type="password" :placeholder="$t('confirmPassword')" class="input-field" :class="{ 'error': formData.confirmPassword && !passwordValidation.match }" required />
+            <div v-if="formData.confirmPassword && !passwordValidation.match" class="password-error">
+              {{ $t('passwordsDoNotMatch') }}
+            </div>
+          </div>
         </div>
         <!-- Professional Details -->
         <div class="flex flex-col gap-4 md:col-span-1">
@@ -110,7 +140,7 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { auth, db, storage } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
@@ -145,6 +175,39 @@ const formData = reactive({
   idPhotoBase64: null // New field to store Base64 string
 });
 
+// Password validation
+const passwordValidation = reactive({
+  length: false,
+  uppercase: false,
+  lowercase: false,
+  number: false,
+  special: false,
+  match: false
+});
+
+// Watch password changes for real-time validation
+watch(() => formData.password, (newPassword) => {
+  passwordValidation.length = newPassword.length >= 8;
+  passwordValidation.uppercase = /[A-Z]/.test(newPassword);
+  passwordValidation.lowercase = /[a-z]/.test(newPassword);
+  passwordValidation.number = /\d/.test(newPassword);
+  passwordValidation.special = /[!@#$%^&*(),.?":{}|<>]/.test(newPassword);
+});
+
+// Watch confirm password for matching
+watch(() => formData.confirmPassword, (newConfirmPassword) => {
+  passwordValidation.match = newConfirmPassword === formData.password && newConfirmPassword.length > 0;
+});
+
+// Check if password meets all requirements
+const isPasswordValid = computed(() => {
+  return passwordValidation.length && 
+         passwordValidation.uppercase && 
+         passwordValidation.lowercase && 
+         passwordValidation.number && 
+         passwordValidation.special;
+});
+
 function triggerFileInput() {
   fileInput.value && fileInput.value.click();
 }
@@ -165,7 +228,12 @@ async function handleRegister() {
   error.value = '';
   success.value = '';
   
-  // Validation
+  // Password validation
+  if (!isPasswordValid.value) {
+    error.value = t('passwordRequirementsNotMet');
+    return;
+  }
+  
   if (formData.password !== formData.confirmPassword) {
     error.value = t('passwordsDoNotMatch');
     return;
@@ -388,6 +456,63 @@ async function promoteUserToTechnician(email) {
 .register-btn:disabled {
   background-color: #9ca3af;
   cursor: not-allowed;
+}
+
+/* Password validation styles */
+.password-field-container {
+  position: relative;
+}
+
+.password-validation {
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background-color: #f8f9fa;
+  border-radius: 0.5rem;
+  border: 1px solid #e9ecef;
+  font-size: 0.75rem;
+}
+
+.dark .password-validation {
+  background-color: #374151;
+  border-color: #4b5563;
+}
+
+.validation-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+  color: #6b7280;
+  transition: color 0.2s ease;
+}
+
+.validation-item:last-child {
+  margin-bottom: 0;
+}
+
+.validation-item.valid {
+  color: #10b981;
+}
+
+.validation-icon {
+  font-weight: bold;
+  font-size: 0.875rem;
+}
+
+.validation-text {
+  font-size: 0.75rem;
+}
+
+.password-error {
+  color: #ef4444;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  padding-left: 0.5rem;
+}
+
+.input-field.error {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
 }
 
 /* Grid layout */

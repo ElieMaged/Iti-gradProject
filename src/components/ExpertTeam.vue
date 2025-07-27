@@ -1,5 +1,5 @@
 <template>
-  <section class="expert-team">
+  <section class="expert-team m-20">
     <div class="team-header">
       <div class="team-title-section">
         <h2 class="team-title">{{ $t('expertTeamTitle') }}</h2>
@@ -124,12 +124,6 @@ export default {
 </script>
 
 <style scoped>
-.expert-team {
-  width: 90%;
-  max-width: 1100px;
-  margin: 0 auto 60px auto;
-  padding: 40px 0;
-}
 
 .team-header {
   display: flex;
@@ -149,6 +143,8 @@ export default {
   color: #333;
   line-height: 1.2;
   font-family: Outfit, sans-serif;
+  text-align: start;
+  margin-bottom: 10px;
 }
 
 .dark .team-title {

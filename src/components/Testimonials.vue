@@ -88,10 +88,11 @@ export default {
   justify-content: center;
   font-family: Outfit, sans-serif;
   border-radius: 12px;
-  font-size: 64px;
+  font-size: 2.5rem;
   font-weight: 700;
   font-family: Outfit, sans-serif;
   display: flex;
+  margin-bottom: 8px;
 }
 .dark .testimonials-title {
   color: var(--primary-text);

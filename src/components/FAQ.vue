@@ -1,7 +1,7 @@
 <template>
   <section class="faq">
     <!-- FAQ Content at the top -->
-    <div class="faq-content">
+    <div class="faq-content m-20">
       <div class="faq-header">
         <div class="faq-title-box">
           <h2 class="faq-title">{{ $t('faqTitle') }}</h2>
@@ -31,7 +31,7 @@
               <i :class="item.isExpanded ? 'fas fa-minus' : 'fas fa-plus'"></i>
             </div>
           </div>
-          <div class="faq-answer" v-show="item.isExpanded">
+          <div class="faq-answer" :class="{ 'expanded': item.isExpanded }">
             <p>{{ $t(item.answer) }}</p>
           </div>
         </div>
@@ -46,6 +46,7 @@ export default {
   name: 'FAQ',
   data() {
     return {
+      isLoaded: false,
       faqItems: [
         {
           question: 'faqQ1',
@@ -74,6 +75,12 @@ export default {
         }
       ]
     };
+  },
+  mounted() {
+    // Trigger loading animation
+    setTimeout(() => {
+      this.isLoaded = true;
+    }, 100);
   },
   methods: {
     toggleFAQ(index) {
@@ -180,23 +187,57 @@ export default {
   gap: 20px;
 }
 
+.faq-item:nth-child(1) { animation-delay: 0.1s; }
+.faq-item:nth-child(2) { animation-delay: 0.2s; }
+.faq-item:nth-child(3) { animation-delay: 0.3s; }
+.faq-item:nth-child(4) { animation-delay: 0.4s; }
+.faq-item:nth-child(5) { animation-delay: 0.5s; }
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .faq-item {
   background: #fff;
   border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+.faq-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 .dark .faq-item {
   background: var(--secondary-bg);
   color: var(--primary-text);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dark .faq-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 .faq-item.active {
   background: #625397;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(98, 83, 151, 0.3);
 }
 .dark .faq-item.active {
   background: var(--primary-color);
   color: var(--primary-text);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(98, 83, 151, 0.4);
 }
 .faq-item.active .question-text {
   color: #fff;
@@ -232,6 +273,7 @@ export default {
   margin: 0;
   font-family: Outfit, sans-serif;
   flex: 1;
+  transition: color 0.3s ease;
 }
 .dark .question-text {
   color: var(--primary-text);
@@ -250,18 +292,34 @@ export default {
   justify-content: center;
   flex-shrink: 0;
   transition: all 0.3s ease;
+  transform: rotate(0deg);
+}
+
+.faq-item.active .faq-icon {
+  transform: rotate(180deg);
 }
 
 .faq-icon i {
   font-size: 0.9rem;
+  transition: all 0.3s ease;
 }
 
 .faq-answer {
-  padding: 0 24px 24px 24px;
+  padding: 0 24px 0 24px;
   color: #fff;
   font-size: 0.95rem;
   line-height: 1.6;
   font-family: Outfit, sans-serif;
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  opacity: 0;
+}
+
+.faq-answer.expanded {
+  max-height: 200px;
+  padding: 0 24px 24px 24px;
+  opacity: 1;
 }
 .dark .faq-item:not(.active) .faq-answer {
   color: var(--text-muted);
@@ -339,7 +397,15 @@ export default {
   }
   
   .faq-title {
-    font-size: 1.5rem;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    font-family: Outfit, sans-serif;
+    color: #333;
+  }
+  
+  .dark .faq-title {
+    color: var(--primary-text);
   }
   
   .faq-question {
@@ -369,7 +435,7 @@ export default {
   }
   
   .faq-title {
-    font-size: 1.3rem;
+    font-size: 2rem;
   }
   
   .faq-intro p {

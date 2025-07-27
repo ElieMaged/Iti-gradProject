@@ -4,14 +4,14 @@
     <div class="dashboard-main">
       <div class="dashboard-container">
         <div class="title-search-row">
-          <h2 class="dashboard-title">Admin Dashboard</h2>
+          <h2 class="dashboard-title">{{ $t('adminDashboard') }}</h2>
           <div class="filter-search-bar">
-            <button class="filter-btn"><i class="fas fa-filter"></i> Filter</button>
+            <button class="filter-btn"><i class="fas fa-filter"></i> {{ $t('filter') }}</button>
             <div class="search-wrapper">
               <span class="search-icon"><i class="fas fa-search"></i></span>
               <input 
                 type="text" 
-                placeholder="Search Field" 
+                :placeholder="$t('searchField')" 
                 class="search-input"
                 v-model="searchQuery"
               />
@@ -27,8 +27,8 @@
               <i class="fas fa-sun stat-icon"></i>
               <span class="stat-time">{{ currentTime }}</span>
             </div>
-            <div class="stat-subtitle">Realtime Insight</div>
-            <button class="stat-action-btn">View All Bookings</button>
+            <div class="stat-subtitle">{{ $t('realtimeInsight') }}</div>
+            <button class="stat-action-btn">{{ $t('viewAllBookings') }}</button>
           </div>
           
           <!-- Total Technicians -->
@@ -37,8 +37,8 @@
               <i class="fas fa-users stat-icon"></i>
               <span class="stat-number">{{ dashboardStats.totalTechnicians }}</span>
             </div>
-            <div class="stat-title">Total Technicians</div>
-            <div class="stat-change positive">{{ dashboardStats.newTechnicians }} new employees added!</div>
+            <div class="stat-title">{{ $t('totalTechnicians') }}</div>
+            <div class="stat-change positive">{{ dashboardStats.newTechnicians }} {{ $t('newEmployeesAdded') }}</div>
           </div>
           
           <!-- Customers -->
@@ -47,7 +47,7 @@
               <i class="fas fa-user stat-icon"></i>
               <span class="stat-number">{{ dashboardStats.totalCustomers }}</span>
             </div>
-            <div class="stat-title">Customers</div>
+            <div class="stat-title">{{ $t('customers') }}</div>
             <div class="stat-change positive">{{ dashboardStats.customerChange }}</div>
           </div>
           
@@ -57,7 +57,7 @@
               <i class="fas fa-chart-line stat-icon"></i>
               <span class="stat-number">{{ dashboardStats.platformGrowth }}</span>
             </div>
-            <div class="stat-title">Platform Growth</div>
+            <div class="stat-title">{{ $t('platformGrowth') }}</div>
             <div class="stat-change growth">{{ dashboardStats.growthChange }}</div>
           </div>
         </div>
@@ -67,7 +67,7 @@
           <!-- Attendance Comparison Chart -->
           <div class="chart-card attendance-chart">
             <div class="chart-header">
-              <div class="chart-title">Attendance Comparison Chart</div>
+              <div class="chart-title">{{ $t('attendanceComparisonChart') }}</div>
               <div class="chart-controls">
                 <button 
                   v-for="period in chartPeriods" 
@@ -76,7 +76,7 @@
                   :class="{ active: selectedPeriod === period }"
                   @click="selectedPeriod = period"
                 >
-                  {{ period }}
+                  {{ $t(period) }}
                 </button>
               </div>
             </div>
@@ -157,18 +157,18 @@
             <div class="chart-legend">
               <div class="legend-item">
                 <div class="legend-dot"></div>
-                <span>Current Week</span>
+                <span>{{ $t('currentWeek') }}</span>
               </div>
               <div class="legend-item">
                 <div class="legend-dot previous"></div>
-                <span>Previous Week</span>
+                <span>{{ $t('previousWeek') }}</span>
               </div>
             </div>
           </div>
           
           <!-- Weekly Bookings Chart -->
           <div class="chart-card bookings-chart">
-            <div class="chart-title">Weekly Bookings</div>
+            <div class="chart-title">{{ $t('weeklyBookings') }}</div>
             <div class="chart-wrapper">
               <div class="chart-y-labels">
                 <span>120</span>
@@ -209,11 +209,11 @@
             <div class="chart-legend">
               <div class="legend-item">
                 <div class="legend-bar current"></div>
-                <span>This Week</span>
+                <span>{{ $t('thisWeek') }}</span>
               </div>
               <div class="legend-item">
                 <div class="legend-bar previous"></div>
-                <span>Last Week</span>
+                <span>{{ $t('lastWeek') }}</span>
               </div>
             </div>
           </div>
@@ -225,23 +225,28 @@
 
 <script>
 import AdminSidebar from '../../components/admin-sidebar.vue';
+import { useI18n } from 'vue-i18n';
 
 export default {
   name: 'AdminDashboard',
   components: { AdminSidebar },
+  setup() {
+    const { t } = useI18n();
+    return { t };
+  },
   data() {
     return {
       searchQuery: '',
-      selectedPeriod: 'Daily',
+      selectedPeriod: 'daily',
       currentTime: '8:02:09 AM',
-      chartPeriods: ['Daily', 'Weekly', 'Monthly'],
+      chartPeriods: ['daily', 'weekly', 'monthly'],
       dashboardStats: {
         totalTechnicians: 452,
         newTechnicians: 2,
         totalCustomers: 360,
-        customerChange: '+10% Less than yesterday',
+        customerChange: t('plus10PercentLessThanYesterday'),
         platformGrowth: 30,
-        growthChange: '+3% Increase than yesterday'
+        growthChange: t('plus3PercentIncreaseThanYesterday')
       },
       attendanceData: [
         { x: 50, y: 180, value: 91 },

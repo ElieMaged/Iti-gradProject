@@ -3,7 +3,7 @@
 </script>
 
 <template>
-  <div class="flex flex-col lg:flex-row gap-5 py-10 px-3">
+  <div class="flex flex-col lg:flex-row gap-5 m-20">
     <div class="flex flex-col gap-5">
       <div>
         <h2 class="title">{{ $t('contactUs') }}</h2>
