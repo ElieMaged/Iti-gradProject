@@ -2,11 +2,11 @@
   <section class="expert-team m-20">
     <div class="team-header">
       <div class="team-title-section">
-        <h2 class="team-title">{{ $t('expertTeamTitle') }}</h2>
+        <h2 class="team-title">{{ $t('meetOurExpertTechnicians') || 'Meet Our Expert Technicians' }}</h2>
       </div>
       <div class="team-subtitle-section">
-        <h3 class="team-subtitle">{{ $t('expertTeamSubtitle') }}</h3>
-        <p class="team-description">{{ $t('expertTeamDescription') }}</p>
+        <h3 class="team-subtitle">{{ $t('ourTechniciansSubtitle') || 'Our technicians are highly skilled and ready to help you.' }}</h3>
+        <p class="team-description">{{ $t('ourTechniciansDescription') || 'Browse our team of professionals and view their profiles to find the right expert for your needs.' }}</p>
       </div>
     </div>
 
@@ -16,7 +16,10 @@
     </div>
 
     <div v-else class="team-cards">
-      <div v-for="(member, index) in teamMembers" :key="member.id" class="team-card">
+      <button @click="prevSlide" :disabled="currentIndex === 0" class="slider-btn">
+        <i class="fas fa-arrow-left"></i>
+      </button>
+      <div v-for="(member, index) in teamMembers.slice(currentIndex, currentIndex + 4)" :key="member.id" class="team-card">
         <div class="member-image">
           <img :src="member.image" :alt="member.name" class="member-photo" />
         </div>
@@ -26,100 +29,93 @@
             <i v-for="star in member.rating" :key="star" class="fas fa-star"></i>
           </div>
           <p class="member-description">{{ $t(member.description) }}</p>
-          <button class="view-profile-btn">
+          <button class="view-profile-btn" @click="viewProfile(member)">
             {{ $t('viewProfile') }}
             <i class="fas fa-arrow-right arrow-right"></i>
           </button>
         </div>
       </div>
+      <button @click="nextSlide" :disabled="currentIndex + 4 >= teamMembers.length" class="slider-btn">
+        <i class="fas fa-arrow-right"></i>
+      </button>
     </div>
   </section>
 </template>
 
 <script>
-// import { collection, getDocs } from 'firebase/firestore';
-// import { ref, getDownloadURL } from 'firebase/storage';
-// import { db, storage } from '../firebase.js';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../firebase.js';
+import { stockTechnicians } from '../assets/stockTechnicians.js';
 
 export default {
   name: 'ExpertTeam',
   data() {
     return {
-      teamMembers: [
-        {
-          id: '1',
-          name: 'teamMember1Name',
-          image: '/images/Image.png',
-          description: 'teamMember1Desc',
-          rating: 5
-        },
-        {
-          id: '2',
-          name: 'teamMember2Name',
-          image: '/images/Image.png',
-          description: 'teamMember2Desc',
-          rating: 5
-        },
-        {
-          id: '3',
-          name: 'teamMember3Name',
-          image: '/images/Image.png',
-          description: 'teamMember3Desc',
-          rating: 5
-        },
-        {
-          id: '4',
-          name: 'teamMember4Name',
-          image: '/images/Image.png',
-          description: 'teamMember4Desc',
-          rating: 5
-        }
-      ],
-      loading: false
+      teamMembers: [],
+      loading: true,
+      currentIndex: 0, // start of the visible window
     };
   },
-  // async mounted() {
-  //   await this.fetchTeamMembers();
-  // },
-  // methods: {
-  //   async fetchTeamMembers() {
-  //     try {
-  //       const teamCollection = collection(db, 'team');
-  //       const teamSnapshot = await getDocs(teamCollection);
-  //       
-  //       const members = [];
-  //       for (const doc of teamSnapshot.docs) {
-  //         const memberData = doc.data();
-  //         
-  //         // Get image URL from Firebase Storage
-  //         let imageUrl = '';
-  //         if (memberData.imagePath) {
-  //           const imageRef = ref(storage, memberData.imagePath);
-  //           try {
-  //               imageUrl = await getDownloadURL(imageRef);
-  //           } catch (error) {
-  //               console.error('Error loading image:', error);
-  //               imageUrl = '/public/images/team/default-avatar.png'; // fallback image
-  //           }
-  //         }
-  //         
-  //         members.push({
-  //           id: doc.id,
-  //           name: memberData.name || 'Unknown',
-  //           image: imageUrl,
-  //           description: memberData.description || 'Professional team member with excellent service record.',
-  //           rating: memberData.rating || 5
-  //         });
-  //       }
-  //       
-  //       this.teamMembers = members;
-  //       this.loading = false;
-  //     } catch (error) {
-  //       console.error('Error fetching team members:', error);
-  //       this.loading = false;
-  //     }
-  //   }
-  // }
+  async mounted() {
+    await this.fetchTechnicians();
+  },
+  methods: {
+    async fetchTechnicians() {
+      try {
+        this.loading = true;
+        const techniciansCollection = collection(db, 'technicians');
+        const techniciansSnapshot = await getDocs(techniciansCollection);
+
+        const firebaseTechnicians = [];
+        techniciansSnapshot.forEach(doc => {
+          const data = doc.data();
+          firebaseTechnicians.push({
+            id: doc.id,
+            name: data.fullName || data.name || 'Unknown Technician',
+            image: data.idPhotoUrl || data.profileImage || '/images/Avatar.png',
+            description: data.bio || data.description || 'Professional technician with years of experience.',
+            rating: data.averageRating || 4.5,
+          });
+        });
+
+        // Fallback to stockTechnicians if none found
+        this.teamMembers = firebaseTechnicians.length > 0
+          ? firebaseTechnicians
+          : stockTechnicians.map(tech => ({
+              id: tech.id,
+              name: tech.name,
+              image: tech.image || '/images/Avatar.png',
+              description: tech.description,
+              rating: tech.rating || 4.5,
+            }));
+      } catch (error) {
+        console.error('Error fetching technicians:', error);
+        // Fallback to stockTechnicians
+        this.teamMembers = stockTechnicians.map(tech => ({
+          id: tech.id,
+          name: tech.name,
+          image: tech.image || '/images/Avatar.png',
+          description: tech.description,
+          rating: tech.rating || 4.5,
+        }));
+      } finally {
+        this.loading = false;
+      }
+    },
+    nextSlide() {
+      if (this.currentIndex + 4 < this.teamMembers.length) {
+        this.currentIndex += 4;
+      }
+    },
+    prevSlide() {
+      if (this.currentIndex - 4 >= 0) {
+        this.currentIndex -= 4;
+      }
+    },
+    viewProfile(member) {
+      this.$router.push({ path: `/technician/${member.id}` });
+    }
+  }
 };
 </script>
 
@@ -429,5 +425,29 @@ export default {
     font-size: 0.85rem;
     text-align: center;
   }
+}
+
+.slider-btn {
+  background: #625397;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  margin: 0 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.slider-btn:disabled {
+  background: #ccc;
+  color: #888;
+  cursor: not-allowed;
+}
+.slider-btn i {
+  pointer-events: none;
 }
 </style>

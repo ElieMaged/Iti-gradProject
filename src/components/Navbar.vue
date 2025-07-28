@@ -231,7 +231,7 @@ export default {
 <template>
   <!-- Top Bar -->
   <div class=" w-full" id="contact-Nav">
-    <div class="max-w-7xl mx-20 flex flex-col sm:flex-row justify-between items-center py-2 gap-2">
+    <div class=" mx-20 flex flex-col sm:flex-row justify-between items-center py-2 gap-2">
       <div class="flex flex-col sm:flex-row gap-2 items-center">
         <a href="tel:+12095551234" class="contact-links no-underline mx-1 flex items-center text-sm"><i
             class="fa-solid fa-phone px-2"></i>{{ $t('contactPhone') }}</a>

@@ -301,6 +301,9 @@ const messages = {
     electricityTeamDescription: 'Our experienced electricians provide safe and efficient electrical services for your home or business.',
     technicianDescription: 'Skilled technician with a strong track record of customer satisfaction. Professional, and ready for your job.',
     viewProfile: 'View Profile',
+    meetOurExpertTechnicians: 'Meet Our Expert Technicians',
+    ourTechniciansSubtitle: 'Our technicians are highly skilled and ready to help you.',
+    ourTechniciansDescription: 'Browse our team of professionals and view their profiles to find the right expert for your needs.',
     // Pagination
     page1: '1',
     page2: '2',
