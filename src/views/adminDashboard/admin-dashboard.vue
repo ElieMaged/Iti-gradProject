@@ -1,7 +1,7 @@
 <template>
   <div class="admin-dashboard-layout">
     <admin-sidebar />
-    <div class="dashboard-main">
+    <div class="dashboard-main mr-20">
       <div class="dashboard-container">
         <div class="title-search-row">
           <h2 class="dashboard-title">{{ $t('adminDashboard') }}</h2>
@@ -503,16 +503,23 @@ export default {
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
   background: #f9fafb;
 }
-
+.dark .admin-dashboard-layout {
+  background: var(--primary-bg);
+  color: var(--primary-text);
+}
 .dashboard-main {
   flex: 1;
-  padding: 2.5rem;
 }
+.dark .dashboard-main {
+  color: var(--primary-text);
+}
+
 
 .dashboard-container {
   max-width: 80rem;
   margin: 0 auto;
 }
+
 
 .title-search-row {
   display: flex;
@@ -527,6 +534,9 @@ export default {
   color: #7c6bb0;
   margin-bottom: 0;
 }
+.dark .dashboard-title {
+  color: var(--primary-text);
+}
 
 .filter-search-bar {
   display: flex;
@@ -539,7 +549,10 @@ export default {
   border-radius: 58px;
   background: #D3CFE2;
 }
-
+.dark .filter-search-bar {
+  background: var(--input-bg);
+  color: var(--primary-text);
+}
 .filter-btn {
   display: flex;
   width: 97px;
@@ -556,14 +569,24 @@ export default {
   cursor: pointer;
   transition: all 0.2s;
 }
-
+.dark .filter-btn {
+  background: var(--grey-bg);
+  color: var(--primary-text);
+} 
 .filter-btn i {
   font-size: 1.1rem;
 }
-
+.dark .filter-btn:hover {
+  background: var(--grey-bg);
+  color: var(--primary-text);
+}
 .filter-btn:hover {
   background: var(--sidebar-color);
   color: var(--primary-color);
+}
+.dark .search-wrapper {
+  background: var(--grey-bg);
+  color: var(--primary-text);
 }
 
 .search-wrapper {
@@ -578,13 +601,17 @@ export default {
   border: 1px solid var(--border-border-primary, #C2C3C4);
   background: var(--surface-color-surface-primary, #FFF);
 }
-
+.dark .search-wrapper {
+  background: var(--grey-bg);
+}
 .search-icon {
   color: #b8a4e3;
   font-size: 1.1rem;
   margin-right: 0.7rem;
 }
-
+.dark .search-icon {
+  color: var(--primary-text);
+}
 .search-input {
   border: none;
   outline: none;
@@ -593,12 +620,16 @@ export default {
   color: #333;
   width: 100%;
 }
-
+.dark .search-input {
+  color: var(--primary-text);
+}
 .search-input::placeholder {
   color: #b8a4e3;
   opacity: 1;
 }
-
+.dark .search-input::placeholder {
+  color: var(--primary-text);
+}
 .stats-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -629,6 +660,10 @@ export default {
   padding: 1.5rem;
   text-align: center;
 }
+.dark .stat-card {
+  background: var(--grey-bg);
+  color: var(--primary-text);
+}
 
 .stat-header {
   display: flex;
@@ -636,18 +671,24 @@ export default {
   justify-content: center;
   margin-bottom: 0.5rem;
 }
-
+.dark .stat-header {
+  color: var(--primary-text);
+}
 .stat-icon {
   font-size: 1.5rem;
   color: #7c6bb0;
   margin-right: 0.5rem;
 }
-
+.dark .stat-icon {
+  color: var(--primary-text);
+}
 .stat-time {
   font-size: 1.125rem;
   font-weight: 600;
 }
-
+.dark .stat-time {
+  color: var(--primary-text);
+}
 .stat-number {
   font-size: 1.875rem;
   font-weight: bold;
@@ -658,13 +699,17 @@ export default {
   font-weight: 600;
   color: #333;
 }
-
+.dark .stat-title {
+  color: var(--primary-text);
+}
 .stat-subtitle {
   font-size: 0.875rem;
   color: #aaaaaa;
   margin-bottom: 1rem;
 }
-
+.dark .stat-subtitle {
+  color: var(--primary-text);
+}
 .stat-change {
   font-size: 0.75rem;
   margin-top: 0.25rem;
@@ -673,11 +718,15 @@ export default {
 .stat-change.positive {
   color: #22c55e;
 }
-
+.dark .stat-change.positive {
+  color: var(--primary-text);
+}
 .stat-change.growth {
   color: #ec4899;
 }
-
+.dark .stat-change.growth {
+  color: var(--primary-text);
+}
 .stat-action-btn {
   background: #7c6bb0;
   color: white;
@@ -688,11 +737,17 @@ export default {
   cursor: pointer;
   transition: background 0.2s;
 }
-
+.dark .stat-action-btn {
+  background: var(--grey-bg);
+  color: var(--primary-text);
+}
 .stat-action-btn:hover {
   background: #5a4a8c;
 }
-
+.dark .stat-action-btn:hover {
+  background: var(--grey-bg);
+  color: var(--primary-text);
+}
 .charts-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -711,25 +766,34 @@ export default {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   padding: 1.5rem;
 }
-
+.dark .chart-card {
+  background: var(--grey-bg);
+  color: var(--primary-text);
+} 
 .chart-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1rem;
 }
-
+.dark .chart-header {
+  color: var(--primary-text);
+}
 .chart-title {
   font-size: 1rem;
   font-weight: 600;
   color: #333;
 }
-
+.dark .chart-title {
+  color: var(--primary-text);
+}
 .chart-controls {
   display: flex;
   gap: 1rem;
 }
-
+.dark .chart-controls {
+  color: var(--primary-color);
+}
 .chart-period-btn {
   color: #7c6bb0;
   font-weight: 600;
@@ -742,11 +806,15 @@ export default {
 .chart-period-btn.active {
   color: #7c6bb0;
 }
-
+.dark .chart-period-btn.active {
+  color: var(--primary-color);
+}
 .chart-period-btn:not(.active) {
   color: #aaaaaa;
 }
-
+.dark .chart-period-btn:not(.active) {
+  color: var(--icon-color);
+}
 .chart-wrapper {
   position: relative;
   width: 100%;
@@ -760,7 +828,10 @@ export default {
   align-items: center;
   padding: 1rem;
 }
-
+.dark .chart-wrapper {
+  background: var(--grey-bg);
+  color: var(--primary-text);
+}
 .chart-y-labels {
   position: absolute;
   left: 0;
@@ -776,7 +847,9 @@ export default {
   font-weight: 600;
   z-index: 2;
 }
-
+.dark .chart-y-labels {
+  color: var(--primary-text);
+} 
 .chart-main {
   position: relative;
   width: 100%;
@@ -787,7 +860,6 @@ export default {
   align-items: center;
   margin-left: 2rem;
 }
-
 .chart-grid {
   position: absolute;
   top: 0;
@@ -796,7 +868,6 @@ export default {
   height: 100%;
   pointer-events: none;
 }
-
 .grid-line {
   position: absolute;
   width: 100%;
@@ -804,7 +875,9 @@ export default {
   background: rgba(124, 107, 176, 0.2);
   opacity: 0.6;
 }
-
+.dark .grid-line {
+  background: var(--icon-color);
+}
 .grid-line:nth-child(1) { top: 20%; }
 .grid-line:nth-child(2) { top: 40%; }
 .grid-line:nth-child(3) { top: 60%; }
@@ -816,7 +889,9 @@ export default {
   height: 100%;
   position: relative;
 }
-
+.dark .chart-area {
+  fill: var(--icon-color);
+}
 .chart-area {
   fill: url(#areaGradient);
   opacity: 0.3;
@@ -824,7 +899,9 @@ export default {
   transition: transform 0.8s ease-out;
   animation: area-fill 1s ease-out 0.5s forwards;
 }
-
+.dark .chart-area {
+  fill: var(--icon-color);
+} 
 @keyframes area-fill {
   to {
     transform: translateY(0);
@@ -842,7 +919,9 @@ export default {
   stroke-dashoffset: 1000;
   animation: draw-line 1.5s ease-out 0.3s forwards;
 }
-
+.dark .chart-line {
+  stroke: var(--primary-color);
+}
 @keyframes draw-line {
   to {
     stroke-dashoffset: 0;
@@ -856,7 +935,10 @@ export default {
   transition: all 0.3s ease;
   cursor: pointer;
 }
-
+.dark .data-point {
+  fill: var(--primary-color);
+  stroke: var(--primary-text-dark);
+}
 .data-point:hover {
   transform: scale(1.3);
   fill: #5a4a8c;
@@ -917,6 +999,9 @@ export default {
   color: #7c6bb0;
   font-weight: 500;
 }
+.dark .legend-item {
+  color: var(--primary-text);
+}
 
 .legend-dot {
   width: 0.75rem;
@@ -952,7 +1037,6 @@ export default {
 .legend-bar.previous {
   background: #b8a4e3;
 }
-
 .bars-container {
   display: flex;
   align-items: end;
@@ -1022,13 +1106,15 @@ export default {
   background: linear-gradient(to top, #b8a4e3, #c5b7e6);
   box-shadow: 0 2px 6px rgba(184, 164, 227, 0.3);
 }
-
 .bar-label {
   font-size: 0.75rem;
   color: #7c6bb0;
   font-weight: 600;
   text-align: center;
   transition: color 0.2s ease;
+}
+.dark .bar-label {
+  color: var(--primary-text);
 }
 
 .bar-group:hover .bar-label {

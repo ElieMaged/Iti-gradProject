@@ -1,12 +1,12 @@
 <template>
     <div class="layout">
-      <div class="sidebar m-20">
+      <div class="sidebar mx-20">
         <a href="/admin-profile" 
            class="sidebar-item" 
            :class="{ active: isActive('/admin-profile') }"
            @click="handleNavigation">
           <i class="fas fa-user"></i>
-          <span>My Profile</span>
+          <span>{{ $t('myProfile') }}</span>
         </a>
   
 
@@ -15,7 +15,7 @@
            :class="{ active: isActive('/admin-users') }"
            @click="handleNavigation">
           <i class="fas fa-users"></i>
-          <span>Users</span>
+          <span>{{ $t('users') }}</span>
         </a>
   
         <!-- Technicians Dropdown -->
@@ -24,18 +24,18 @@
                :class="{ active: isTechniciansActive }"
                @click="toggleDropdown('tech')">
             <i class="fas fa-user-cog"></i>
-            <span>Technicians</span>
+            <span>{{ $t('technicians') }}</span>
             <i class="fas fa-chevron-down chevron-icon"></i>
           </div>
           <div class="dropdown-menu" v-show="showTechnicians">
             <a href="/all-technician" 
                @click="handleNavigation" 
                class="dropdown-link"
-               :class="{ active: isActive('/all-technician') }">All Technicians</a>
+               :class="{ active: isActive('/all-technician') }">{{ $t('allTechnicians') }}</a>
             <a href="/admin-pending-tech" 
                @click="handleNavigation" 
                class="dropdown-link"
-               :class="{ active: isActive('/admin-pending-tech') }">Pending Technicians</a>
+               :class="{ active: isActive('/admin-pending-tech') }">{{ $t('pendingTechnicians') }}</a>
           </div>
         </div>
   
@@ -45,22 +45,22 @@
                :class="{ active: isBookingActive }"
                @click="toggleDropdown('booking')">
             <i class="fas fa-calendar-alt"></i>
-            <span>Booking</span>
+            <span>{{ $t('booking') }}</span>
             <i class="fas fa-chevron-down chevron-icon"></i>
           </div>
           <div class="dropdown-menu" v-show="showBooking">
             <router-link to="/booking-upcoming" 
                          class="dropdown-status-link" 
-                         active-class="active-status-link">Upcoming</router-link>
+                         active-class="active-status-link">{{ $t('upcoming') }}</router-link>
             <router-link to="/booking-pending" 
                          class="dropdown-status-link" 
-                         active-class="active-status-link">Pending</router-link>
+                         active-class="active-status-link">{{ $t('pending') }}</router-link>
             <router-link to="/booking-completed" 
                          class="dropdown-status-link" 
-                         active-class="active-status-link">Completed</router-link>
+                         active-class="active-status-link">{{ $t('completed') }}</router-link>
             <router-link to="/booking-canceled" 
                          class="dropdown-status-link" 
-                         active-class="active-status-link">Canceled</router-link>
+                         active-class="active-status-link">{{ $t('canceled') }}</router-link>
           </div>
         </div>
         
@@ -69,7 +69,7 @@
            :class="{ active: isActive('/admin-payment') }"
            @click="handleNavigation">
           <i class="fas fa-credit-card"></i>
-          <span>Payment</span>
+          <span>{{ $t('payment') }}</span>
         </a>
   
         <a href="/admin-dashboard" 
@@ -77,7 +77,7 @@
            :class="{ active: isActive('/admin-dashboard') }"
            @click="handleNavigation">
           <i class="fas fa-chart-bar"></i>
-          <span>Overview</span>
+          <span>{{ $t('overview') }}</span>
         </a>
   
         <a href="/admin-edit-profile" 
@@ -85,12 +85,12 @@
            :class="{ active: isActive('/admin-edit-profile') }"
            @click="handleNavigation">
           <i class="fas fa-cog"></i>
-          <span>Settings</span>
+          <span>{{ $t('settings') }}</span>
         </a>
   
         <button @click="handleLogout" class="sidebar-item logout-btn">
           <i class="fas fa-sign-out-alt"></i>
-          <span>Logout</span>
+          <span>{{ $t('logout') }}</span>
         </button>
       </div>
     </div>
@@ -145,7 +145,7 @@
   }
   
   function handleLogout() {
-    if (confirm('Are you sure you want to logout?')) {
+    if (confirm($t('confirmLogout'))) {
       // Clear any stored authentication data
       localStorage.removeItem('token');
       localStorage.removeItem('user');
@@ -155,7 +155,7 @@
       router.push('/login');
       
       // Optional: Show success message
-      alert('You have been logged out successfully!');
+      alert($t('logoutSuccess'));
     }
   }
   
@@ -186,7 +186,7 @@
     --text-main: #333333;
     --text-muted: #aaaaaa;
   }
-  
+
   body {
     margin: 0;
   }
@@ -203,6 +203,10 @@
     flex-direction: column;
     align-items: center;
     padding-top: 2.5rem;
+  }
+  .dark {
+    background: var(--sidebar);
+    color: var(--text-main);
   }
   
   .sidebar-item {
@@ -222,7 +226,9 @@
     font-family: inherit;
     border-radius: 12px;
   }
-  
+  .dark .sidebar-item {
+    color: var(--text-main);
+  }
   .sidebar-item:hover {
     background-color: #c5b7e6;
     color: white;
@@ -231,6 +237,10 @@
   .sidebar-item.active {
     background-color: var(--secondary);
     color: white;
+  }
+  .dark .sidebar-item.active {
+    background-color: var(--icon-color);
+    color: var(--primary-text-dark);
   }
   
   .dropdown-container {

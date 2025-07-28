@@ -26,7 +26,7 @@
         <div class="member-info">
           <h3 class="member-name">{{ $t(member.name) }}</h3>
           <div class="member-rating">
-            <i v-for="star in member.rating" :key="star" class="fas fa-star"></i>
+            <i v-for="star in Math.floor(member.rating || 5)" :key="star" class="fas fa-star"></i>
           </div>
           <p class="member-description">{{ $t(member.description) }}</p>
           <button class="view-profile-btn" @click="viewProfile(member)">

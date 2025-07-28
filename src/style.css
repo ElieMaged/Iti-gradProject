@@ -22,7 +22,34 @@ body {
   --danger: #ef4444;
   --completed: #6b7280;
 }
+.dark {
+  body, .sidebar, .navbar {
+  background: var(--primary-bg);
+  color: var(--primary-text);
+  
 
+}
+
+
+--primary-color: #625397;   
+--secondary-color: #ffd54f;
+--primary: #7B6FA8;
+--secondary: #ffd54f;
+--sidebar: #7B6FA8;
+--icon-color: #C6C3D6;
+--text-main: #f1f1f1;
+--text-muted: #484B4D;
+--input-bg: #232336;
+--input-border: #44445a;
+--success: #22c55e;
+--danger: #ef4444;
+--completed: #bdbdbd;
+--primary-bg: #181824;
+--primary-text: #F4F4F5;
+--primary-text-dark: #000000;
+--secondary-bg: #37373a;
+--grey-bg: #87838D;
+}
 
 .primary-color {
   color: var(--primary-color);

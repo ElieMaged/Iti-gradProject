@@ -432,13 +432,13 @@ export default {
   background-color: white;
   color: var(white);
 }
-.dark .social-media-links {
-  background-color: var(--primary-text-dark);
-  color: var(--primary-text-dark);
-}
 .dark #contact-Nav {
   background-color: var(--secondary) !important;
-  color: var(--primary-text-dark) !important;
+  color: var(--primary-text-dark) ;
+}
+.dark .social-media-links {
+  background-color: var(--primary-text-dark) !important;
+  color: var(--secondary) !important;
 }
 
 #logo {

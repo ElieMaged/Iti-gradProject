@@ -284,7 +284,7 @@ const messages = {
     heroSectionDescription: "We're here to help you achieve your goals, overcome challenges and make every step smoother along the way.",
     heroSectionBookBtn: "Book an Appointment",
     heroTitle: "Specialized Efficient Solutions",
-    heroDescription: "Our expert technicians tackle every project with innovation and expertise. From simple repairs to complex installations, we’re the trusted partner you need.",
+    heroDescription: "Our expert technicians tackle every project with innovation and expertise. From simple repairs to complex installations, we're the trusted partner you need.",
     heroBookBtn: "Book an Appointment",
     heroShowServicesBtn: "Show all services",
     // --- Added for Service Views ---
@@ -335,7 +335,7 @@ const messages = {
     // About.vue
     aboutUsTitle: 'About Us',
     whoAreWeTitle: 'Who Are We?',
-    whoAreWeDesc: "At BoltFix, we're redefining how home maintenance is done. As Egypt’s trusted platform for reliable repair and installation services, we connect you with skilled, verified technicians across plumbing, electrical, carpentry, appliance repair, and more — all with a click. Our mission is simple: to bring professionalism, transparency, and peace of mind to every home. Whether it’s a quick fix or a big job, we make sure it’s done right, on time, and with care.",
+    whoAreWeDesc: "At BoltFix, we're redefining how home maintenance is done. As Egypt's trusted platform for reliable repair and installation services, we connect you with skilled, verified technicians across plumbing, electrical, carpentry, appliance repair, and more — all with a click. Our mission is simple: to bring professionalism, transparency, and peace of mind to every home. Whether it's a quick fix or a big job, we make sure it's done right, on time, and with care.",
     ourMissionTitle: 'Our Mission',
     ourMissionDesc: "Our mission at BoltFix is to simplify access to trusted home repair services by empowering skilled technicians and delivering a seamless, dependable experience for every customer. We aim to raise the standard of home maintenance in Egypt through speed, honesty, and quality — ensuring that every task, big or small, is completed with precision, professionalism, and care.",
     teamMembers: '150+ Team Member',
@@ -380,6 +380,10 @@ const messages = {
     expertTeamSubtitle: 'Expert Team',
     expertTeamDescription: 'We have professional expert cleaning staff ensuring top-notch cleanliness and hygiene for your space.',
     loadingTeamMembers: 'Loading team members...',
+    meetOurExpertTechnicians: 'Meet Our Expert Technicians',
+    ourTechniciansSubtitle: 'Our technicians are highly skilled and ready to help you.',
+    ourTechniciansDescription: 'Browse our team of professionals and view their profiles to find the right expert for your needs.',
+    viewProfile: 'View Profile',
     // AboutUs.vue
     aboutUsSectionTitle: 'Over 25+ Year of Experience In Handyman Service',
     aboutUsSectionDesc: 'With 25+ years of experience, we are the go-to experts for all your handyman service requirements. Trust in our skill and professionalism for top-notch results.',
@@ -607,6 +611,31 @@ const messages = {
     applianceRepairServiceDesc: 'Fast and efficient repair services for all household appliances',
     wallFinishingServiceTitle: 'Wall Finishing',
     wallFinishingServiceDesc: 'High-quality painting and finishing services for walls and ceilings',
+
+    // Admin Sidebar
+    myProfile: 'ملفي الشخصي',
+    users: 'المستخدمين',
+    technicians: 'الفنيين',
+    allTechnicians: 'جميع الفنيين',
+    pendingTechnicians: 'الفنيين المعلقين',
+    booking: 'الحجوزات',
+    upcoming: 'القادمة',
+    pending: 'معلق',
+    completed: 'مكتمل',
+    canceled: 'ملغي',
+    payment: 'الدفع',
+    overview: 'نظرة عامة',
+    settings: 'الإعدادات',
+    logout: 'تسجيل الخروج',
+    confirmLogout: 'هل أنت متأكد من أنك تريد تسجيل الخروج؟',
+    logoutSuccess: 'تم تسجيل الخروج بنجاح!',
+    // Admin Dashboard
+    dashboard: 'لوحة التحكم',
+    statistics: 'الإحصائيات',
+    analytics: 'التحليلات',
+    reports: 'التقارير',
+    settings: 'الإعدادات',
+    logout: 'تسجيل الخروج',
   },
   ar: {
     // Navbar
@@ -817,8 +846,6 @@ const messages = {
     willingToTravel: 'سعي للسفر',
     yes: 'نعم',
     no: 'لا',
-    passwordsDoNotMatch: 'كلمات المرور غير متطابقة',
-    password: 'كلمة المرور',
     pleaseUploadYourId: 'يرجى رفع الهوية',
     dragDropOrBrowse: 'سحب وإسقاط أو تصفح',
     professionalDetails: 'التفاصيل المهنية',
@@ -929,6 +956,9 @@ const messages = {
     electricityTeamDescription: 'يقدم كهربائيوونا ذوو الخبرة خدمات كهربائية آمنة وفعالة لمنزلك أو عملك.',
     technicianDescription: 'فني ماهر ذو سجل قوي في رضا العملاء. محترف وجاهز لخدمتك.',
     viewProfile: 'عرض الملف الشخصي',
+    meetOurExpertTechnicians: 'تعرف على فنيينا الخبراء',
+    ourTechniciansSubtitle: 'فنيونا ذوو مهارات عالية وجاهزون لمساعدتك.',
+    ourTechniciansDescription: 'تصفح فريقنا من المحترفين وعرض ملفاتهم الشخصية للعثور على الخبير المناسب لاحتياجاتك.',
     // Pagination
     page1: '١',
     page2: '٢',
@@ -1005,6 +1035,10 @@ const messages = {
     expertTeamSubtitle: 'فريق الخبراء',
     expertTeamDescription: 'لدينا طاقم تنظيف محترف يضمن أعلى مستويات النظافة والصحة لمساحتك.',
     loadingTeamMembers: 'جاري تحميل أعضاء الفريق...',
+    meetOurExpertTechnicians: 'تعرف على فنيينا الخبراء',
+    ourTechniciansSubtitle: 'فنيونا ذوو مهارات عالية وجاهزون لمساعدتك.',
+    ourTechniciansDescription: 'تصفح فريقنا من المحترفين وعرض ملفاتهم الشخصية للعثور على الخبير المناسب لاحتياجاتك.',
+    viewProfile: 'عرض الملف الشخصي',
     // AboutUs.vue
     aboutUsSectionTitle: 'أكثر من 25 عامًا من الخبرة في خدمات الصيانة',
     aboutUsSectionDesc: 'مع أكثر من 25 عامًا من الخبرة، نحن الخبراء الموثوقون لجميع متطلبات خدمات الصيانة الخاصة بك. ثق بمهارتنا واحترافيتنا للحصول على أفضل النتائج.',
@@ -1028,7 +1062,7 @@ const messages = {
     howStep3Title: 'تقدير التكلفة',
     howStep3Desc: 'احصل على تقدير واضح وتسعير شفاف قبل أن نبدأ.',
     howStep4Title: 'أعمال كاملة',
-    howStep4Desc: 'يقوم خبرائنا بإنجاز العمل بكفاءة واحترافية.',
+    howStep4Desc: 'يقوم خبراؤنا بإنجاز العمل بكفاءة واحترافية.',
     // ExpertTeam.vue members
     teamMember1Name: 'إريك رينولدز',
     teamMember1Desc: 'فني ماهر ذو سجل قوي في رضا العملاء. محترف وجاهز لخدمتك.',
@@ -1161,7 +1195,32 @@ const messages = {
     paymentMethod: 'طريقة الدفع',
     backToHome: 'العودة للرئيسية',
     whatHappensNext: 'ماذا يحدث بعد ذلك؟',
-  }
+    
+    // Admin Sidebar
+    myProfile: 'ملفي الشخصي',
+    users: 'المستخدمين',
+    technicians: 'الفنيين',
+    allTechnicians: 'جميع الفنيين',
+    pendingTechnicians: 'الفنيين المعلقين',
+    booking: 'الحجوزات',
+    upcoming: 'القادمة',
+    pending: 'معلق',
+    completed: 'مكتمل',
+    canceled: 'ملغي',
+    payment: 'الدفع',
+    overview: 'نظرة عامة',
+    settings: 'الإعدادات',
+    logout: 'تسجيل الخروج',
+    confirmLogout: 'هل أنت متأكد من أنك تريد تسجيل الخروج؟',
+    logoutSuccess: 'تم تسجيل الخروج بنجاح!',
+    // Admin Dashboard
+    dashboard: 'لوحة التحكم',
+    statistics: 'الإحصائيات',
+    analytics: 'التحليلات',
+    reports: 'التقارير',
+    settings: 'الإعدادات',
+    logout: 'تسجيل الخروج',
+  },
 };
 
 const i18n = createI18n({
