@@ -356,11 +356,13 @@ import { stockTechnicians } from '../assets/stockTechnicians.js';
         }
       } catch (error) {
         console.error('Error fetching technicians:', error);
-        // Handle Firebase permissions error gracefully
+        // Handle Firebase errors gracefully
         if (error.code === 'permission-denied') {
           console.log('Firebase permissions not configured, using stock data');
         } else if (error.code === 'unavailable') {
           console.log('Firebase service unavailable, using stock data');
+        } else if (error.code === 'not-found') {
+          console.log('Firebase collection not found, using stock data');
         } else {
           console.log('Firebase error occurred, using stock data');
         }
