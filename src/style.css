@@ -1,8 +1,11 @@
 @import "tailwindcss";
 
+html {
+  font-size: 80%; /* This will make everything 20% smaller */
+}
+
 body {
   box-sizing: border-box;
-  
 }
 
 :root {
@@ -12,41 +15,12 @@ body {
   --secondary: #7c6bb0;
   --sidebar: #ede7f6;
   --text-main: #333333;
-  --text-muted: #8C8E90;
+  --text-muted: #aaaaaa;
   --input-bg: #f8f9fa;
   --input-border: #e0e0e0;
   --success: #22c55e;
   --danger: #ef4444;
   --completed: #6b7280;
-  --primary-bg: #fff;
-  --primary-text: #222;
-}
-.dark {
-  body, .sidebar, .navbar , .topbar{
-  background: var(--primary-bg);
-  color: var(--primary-text);
-  
-
-}
-
-
---primary-color: #625397;   
---secondary-color: #ffd54f;
---primary: #7B6FA8;
---secondary: #FFCC51;
---sidebar: #232336;
---text-main: #f1f1f1;
---text-muted: #8b9297;
---input-bg: #232336;
---input-border: #44445a;
---success: #22c55e;
---danger: #ef4444;
---completed: #bdbdbd;
---primary-bg: #181824;
---primary-text: #F4F4F5;
---primary-text-dark: #000000;
---secondary-bg: #37373a;
---grey-bg: #87838D;
 }
 
 
@@ -59,7 +33,6 @@ body {
 
 .no-underline {
   text-decoration: none;
-  color: var(--primary-text);
 }
 
 

@@ -538,7 +538,18 @@ const messages = {
   loginRequired: 'Please log in to submit a review',
   thankYouForReview: 'Thank you for your review!',
   submitting: 'Submitting...',
-
+    
+    // Booking Confirmation
+    requestSubmitted: 'Your request has been submitted successfully',
+    reviewBookingNotify: 'We will review your booking and notify you via email.',
+    confirmationEmailInstructions: 'You will receive an email confirmation once the technician approves your request. In case of rejection, you\'ll be notified with further instructions.',
+    bookingSummary: 'Booking Summary',
+    technician: 'Technician',
+    dateAndTime: 'Date & Time',
+    technicianPhoneNumber: 'Technician Phone Number',
+    paymentMethod: 'Payment Method',
+    backToHome: 'Back To Home',
+    whatHappensNext: 'What Happens Next?',
     
     // Services Overview Section
     ourServices: 'Our Services',
@@ -1135,6 +1146,18 @@ const messages = {
   loginRequired: 'يرجى تسجيل الدخول لإرسال تقييم',
   thankYouForReview: 'شكراً لك على تقييمك!',
   submitting: 'جاري الإرسال...',
+    
+    // Booking Confirmation
+    requestSubmitted: 'تم إرسال طلبك بنجاح',
+    reviewBookingNotify: 'سنراجع حجزك ونخطرك عبر البريد الإلكتروني.',
+    confirmationEmailInstructions: 'ستتلقى تأكيداً عبر البريد الإلكتروني بمجرد موافقة الفني على طلبك. في حالة الرفض، سيتم إخطارك بتعليمات إضافية.',
+    bookingSummary: 'ملخص الحجز',
+    technician: 'الفني',
+    dateAndTime: 'التاريخ والوقت',
+    technicianPhoneNumber: 'رقم هاتف الفني',
+    paymentMethod: 'طريقة الدفع',
+    backToHome: 'العودة للرئيسية',
+    whatHappensNext: 'ماذا يحدث بعد ذلك؟',
   }
 };
 
