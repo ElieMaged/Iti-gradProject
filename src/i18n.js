@@ -295,16 +295,10 @@ const messages = {
     heroSectionBookBtn: "Book an Appointment",
     heroTitle: "Specialized Efficient Solutions",
     heroDescription:
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
       "Our expert technicians tackle every project with innovation and expertise. From simple repairs to complex installations, we’re the trusted partner you need.",
     heroDescription: "Our expert technicians tackle every project with innovation and expertise. From simple repairs to complex installations, we're the trusted partner you need.",
-=======
       "Our expert technicians tackle every project with innovation and expertise. From simple repairs to complex installations, we're the trusted partner you need.",
->>>>>>> Stashed changes
-=======
-      "Our expert technicians tackle every project with innovation and expertise. From simple repairs to complex installations, we're the trusted partner you need.",
->>>>>>> Stashed changes
+
     heroBookBtn: "Book an Appointment",
     heroShowServicesBtn: "Show all services",
     // --- Added for Service Views ---
@@ -534,7 +528,6 @@ const messages = {
     navCarpentry: "Carpentry",
     navElectricityTechnicians: "Electricity Technicians",
     // Service Titles
-<<<<<<< Updated upstream
     electricityTitle: 'Electricity',
     electricalTechniciansTitle: 'Electrical Technicians',
     wallFinishingTitle: 'Wall Finishing',
@@ -712,7 +705,6 @@ const messages = {
     reports: 'التقارير',
     settings: 'الإعدادات',
     logout: 'تسجيل الخروج',
-=======
     electricityTitle: "Electricity",
     electricalTechniciansTitle: "Electrical Technicians",
     wallFinishingTitle: "Wall Finishing",
@@ -769,10 +761,7 @@ const messages = {
     loginRequired: "Please log in to continue",
     retry: "Retry",
     submitting: "Submitting...",
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
+ changes
   },
   ar: {
     // Navbar
