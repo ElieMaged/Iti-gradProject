@@ -80,6 +80,7 @@ const messages = {
     // Admin Payment Management
     paymentManagement: "Payment Management",
     totalRevenue: "Total Revenue",
+    totalApprovedCredits: "Total Approved Credits",
     pendingTransactions: "Pending Transactions",
     approvedTransactions: "Approved Transactions",
     rejectedTransactions: "Rejected Transactions",
@@ -96,6 +97,27 @@ const messages = {
     declined: "Declined",
     awaitingApproval: "Awaiting Approval",
     allTime: "All Time",
+    paymentFailed: "Payment Failed",
+    transactionRecorded: "Transaction recorded for admin review",
+    creditsUpdated: "Credits updated successfully",
+    // PayPal Payout
+    paypalPayoutToTechnician: "PayPal Payout to Technician",
+    availableCredits: "Available Credits",
+    selectTechnician: "Select Technician",
+    chooseTechnician: "Choose a technician...",
+    payoutAmount: "Amount (EGP)",
+    enterAmountEGP: "Enter amount in EGP",
+    payoutReason: "Reason (Optional)",
+    payoutReasonPlaceholder: "e.g., Bonus, Commission, etc.",
+    paypalFee: "PayPal Fee",
+    totalDeduction: "Total Deduction",
+    remainingCredits: "Remaining Credits",
+    sendPaypalPayout: "Send PayPal Payout",
+    processing: "Processing...",
+    payoutInitiated: "Payout initiated successfully",
+    payoutFailed: "Failed to initiate payout",
+    amountExceedsCredits: "Amount exceeds available credits",
+    totalDeductionExceedsCredits: "Total deduction (including fees) exceeds available credits",
     // Footer
     footerQuickInfo:
       "BoltFix exists to simplify home maintenance for every household in Egypt by connecting users with skilled, verified technicians.",
@@ -561,6 +583,8 @@ const messages = {
     retry: "Retry",
     submitting: "Submitting...",
     positive: "positive",
+    paypalEmail: 'PayPal Email',
+    paypalEmailAr: 'بريد إلكتروني PayPal',
   },
   ar: {
     // Navbar
@@ -695,6 +719,7 @@ const messages = {
     // Admin Payment Management
     paymentManagement: "إدارة المدفوعات",
     totalRevenue: "إجمالي الإيرادات",
+    totalApprovedCredits: "المبلغ المعتمد",
     pendingTransactions: "المعاملات المعلقة",
     approvedTransactions: "المعاملات المعتمدة",
     rejectedTransactions: "المعاملات المرفوضة",
@@ -711,6 +736,27 @@ const messages = {
     declined: "مرفوض",
     awaitingApproval: "في انتظار الاعتماد",
     allTime: "طوال الوقت",
+    paymentFailed: "فشل الدفع",
+    transactionRecorded: "تم تسجيل المعاملة لمراجعة المدير",
+    creditsUpdated: "تم تحديث المبلغ المعتمد بنجاح",
+    // PayPal Payout
+    paypalPayoutToTechnician: "تحويل PayPal إلى الفني",
+    availableCredits: "الرصيد المتاح",
+    selectTechnician: "اختر الفني",
+    chooseTechnician: "اختر فني...",
+    payoutAmount: "المبلغ (جنيه مصري)",
+    enterAmountEGP: "أدخل المبلغ بالجنيه المصري",
+    payoutReason: "السبب (اختياري)",
+    payoutReasonPlaceholder: "مثال: مكافأة، عمولة، إلخ",
+    paypalFee: "رسوم PayPal",
+    totalDeduction: "إجمالي الخصم",
+    remainingCredits: "الرصيد المتبقي",
+    sendPaypalPayout: "إرسال تحويل PayPal",
+    processing: "جاري المعالجة...",
+    payoutInitiated: "تم بدء التحويل بنجاح",
+    payoutFailed: "فشل في بدء التحويل",
+    amountExceedsCredits: "المبلغ يتجاوز الرصيد المتاح",
+    totalDeductionExceedsCredits: "إجمالي الخصم (بما في ذلك الرسوم) يتجاوز الرصيد المتاح",
     // Footer
     footerQuickInfo:
       "توجد BoltFix لتبسيط صيانة المنازل لكل أسرة في مصر من خلال ربط المستخدمين بفنيين مهرة وموثوقين.",
@@ -1169,6 +1215,8 @@ const messages = {
     backToHome: "العودة للرئيسية",
     whatHappensNext: "ماذا يحدث بعد ذلك؟",
     positive: "إيجابي",
+    paypalEmail: 'PayPal Email',
+    paypalEmailAr: 'بريد إلكتروني PayPal',
   },
 };
 

@@ -132,7 +132,7 @@
 <script>
 import AdminSidebar from '../../components/admin-sidebar.vue';
 import Pagination from '../../components/pagination.vue';
-import { collection, getDocs, doc, deleteDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, updateDoc, deleteDoc, addDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 
 export default {
@@ -202,6 +202,74 @@ export default {
       }
     },
 
+    // Function to send application status notification to technician
+    async sendApplicationStatusNotification(application, status) {
+      try {
+        console.log('=== SENDING APPLICATION STATUS NOTIFICATION ===');
+        console.log('Application:', application);
+        console.log('Status:', status);
+        
+        const notificationData = {
+          type: 'application_status_update',
+          title: status === 'approved' ? 'Application Approved!' : 'Application Rejected',
+          message: status === 'approved' 
+            ? `Your technician application has been approved! You can now start accepting bookings.`
+            : `Your technician application has been rejected. You can contact support for more information.`,
+          technicianId: application.id,
+          technicianName: application.fullName,
+          technicianEmail: application.email,
+          specialization: application.specialization,
+          experience: application.experience,
+          status: status,
+          createdAt: new Date(),
+          read: false
+        };
+        
+        console.log('Notification data prepared:', notificationData);
+        
+        // Send notification to the technician
+        const technicianNotification = {
+          ...notificationData,
+          recipientId: application.id, // The technician's UID
+          recipientType: 'technician',
+          message: status === 'approved' 
+            ? `Congratulations! Your technician application for ${application.specialization} has been approved. You can now start accepting bookings and earning money.`
+            : `Unfortunately, your technician application for ${application.specialization} has been rejected. You can contact support at support@boltfix.com for more information.`
+        };
+        
+        console.log('Technician notification object:', technicianNotification);
+        
+        // Send notification to admin
+        const adminNotification = {
+          ...notificationData,
+          recipientId: 'admin',
+          recipientType: 'admin',
+          message: `Application ${status}: ${application.fullName} (${application.email}) for ${application.specialization} position.`
+        };
+        
+        console.log('Admin notification object:', adminNotification);
+        
+        // Add notifications to Firebase
+        console.log('Adding technician notification to Firebase...');
+        const technicianNotificationRef = await addDoc(collection(db, 'notifications'), technicianNotification);
+        console.log('Technician notification added with ID:', technicianNotificationRef.id);
+        
+        console.log('Adding admin notification to Firebase...');
+        const adminNotificationRef = await addDoc(collection(db, 'notifications'), adminNotification);
+        console.log('Admin notification added with ID:', adminNotificationRef.id);
+        
+        console.log('=== APPLICATION STATUS NOTIFICATIONS SENT SUCCESSFULLY ===');
+        return true;
+        
+      } catch (error) {
+        console.error('=== ERROR SENDING APPLICATION STATUS NOTIFICATION ===');
+        console.error('Error details:', error);
+        console.error('Error message:', error.message);
+        console.error('Error code:', error.code);
+        return false;
+      }
+    },
+
     async acceptApplication(application) {
       if (!confirm(`Are you sure you want to accept ${application.fullName} as a technician?`)) {
         return;
@@ -227,6 +295,9 @@ export default {
         
         // Remove from pending applications
         await deleteDoc(doc(db, 'pendingTechnicians', application.id));
+        
+        // Send notification to technician
+        await this.sendApplicationStatusNotification(application, 'approved');
         
         // Remove from local array
         const index = this.applications.findIndex(app => app.id === application.id);
@@ -258,6 +329,9 @@ export default {
         
         // Remove from pending applications
         await deleteDoc(doc(db, 'pendingTechnicians', application.id));
+        
+        // Send notification to technician
+        await this.sendApplicationStatusNotification(application, 'rejected');
         
         // Remove from local array
         const index = this.applications.findIndex(app => app.id === application.id);

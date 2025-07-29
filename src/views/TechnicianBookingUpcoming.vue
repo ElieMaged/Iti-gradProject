@@ -44,7 +44,9 @@
                 <thead>
                   <tr class="table-header">
                     <th>User Name</th>
+                    <th>User Email</th>
                     <th>Technician Name</th>
+                    <th>Technician Email</th>
                     <th>Specialization</th>
                     <th>Date</th>
                     <th>Time</th>
@@ -56,12 +58,14 @@
                 <tbody>
                   <tr v-for="booking in filteredBookings" :key="booking.id" class="table-row">
                     <td>{{ booking.userName }}</td>
+                    <td>{{ booking.userEmail || 'N/A' }}</td>
                     <td>{{ booking.technicianName }}</td>
-                    <td>{{ booking.specialization }}</td>
+                    <td>{{ booking.technicianEmail || 'N/A' }}</td>
+                    <td>{{ booking.specialization || 'N/A' }}</td>
                     <td>{{ booking.date }}</td>
                     <td>{{ booking.time }}</td>
-                    <td>{{ booking.address }}</td>
-                    <td>{{ booking.price }}</td>
+                    <td>{{ booking.address && booking.address.trim() ? booking.address : 'Address not provided' }}</td>
+                    <td>{{ booking.price || 'N/A' }}</td>
                     <td class="booking-status">{{ booking.status }}</td>
                   </tr>
                 </tbody>
@@ -79,7 +83,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { collection, getDocs, query, where, updateDoc, doc, writeBatch } from 'firebase/firestore';
+import { collection, getDocs, query, where, updateDoc, doc, writeBatch, getDoc } from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { db } from '../firebase';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
@@ -109,68 +113,66 @@ function handleSidebarNavigate(path) {
   router.push(path);
 }
 
-// Client-side function to check and move expired bookings
-async function checkExpiredBookingsClientSide() {
+// Function to check and update expired bookings
+async function checkAndUpdateExpiredBookings() {
   try {
+    console.log('=== CHECKING FOR EXPIRED BOOKINGS ===');
+    
+    // Get all upcoming bookings for this technician
+    const upcomingQuery = query(
+      collection(db, 'bookings'),
+      where('technicianId', '==', technicianUid.value),
+      where('status', '==', 'upcoming')
+    );
+    const upcomingSnapshot = await getDocs(upcomingQuery);
+    
+    console.log('Found upcoming bookings:', upcomingSnapshot.docs.length);
+    
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Set to start of day for comparison
-
+    
     const expiredBookings = [];
     
-    // Check each booking for expiration
-    bookings.value.forEach(booking => {
-      if (booking.date) {
-        let bookingDate;
-        
-        // Handle different date formats
-        if (typeof booking.date === 'string') {
-          bookingDate = new Date(booking.date);
-        } else if (booking.date.toDate) {
-          // Firestore timestamp
-          bookingDate = booking.date.toDate();
-        } else {
-          bookingDate = new Date(booking.date);
-        }
-        
-        // Set to start of day for comparison
-        bookingDate.setHours(0, 0, 0, 0);
-        
-        // If booking date is before today, mark as expired
-        if (bookingDate < today) {
-          expiredBookings.push(booking);
-        }
+    upcomingSnapshot.docs.forEach(doc => {
+      const booking = doc.data();
+      const bookingDate = new Date(booking.date);
+      bookingDate.setHours(0, 0, 0, 0);
+      
+      console.log('Checking booking date:', booking.date, 'vs today:', today.toDateString());
+      console.log('Booking date object:', bookingDate.toDateString());
+      
+      // If booking date is in the past, mark it as expired
+      if (bookingDate < today) {
+        expiredBookings.push({
+          id: doc.id,
+          ...booking
+        });
+        console.log('✅ Found expired booking:', booking.date, 'for booking ID:', doc.id);
       }
     });
-
-    if (expiredBookings.length > 0) {
-      // Use batch write to update all expired bookings
-      const batch = writeBatch(db);
-      
-      expiredBookings.forEach(booking => {
-        const bookingRef = doc(db, 'bookings', booking.id);
-        batch.update(bookingRef, { 
-          status: 'completed',
+    
+    console.log('Total expired bookings found:', expiredBookings.length);
+    
+    // Update expired bookings to completed status
+    for (const booking of expiredBookings) {
+      try {
+        console.log('Updating expired booking to completed:', booking.id);
+        await updateDoc(doc(db, 'bookings', booking.id), { 
+          status: 'complete',
           completedAt: new Date()
         });
-      });
-      
-      await batch.commit();
-      
-      return {
-        success: true,
-        movedCount: expiredBookings.length,
-        message: `Successfully moved ${expiredBookings.length} expired bookings to completed`
-      };
-    } else {
-      return {
-        success: true,
-        movedCount: 0,
-        message: 'No expired bookings found'
-      };
+        console.log('✅ Successfully updated booking to completed:', booking.id);
+      } catch (updateError) {
+        console.error('❌ Error updating expired booking:', booking.id, updateError);
+      }
     }
+    
+    console.log('=== EXPIRED BOOKINGS CHECK COMPLETE ===');
+    return expiredBookings.length;
+    
   } catch (error) {
-    console.error('Error moving expired bookings:', error);
-    throw error;
+    console.error('❌ Error checking expired bookings:', error);
+    return 0;
   }
 }
 
@@ -187,12 +189,16 @@ async function checkExpiredBookings() {
       lastCheckResult.value = result.data;
     } catch (functionsError) {
       console.log('Firebase Functions not available, using client-side solution');
-      result = await checkExpiredBookingsClientSide();
-      lastCheckResult.value = result;
+      result = await checkAndUpdateExpiredBookings(); // Changed to call the new function
+      lastCheckResult.value = {
+        success: true,
+        movedCount: result,
+        message: `Successfully moved ${result} expired bookings to completed`
+      };
     }
     
     // Refresh the bookings list after moving expired ones
-    if (result.success && result.movedCount > 0) {
+    if (result > 0) { // Changed to check result directly
       await fetchBookings();
     }
   } catch (err) {
@@ -214,13 +220,88 @@ async function fetchBookings() {
       error.value = 'Technician not authenticated.';
       return;
     }
+    
+    console.log('Fetching bookings for technician UID:', technicianUid.value);
+    
+    // First, check and update any expired bookings
+    const expiredCount = await checkAndUpdateExpiredBookings();
+    if (expiredCount > 0) {
+      console.log(`Updated ${expiredCount} expired bookings to completed status`);
+    }
+    
     const q = query(
       collection(db, 'bookings'),
       where('technicianId', '==', technicianUid.value),
       where('status', '==', 'upcoming')
     );
     const snapshot = await getDocs(q);
-    bookings.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    
+    // Fetch technician details for each booking
+    const bookingsWithTechDetails = await Promise.all(
+      snapshot.docs.map(async (doc) => {
+        const bookingData = { id: doc.id, ...doc.data() };
+                try {
+                  const technicianDoc = await getDoc(doc(db, 'technicians', bookingData.technicianId));
+                  if (technicianDoc.exists()) {
+                    const techData = technicianDoc.data();
+                    console.log('Technician data found:', techData);
+                    console.log('All technician fields:', Object.keys(techData));
+                    
+                    // Get the technician's login email (the email they used to register/login)
+                    const loginEmail = techData.email || techData.userEmail || techData.technicianEmail || techData.contactEmail;
+                    console.log('Technician login email:', loginEmail);
+                    
+                    // Debug price fields - look for costpervisit specifically
+                    console.log('CostPerVisit field value:', techData.costpervisit);
+                    console.log('BasePrice field value:', techData.basePrice);
+                    console.log('VisitPrice field value:', techData.visitPrice);
+                    console.log('Price field value:', techData.price);
+                    
+                    // Try to get price from costpervisit first, then fallback to other fields
+                    const price = techData.costpervisit || techData.basePrice || techData.visitPrice || techData.price;
+                    console.log('Selected price value:', price);
+                    
+                    bookingData.technicianEmail = loginEmail || 'N/A';
+            
+            // Try multiple specialization field names
+            const specialization = techData.specialization || 
+                                 techData.service || 
+                                 techData.services || 
+                                 techData.category || 
+                                 techData.type || 
+                                 techData.jobType || 
+                                 techData.workType || 
+                                 techData.profession || 
+                                 techData.trade || 
+                                 techData.skill || 
+                                 techData.skills || 
+                                 'N/A';
+            
+            bookingData.specialization = specialization;
+            // Use the technician's base price from their profile
+            bookingData.price = price || 'N/A';
+                    console.log('Technician details mapped:', {
+                      email: bookingData.technicianEmail,
+                      specialization: bookingData.specialization,
+                      price: bookingData.price,
+                      allFields: Object.keys(techData)
+                    });
+                  } else {
+                    bookingData.technicianEmail = 'N/A';
+                    bookingData.specialization = 'N/A';
+                    bookingData.price = 'N/A';
+                  }
+                } catch (error) {
+                  console.error('Error fetching technician details:', error);
+                  bookingData.technicianEmail = 'N/A';
+                  bookingData.specialization = 'N/A';
+                  bookingData.price = 'N/A';
+                }
+                return bookingData;
+              })
+            );
+    
+    bookings.value = bookingsWithTechDetails;
   } catch (e) {
     error.value = 'Failed to fetch bookings';
   } finally {

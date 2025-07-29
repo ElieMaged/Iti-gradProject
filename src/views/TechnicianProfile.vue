@@ -7,7 +7,7 @@
   </div>
   <div v-else-if="technician">
     <div class="profile-hero">
-      <h1 class="profile-title">{{ $t('technicianProfileTitle') }}</h1>
+      <h1 class="profile-title">Technician</h1>
     </div>
     <div class="profile-main">
       <div class="profile-card">
@@ -34,10 +34,6 @@
             </div>
             <div v-if="reviews.length === 0" class="no-rating">
               {{ $t('noReviewsYet') }}
-            </div>
-            <!-- Debug to see what's happening -->
-            <div style="font-size: 0.8rem; color: #666; margin-top: 0.5rem;">
-              Debug: Avg={{ averageRating }}, Reviews={{ reviews.length }}, Reviews: {{ reviews.map(r => r.rating).join(', ') }}
             </div>
           </div>
           <div class="profile-skills">
@@ -266,6 +262,48 @@
           </div>
         </div>
       </div>
+
+      <!-- Notifications Section -->
+      <div class="notifications-section">
+        <div class="section-header">
+          <h3 class="section-title">
+            <i class="fas fa-bell"></i>
+            Notifications
+          </h3>
+          <!-- Debug notification button -->
+        <button 
+          @click="debugNotifications" 
+          class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors mb-4"
+        >
+          🐛 Debug Notifications
+        </button>
+        </div>
+        
+        <div class="notifications-list">
+          <div v-if="notifications.length === 0" class="no-notifications">
+            No notifications yet
+          </div>
+          
+          <div 
+            v-for="notification in notifications" 
+            :key="notification.id"
+            class="notification-item"
+            :class="{ 'unread': !notification.read }"
+            @click="markNotificationAsRead(notification.id)"
+          >
+            <div class="notification-icon">
+              <i class="fas fa-calendar-plus" v-if="notification.type === 'booking_request'"></i>
+              <i class="fas fa-dollar-sign" v-else-if="notification.type === 'payment_received'"></i>
+              <i class="fas fa-info-circle" v-else></i>
+            </div>
+            <div class="notification-content">
+              <div class="notification-title">{{ notification.title }}</div>
+              <div class="notification-message">{{ notification.message }}</div>
+              <div class="notification-time">{{ formatNotificationTime(notification.createdAt) }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   <div v-else>
@@ -276,9 +314,10 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useI18n } from 'vue-i18n'
-import { doc, getDoc, collection, getDocs, query, where, addDoc, orderBy } from 'firebase/firestore'
+import { collection, query, where, getDocs, doc, getDoc, updateDoc, onSnapshot, orderBy, addDoc } from 'firebase/firestore'
 import { db, auth } from '../firebase'
+import { useI18n } from 'vue-i18n'
+import ReviewSection from '../components/ReviewSection.vue'
 import { stockTechnicians } from '../assets/stockTechnicians'
 
 const route = useRoute()
@@ -305,6 +344,11 @@ const newReview = ref({
 })
 
 const submittingReview = ref(false)
+
+// Notifications state
+const notifications = ref([])
+const notificationsLoading = ref(true)
+const notificationsError = ref(null)
 
 const filteredBookings = computed(() => {
   const q = searchQuery.value.toLowerCase();
@@ -377,7 +421,7 @@ onMounted(async () => {
       loading.value = false
     }
   }
-  await Promise.all([fetchBookings(), fetchReviews()])
+  await Promise.all([fetchBookings(), fetchReviews(), fetchNotifications()])
 })
 
 async function fetchBookings() {
@@ -442,79 +486,96 @@ async function fetchReviews() {
   }
 }
 
-async function submitReview() {
-  if (!auth.currentUser) {
-    alert(t('loginRequired'))
-    return
-  }
-
-  if (!isValidReview.value) {
-    if (newReview.value.rating === 0) {
-      alert(t('pleaseSelectRating'))
-    } else if (newReview.value.text.trim().length < 10) {
-      alert(t('reviewTooShort'))
-    }
-    return
-  }
-
+async function fetchNotifications() {
   try {
-    submittingReview.value = true
+    notificationsLoading.value = true
+    notificationsError.value = null
+    const userId = auth.currentUser?.uid
+    const technicianId = route.params.id
     
-    const reviewData = {
-      technicianId: route.params.id,
-      userId: auth.currentUser.uid,
-      userEmail: auth.currentUser.email,
-      userName: auth.currentUser.displayName || auth.currentUser.email,
-      rating: newReview.value.rating,
-      text: newReview.value.text.trim(),
-      createdAt: new Date(),
-      technicianName: technician.value?.name || technician.value?.fullName || 'Unknown'
+    console.log('=== FETCHING NOTIFICATIONS ===');
+    console.log('Current user UID:', userId);
+    console.log('Technician ID from route:', technicianId);
+    
+    if (!technicianId) {
+      console.log('No technician ID found, skipping notifications');
+      notificationsLoading.value = false
+      return
     }
 
-    await addDoc(collection(db, 'reviews'), reviewData)
+    // Check if current user is the technician viewing their own profile
+    const isOwnProfile = userId === technicianId;
+    console.log('Is viewing own profile:', isOwnProfile);
+
+    // Always query for notifications sent to the technician being viewed
+    // This allows anyone to see the technician's notifications (for transparency)
+    const recipientIds = [technicianId];
     
-    // Reset form
-    newReview.value = { rating: 0, text: '' }
-    showReviewForm.value = false
-    hoverRating.value = 0
+    // If the current user is logged in and is the technician, also include their user notifications
+    if (userId && userId !== technicianId) {
+      recipientIds.push(userId);
+    }
     
-    // Refresh reviews
-    await fetchReviews()
+    console.log('Querying for notifications with recipientIds:', recipientIds);
+
+    const q = query(
+      collection(db, 'notifications'),
+      where('recipientId', 'in', recipientIds),
+      orderBy('createdAt', 'desc')
+    )
     
-    alert(t('reviewSubmitted'))
-  } catch (error) {
-    console.error('Error submitting review:', error)
-    alert(t('reviewSubmissionFailed'))
-  } finally {
-    submittingReview.value = false
+    console.log('Notification query created for recipientIds:', recipientIds);
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      console.log('Notification snapshot received:', snapshot.docs.length, 'notifications');
+      const newNotifications = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+      console.log('Notifications data:', newNotifications);
+      notifications.value = newNotifications
+      notificationsLoading.value = false
+    }, (error) => {
+      console.error('Error fetching notifications:', error)
+      notificationsError.value = error.message
+      notificationsLoading.value = false
+    })
+    return () => unsubscribe()
+  } catch (e) {
+    console.error('Error fetching notifications:', e)
+    notificationsError.value = e.message
+    notificationsLoading.value = false
   }
 }
 
-function setRating(rating) {
-  console.log('Setting rating to:', rating);
-  newReview.value.rating = rating;
-  hoverRating.value = 0; // Reset hover state
-  console.log('New review state:', newReview.value);
-  console.log('Is valid review:', isValidReview.value);
+async function markNotificationAsRead(notificationId) {
+  const notificationRef = doc(db, 'notifications', notificationId)
+  try {
+    await updateDoc(notificationRef, { read: true })
+    const index = notifications.value.findIndex(n => n.id === notificationId)
+    if (index !== -1) {
+      notifications.value[index].read = true
+    }
+  } catch (e) {
+    console.error('Error marking notification as read:', e)
+  }
 }
 
-function testReactive() {
-  console.log('Testing reactive system...');
-  newReview.value.rating = Math.floor(Math.random() * 5) + 1;
-  alert(`Rating set to: ${newReview.value.rating}`);
-  console.log('New review state:', newReview.value);
-}
-
-function cancelReview() {
-  newReview.value = { rating: 0, text: '' }
-  showReviewForm.value = false
-  hoverRating.value = 0
+function markAllNotificationsAsRead() {
+  notifications.value.forEach(notification => {
+    if (!notification.read) {
+      markNotificationAsRead(notification.id)
+    }
+  })
 }
 
 function formatDate(date) {
   if (!date) return ''
   const d = date.toDate ? date.toDate() : new Date(date)
   return d.toLocaleDateString()
+}
+
+function formatNotificationTime(timestamp) {
+  if (!timestamp) return ''
+  const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp)
+  return date.toLocaleTimeString()
 }
 
 function bookNow() {
@@ -546,6 +607,64 @@ function getSpecializationTranslation(specialization) {
   }
   
   return specializationMap[specialization] || specialization
+}
+
+// Debug notifications function for development
+async function debugNotifications() {
+  try {
+    console.log('=== DEBUGGING NOTIFICATIONS ===');
+    const currentUserId = auth.currentUser?.uid;
+    const technicianId = route.params.id;
+
+    console.log('Current user UID:', currentUserId);
+    console.log('Technician ID:', technicianId);
+
+    // Check existing notifications for this technician
+    console.log('Checking existing notifications...');
+    const notificationsQuery = query(
+      collection(db, 'notifications'),
+      where('recipientId', '==', technicianId)
+    );
+    
+    const snapshot = await getDocs(notificationsQuery);
+    console.log('Found notifications for technician:', snapshot.docs.length);
+    
+    snapshot.docs.forEach((doc, index) => {
+      const data = doc.data();
+      console.log(`Notification ${index + 1}:`, {
+        id: doc.id,
+        type: data.type,
+        title: data.title,
+        message: data.message,
+        recipientId: data.recipientId,
+        createdAt: data.createdAt
+      });
+    });
+
+    // Create a persistent test notification for debugging
+    const testNotification = {
+      title: 'Technician Profile Debug Notification',
+      message: `Debug notification from technician profile for ${technicianId}`,
+      type: 'debug',
+      recipientId: technicianId,
+      recipientType: 'technician',
+      createdAt: new Date(),
+      read: false,
+      debugInfo: {
+        technicianId: technicianId,
+        currentUserId: currentUserId,
+        timestamp: new Date().toISOString()
+      }
+    };
+
+    const result = await addDoc(collection(db, 'notifications'), testNotification);
+    console.log('Debug notification created with ID:', result.id);
+    alert(`Debug notification created!\nFound ${snapshot.docs.length} existing notifications.\nCheck the console for details.`);
+
+  } catch (error) {
+    console.error('Error creating debug notification:', error);
+    alert('Error creating debug notification: ' + error.message);
+  }
 }
 </script>
 
@@ -1286,6 +1405,140 @@ function getSpecializationTranslation(specialization) {
 
 .cancel-btn:hover {
   background: #5a6268;
+}
+
+/* Notifications Section */
+.notifications-section {
+  background: #fff;
+  border-radius: 0.75rem;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #7c6bb0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section-title i {
+  color: #7c6bb0;
+  font-size: 1.2rem;
+}
+
+.notification-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.test-notification-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.test-notification-btn:hover {
+  background: #0056b3;
+}
+
+.mark-all-read-btn {
+  background: #7c6bb0;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.mark-all-read-btn:hover {
+  background: #6b5fa7;
+}
+
+.notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.notification-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.notification-item:hover {
+  background: #e9ecef;
+  border-color: #dee2e6;
+}
+
+.notification-item.unread {
+  background: #fdfdff;
+  border-color: #7c6bb0;
+  box-shadow: 0 2px 8px rgba(124, 107, 176, 0.1);
+}
+
+.notification-item.unread:hover {
+  background: #f0f0ff;
+  border-color: #6b5fa7;
+}
+
+.notification-icon {
+  font-size: 1.5rem;
+  color: #7c6bb0;
+}
+
+.notification-content {
+  flex: 1;
+}
+
+.notification-title {
+  font-weight: 600;
+  color: #374151;
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.notification-message {
+  font-size: 0.875rem;
+  color: #6b7280;
+  line-height: 1.4;
+  margin-bottom: 0.25rem;
+}
+
+.notification-time {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.no-notifications {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+  font-style: italic;
 }
 
 @media (max-width: 768px) {

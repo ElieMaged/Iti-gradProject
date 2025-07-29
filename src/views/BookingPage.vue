@@ -3,6 +3,38 @@
     <!-- Header -->
     <div class="header">
       <h1 class="page-title">{{ $t('completeYourBooking') }}</h1>
+      <!-- Test button for debugging notifications -->
+      <button 
+        @click="testNotification" 
+        class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors"
+        style="position: absolute; top: 20px; right: 20px;"
+      >
+        Test Notification
+      </button>
+      <!-- Manual notification test button -->
+      <button 
+        @click="createManualNotification" 
+        class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+        style="position: absolute; top: 20px; right: 200px;"
+      >
+        Manual Notification
+      </button>
+      <!-- Simple test notification button -->
+      <button 
+        @click="createSimpleTestNotification" 
+        class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
+        style="position: absolute; top: 20px; right: 380px;"
+      >
+        Simple Test
+      </button>
+      <!-- Check all notifications button -->
+      <button 
+        @click="checkAllNotifications" 
+        class="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition-colors"
+        style="position: absolute; top: 20px; right: 500px;"
+      >
+        Check All
+      </button>
     </div>
 
     <!-- Main Booking Card -->
@@ -103,6 +135,12 @@
               <input v-model="form.phone" :placeholder="$t('enterPhoneNumber')" class="form-input" required />
             </div>
           </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>{{ $t('emailAddress') }}</label>
+              <input v-model="form.email" type="email" :placeholder="$t('enterEmailAddress')" class="form-input" required />
+            </div>
+          </div>
           <div class="form-group full-width">
             <label>{{ $t('note') }}</label>
             <textarea v-model="form.note" :placeholder="$t('enterNote')" class="form-input textarea"></textarea>
@@ -145,17 +183,17 @@
           <h3 class="section-title">{{ $t('choosePaymentMethod') }}</h3>
           <div class="payment-methods">
             <label class="payment-option">
-              <input type="radio" value="Paypal" v-model="form.payment" @change="handlePaymentMethodChange" />
+              <input type="radio" value="PayPal" v-model="form.payment" @change="handlePaymentMethodChange" />
               <span class="payment-text">{{ $t('paypal') }}</span>
               <img src="https://www.paypalobjects.com/webstatic/icon/pp258.png" alt="PayPal" class="paypal-logo" />
             </label>
             <label class="payment-option">
-              <input type="radio" value="Cash" v-model="form.payment" @change="handlePaymentMethodChange" />
+              <input type="radio" value="Cash on Visit" v-model="form.payment" @change="handlePaymentMethodChange" />
               <span class="payment-text">{{ $t('cashOnVisit') }}</span>
             </label>
           </div>
           
-          <div v-if="form.payment === 'Paypal' && (technician.basePrice || technician.visitPrice)" class="payment-summary">
+          <div v-if="form.payment === 'PayPal' && (technician.basePrice || technician.visitPrice)" class="payment-summary">
             <div class="payment-amount">
               <span>{{ $t('totalAmount') }}:</span>
               <span class="amount">{{ technician.visitPrice || technician.basePrice }} {{ $t('egp') }}</span>
@@ -169,7 +207,7 @@
         </div>
         
         <!-- PayPal Button Container -->
-        <div v-show="form.payment === 'Paypal'" class="paypal-container">
+        <div v-show="form.payment === 'PayPal'" class="paypal-container">
           <div v-if="!paypalLoaded" class="paypal-loading">
             Loading payment system...
           </div>
@@ -177,8 +215,18 @@
         </div>
         
         <!-- Confirm Booking Button -->
-        <button v-if="form.payment === 'Cash'" class="confirm-btn" type="submit">
+        <button v-if="form.payment === 'Cash on Visit'" class="confirm-btn" type="submit">
           {{ $t('confirmBooking') }}
+        </button>
+        
+        <!-- Debug Test Button -->
+        <button 
+          type="button" 
+          @click="testBookingData" 
+          class="debug-btn"
+          style="background: #ff6b6b; color: white; padding: 10px 20px; border: none; border-radius: 8px; margin-top: 20px; cursor: pointer;"
+        >
+          🐛 Test Booking Data
         </button>
       </form>
     </div>
@@ -186,15 +234,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { collection, doc, getDoc, addDoc, serverTimestamp, query, getDocs, where, orderBy, limit } from 'firebase/firestore'
+import { db } from '../firebase'
+import { useI18n } from 'vue-i18n'
 import { stockTechnicians } from '../assets/stockTechnicians'
-import { getFunctions, httpsCallable } from 'firebase/functions';
-import { auth } from '../firebase';
 import emailjs from 'emailjs-com';
-import { db } from '../firebase';
-import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
-import { useI18n } from 'vue-i18n';
+import { auth } from '../firebase';
 
 const { t } = useI18n();
 const route = useRoute()
@@ -228,8 +275,8 @@ const availableDates = computed(() => {
     if (technicianAvailability.value && 
         technicianAvailability.value[dayName] && 
         technicianAvailability.value[dayName].available) {
-      days.push(`${month}/${date}/${year} ${dayOfWeek}`);
-    }
+    days.push(`${month}/${date}/${year} ${dayOfWeek}`);
+  }
   }
   
   return days;
@@ -268,8 +315,37 @@ const form = ref({
   area: 'Giza',
   street: '',
   building: '',
-  payment: 'Paypal'
+  payment: 'PayPal'
 })
+
+// Function to pre-populate form with user data
+function populateFormWithUserData() {
+  console.log('=== POPULATING FORM WITH USER DATA ===');
+  console.log('Current user:', auth.currentUser);
+  
+  if (auth.currentUser) {
+    console.log('User is logged in, pre-populating form...');
+    console.log('User email:', auth.currentUser.email);
+    console.log('User display name:', auth.currentUser.displayName);
+    
+    // Pre-populate email if user is logged in
+    if (auth.currentUser.email) {
+      form.value.email = auth.currentUser.email;
+      console.log('Email field populated with:', form.value.email);
+    }
+    
+    // Pre-populate name if available
+    if (auth.currentUser.displayName) {
+      form.value.fullName = auth.currentUser.displayName;
+      console.log('Name field populated with:', form.value.fullName);
+    }
+  } else {
+    console.log('No user logged in, form will be empty');
+  }
+  
+  console.log('Final form data:', form.value);
+  console.log('=== END FORM POPULATION ===');
+}
 
 // Function to get day name from date string
 function getDayName(dateString) {
@@ -386,7 +462,7 @@ watch(() => technician.value.uid, async (newUid) => {
 
 // Watch for available times changes to reinitialize PayPal
 watch(() => availableTimes.value, () => {
-  if (form.value.payment === 'Paypal' && paypalLoaded.value) {
+  if (form.value.payment === 'PayPal' && paypalLoaded.value) {
     setTimeout(() => {
       initializePayPalButton();
     }, 100);
@@ -489,11 +565,12 @@ onMounted(async () => {
   
   // Load PayPal script
   loadPayPalScript();
+  populateFormWithUserData(); // Call the new function here
 })
 
 // Watch for technician data changes to initialize PayPal when data is available
 watch(() => technician.value, (newTechnician) => {
-  if (newTechnician && (newTechnician.visitPrice || newTechnician.basePrice) && form.value.payment === 'Paypal') {
+  if (newTechnician && (newTechnician.visitPrice || newTechnician.basePrice) && form.value.payment === 'PayPal') {
     console.log('Technician data loaded, initializing PayPal...');
     setTimeout(() => {
       if (paypalLoaded.value) {
@@ -505,7 +582,7 @@ watch(() => technician.value, (newTechnician) => {
 
 // Watch for payment method changes
 watch(() => form.value.payment, (newPayment) => {
-  if (newPayment === 'Paypal') {
+  if (newPayment === 'PayPal') {
     // Initialize PayPal button after a short delay to ensure script is loaded
     setTimeout(() => {
       if (paypalLoaded.value) {
@@ -518,8 +595,7 @@ watch(() => form.value.payment, (newPayment) => {
 function loadPayPalScript() {
   if (window.paypal) {
     paypalLoaded.value = true;
-    if (form.value.payment === 'Paypal') {
-      // Add a small delay to ensure DOM is ready
+    if (form.value.payment === 'PayPal') {
       setTimeout(() => {
         initializePayPalButton();
       }, 100);
@@ -527,12 +603,19 @@ function loadPayPalScript() {
     return;
   }
 
+  const clientId = import.meta.env.VITE_PAYPAL_CLIENT_ID;
+  
+  // Use a test client ID if none is configured
+  const finalClientId = clientId && clientId !== 'YOUR_SANDBOX_CLIENT_ID' 
+    ? clientId 
+    : 'test'; // This will show the button for testing
+
   const script = document.createElement('script');
-  script.src = 'https://www.paypal.com/sdk/js?client-id=test&currency=USD&intent=capture';
+  script.src = `https://www.paypal.com/sdk/js?client-id=${finalClientId}&currency=USD&intent=capture`;
   script.async = true;
   script.onload = () => {
     paypalLoaded.value = true;
-    if (form.value.payment === 'Paypal') {
+    if (form.value.payment === 'PayPal') {
       // Add a small delay to ensure DOM is ready
       setTimeout(() => {
         initializePayPalButton();
@@ -618,18 +701,106 @@ function initializePayPalButton() {
             }]
           });
         },
-        onApprove: function(data, actions) {
-          return actions.order.capture().then(function(details) {
-            // Payment successful
-            console.log('Payment completed:', details);
+        onApprove: async (data, actions) => {
+          try {
+            console.log('PayPal payment approved, capturing order...');
             
-            // Create booking with payment details
-            createBookingWithPayment(details);
-          });
+            const order = await actions.order.capture();
+            console.log('Payment captured successfully:', order);
+            
+            // Extract payment details
+            const paymentAmount = parseFloat(order.purchase_units[0].amount.value);
+            const paypalOrderId = order.id;
+            
+            // Split the payment between accounts
+            const splitSuccess = await splitPaymentToAccounts(paypalOrderId, paymentAmount, technician.value.uid);
+            
+            if (splitSuccess) {
+              console.log('Payment split successfully between accounts');
+            } else {
+              console.warn('Payment split failed, but payment was successful');
+            }
+            
+            // Continue with existing booking logic
+            const bookingData = {
+              technicianId: technician.value.uid || technician.value.id,
+              technicianName: technician.value.name,
+              userId: auth.currentUser?.uid, // Add current user's UID
+              userName: form.value.fullName,
+              userEmail: form.value.email,
+              userPhone: form.value.phone,
+              date: form.value.date,
+              time: form.value.time,
+              address: constructAddress(form.value),
+              price: technician.value.visitPrice || technician.value.basePrice || 'N/A',
+              note: form.value.note || '',
+              payment: form.value.payment,
+              paymentDetails: {
+                paypalOrderId: paypalOrderId,
+                paypalPayerId: order.payer.payer_id,
+                amount: paymentAmount,
+                currency: order.purchase_units[0].amount.currency_code,
+                status: order.status,
+                captureId: order.purchase_units[0].payments.captures[0]?.id,
+                paymentMethod: 'PayPal'
+              },
+              status: 'pending',
+              createdAt: serverTimestamp(),
+              paymentSplit: splitSuccess
+            };
+            
+            console.log('Creating PayPal booking with data:', bookingData);
+            console.log('Complete form data:', form.value);
+            console.log('User email being saved:', bookingData.userEmail);
+            console.log('Form email value:', form.value.email);
+            console.log('Technician ID being saved:', bookingData.technicianId);
+            console.log('Technician UID:', technician.value.uid);
+            console.log('Technician ID:', technician.value.id);
+            console.log('Technician name:', technician.value.name);
+            console.log('Address being saved:', bookingData.address);
+            console.log('Address type:', typeof bookingData.address);
+            console.log('Address length:', bookingData.address ? bookingData.address.length : 'undefined');
+            
+            // Save booking to Firestore
+            const bookingRef = await addDoc(collection(db, 'bookings'), bookingData);
+            console.log('PayPal booking saved with ID:', bookingRef.id);
+            
+            // Update booking data with the Firestore ID
+            bookingData.id = bookingRef.id;
+            
+            // Send payment notifications
+            console.log('Sending payment notifications...');
+            await sendPaymentNotifications(
+              bookingData.paymentDetails,
+              technician.value.uid || technician.value.id,
+              technician.value.name
+            );
+
+            // Send booking request notifications to technician
+            console.log('Sending booking request notifications...');
+            await sendBookingRequestNotification(bookingData);
+            
+            // Send booking request email to technician
+            console.log('Sending booking request email...');
+            await sendBookingRequestEmail(bookingData);
+            
+            // Store booking data and redirect
+            localStorage.setItem('bookingData', JSON.stringify(bookingData));
+            console.log('PayPal booking completed successfully');
+            router.push('/bookingconfirmation');
+            
+          } catch (err) {
+            console.error('Error capturing PayPal payment:', err);
+            recordFailedTransaction(err);
+            alert('Payment failed. Please try again.');
+          }
         },
         onError: function(err) {
           console.error('PayPal error:', err);
           errorMsg.value = t('paypalPaymentFailed');
+          
+          // Record failed transaction for admin review
+          recordFailedTransaction(err);
         }
       }).render('#paypal-button-container');
       
@@ -642,7 +813,7 @@ function initializePayPalButton() {
 }
 
 function handlePaymentMethodChange() {
-  if (form.value.payment === 'Paypal') {
+  if (form.value.payment === 'PayPal') {
     // Add a longer delay to ensure DOM is fully updated
     setTimeout(() => {
       if (paypalLoaded.value) {
@@ -653,107 +824,71 @@ function handlePaymentMethodChange() {
 }
 
 async function createBookingWithPayment(paymentDetails) {
-  // Validate that a date is selected
-  if (!form.value.date || availableDates.value.length === 0) {
-    errorMsg.value = 'Please select an available date for booking.';
-    return;
-  }
-
-  // Validate that a time is selected
-  if (!form.value.time || availableTimes.value.length === 0) {
-    errorMsg.value = 'Please select an available time slot for booking.';
-    return;
-  }
-
+  try {
+    loading.value = true;
+    
+    // Create booking data
   const bookingData = {
     technicianId: technician.value.uid || technician.value.id,
     technicianName: technician.value.name,
+    userId: auth.currentUser?.uid, // Add current user's UID
     userName: form.value.fullName,
     userEmail: form.value.email,
     userPhone: form.value.phone,
     date: form.value.date,
     time: form.value.time,
+    address: constructAddress(form.value),
+    price: technician.value.visitPrice || technician.value.basePrice || 'N/A',
+    note: form.value.note || '',
     payment: form.value.payment,
     paymentDetails: {
-      paypalOrderId: paymentDetails.id,
-      paypalPayerId: paymentDetails.payer.payer_id,
-      amount: paymentDetails.purchase_units[0].amount.value,
-      currency: paymentDetails.purchase_units[0].amount.currency_code,
-      status: paymentDetails.status,
-      captureId: paymentDetails.purchase_units[0].payments.captures[0]?.id
+        ...paymentDetails,
+        paymentMethod: form.value.payment
     },
     status: 'pending',
     createdAt: serverTimestamp()
   };
 
-  try {
+    console.log('Creating booking with payment details:', bookingData);
+    console.log('Complete form data:', form.value);
+    console.log('User email being saved:', bookingData.userEmail);
+    console.log('Form email value:', form.value.email);
+    console.log('Technician ID being saved:', bookingData.technicianId);
+    console.log('Technician UID:', technician.value.uid);
+    console.log('Technician ID:', technician.value.id);
+    console.log('Technician name:', technician.value.name);
+    console.log('Address being saved:', bookingData.address);
+    console.log('Address type:', typeof bookingData.address);
+    console.log('Address length:', bookingData.address ? bookingData.address.length : 'undefined');
+
     // Save booking to Firestore
     const bookingRef = await addDoc(collection(db, 'bookings'), bookingData);
+    console.log('Booking saved with ID:', bookingRef.id);
     
-    // Create payment transaction record for admin wallet
-    const paymentTransaction = {
-      bookingId: bookingRef.id,
-      technicianId: technician.value.uid || technician.value.id,
-      technicianName: technician.value.name,
-      userEmail: form.value.email,
-      userName: form.value.fullName,
-      amount: parseFloat(paymentDetails.purchase_units[0].amount.value),
-      currency: paymentDetails.purchase_units[0].amount.currency_code,
-      originalAmountEGP: parseFloat((technician.value.visitPrice || technician.value.basePrice).replace(/[^\d.]/g, '')),
-      exchangeRate: 31, // EGP to USD rate used
-      paypalOrderId: paymentDetails.id,
-      paypalPayerId: paymentDetails.payer.payer_id,
-      status: 'pending', // pending, approved, rejected
-      adminAction: null, // approved, rejected
-      adminActionDate: null,
-      adminActionBy: null,
-      createdAt: serverTimestamp(),
-      paymentDate: serverTimestamp(),
-      paymentMethod: 'PayPal',
-      creditsEarned: parseFloat((technician.value.visitPrice || technician.value.basePrice).replace(/[^\d.]/g, '')) // Credits in EGP
-    };
-    
-    await addDoc(collection(db, 'paymentTransactions'), paymentTransaction);
-    
-    // Create credit record for admin wallet
-    const creditRecord = {
-      bookingId: bookingRef.id,
-      transactionId: bookingRef.id, // Corrected to use bookingRef.id
-      amount: parseFloat((technician.value.visitPrice || technician.value.basePrice).replace(/[^\d.]/g, '')),
-      currency: 'EGP',
-      credits: parseFloat((technician.value.visitPrice || technician.value.basePrice).replace(/[^\d.]/g, '')),
-      status: 'pending',
-      paymentMethod: 'PayPal',
-      paypalOrderId: paymentDetails.id,
-      technicianName: technician.value.name,
-      userEmail: form.value.email,
-      userName: form.value.fullName,
-      createdAt: serverTimestamp(),
-      approvedAt: null,
-      approvedBy: null
-    };
-    
-    await addDoc(collection(db, 'adminCredits'), creditRecord);
-    
-    // Send confirmation email
-    if (form.value.email) {
-      sendConfirmationEmail(form.value.email, technician.value.name, form.value.date, form.value.time, form.value.payment);
+    // Update booking data with the Firestore ID
+    bookingData.id = bookingRef.id;
+
+    // Send payment notifications for cash payments
+    if (form.value.payment === 'Cash on Visit') {
+      await sendPaymentNotifications(
+        bookingData.paymentDetails,
+        technician.value.uid || technician.value.id,
+        technician.value.name
+      );
     }
     
-    // Store booking data for confirmation page
-    const confirmationData = {
-      technicianName: technician.value.name,
-      date: form.value.date,
-      time: form.value.time,
-      payment: form.value.payment
-    };
-    localStorage.setItem('bookingData', JSON.stringify(confirmationData));
+    // Send booking request notifications
+    await sendBookingRequestNotification(bookingData);
     
+    // Store booking data and redirect
+    localStorage.setItem('bookingData', JSON.stringify(bookingData));
     router.push('/bookingconfirmation');
     
   } catch (error) {
     console.error('Error creating booking:', error);
-    errorMsg.value = t('bookingCreationFailed');
+    errorMsg.value = t('bookingError');
+  } finally {
+    loading.value = false;
   }
 }
 
@@ -779,8 +914,8 @@ function sendConfirmationEmail(userEmail, technicianName, date, time, payment) {
 }
 
 async function confirmBooking() {
-  // This function is now only for cash payments
-  if (form.value.payment !== 'Cash') {
+  // This function is for cash payments
+  if (form.value.payment !== 'Cash on Visit') {
     return;
   }
 
@@ -799,23 +934,52 @@ async function confirmBooking() {
   const bookingData = {
     technicianId: technician.value.uid || technician.value.id,
     technicianName: technician.value.name,
+    userId: auth.currentUser?.uid, // Add current user's UID
     userName: form.value.fullName,
     userEmail: form.value.email,
     userPhone: form.value.phone,
     date: form.value.date,
     time: form.value.time,
+    address: constructAddress(form.value),
+    price: technician.value.visitPrice || technician.value.basePrice || 'N/A',
+    note: form.value.note || '',
     payment: form.value.payment,
     status: 'pending',
     createdAt: serverTimestamp()
   };
 
   try {
-    await addDoc(collection(db, 'bookings'), bookingData);
+    console.log('Creating cash booking with data:', bookingData);
+    console.log('Complete form data:', form.value);
+    console.log('User email being saved:', bookingData.userEmail);
+    console.log('Form email value:', form.value.email);
+    console.log('Technician ID being saved:', bookingData.technicianId);
+    console.log('Technician UID:', technician.value.uid);
+    console.log('Technician ID:', technician.value.id);
+    console.log('Technician name:', technician.value.name);
+    console.log('Address being saved:', bookingData.address);
+    console.log('Address type:', typeof bookingData.address);
+    console.log('Address length:', bookingData.address ? bookingData.address.length : 'undefined');
     
-    // Send confirmation email
+    // Save booking to Firestore
+    const bookingRef = await addDoc(collection(db, 'bookings'), bookingData);
+    console.log('Cash booking saved with ID:', bookingRef.id);
+    
+    // Update booking data with the Firestore ID
+    bookingData.id = bookingRef.id;
+    
+    // Send confirmation email to customer
     if (form.value.email) {
       sendConfirmationEmail(form.value.email, technician.value.name, form.value.date, form.value.time, form.value.payment);
     }
+    
+    // Send booking request notifications to technician and admin
+    console.log('Sending booking request notifications...');
+    await sendBookingRequestNotification(bookingData);
+    
+    // Send booking request email to technician
+    console.log('Sending booking request email...');
+    await sendBookingRequestEmail(bookingData);
     
     // Store booking data for confirmation page
     const confirmationData = {
@@ -826,11 +990,592 @@ async function confirmBooking() {
     };
     localStorage.setItem('bookingData', JSON.stringify(confirmationData));
     
+    console.log('Cash booking completed successfully');
     router.push('/bookingconfirmation');
   } catch (e) {
     console.error('Booking Firestore error:', e);
     errorMsg.value = t('bookingCreationFailed');
   }
+}
+
+function recordFailedTransaction(error) {
+  console.error('PayPal transaction failed:', error);
+  const errorMessage = error.message || JSON.stringify(error);
+  const errorDetails = {
+    errorMessage: errorMessage,
+    errorCode: error.code,
+    errorDetails: error.details,
+    timestamp: serverTimestamp()
+  };
+
+  addDoc(collection(db, 'failedPayPalTransactions'), errorDetails)
+    .then(() => {
+      console.log('Failed PayPal transaction recorded successfully.');
+    })
+    .catch(err => {
+      console.error('Error recording failed PayPal transaction:', err);
+    });
+}
+
+// After successful PayPal payment, split the amount
+async function splitPaymentToAccounts(paypalOrderId, totalAmountUSD, technicianId) {
+  try {
+    console.log('Splitting payment:', totalAmountUSD, 'USD between accounts');
+    
+    // Get technician's PayPal email from their profile
+    let technicianPayPalEmail = '';
+    try {
+      const technicianDoc = await getDoc(doc(db, 'technicians', technicianId));
+      if (technicianDoc.exists()) {
+        const technicianData = technicianDoc.data();
+        technicianPayPalEmail = technicianData.paypalEmail || technicianData.email || '';
+        console.log('Technician PayPal email:', technicianPayPalEmail);
+      }
+    } catch (error) {
+      console.error('Error fetching technician PayPal email:', error);
+    }
+    
+    if (!technicianPayPalEmail) {
+      console.error('No technician PayPal email found');
+      return false;
+    }
+    
+    // Calculate split amounts (25% platform fee, 75% technician)
+    const platformFeeUSD = totalAmountUSD * 0.25; // 25% to platform
+    const technicianAmountUSD = totalAmountUSD * 0.75; // 75% to technician
+    
+    console.log('Platform fee (25%):', platformFeeUSD, 'USD');
+    console.log('Technician payment (75%):', technicianAmountUSD, 'USD');
+    
+    // Store split information directly in Firebase (client-side)
+    const splitRecord = {
+      paypalOrderId: paypalOrderId,
+      totalAmountUSD: totalAmountUSD,
+      platformFeeUSD: platformFeeUSD,
+      technicianAmountUSD: technicianAmountUSD,
+      platformAccount: "elie1400674@gmail.com", // Your platform account
+      technicianAccount: technicianPayPalEmail, // Technician's PayPal account
+      splitPercentage: {
+        platform: 25,
+        technician: 75
+      },
+      status: 'pending',
+      createdAt: serverTimestamp(),
+      transactionType: 'payment_split'
+    };
+    
+    // Add to paymentSplits collection
+    await addDoc(collection(db, 'paymentSplits'), splitRecord);
+    
+    console.log('Payment split recorded successfully:', splitRecord);
+    return true;
+    
+  } catch (error) {
+    console.error('Error splitting payment:', error);
+    return false;
+  }
+}
+
+// Send payment notifications to technician and admin
+async function sendPaymentNotifications(paymentDetails, technicianId, technicianName) {
+  try {
+    console.log('Sending payment notifications...');
+    
+    const notificationData = {
+      type: 'payment_received',
+      title: 'Payment Received',
+      message: `Payment of ${paymentDetails.amount} ${paymentDetails.currency} received for booking`,
+      paymentMethod: paymentDetails.paymentMethod,
+      amount: paymentDetails.amount,
+      currency: paymentDetails.currency,
+      paypalOrderId: paymentDetails.paypalOrderId,
+      technicianId: technicianId,
+      technicianName: technicianName,
+      customerName: form.value.fullName,
+      customerEmail: form.value.email,
+      createdAt: serverTimestamp(),
+      read: false
+    };
+    
+    // Send notification to technician
+    const technicianNotification = {
+      ...notificationData,
+      recipientId: technicianId,
+      recipientType: 'technician',
+      message: `You have received a payment of ${paymentDetails.amount} ${paymentDetails.currency} from ${form.value.fullName} for a booking. Payment method: ${paymentDetails.paymentMethod}`
+    };
+    
+    // Send notification to admin
+    const adminNotification = {
+      ...notificationData,
+      recipientId: 'admin',
+      recipientType: 'admin',
+      message: `Payment received: ${paymentDetails.amount} ${paymentDetails.currency} from ${form.value.fullName} to ${technicianName}. Payment method: ${paymentDetails.paymentMethod}`
+    };
+    
+    // Add notifications to Firebase
+    await addDoc(collection(db, 'notifications'), technicianNotification);
+    await addDoc(collection(db, 'notifications'), adminNotification);
+    
+    console.log('Payment notifications sent successfully');
+    return true;
+    
+  } catch (error) {
+    console.error('Error sending payment notifications:', error);
+    return false;
+  }
+}
+
+// Send booking request notifications to technician
+async function sendBookingRequestNotification(bookingData) {
+  try {
+    console.log('=== SENDING BOOKING REQUEST NOTIFICATION ===');
+    console.log('Booking data received:', bookingData);
+    console.log('Technician ID from booking:', bookingData.technicianId);
+    console.log('Technician name from booking:', bookingData.technicianName);
+    
+    // Try to find the technician's actual UID by multiple methods
+    let technicianUid = bookingData.technicianId;
+    let technicianEmail = '';
+    
+    try {
+      // Method 1: Try to get technician data from the technicians collection using the booking's technicianId
+      const technicianDoc = await getDoc(doc(db, 'technicians', bookingData.technicianId));
+      if (technicianDoc.exists()) {
+        const techData = technicianDoc.data();
+        technicianEmail = techData.email;
+        console.log('Found technician data by ID:', techData);
+        console.log('Technician email:', technicianEmail);
+        
+        // If the technician has a uid field, use that
+        if (techData.uid) {
+          technicianUid = techData.uid;
+          console.log('Using technician UID from data:', technicianUid);
+        }
+      } else {
+        console.log('Technician document not found by ID, trying to find by name...');
+        
+        // Method 2: Try to find technician by name in technicians collection
+        const techNameQuery = query(
+          collection(db, 'technicians'),
+          where('fullName', '==', bookingData.technicianName)
+        );
+        const techNameSnapshot = await getDocs(techNameQuery);
+        if (!techNameSnapshot.empty) {
+          const techDoc = techNameSnapshot.docs[0];
+          const techData = techDoc.data();
+          technicianUid = techDoc.id;
+          technicianEmail = techData.email;
+          console.log('Found technician by name:', technicianUid, technicianEmail);
+        } else {
+          console.log('Technician not found by name, trying to find by email...');
+          
+          // Method 3: Try to find technician by email (common emails)
+          const commonEmails = ['maged@yahoo.com', 'magedishak@yahoo.com', 'maged.ishak@yahoo.com'];
+          for (const email of commonEmails) {
+            const techEmailQuery = query(
+              collection(db, 'technicians'),
+              where('email', '==', email)
+            );
+            const techEmailSnapshot = await getDocs(techEmailQuery);
+            if (!techEmailSnapshot.empty) {
+              const techDoc = techEmailSnapshot.docs[0];
+              const techData = techDoc.data();
+              technicianUid = techDoc.id;
+              technicianEmail = techData.email;
+              console.log('Found technician by email:', technicianUid, technicianEmail);
+              break;
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error looking up technician:', error);
+    }
+    
+    // If we still don't have a technician email, try to get it from the technician name
+    if (!technicianEmail && bookingData.technicianName) {
+      try {
+        const techQuery = query(
+          collection(db, 'technicians'),
+          where('fullName', '==', bookingData.technicianName)
+        );
+        const techSnapshot = await getDocs(techQuery);
+        if (!techSnapshot.empty) {
+          const techDoc = techSnapshot.docs[0];
+          const techData = techDoc.data();
+          technicianEmail = techData.email;
+          technicianUid = techDoc.id;
+          console.log('Found technician email by name:', technicianEmail);
+        }
+      } catch (error) {
+        console.error('Error finding technician email by name:', error);
+      }
+    }
+    
+    console.log('Final technician UID:', technicianUid);
+    console.log('Final technician email:', technicianEmail);
+    
+    const notificationData = {
+      type: 'booking_request',
+      title: 'New Booking Request',
+      message: `New booking request from ${bookingData.userName} for ${bookingData.date} at ${bookingData.time}`,
+      bookingId: bookingData.id || 'pending',
+      technicianId: technicianUid,
+      technicianName: bookingData.technicianName,
+      technicianEmail: technicianEmail,
+      customerName: bookingData.userName,
+      customerEmail: bookingData.userEmail,
+      customerPhone: bookingData.userPhone,
+      bookingDate: bookingData.date,
+      bookingTime: bookingData.time,
+      paymentMethod: bookingData.payment,
+      status: 'pending',
+      createdAt: serverTimestamp(),
+      read: false
+    };
+    
+    console.log('Notification data prepared:', notificationData);
+    
+    // Send notification to technician using UID
+    const technicianNotification = {
+      ...notificationData,
+      recipientId: technicianUid,
+      recipientType: 'technician',
+      message: `New booking request from ${bookingData.userName} for ${bookingData.date} at ${bookingData.time}. Payment method: ${bookingData.payment}`
+    };
+    
+    console.log('Technician UID for notification:', technicianUid);
+    console.log('Technician notification object:', technicianNotification);
+    
+    // Send notification to admin
+    const adminNotification = {
+      ...notificationData,
+      recipientId: 'admin',
+      recipientType: 'admin',
+      message: `New booking request: ${bookingData.userName} booked ${bookingData.technicianName} for ${bookingData.date} at ${bookingData.time}. Payment method: ${bookingData.payment}`
+    };
+    
+    console.log('Admin notification object:', adminNotification);
+    
+    // Add notifications to Firebase
+    console.log('Adding technician notification to Firebase...');
+    const techNotificationRef = await addDoc(collection(db, 'notifications'), technicianNotification);
+    console.log('Technician notification added with ID:', techNotificationRef.id);
+    
+    // Also send a notification using technician's email as recipientId for fallback
+    if (technicianEmail) {
+      const emailNotification = {
+        ...notificationData,
+        recipientId: technicianEmail,
+        recipientType: 'technician',
+        recipientEmail: technicianEmail,
+        message: `New booking request from ${bookingData.userName} for ${bookingData.date} at ${bookingData.time}. Payment method: ${bookingData.payment}`
+      };
+      
+      console.log('Adding email fallback notification to Firebase...');
+      const emailNotificationRef = await addDoc(collection(db, 'notifications'), emailNotification);
+      console.log('Email fallback notification added with ID:', emailNotificationRef.id);
+    }
+    
+    console.log('Adding admin notification to Firebase...');
+    const adminNotificationRef = await addDoc(collection(db, 'notifications'), adminNotification);
+    console.log('Admin notification added with ID:', adminNotificationRef.id);
+    
+    console.log('=== BOOKING REQUEST NOTIFICATIONS SENT SUCCESSFULLY ===');
+    return true;
+    
+  } catch (error) {
+    console.error('=== ERROR SENDING BOOKING REQUEST NOTIFICATION ===');
+    console.error('Error details:', error);
+    console.error('Error message:', error.message);
+    console.error('Error code:', error.code);
+    return false;
+  }
+}
+
+// Send booking request email to technician
+async function sendBookingRequestEmail(bookingData) {
+  try {
+    console.log('Sending booking request email to technician...');
+    
+    // Get technician's email from their profile
+    const technicianDoc = await getDoc(doc(db, 'technicians', bookingData.technicianId));
+    if (!technicianDoc.exists()) {
+      console.error('Technician not found');
+      return false;
+    }
+    
+    const technicianData = technicianDoc.data();
+    const technicianEmail = technicianData.email;
+    
+    if (!technicianEmail) {
+      console.error('Technician email not found');
+      return false;
+    }
+    
+    // Email template for booking request
+    const emailTemplate = {
+      to_email: technicianEmail,
+      to_name: technicianData.fullName || technicianData.name,
+      customer_name: bookingData.userName,
+      customer_email: bookingData.userEmail,
+      customer_phone: bookingData.userPhone,
+      booking_date: bookingData.date,
+      booking_time: bookingData.time,
+      payment_method: bookingData.payment,
+      subject: 'New Booking Request - BoltFix'
+    };
+    
+    // Send email using EmailJS
+    const response = await emailjs.send(
+      import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_boltfix',
+      import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_booking_request',
+      emailTemplate,
+      import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'YOUR_EMAILJS_PUBLIC_KEY'
+    );
+    
+    console.log('Booking request email sent successfully:', response);
+    return true;
+    
+  } catch (error) {
+    console.error('Error sending booking request email:', error);
+    return false;
+  }
+}
+
+// Test notification function
+async function testNotification() {
+  try {
+    console.log('=== TESTING BOOKING REQUEST NOTIFICATION ===');
+    
+    const testBookingData = {
+      id: 'test-booking-id',
+      technicianId: 'test-technician-id',
+      technicianName: 'Maged Ishak',
+      userName: 'Test User',
+      userEmail: 'narutossj23@yahoo.com',
+      userPhone: '1234567890',
+      date: '2023-10-27',
+      time: '10:00 AM',
+      payment: 'PayPal',
+      status: 'pending'
+    };
+    
+    console.log('Test booking data:', testBookingData);
+    
+    // Test the notification function
+    const result = await sendBookingRequestNotification(testBookingData);
+    
+    if (result) {
+      alert('✅ Test notification sent successfully! Check console for details.');
+    } else {
+      alert('❌ Test notification failed! Check console for errors.');
+    }
+    
+  } catch (error) {
+    console.error('❌ Error in test notification:', error);
+    alert('❌ Test notification error: ' + error.message);
+  }
+}
+
+// Manual notification test function
+async function createManualNotification() {
+  try {
+    console.log('=== CREATING MANUAL NOTIFICATION ===');
+    
+    // Find Maged Ishak in the technicians collection
+    const techQuery = query(
+      collection(db, 'technicians'),
+      where('fullName', '==', 'Maged Ishak')
+    );
+    const techSnapshot = await getDocs(techQuery);
+    
+    if (techSnapshot.empty) {
+      alert('❌ Maged Ishak not found in technicians collection');
+      return;
+    }
+    
+    const techDoc = techSnapshot.docs[0];
+    const techData = techDoc.data();
+    const technicianUid = techDoc.id;
+    const technicianEmail = techData.email;
+    
+    console.log('Found technician:', { uid: technicianUid, email: technicianEmail, data: techData });
+    
+    // Create a test notification
+    const testNotification = {
+      type: 'booking_request',
+      title: 'Test Booking Request',
+      message: 'This is a test booking request notification',
+      bookingId: 'test-manual-booking',
+      technicianId: technicianUid,
+      technicianName: 'Maged Ishak',
+      technicianEmail: technicianEmail,
+      customerName: 'Test Customer',
+      customerEmail: 'test@example.com',
+      customerPhone: '1234567890',
+      bookingDate: '2023-10-27',
+      bookingTime: '10:00 AM',
+      paymentMethod: 'Cash',
+      status: 'pending',
+      recipientId: technicianUid,
+      recipientType: 'technician',
+      createdAt: serverTimestamp(),
+      read: false
+    };
+    
+    console.log('Creating manual notification:', testNotification);
+    
+    const notificationRef = await addDoc(collection(db, 'notifications'), testNotification);
+    console.log('Manual notification created with ID:', notificationRef.id);
+    
+    alert(`✅ Manual notification created successfully!\nTechnician UID: ${technicianUid}\nNotification ID: ${notificationRef.id}`);
+    
+  } catch (error) {
+    console.error('Manual notification error:', error);
+    alert('❌ Manual notification error: ' + error.message);
+  }
+}
+
+// Simple test notification for current user
+async function createSimpleTestNotification() {
+  try {
+    console.log('=== CREATING SIMPLE TEST NOTIFICATION ===');
+    
+    if (!auth.currentUser) {
+      alert('❌ No user logged in');
+      return;
+    }
+    
+    const testNotification = {
+      type: 'test',
+      title: 'Simple Test Notification',
+      message: 'This is a simple test notification for the current user',
+      recipientId: auth.currentUser.uid,
+      recipientType: 'user',
+      createdAt: serverTimestamp(),
+      read: false
+    };
+    
+    console.log('Creating simple test notification:', testNotification);
+    
+    const notificationRef = await addDoc(collection(db, 'notifications'), testNotification);
+    console.log('Simple test notification created with ID:', notificationRef.id);
+    
+    alert(`✅ Simple test notification created successfully!\nUser UID: ${auth.currentUser.uid}\nNotification ID: ${notificationRef.id}`);
+    
+  } catch (error) {
+    console.error('Simple test notification error:', error);
+    alert('❌ Simple test notification error: ' + error.message);
+  }
+}
+
+// Check all notifications in database
+async function checkAllNotifications() {
+  try {
+    console.log('=== CHECKING ALL NOTIFICATIONS IN DATABASE ===');
+    
+    const allNotificationsQuery = query(
+      collection(db, 'notifications'),
+      orderBy('createdAt', 'desc'),
+      limit(50)
+    );
+    
+    const snapshot = await getDocs(allNotificationsQuery);
+    console.log('Total notifications in database:', snapshot.docs.length);
+    
+    const notifications = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    
+    console.log('All notifications:', notifications);
+    
+    // Group by recipientId
+    const groupedByRecipient = {};
+    notifications.forEach(notification => {
+      const recipientId = notification.recipientId;
+      if (!groupedByRecipient[recipientId]) {
+        groupedByRecipient[recipientId] = [];
+      }
+      groupedByRecipient[recipientId].push(notification);
+    });
+    
+    console.log('Notifications grouped by recipientId:', groupedByRecipient);
+    
+    alert(`✅ Found ${snapshot.docs.length} notifications in database.\nCheck console for details.`);
+    
+  } catch (error) {
+    console.error('Error checking all notifications:', error);
+    alert('❌ Error checking notifications: ' + error.message);
+  }
+}
+
+// Function to test booking data
+function testBookingData() {
+  console.log('=== TESTING BOOKING DATA ===');
+  console.log('Current form data:', form.value);
+  console.log('Technician data:', technician.value);
+  console.log('Auth current user:', auth.currentUser);
+  
+  // Test address construction
+  const testAddress = constructAddress(form.value);
+  console.log('Test constructed address:', testAddress);
+  
+  // Test booking data object
+  const testBookingData = {
+    technicianId: technician.value.uid || technician.value.id,
+    technicianName: technician.value.name,
+    userId: auth.currentUser?.uid,
+    userName: form.value.fullName,
+    userEmail: form.value.email,
+    userPhone: form.value.phone,
+    date: form.value.date,
+    time: form.value.time,
+    address: testAddress,
+    price: technician.value.visitPrice || technician.value.basePrice || 'N/A',
+    note: form.value.note || '',
+    payment: form.value.payment,
+    status: 'pending',
+    createdAt: new Date()
+  };
+  
+  console.log('Test booking data object:', testBookingData);
+  console.log('=== END TESTING BOOKING DATA ===');
+  
+  alert(`Test completed! Check console for details.\n\nUser Email: ${form.value.email}\nAddress: ${testAddress}\nPrice: ${testBookingData.price}`);
+}
+
+function constructAddress(formData) {
+  console.log('=== CONSTRUCTING ADDRESS ===');
+  console.log('Form data for address:', {
+    street: formData.street,
+    building: formData.building,
+    area: formData.area,
+    city: formData.city
+  });
+  
+  const addressParts = [];
+  if (formData.street) {
+    addressParts.push(formData.street);
+  }
+  if (formData.building) {
+    addressParts.push(formData.building);
+  }
+  if (formData.area) {
+    addressParts.push(formData.area);
+  }
+  if (formData.city) {
+    addressParts.push(formData.city);
+  }
+  
+  const finalAddress = addressParts.join(', ');
+  console.log('Address parts:', addressParts);
+  console.log('Final constructed address:', finalAddress);
+  console.log('=== END ADDRESS CONSTRUCTION ===');
+  
+  return finalAddress;
 }
 </script>
 

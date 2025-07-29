@@ -64,7 +64,14 @@
             <div class="technician-info">
               <h3 class="technician-name">{{ technician.name }}</h3>
               <div class="rating">
-                <i class="fa-solid fa-star" v-for="n in 5" :key="n"></i>
+                <i 
+                  v-for="n in 5" 
+                  :key="n" 
+                  class="fa-solid fa-star"
+                  :class="{ 'filled': n <= Math.round(technician.rating), 'empty': n > Math.round(technician.rating) }"
+                  :style="{ color: n <= Math.round(technician.rating) ? '#FFC230' : '#ddd' }"
+                ></i>
+                <span class="rating-text">({{ technician.rating }})</span>
               </div>
               <p class="technician-description">{{ $t('technicianDescription') }}</p>
               <button class="view-profile-btn" @click="viewProfile(technician.id)">{{ $t('viewProfile') }}</button>
@@ -102,9 +109,102 @@ const router = useRouter()
 const loading = ref(true)
 const stockTechnicians = [
   // Example stock wall finishing technicians (update these as needed)
-  { id: 'stock-1', name: 'Ahmed Salah', image: profile1, bgColor: '#E8E4F3', price: 200, description: 'Experienced wall finisher with 10+ years in the field.', rating: 5, specialization: 'Wall Finishing' },
-  { id: 'stock-2', name: 'Mohammed Ali', image: profile2, bgColor: '#E3F2FD', price: 180, description: 'Expert in residential wall finishing.', rating: 5, specialization: 'Wall Finishing' },
-  // Add more stock wall finishing technicians as needed
+  { 
+    id: 'stock-1', 
+    name: 'Ahmed Salah', 
+    image: profile1, 
+    bgColor: '#E8E4F3', 
+    price: 200, 
+    description: 'Experienced wall finisher with 10+ years in the field.', 
+    rating: 4.5, 
+    specialization: 'Wall Finishing',
+    area: 'Maadi',
+    yearsOfExperience: 10
+  },
+  { 
+    id: 'stock-2', 
+    name: 'Mohammed Ali', 
+    image: profile2, 
+    bgColor: '#E3F2FD', 
+    price: 180, 
+    description: 'Expert in residential wall finishing.', 
+    rating: 4.8, 
+    specialization: 'Wall Finishing',
+    area: 'Mokattam',
+    yearsOfExperience: 8
+  },
+  { 
+    id: 'stock-3', 
+    name: 'Hassan Mahmoud', 
+    image: profile3, 
+    bgColor: '#FFF3E0', 
+    price: 150, 
+    description: 'Professional wall finishing specialist.', 
+    rating: 4.2, 
+    specialization: 'Wall Finishing',
+    area: 'Shoubra',
+    yearsOfExperience: 5
+  },
+  { 
+    id: 'stock-4', 
+    name: 'Omar Khalil', 
+    image: profile4, 
+    bgColor: '#F3E5F5', 
+    price: 220, 
+    description: 'Master wall finisher with premium services.', 
+    rating: 4.9, 
+    specialization: 'Wall Finishing',
+    area: 'Embaba',
+    yearsOfExperience: 12
+  },
+  { 
+    id: 'stock-5', 
+    name: 'Youssef Ahmed', 
+    image: profile5, 
+    bgColor: '#E0F2F1', 
+    price: 160, 
+    description: 'Skilled wall finishing technician.', 
+    rating: 4.0, 
+    specialization: 'Wall Finishing',
+    area: 'Maadi',
+    yearsOfExperience: 3
+  },
+  { 
+    id: 'stock-6', 
+    name: 'Karim Hassan', 
+    image: profile6, 
+    bgColor: '#FFF8E1', 
+    price: 190, 
+    description: 'Experienced wall finishing expert.', 
+    rating: 4.6, 
+    specialization: 'Wall Finishing',
+    area: 'Mokattam',
+    yearsOfExperience: 7
+  },
+  { 
+    id: 'stock-7', 
+    name: 'Samir Ibrahim', 
+    image: profile7, 
+    bgColor: '#F1F8E9', 
+    price: 170, 
+    description: 'Professional wall finishing contractor.', 
+    rating: 4.3, 
+    specialization: 'Wall Finishing',
+    area: 'Shoubra',
+    yearsOfExperience: 6
+  },
+  { 
+    id: 'stock-8', 
+    name: 'Tarek Mohamed', 
+    image: profile8, 
+    bgColor: '#E8F5E8', 
+    price: 210, 
+    description: 'Expert wall finishing specialist.', 
+    rating: 4.7, 
+    specialization: 'Wall Finishing',
+    area: 'Embaba',
+    yearsOfExperience: 9
+  }
 ]
 const firebaseTechnicians = ref([])
 const searchQuery = ref('')
@@ -142,8 +242,10 @@ const mergedTechnicians = computed(() => {
         bgColor: '#E8E4F3', // or any default color
         price: fbTech.basePrice,
         description: fbTech.bio,
-        rating: 5, // or fbTech.rating if available
-        specialization: fbTech.specialization
+        rating: fbTech.rating || 4.0, // Use actual rating if available
+        specialization: fbTech.specialization,
+        area: fbTech.area || fbTech.location || 'Cairo', // Use area/location if available
+        yearsOfExperience: fbTech.yearsOfExperience || 5 // Use actual years if available
       })
     }
   })
@@ -153,25 +255,59 @@ const mergedTechnicians = computed(() => {
 const filteredTechnicians = computed(() => {
   let list = mergedTechnicians.value
   const query = searchQuery.value.trim().toLowerCase()
+  
+  // Search filter
   if (query) {
     list = list.filter(t => t.name && t.name.toLowerCase().includes(query))
   }
-  if (filterOption.value === 'price') {
-    list = list.filter(t => t.price)
-  } else if (filterOption.value === 'area') {
-    // Implement area filter if you have area data
-  } else if (filterOption.value === 'rating') {
-    list = list.filter(t => t.rating >= 4)
-  } else if (filterOption.value === 'years') {
-    // Implement years filter if you have years data
+  
+  // Price filter
+  if (filterOption.value.price) {
+    const [min, max] = filterOption.value.price.split('-').map(Number)
+    list = list.filter(t => {
+      const price = parseFloat(t.price) || 0
+      return price >= min && price <= max
+    })
   }
+  
+  // Area filter (if technician has area data)
+  if (filterOption.value.area) {
+    list = list.filter(t => {
+      // Check if technician has area information
+      const technicianArea = t.area || t.location || ''
+      return technicianArea.toLowerCase().includes(filterOption.value.area.toLowerCase())
+    })
+  }
+  
+  // Rating filter
+  if (filterOption.value.rating) {
+    const [min, max] = filterOption.value.rating.split('-').map(Number)
+    list = list.filter(t => {
+      const rating = parseFloat(t.rating) || 0
+      return rating >= min && rating <= max
+    })
+  }
+  
+  // Years of experience filter
+  if (filterOption.value.years && filterOption.value.years.length > 0) {
+    list = list.filter(t => {
+      const years = parseFloat(t.yearsOfExperience) || 0
+      return filterOption.value.years.some(yearRange => {
+        const [min, max] = yearRange.split('-').map(Number)
+        return years >= min && years <= max
+      })
+    })
+  }
+  
+  // Sort options
   if (sortOption.value === 'priceLow') {
-    list = [...list].sort((a, b) => a.price - b.price)
+    list = [...list].sort((a, b) => (parseFloat(a.price) || 0) - (parseFloat(b.price) || 0))
   } else if (sortOption.value === 'priceHigh') {
-    list = [...list].sort((a, b) => b.price - a.price)
+    list = [...list].sort((a, b) => (parseFloat(b.price) || 0) - (parseFloat(a.price) || 0))
   } else if (sortOption.value === 'rating') {
-    list = [...list].sort((a, b) => b.rating - a.rating)
+    list = [...list].sort((a, b) => (parseFloat(b.rating) || 0) - (parseFloat(a.rating) || 0))
   }
+  
   return list
 })
 
@@ -361,16 +497,32 @@ const heroBackgroundStyle = computed(() => {
   color: var(--primary-text);
 }
 .rating {
-  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  margin-bottom: 0.5rem;
 }
-.dark .rating {
-  color: var(--primary-text);
+
+.rating .fa-star {
+  font-size: 1rem;
+  transition: color 0.2s ease;
 }
-.rating i {
-  color: #FFC230;
-  margin-right: 0.2rem;
+
+.rating .fa-star.filled {
+  color: #FFC230 !important;
 }
-.dark .rating i {
+
+.rating .fa-star.empty {
+  color: #ddd !important;
+}
+
+.rating-text {
+  font-size: 0.9rem;
+  color: #666;
+  margin-left: 0.5rem;
+}
+
+.dark .rating-text {
   color: var(--primary-text);
 }
 .technician-description {

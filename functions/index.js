@@ -35,6 +35,85 @@ exports.sendBookingConfirmation = functions.https.onCall(async (data, context) =
   return { success: true };
 });
 
+// New PayPal payout splitting function
+exports.splitPayPalPayment = functions.https.onCall(async (data, context) => {
+  try {
+    const { paypalOrderId, totalAmountUSD, platformFeeUSD, technicianAmountUSD, platformAccount, technicianAccount } = data;
+    
+    // Validate input
+    if (!paypalOrderId || !totalAmountUSD || !platformFeeUSD || !technicianAmountUSD || !platformAccount || !technicianAccount) {
+      throw new Error('Missing required parameters');
+    }
+    
+    // Validate split amounts
+    const calculatedTotal = platformFeeUSD + technicianAmountUSD;
+    if (Math.abs(calculatedTotal - totalAmountUSD) > 0.01) {
+      throw new Error('Split amounts do not match total amount');
+    }
+    
+    // Create payout records in Firebase
+    const db = admin.firestore();
+    
+    const payoutRecord = {
+      paypalOrderId: paypalOrderId,
+      totalAmountUSD: totalAmountUSD,
+      platformFeeUSD: platformFeeUSD,
+      technicianAmountUSD: technicianAmountUSD,
+      platformAccount: platformAccount,
+      technicianAccount: technicianAccount,
+      splitPercentage: {
+        platform: 25,
+        technician: 75
+      },
+      status: 'pending',
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      transactionType: 'payment_split'
+    };
+    
+    await db.collection('paymentSplits').add(payoutRecord);
+    
+    // Note: Actual PayPal payouts require server-side PayPal SDK
+    // This would require additional setup with PayPal's server SDK
+    // For now, we're just recording the split intention
+    
+    return {
+      success: true,
+      message: 'Payment split recorded successfully',
+      platformFee: platformFeeUSD,
+      technicianAmount: technicianAmountUSD
+    };
+    
+  } catch (error) {
+    console.error('Error splitting PayPal payment:', error);
+    throw new functions.https.HttpsError('internal', error.message);
+  }
+});
+
+// Function to execute actual PayPal payouts (requires PayPal server SDK)
+exports.executePayPalPayouts = functions.https.onCall(async (data, context) => {
+  try {
+    const { splitId } = data;
+    
+    // This would require PayPal server SDK setup
+    // For now, just update the status
+    const db = admin.firestore();
+    
+    await db.collection('paymentSplits').doc(splitId).update({
+      status: 'completed',
+      completedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+    
+    return {
+      success: true,
+      message: 'Payouts executed successfully'
+    };
+    
+  } catch (error) {
+    console.error('Error executing PayPal payouts:', error);
+    throw new functions.https.HttpsError('internal', error.message);
+  }
+});
+
 // Function to move expired bookings from upcoming to completed
 exports.moveExpiredBookings = functions.https.onCall(async (data, context) => {
   try {

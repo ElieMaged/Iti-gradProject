@@ -25,6 +25,7 @@
                 <thead>
                   <tr class="table-header">
                     <th>Technician Name</th>
+                    <th>Technician Email</th>
                     <th>Specialization</th>
                     <th>Date</th>
                     <th>Time</th>
@@ -37,11 +38,12 @@
                 <tbody>
                   <tr v-for="booking in filteredBookings" :key="booking.id" class="table-row">
                     <td>{{ booking.technicianName }}</td>
-                    <td>{{ booking.specialization }}</td>
+                    <td>{{ booking.technicianEmail || 'N/A' }}</td>
+                    <td>{{ booking.specialization || 'N/A' }}</td>
                     <td>{{ booking.date }}</td>
                     <td>{{ booking.time }}</td>
-                    <td>{{ booking.address }}</td>
-                    <td>{{ booking.price }}</td>
+                    <td>{{ booking.address && booking.address.trim() ? booking.address : 'Address not provided' }}</td>
+                    <td>{{ booking.price || 'N/A' }}</td>
                     <td class="booking-status">{{ booking.status }}</td>
                     <td>
                       <button @click="cancelBooking(booking.id)" class="cancel-btn">
@@ -64,7 +66,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { collection, getDocs, query, where, updateDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, query, where, updateDoc, doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'vue-router';
@@ -83,6 +85,69 @@ const filteredBookings = computed(() => {
   );
 });
 
+// Function to check and update expired bookings
+async function checkAndUpdateExpiredBookings() {
+  try {
+    console.log('=== CHECKING FOR EXPIRED BOOKINGS (USER) ===');
+    
+    // Get all upcoming bookings for this user
+    const upcomingQuery = query(
+      collection(db, 'bookings'),
+      where('userId', '==', userUid.value),
+      where('status', '==', 'upcoming')
+    );
+    const upcomingSnapshot = await getDocs(upcomingQuery);
+    
+    console.log('Found upcoming bookings for user:', upcomingSnapshot.docs.length);
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to start of day for comparison
+    
+    const expiredBookings = [];
+    
+    upcomingSnapshot.docs.forEach(doc => {
+      const booking = doc.data();
+      const bookingDate = new Date(booking.date);
+      bookingDate.setHours(0, 0, 0, 0);
+      
+      console.log('Checking booking date:', booking.date, 'vs today:', today.toDateString());
+      console.log('Booking date object:', bookingDate.toDateString());
+      
+      // If booking date is in the past, mark it as expired
+      if (bookingDate < today) {
+        expiredBookings.push({
+          id: doc.id,
+          ...booking
+        });
+        console.log('✅ Found expired booking:', booking.date, 'for booking ID:', doc.id);
+      }
+    });
+    
+    console.log('Total expired bookings found for user:', expiredBookings.length);
+    
+    // Update expired bookings to completed status
+    for (const booking of expiredBookings) {
+      try {
+        console.log('Updating expired booking to completed:', booking.id);
+        await updateDoc(doc(db, 'bookings', booking.id), { 
+          status: 'complete',
+          completedAt: new Date()
+        });
+        console.log('✅ Successfully updated booking to completed:', booking.id);
+      } catch (updateError) {
+        console.error('❌ Error updating expired booking:', booking.id, updateError);
+      }
+    }
+    
+    console.log('=== EXPIRED BOOKINGS CHECK COMPLETE (USER) ===');
+    return expiredBookings.length;
+    
+  } catch (error) {
+    console.error('❌ Error checking expired bookings:', error);
+    return 0;
+  }
+}
+
 async function fetchBookings() {
   try {
     loading.value = true;
@@ -91,13 +156,88 @@ async function fetchBookings() {
       error.value = 'User not authenticated.';
       return;
     }
+    
+    console.log('Fetching bookings for user UID:', userUid.value);
+    
+    // First, check and update any expired bookings
+    const expiredCount = await checkAndUpdateExpiredBookings();
+    if (expiredCount > 0) {
+      console.log(`Updated ${expiredCount} expired bookings to completed status`);
+    }
+    
     const q = query(
       collection(db, 'bookings'),
       where('userId', '==', userUid.value),
       where('status', '==', 'pending')
     );
     const snapshot = await getDocs(q);
-    bookings.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    
+    // Fetch technician details for each booking
+    const bookingsWithTechDetails = await Promise.all(
+      snapshot.docs.map(async (doc) => {
+        const bookingData = { id: doc.id, ...doc.data() };
+        
+        // Try to get technician details from technicians collection
+        try {
+          const technicianDoc = await getDoc(doc(db, 'technicians', bookingData.technicianId));
+          if (technicianDoc.exists()) {
+            const techData = technicianDoc.data();
+            console.log('Technician data found:', techData);
+            console.log('All technician fields:', Object.keys(techData));
+            
+            // Use the correct field names based on the technician document structure
+            // Try multiple possible field names for email
+            // Get the technician's login email (the email they used to register/login)
+            const loginEmail = techData.email || 
+                              techData.userEmail || 
+                              techData.technicianEmail || 
+                              techData.contactEmail || 
+                              'N/A';
+            
+            bookingData.technicianEmail = loginEmail;
+            
+            // Try multiple specialization field names
+            const specialization = techData.specialization || 
+                                 techData.service || 
+                                 techData.services || 
+                                 techData.category || 
+                                 techData.type || 
+                                 techData.jobType || 
+                                 techData.workType || 
+                                 techData.profession || 
+                                 techData.trade || 
+                                 techData.skill || 
+                                 techData.skills || 
+                                 'N/A';
+            
+            bookingData.specialization = specialization;
+            
+            // Use the technician's costpervisit from their profile, then fallback to other price fields
+            bookingData.price = techData.costpervisit || techData.basePrice || techData.visitPrice || techData.price || 'N/A';
+            
+            console.log('Technician details mapped:', {
+              email: bookingData.technicianEmail,
+              specialization: bookingData.specialization,
+              price: bookingData.price,
+              allFields: Object.keys(techData)
+            });
+          } else {
+            bookingData.technicianEmail = 'N/A';
+            bookingData.specialization = 'N/A';
+            bookingData.price = 'N/A';
+          }
+        } catch (error) {
+          console.error('Error fetching technician details:', error);
+          bookingData.technicianEmail = 'N/A';
+          bookingData.specialization = 'N/A';
+          bookingData.price = 'N/A';
+        }
+        
+        return bookingData;
+      })
+    );
+    
+    bookings.value = bookingsWithTechDetails;
   } catch (e) {
     error.value = 'Failed to fetch bookings';
   } finally {

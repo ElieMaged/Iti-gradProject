@@ -6,10 +6,11 @@ import { useI18n } from 'vue-i18n';
 import { auth } from '../firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import LanguageToggle from './LanguageToggle.vue';
+import NotificationBell from './NotificationBell.vue'
 // Firebase-related imports removed
 
 export default {
-  components: { LanguageToggle },
+  components: { LanguageToggle, NotificationBell },
   setup() {
     const user = ref(null);
     const loading = ref(true);
@@ -330,6 +331,7 @@ export default {
         type="button">
         <i :class="iconClass"></i>
       </button>
+      <NotificationBell />
     </div>
     <!-- Mobile Menu & Overlay -->
     <transition name="fade">
@@ -409,6 +411,7 @@ export default {
               type="button">
               <i :class="iconClass"></i>
             </button>
+            <NotificationBell />
           </div>
         </div>
       </div>
