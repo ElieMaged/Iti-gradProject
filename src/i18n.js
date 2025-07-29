@@ -41,6 +41,9 @@ const messages = {
     passwordResetFailed: "Failed to send reset email. Please try again.",
     // Review System - Booking Requirements
     loginToReview: "Please log in to submit a review",
+    alreadyReviewed: "You have already reviewed this technician",
+    thankYouForReview: "Thank you for your review!",
+    loginToLeaveReview: "Please log in to leave a review",
     bookingRequiredToReview:
       "You must book and complete a service with this technician before you can leave a review",
     bookTechnicianFirst: "Book this technician first to leave a review",
@@ -292,8 +295,12 @@ const messages = {
     heroSectionBookBtn: "Book an Appointment",
     heroTitle: "Specialized Efficient Solutions",
     heroDescription:
+<<<<<<< Updated upstream
       "Our expert technicians tackle every project with innovation and expertise. From simple repairs to complex installations, we’re the trusted partner you need.",
     heroDescription: "Our expert technicians tackle every project with innovation and expertise. From simple repairs to complex installations, we're the trusted partner you need.",
+=======
+      "Our expert technicians tackle every project with innovation and expertise. From simple repairs to complex installations, we're the trusted partner you need.",
+>>>>>>> Stashed changes
     heroBookBtn: "Book an Appointment",
     heroShowServicesBtn: "Show all services",
     // --- Added for Service Views ---
@@ -354,7 +361,7 @@ const messages = {
     aboutUsTitle: "About Us",
     whoAreWeTitle: "Who Are We?",
     whoAreWeDesc:
-      "At BoltFix, we're redefining how home maintenance is done. As Egypt’s trusted platform for reliable repair and installation services, we connect you with skilled, verified technicians across plumbing, electrical, carpentry, appliance repair, and more — all with a click. Our mission is simple: to bring professionalism, transparency, and peace of mind to every home. Whether it’s a quick fix or a big job, we make sure it’s done right, on time, and with care.",
+      "At BoltFix, we're redefining how home maintenance is done. As Egypt's trusted platform for reliable repair and installation services, we connect you with skilled, verified technicians across plumbing, electrical, carpentry, appliance repair, and more — all with a click. Our mission is simple: to bring professionalism, transparency, and peace of mind to every home. Whether it's a quick fix or a big job, we make sure it's done right, on time, and with care.",
     ourMissionTitle: "Our Mission",
     ourMissionDesc:
       "Our mission at BoltFix is to simplify access to trusted home repair services by empowering skilled technicians and delivering a seamless, dependable experience for every customer. We aim to raise the standard of home maintenance in Egypt through speed, honesty, and quality — ensuring that every task, big or small, is completed with precision, professionalism, and care.",
@@ -523,6 +530,7 @@ const messages = {
     navCarpentry: "Carpentry",
     navElectricityTechnicians: "Electricity Technicians",
     // Service Titles
+<<<<<<< Updated upstream
     electricityTitle: 'Electricity',
     electricalTechniciansTitle: 'Electrical Technicians',
     wallFinishingTitle: 'Wall Finishing',
@@ -700,6 +708,64 @@ const messages = {
     reports: 'التقارير',
     settings: 'الإعدادات',
     logout: 'تسجيل الخروج',
+=======
+    electricityTitle: "Electricity",
+    electricalTechniciansTitle: "Electrical Technicians",
+    wallFinishingTitle: "Wall Finishing",
+    airConditioningTitle: "Air Conditioner Technicians",
+    carpentryTitle: "Carpentry",
+    meetTechniciansTeam: "Meet Our Technicians Team",
+    plumbingTeamDescription:
+      "We pride ourselves on being your trusted local technicians experts. With 20 years of experience serving your city, our mission is to provide high quality, reliable plumbing services that you can depend on, whether it's for your home or business.",
+    electricalTechniciansTeamDescription:
+      "Our electrical technicians are certified and experienced, ready to handle all your electrical needs safely and efficiently.",
+    airConditioningTeamDescription:
+      "Our air conditioning technicians are experts in installation, maintenance, and repair, ensuring your comfort all year round.",
+    carpentryTeamDescription:
+      "Our carpenters deliver quality craftsmanship for all your woodwork and furniture needs.",
+    wallFinishingTeamDescription:
+      "Our wall finishing team provides professional painting, plastering, and decorative finishes for your home or office.",
+    carpentry: "Carpentry",
+    wallFinishing: "Wall Finishing",
+    oneYear: "1 year",
+    twoYears: "2 years",
+    threeYears: "3 years",
+    fourPlusYears: "4+ years",
+    cairo: "Cairo",
+    giza: "Giza",
+    alexandria: "Alexandria",
+    districtArea: "District/Area",
+    nasrCity: "Nasr City",
+    maadi: "Maadi",
+    dokki: "Dokki",
+    browse: "Browse",
+    agreeTermsPrivacyPolicy: "Agree to Terms and Privacy Policy",
+    registrationFailed: "Registration failed: {err}",
+    registrationSuccessful: "Registration successful!",
+    // Reviews
+    reviews: "Reviews",
+    addReview: "Add Review",
+    writeReview: "Write Review",
+    rating: "Rating",
+    review: "Review",
+    star: "star",
+    stars: "stars",
+    writeYourReview: "Share your experience with this technician...",
+    submitReview: "Submit Review",
+    cancel: "Cancel",
+    loadingReviews: "Loading reviews...",
+    noReviewsYet: "No reviews yet",
+    beFirstToReview: "Be the first to review this technician!",
+    // Review Form Messages
+    reviewSubmitted: "Review submitted successfully!",
+    reviewSubmissionFailed: "Failed to submit review. Please try again.",
+    pleaseSelectRating: "Please select a rating",
+    reviewTooShort: "Review must be at least 10 characters",
+    reviewTooLong: "Review cannot exceed 500 characters",
+    loginRequired: "Please log in to continue",
+    retry: "Retry",
+    submitting: "Submitting...",
+>>>>>>> Stashed changes
   },
   ar: {
     // Navbar
@@ -783,6 +849,9 @@ const messages = {
       "فشل في إرسال رابط إعادة التعيين. يرجى المحاولة مرة أخرى.",
     // Review System - Booking Requirements
     loginToReview: "يرجى تسجيل الدخول لإرسال تقييم",
+    alreadyReviewed: "لقد قمت بتقييم هذا الفني بالفعل",
+    thankYouForReview: "شكراً لك على تقييمك!",
+    loginToLeaveReview: "يرجى تسجيل الدخول لكتابة تقييم",
     bookingRequiredToReview:
       "يجب عليك حجز وإكمال خدمة مع هذا الفني قبل أن تتمكن من ترك تقييم",
     bookTechnicianFirst: "احجز هذا الفني أولاً لترك تقييم",
@@ -1326,6 +1395,8 @@ const messages = {
     writeReview: "اكتب تقييم",
     rating: "التقييم",
     review: "التقييم",
+    star: "نجمة",
+    stars: "نجوم",
     writeYourReview: "شارك تجربتك مع هذا الفني...",
     submitReview: "إرسال التقييم",
     cancel: "إلغاء",
