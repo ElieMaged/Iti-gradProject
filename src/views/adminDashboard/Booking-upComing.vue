@@ -2,12 +2,12 @@
 <template>
   <div class="admin-dashboard-layout">
     <admin-sidebar />
-    <div class="booking-main">
+    <div class="booking-main mr-20 p-4">
       <div class="booking-container">
         <div class="title-search-row">
-          <h2 class="booking-title">Upcoming Booking</h2>
+          <h2 class="booking-title">{{ $t('upcomingBookings') }}</h2>
           <div class="search-wrapper">
-            <input v-model="searchQuery" type="text" class="search-input" placeholder="Search" />
+            <input v-model="searchQuery" type="text" class="search-input" :placeholder="$t('search')" />
             <span class="search-icon"><i class="fas fa-search"></i></span>
           </div>
         </div>
@@ -15,15 +15,15 @@
           <table class="booking-table">
             <thead>
               <tr class="table-header">
-                <th>User Name</th>
-                <th>Technician Name</th>
-                <th>Specialization</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Address</th>
-                <th>Price</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th>{{ $t('userName') }}</th>
+                <th>{{ $t('technician') }}</th>
+                <th>{{ $t('specialization') }}</th>
+                <th>{{ $t('date') }}</th>
+                <th>{{ $t('time') }}</th>
+                <th>{{ $t('address') }}</th>
+                <th>{{ $t('price') }}</th>
+                <th>{{ $t('status') }}</th>
+                <th>{{ $t('actions') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -35,13 +35,13 @@
                 <td>{{ booking.time }}</td>
                 <td>{{ booking.address }}</td>
                 <td>{{ booking.price }}</td>
-                                 <td class="booking-status">{{ booking.status }}</td>
+                                 <td class="booking-status">{{ $t('upcoming') }}</td>
                                    <td>
                     <div class="action-buttons">
                       <button 
                         class="edit-btn" 
                         @click="editBooking(booking)"
-                        title="Edit Booking"
+                        :title="$t('editBooking')"
                       >
                         <i class="fas fa-pen"></i>
                       </button>
@@ -49,7 +49,7 @@
                         class="delete-btn" 
                         @click="cancelBooking(booking.id)" 
                         :disabled="actionLoading === booking.id"
-                        title="Delete Booking"
+                        :title="$t('deleteBooking')"
                       >
                         <i class="fas fa-trash"></i>
                       </button>
@@ -132,15 +132,24 @@ const filteredBookings = computed(() => {
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
   background: #faf8fd;
 }
+.dark .admin-dashboard-layout {
+  background-color: var(--primary-bg);
+}
 
 .booking-main {
   flex: 1;
   padding: 2.5rem;
 }
+.dark .booking-main {
+  background-color: var(--primary-bg);
+}
 
 .booking-container {
   max-width: 80rem;
   margin: 0 auto;
+}
+.dark .booking-container {
+  background-color: var(--primary-bg);
 }
 
 .title-search-row {
@@ -149,12 +158,18 @@ const filteredBookings = computed(() => {
   justify-content: space-between;
   margin-bottom: 1.5rem;
 }
+.dark .title-search-row {
+  color: var(--primary-text);
+}
 
 .booking-title {
   font-size: 2rem;
   font-weight: bold;
   color: #7c6bb0;
   margin-bottom: 0;
+}
+.dark .booking-title {
+  color: var(--primary-text);
 }
 
 .search-wrapper {
@@ -167,6 +182,9 @@ const filteredBookings = computed(() => {
   flex-shrink: 0;
   margin-bottom: 16px;
   position: relative;
+}
+.dark .search-wrapper {
+  background-color: var(--primary-bg);
 }
 
 .search-input {
@@ -181,9 +199,19 @@ const filteredBookings = computed(() => {
   padding: 0 16px 0 40px;
   transition: border 0.2s;
 }
+.dark .search-input {
+  background-color: var(--input-bg);
+  color: var(--text-muted);
+}
+.dark .search-input::placeholder {
+  color: var(--text-muted);
+}
 
 .search-input:focus {
   border: 1.5px solid #6B5FA7;
+}
+.dark .search-input:focus {
+  border: 1.5px solid var(--primary-text);
 }
 
 .search-icon {
@@ -194,12 +222,18 @@ const filteredBookings = computed(() => {
   color: #b6a7e6;
   font-size: 1.1rem;
 }
+.dark .search-icon {
+  color: var(--icon-color);
+}
 
 .table-wrapper {
   overflow-x: auto;
   border-radius: 0.75rem;
   background: #fff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.dark .table-wrapper {
+  background-color: var(--grey-bg);
 }
 
 .booking-table {
@@ -208,10 +242,17 @@ const filteredBookings = computed(() => {
   background: #fff;
   border-radius: 0.75rem;
 }
+.dark .booking-table {
+  background-color: var(--grey-bg);
+  color: var(--primary-text);
+}
 
 .table-header {
   background: rgba(124, 107, 176, 0.2);
   color: #333;
+}
+.dark .table-header th {
+  color: var(--primary-text);
 }
 
 .table-header th {
@@ -225,9 +266,16 @@ const filteredBookings = computed(() => {
   border-bottom: 1px solid #e5e7eb;
   transition: background-color 0.2s;
 }
+.dark .table-row {
+  background-color: var(--input-bg);
+  color: var(--text-muted);
+}
 
 .table-row:hover {
   background: #ede7f6;
+}
+.dark .table-row:hover {
+  background-color: var(--icon-color);
 }
 
 .table-row td {
@@ -238,9 +286,7 @@ const filteredBookings = computed(() => {
 
 .booking-status {
   background: none;
-  color: #6b7280;
-  padding: 0.2rem 0.6rem;
-  border-radius: 0.5rem;
+  color: #6b7280 !important;
   font-size: 0.8rem;
   font-weight: 600;
   text-transform: capitalize;
@@ -254,32 +300,28 @@ const filteredBookings = computed(() => {
 
 .edit-btn {
   background: none;
-  color: #f59e0b;
+  color: #f59e0b !important;
   border: none;
   padding: 0.3rem 0.8rem;
-  border-radius: 0.5rem;
   cursor: pointer;
   font-size: 0.9rem;
   transition: color 0.2s;
 }
 
 .edit-btn:hover {
-  color: #d97706;
+  color: #d97706 !important;
 }
 
 .delete-btn {
-  background: none;
-  color: #ef4444;
+  color: #ef4444 !important;
   border: none;
-  padding: 0.3rem 0.8rem;
-  border-radius: 0.5rem;
   cursor: pointer;
   font-size: 0.9rem;
   transition: color 0.2s;
 }
 
 .delete-btn:hover {
-  color: #dc2626;
+  color: #dc2626 !important;
 }
 
 .delete-btn:disabled {

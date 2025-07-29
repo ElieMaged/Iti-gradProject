@@ -5,11 +5,11 @@
             @navigate="handleSidebarNavigate"
         />
     <div class="payment-content">
-      <h1 class="payment-title">Payment</h1>
+      <h1 class="payment-title">{{ $t('payment') }}</h1>  
       <div class="payment-balance-card">
         <div class="balance-labels">
-          <span class="current-balance-label">Current Balance</span>
-          <span class="pending-label">Pending</span>
+          <span class="current-balance-label">{{ $t('currentBalance') }}</span>
+          <span class="pending-label">{{ $t('pending') }}</span>
         </div>
         <div class="balance-amounts">
           <span class="current-balance-amount">600 EGP</span>
@@ -18,26 +18,26 @@
       </div>
       <div class="payment-method-card">
         <div class="payment-method-header">
-          <span class="payment-method-title">Your Payment Method</span>
-          <button class="edit-btn">Edit</button>
+          <span class="payment-method-title">{{ $t('yourPaymentMethod') }}</span>
+          <button class="edit-btn">{{ $t('edit') }}</button>
         </div>
-        <div class="payment-method-type">Paypal</div>
+        <div class="payment-method-type">{{ $t('paypal') }}</div>
         <div class="payment-method-email">exampletech@gmail.com</div>
       </div>
       <div class="withdraw-card">
-        <div class="withdraw-title">Withdraw Funds</div>
+        <div class="withdraw-title">{{ $t('withdrawFunds') }}</div>
         <form class="withdraw-form">
           <div class="withdraw-fields">
             <div class="withdraw-field">
-              <label>Amount</label>
-              <input type="number" placeholder="Enter amount" />
+              <label>{{ $t('amount') }}</label>
+              <input type="number" :placeholder="$t('enterAmount')" />
             </div>
             <div class="withdraw-field">
-              <label>Paypal email</label>
-              <input type="email" placeholder="example email" />
+              <label>{{ $t('paypalEmail') }}</label>
+                <input type="email" :placeholder="$t('exampleEmail')" />
             </div>
           </div>
-          <button class="withdraw-btn" type="submit">Withdraw</button>
+          <button class="withdraw-btn" type="submit">{{ $t('withdraw') }}</button>
         </form>
       </div>
     </div>

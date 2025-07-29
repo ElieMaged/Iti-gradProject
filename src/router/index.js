@@ -60,6 +60,8 @@ import AdminBookingEdit from '../views/adminDashboard/AdminBookingEdit.vue'
 
 
 
+
+
 const routes = [
   { path: '/', component: HomePage },
   { path: '/about', component: About },

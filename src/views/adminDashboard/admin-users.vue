@@ -1,15 +1,15 @@
 <template>
   <div class="admin-dashboard-layout">
     <admin-sidebar />
-    <div class="users-main">
+    <div class="users-main mr-20 p-4">
       <div class="users-container">
-        <h2 class="users-title">User Management</h2>
+        <h2 class="users-title">{{ $t('userManagement') }}</h2>
                  <div class="subtitle-search-row">
-           <div class="users-subtitle">All Regular Users</div>
+           <div class="users-subtitle">{{ $t('allRegularUsers') }}</div>
           <div class="search-wrapper">
             <input 
               type="text" 
-              placeholder="Search" 
+              :placeholder="$t('search')" 
               v-model="searchQuery"
               class="search-input"
             />
@@ -20,13 +20,13 @@
         <!-- Loading State -->
         <div v-if="loading" class="loading-state">
           <div class="loading-spinner"></div>
-          <p>Loading users...</p>
+          <p>{{ $t('loadingUsers') }}</p>
         </div>
 
         <!-- Error State -->
         <div v-else-if="error" class="error-state">
-          <p class="error-message">{{ error }}</p>
-          <button @click="fetchAllUsers" class="retry-btn">Retry</button>
+          <p class="error-message">{{ $t('failedToFetchUsers') }}</p>
+          <button @click="fetchAllUsers" class="retry-btn">{{ $t('retry') }}</button>
         </div>
 
         <!-- Users Table -->
@@ -34,14 +34,14 @@
           <table class="users-table">
             <thead>
               <tr class="table-header">
-                <th>No</th>
-                <th>User</th>
-                <th>Role</th>
-                <th>Specialization</th>
-                <th>Location</th>
-                <th>Mail</th>
-                <th>Contact</th>
-                <th>Action</th>
+                <th>{{ $t('no') }}</th>
+                <th>{{ $t('user') }}</th>
+                <th>{{ $t('role') }}</th>
+                <th>{{ $t('specialization') }}</th>
+                <th>{{ $t('location') }}</th>
+                <th>{{ $t('mail') }}</th>
+                <th>{{ $t('contact') }}</th>
+                <th>{{ $t('action') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -57,7 +57,7 @@
                 </td>
                 <td>
                   <span class="role-badge" :class="user.role">
-                    {{ user.role }}
+                    {{ $t(user.role) }}
                   </span>
                 </td>
                 <td>{{ user.specialization || 'N/A' }}</td>
@@ -65,10 +65,10 @@
                 <td>{{ user.email }}</td>
                 <td>{{ user.contact || 'N/A' }}</td>
                 <td class="action-cell">
-                  <a @click="viewUser(user)" class="action-btn view-btn">
+                  <a @click="viewUser(user)" class="action-btn view-btn" :title="$t('viewUser')">
                     <i class="fas fa-eye"></i>
                   </a>
-                  <button @click="deleteUser(user)" class="action-btn delete-btn" :disabled="user.role === 'admin'">
+                  <button @click="deleteUser(user)" class="action-btn delete-btn" :disabled="user.role === 'admin'" :title="$t('deleteUser')">
                     <i class="fas fa-trash-alt"></i>
                   </button>
                 </td>
@@ -79,8 +79,8 @@
 
                  <!-- Empty State -->
          <div v-else class="empty-state">
-           <p>No regular users found in the database.</p>
-           <p class="debug-info">Debug: Check console for more information</p>
+           <p>{{ $t('noRegularUsersFound') }}</p>
+           <p class="debug-info">{{ $t('debugInfo') }}</p>
          </div>
         
         <pagination
@@ -201,11 +201,11 @@ export default {
       
              async deleteUser(user) {
          if (user.role === 'admin') {
-           alert('Cannot delete admin users');
+           alert(this.$t('cannotDeleteAdmin'));
            return;
          }
 
-         if (!confirm(`Are you sure you want to delete ${user.name}? This action cannot be undone.`)) {
+         if (!confirm(this.$t('confirmDeleteUser', { name: user.name }))) {
            return;
          }
 
@@ -225,11 +225,11 @@ export default {
            }
 
            // Show success message
-           alert(`User ${user.name} has been deleted successfully from the database!`);
+           alert(this.$t('userDeletedSuccess', { name: user.name }));
            
          } catch (error) {
            console.error('❌ Error deleting user:', error);
-           alert('Failed to delete user. Please try again.');
+           alert(this.$t('failedToDeleteUser'));
          }
        },
       
@@ -260,22 +260,31 @@ export default {
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
   background: #faf8fd;
 }
-
+.dark .admin-dashboard-layout {
+  background-color: var(--primary-bg);
+}
 .users-main {
   flex: 1;
   padding: 2.5rem;
 }
-
+.dark .users-main {
+  background-color: var(--primary-bg);
+}
 .users-container {
   max-width: 80rem;
   margin: 0 auto;
 }
-
+.dark .users-container {
+  background-color: var(--primary-bg);
+}
 .users-title {
   font-size: 2rem;
   font-weight: bold;
   color: #7c6bb0;
   margin-bottom: 0;
+}
+.dark .users-title {
+  color: var(--primary-text);
 }
 
 .subtitle-search-row {
@@ -289,6 +298,9 @@ export default {
   font-size: 1.2rem;
   font-weight: 600;
   color: #7c6bb0;
+}
+.dark .users-subtitle {
+  color: var(--primary-text);
 }
 
 .search-wrapper {
@@ -315,11 +327,19 @@ export default {
   padding: 0 16px 0 40px;
   transition: border 0.2s;
 }
-
+.dark .search-input {
+  background-color: var(--input-bg);
+  color: var(--text-muted);
+}
+.dark .search-input::placeholder {
+  color: var(--text-muted);
+}
 .search-input:focus {
   border: 1.5px solid #6B5FA7;
 }
-
+.dark .search-input:focus {
+  border: 1.5px solid var(--primary-text);
+}
 .search-icon {
   position: absolute;
   left: 16px;
@@ -328,12 +348,17 @@ export default {
   color: #b6a7e6;
   font-size: 1.1rem;
 }
-
+.dark .search-icon {
+  color: var(--icon-color);
+}
 .table-wrapper {
   overflow-x: auto;
   border-radius: 0.75rem;
   background: #fff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.dark .table-wrapper {
+  background-color: var(--grey-bg);
 }
 
 .users-table {
@@ -342,7 +367,10 @@ export default {
   background: #fff;
   border-radius: 0.75rem;
 }
-
+.dark .table-header {
+  background-color: var(--grey-bg);
+  color: var(--primary-text);
+}
 .table-header {
   background: rgba(124, 107, 176, 0.2);
   color: #333;
@@ -359,16 +387,24 @@ export default {
   border-bottom: 1px solid #e5e7eb;
   transition: background-color 0.2s;
 }
-
+.dark .table-row {
+  background-color: var(--input-bg);
+}
 .table-row:hover {
   background: #ede7f6;
 }
-
+.dark .table-row:hover {
+  background-color: var(--icon-color);
+}
 .table-row td {
   padding: 0.75rem 1rem;
   font-size: 0.9rem;
   color: #333;
 }
+.dark .table-row td {
+  color: var(--text-muted);
+}
+
 
 .user-cell {
   display: flex;

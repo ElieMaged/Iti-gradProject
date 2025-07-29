@@ -2,10 +2,8 @@
   <div v-if="loading">
     <p>{{ $t('loading') }}</p>
   </div>
-  <div v-else-if="error">
-    <p class="text-red-500">{{ error }}</p>
-  </div>
   <div v-else-if="technician">
+    <Sidebar :activeMenu="'technicianprofile'"  />
     <div class="profile-hero">
       <h1 class="profile-title">{{ $t('technicianProfileTitle') }}</h1>
     </div>
@@ -237,13 +235,27 @@
   </div>
 </template>
 
-<script setup>
+<script >
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { doc, getDoc, collection, getDocs, query, where, addDoc, orderBy } from 'firebase/firestore'
 import { db, auth } from '../firebase'
 import { stockTechnicians } from '../assets/stockTechnicians'
+import Sidebar from '../components/Sidebar.vue'
+
+export default {
+  name: 'TechnicianProfile',
+  components: {
+    Sidebar
+  },
+  data() {
+    return {
+      activeMenu: 'technicianprofile'
+    }
+  }
+}
+
 
 const route = useRoute()
 const router = useRouter()
@@ -441,13 +453,7 @@ function formatDate(date) {
   return d.toLocaleDateString()
 }
 
-function bookNow() {
-  const technicianId = route.params.id
-  router.push({
-    path: '/bookingpage',
-    query: { techId: technicianId }
-  })
-}
+
 
 function viewAllServices() {
   router.push('/allservices')

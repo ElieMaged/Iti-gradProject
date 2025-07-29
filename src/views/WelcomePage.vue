@@ -3,8 +3,8 @@
     <div class="welcome-container">
       <!-- Header Section -->
       <div class="welcome-header">
-        <h1 class="welcome-title pt-5">Welcome to Boltfix</h1>
-        <p class="welcome-subtitle">Choose your role and start your journey with us</p>
+        <h1 class="welcome-title pt-5">{{ $t('welcomeToBoltfix') }}</h1>
+        <p class="welcome-subtitle">{{ $t('chooseYourRole') }}</p>
       </div>
 
       <!-- Cards Section -->
@@ -14,13 +14,12 @@
           <div class="card-icon">
             <i class="fa-regular fa-user"></i>
           </div>
-          <h3 class="card-title">Register as a user</h3>
+          <h3 class="card-title">{{ $t('registerAsUser') }}</h3>
           <p class="card-description">
-            Join us now to easily book trusted technicians near you. we'll connect you with professionals in just a few
-            clicks.
+            {{ $t('userDescription') }}
           </p>
           <button class="get-started-btn" @click="$router.push('/usersignup')">
-            Get Started
+            {{ $t('getStarted') }}
             <i class="fa-solid fa-arrow-right"></i>
           </button>
         </div>
@@ -30,13 +29,12 @@
           <div class="card-icon">
             <i class="fa-regular fa-user"></i>
           </div>
-          <h3 class="card-title">Register as a Technicain</h3>
+          <h3 class="card-title">{{ $t('registerAsTechnician') }}</h3>
           <p class="card-description">
-            Register to offer your services and reach more customers in your area. Create your profile and start
-            receiving bookings.
+            {{ $t('technicianDescription') }}
           </p>
           <button class="get-started-btn" @click="$router.push('/techregister')">
-            Get Started
+            {{ $t('getStarted') }}
             <i class="fa-solid fa-arrow-right"></i>
           </button>
         </div>

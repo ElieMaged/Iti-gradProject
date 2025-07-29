@@ -5,7 +5,7 @@
     <div id="admin-profile-container">
       <div id="admin-profile-wrapper">
         <div id="admin-profile-card">
-          <h2 id="admin-profile-title">Personal Information</h2>
+          <h2 id="admin-profile-title">{{ $t('personalInformation') }}</h2>
           <div id="admin-profile-content">
             <div id="admin-profile-info">
               <div class="info-block" v-for="(value, label) in userInfo" :key="label">
@@ -30,15 +30,27 @@ export default {
   components: { AdminSidebar },
   data() {
     return {
-      userInfo: {
-        'Full Name': 'Mohamed Ali Mohamed',
-        'Email Address': 'mohamed@gmail.com',
-        'Phone Number': '+20 011 555 2323',
-        'Gender': 'Male',
-        'National id': '60504441591478',
-        'Address': '15 El-Tahrir Street, Dokki, Giza, Egypt, 12611'
+      userData: {
+        fullName: 'Mohamed Ali Mohamed',
+        emailAddress: 'mohamed@gmail.com',
+        phoneNumber: '+20 011 555 2323',
+        gender: 'male',
+        nationalId: '60504441591478',
+        address: '15 El-Tahrir Street, Dokki, Giza, Egypt, 12611'
       }
     };
+  },
+  computed: {
+    userInfo() {
+      return {
+        [this.$t('fullName')]: this.userData.fullName,
+        [this.$t('emailAddress')]: this.userData.emailAddress,
+        [this.$t('phoneNumber')]: this.userData.phoneNumber,
+        [this.$t('gender')]: this.$t(this.userData.gender),
+        [this.$t('nationalId')]: this.userData.nationalId,
+        [this.$t('address')]: this.userData.address
+      };
+    }
   }
 };
 </script>
@@ -50,13 +62,18 @@ export default {
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
   background: #faf8fd;
 }
+.dark .admin-dashboard-layout {
+  background-color: var(--primary-bg);
+}
 #admin-profile-container {
   background-color: #f9fafb;
   min-height: 100vh;
   font-family: sans-serif;
   flex: 1;
 }
-
+.dark #admin-profile-container {
+  background-color: var(--primary-bg);
+}
 #admin-profile-wrapper {
   padding: 2rem;
   max-width: 1000px;
@@ -69,12 +86,30 @@ export default {
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
   padding: 2rem;
 }
-
+.dark #admin-profile-card {
+  background-color: var(--grey-bg);
+}
 #admin-profile-title {
   font-size: 1.5rem;
   font-weight: bold;
   color: #7c6bb0;
   margin-bottom: 1.5rem;
+}
+.dark #admin-profile-title {
+  color: var(--white);
+}
+
+/* RTL Support for Arabic */
+[dir="rtl"] #admin-profile-title {
+  text-align: right;
+}
+
+[dir="rtl"] .info-label {
+  text-align: right;
+}
+
+[dir="rtl"] .info-value {
+  text-align: right;
 }
 
 #admin-profile-content {
@@ -107,13 +142,17 @@ export default {
   font-weight: bold;
   color: #333;
 }
-
+.dark .info-label {
+  color: var(--white);
+}
 .info-value {
   font-size: 1rem;
   color: #4b5563;
   margin-top: 0.25rem;
 }
-
+.dark .info-value {
+  color: var(--primary-text-dark);
+}
 #admin-profile-image {
   flex-shrink: 0;
   display: flex;
@@ -125,9 +164,15 @@ export default {
   border-radius: 0.5rem;
   margin: 0 auto;
 }
+.dark #admin-profile-image {
+  background-color: var(--primary-bg);
+}
 
 #profile-icon {
   font-size: 3.5rem;
   color: #9ca3af;
+}
+.dark #profile-icon {
+  color: var(--white);
 }
 </style>

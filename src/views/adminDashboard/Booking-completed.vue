@@ -1,12 +1,12 @@
 <template>
   <div class="admin-dashboard-layout">
     <admin-sidebar />
-    <div class="booking-main">
+    <div class="booking-main mr-20 p-4">
       <div class="booking-container">
         <div class="title-search-row">
-          <h2 class="booking-title">Completed Booking</h2>
+          <h2 class="booking-title">{{ $t('completedBookings') }}</h2>
           <div class="search-wrapper">
-            <input v-model="searchQuery" class="search-input" type="text" placeholder="Search" />
+            <input v-model="searchQuery" class="search-input" type="text" :placeholder="$t('search')" />
             <span class="search-icon"><i class="fas fa-search"></i></span>
           </div>
         </div>
@@ -14,14 +14,14 @@
           <table class="booking-table">
             <thead>
               <tr class="table-header">
-                <th>User Name</th>
-                <th>Technician Name</th>
-                <th>Specialization</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Address</th>
-                <th>Price</th>
-                <th>Status</th>
+                <th>{{ $t('userName') }}</th>
+                <th>{{ $t('technician') }}</th>
+                <th>{{ $t('specialization') }}</th>
+                <th>{{ $t('date') }}</th>
+                <th>{{ $t('time') }}</th>
+                <th>{{ $t('address') }}</th>
+                <th>{{ $t('price') }}</th>
+                <th>{{ $t('status') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -34,7 +34,7 @@
                 <td>{{ booking.address }}</td>
                 <td>{{ booking.price }}</td>
                 <td>
-                  <span class="status-completed">{{ booking.status }}</span>
+                  <span class="status-completed">{{ $t('completed') }}</span>
                 </td>
               </tr>
             </tbody>
@@ -92,15 +92,24 @@ export default {
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
   background: #faf8fd;
 }
+.dark .admin-dashboard-layout {
+  background-color: var(--primary-bg);
+}
 
 .booking-main {
   flex: 1;
   padding: 2.5rem;
 }
+.dark .booking-main {
+  background-color: var(--primary-bg);
+}
 
 .booking-container {
   max-width: 80rem;
   margin: 0 auto;
+}
+.dark .booking-container {
+  background-color: var(--primary-bg);
 }
 
 .title-search-row {
@@ -109,12 +118,18 @@ export default {
   justify-content: space-between;
   margin-bottom: 1.5rem;
 }
+.dark .title-search-row {
+  color: var(--primary-text);
+}
 
 .booking-title {
   font-size: 2rem;
   font-weight: bold;
   color: #7c6bb0;
   margin-bottom: 0;
+}
+.dark .booking-title {
+  color: var(--primary-text);
 }
 
 .search-wrapper {
@@ -127,6 +142,9 @@ export default {
   flex-shrink: 0;
   margin-bottom: 16px;
   position: relative;
+}
+.dark .search-wrapper {
+  background-color: var(--primary-bg);
 }
 
 .search-input {
@@ -141,9 +159,19 @@ export default {
   padding: 0 16px 0 40px;
   transition: border 0.2s;
 }
+.dark .search-input {
+  background-color: var(--input-bg);
+  color: var(--text-muted);
+}
+.dark .search-input::placeholder {
+  color: var(--text-muted);
+}
 
 .search-input:focus {
   border: 1.5px solid #6B5FA7;
+}
+.dark .search-input:focus {
+  border: 1.5px solid var(--primary-text);
 }
 
 .search-icon {
@@ -154,12 +182,18 @@ export default {
   color: #b6a7e6;
   font-size: 1.1rem;
 }
+.dark .search-icon {
+  color: var(--icon-color);
+}
 
 .table-wrapper {
   overflow-x: auto;
   border-radius: 0.75rem;
   background: #fff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.dark .table-wrapper {
+  background-color: var(--grey-bg);
 }
 
 .booking-table {
@@ -168,10 +202,17 @@ export default {
   background: #fff;
   border-radius: 0.75rem;
 }
+.dark .booking-table {
+  background-color: var(--grey-bg);
+  color: var(--primary-text);
+}
 
 .table-header {
   background: rgba(124, 107, 176, 0.2);
   color: #333;
+}
+.dark .table-header th {
+  color: var(--primary-text);
 }
 
 .table-header th {
@@ -185,9 +226,16 @@ export default {
   border-bottom: 1px solid #e5e7eb;
   transition: background-color 0.2s;
 }
+.dark .table-row {
+  background-color: var(--input-bg);
+  color: var(--text-muted);
+}
 
 .table-row:hover {
   background: #ede7f6;
+}
+.dark .table-row:hover {
+  background-color: var(--icon-color);
 }
 
 .table-row td {
@@ -197,9 +245,7 @@ export default {
 }
 
 .status-completed {
-  background: #dcfce7;
   color: #166534;
-  padding: 0.25rem 0.75rem;
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 600;

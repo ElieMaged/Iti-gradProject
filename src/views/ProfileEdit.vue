@@ -1,8 +1,6 @@
 <template>
   <div class="flex min-h-screen">
-    <!-- Sidebar -->
-    <Sidebar :activeMenu="activeMenu" @navigate="handleSidebarNavigate" />
-    <!-- Main Content -->
+    <userSidebar :activeTab="activeTab" />
     <div class="flex-1 p-8">
       <div class="max-w-4xl mx-auto">
         <div class="bg-white rounded-xl shadow-lg p-8">
@@ -103,12 +101,12 @@
 </template>
 
 <script>
-import Sidebar from '../components/Sidebar.vue';
+import userSidebar from '../components/userSidebar.vue';
 export default {
-  components: { Sidebar },
+  components: { userSidebar },
   data() {
     return {
-      activeMenu: 'technicianeditprofile',
+      activeTab: 'settings',
       profileImageUrl: 'https://randomuser.me/api/portraits/men/32.jpg',
       form: {
         fullName: '',
