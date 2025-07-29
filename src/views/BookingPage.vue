@@ -48,7 +48,14 @@
               <div v-for="(date, index) in visibleDates" :key="index" class="date-slot">
                 <div class="day-name">{{ formatDay(date) }}</div>
                 <div class="date-number">{{ formatDateNumber(date) }}</div>
-                <div class="time-slot">{{ availableTimes[selectedTimeIndex] }}</div>
+                <div class="time-slot">
+                  <span v-if="getAvailableTimeForDate(date)">
+                    {{ getAvailableTimeForDate(date) }}
+                  </span>
+                  <span v-else class="text-gray-400 text-sm">
+                    Unavailable
+                  </span>
+                </div>
               </div>
             
             </div>
@@ -67,15 +74,23 @@
           <div class="form-row">
             <div class="form-group">
               <label>{{ $t('date') }}</label>
-              <select v-model="form.date" class="form-input">
+              <select v-model="form.date" class="form-input" :disabled="availableDates.length === 0">
+                <option v-if="availableDates.length === 0" value="">No available dates</option>
                 <option v-for="date in availableDates" :key="date" :value="date">{{ formatDate(date) }}</option>
               </select>
+              <div v-if="availableDates.length === 0" class="text-sm text-red-500 mt-1">
+                This technician has not set their availability yet. Please contact them directly or try again later.
+              </div>
             </div>
             <div class="form-group">
               <label>{{ $t('time') }}</label>
-              <select v-model="form.time" class="form-input">
+              <select v-model="form.time" class="form-input" :disabled="availableTimes.length === 0">
+                <option v-if="availableTimes.length === 0" value="">No available times for this date</option>
                 <option v-for="time in availableTimes" :key="time" :value="time">{{ time }}</option>
               </select>
+              <div v-if="availableTimes.length === 0" class="text-sm text-red-500 mt-1">
+                This technician is not available on the selected date. Please choose a different date.
+              </div>
             </div>
           </div>
           <div class="form-row">
@@ -187,24 +202,36 @@ const router = useRouter()
 const technician = ref({})
 const errorMsg = ref('')
 const paypalLoaded = ref(false)
+const technicianAvailability = ref(null)
 
 // Date and time management
 const currentDateOffset = ref(0)
 
-// Dynamically generate the next three days for the date dropdown
+// Dynamically generate available dates based on technician availability
 const availableDates = computed(() => {
   const days = [];
   const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const today = new Date();
-  for (let i = 1; i <= 3; i++) {
+  
+  // Check next 14 days (2 weeks) for availability
+  for (let i = 1; i <= 14; i++) {
     const nextDay = new Date(today);
     nextDay.setDate(today.getDate() + i);
+    
     const month = nextDay.getMonth() + 1;
     const date = nextDay.getDate();
     const year = nextDay.getFullYear();
     const dayOfWeek = dayNames[nextDay.getDay()];
-    days.push(`${month}/${date}/${year} ${dayOfWeek}`);
+    const dayName = dayNames[nextDay.getDay()].toLowerCase();
+    
+    // Check if technician is available on this day
+    if (technicianAvailability.value && 
+        technicianAvailability.value[dayName] && 
+        technicianAvailability.value[dayName].available) {
+      days.push(`${month}/${date}/${year} ${dayOfWeek}`);
+    }
   }
+  
   return days;
 });
 
@@ -225,16 +252,14 @@ const visibleDates = computed(() => {
   return days.slice(0, 3); // Show only 3 days
 });
 
-const availableTimes = [
-  '01:00 PM - 11:00 PM',
-  '12:00 PM - 12:00 PM',
-  '03:00 PM - 05:00 PM'
-]
+// Dynamic available times based on technician availability
+const availableTimes = ref([])
 const selectedTimeIndex = ref(0)
 
+// Form data - moved before watch functions
 const form = ref({
   date: '', // will be set on mount
-  time: availableTimes[0],
+  time: '',
   fullName: '',
   phone: '',
   email: '', // <-- Add email field
@@ -244,6 +269,140 @@ const form = ref({
   street: '',
   building: '',
   payment: 'Paypal'
+})
+
+// Function to get day name from date string
+function getDayName(dateString) {
+  const [datePart] = dateString.split(' ')
+  const [month, day, year] = datePart.split('/')
+  const date = new Date(year, month - 1, day)
+  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+  return days[date.getDay()]
+}
+
+// Function to generate time slots based on availability
+function generateTimeSlots(startTime, endTime) {
+  const slots = []
+  const start = new Date(`2000-01-01 ${startTime}`)
+  const end = new Date(`2000-01-01 ${endTime}`)
+  
+  // Generate 1-hour slots
+  let current = new Date(start)
+  while (current < end) {
+    const slotStart = current.toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: true 
+    })
+    
+    current.setHours(current.getHours() + 1)
+    const slotEnd = current.toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: true 
+    })
+    
+    slots.push(`${slotStart} - ${slotEnd}`)
+  }
+  
+  return slots
+}
+
+// Function to fetch technician availability
+async function fetchTechnicianAvailability(technicianId) {
+  try {
+    const availabilityRef = doc(db, 'technicianAvailability', technicianId)
+    const availabilitySnap = await getDoc(availabilityRef)
+    
+    if (availabilitySnap.exists()) {
+      const data = availabilitySnap.data()
+      technicianAvailability.value = data
+      return data
+    }
+    technicianAvailability.value = null
+    return null
+  } catch (error) {
+    console.error('Error fetching technician availability:', error)
+    technicianAvailability.value = null
+    return null
+  }
+}
+
+// Function to get available time for a specific date
+function getAvailableTimeForDate(dateString) {
+  if (!technicianAvailability.value) return null
+  
+  const dayName = getDayName(dateString)
+  const dayAvailability = technicianAvailability.value[dayName]
+  
+  if (dayAvailability && dayAvailability.available) {
+    return `${dayAvailability.startTime} - ${dayAvailability.endTime}`
+  }
+  
+  return null
+}
+
+// Function to update available times based on selected date
+async function updateAvailableTimes(selectedDate) {
+  if (!technician.value.uid || !selectedDate) {
+    availableTimes.value = []
+    return
+  }
+  
+  const dayName = getDayName(selectedDate)
+  const availability = await fetchTechnicianAvailability(technician.value.uid)
+  
+  if (availability && availability[dayName] && availability[dayName].available) {
+    const { startTime, endTime } = availability[dayName]
+    availableTimes.value = generateTimeSlots(startTime, endTime)
+    
+    // Set default time if available
+    if (availableTimes.value.length > 0) {
+      form.value.time = availableTimes.value[0]
+      selectedTimeIndex.value = 0
+    }
+  } else {
+    availableTimes.value = []
+    form.value.time = ''
+  }
+}
+
+// Watch for date changes to update available times
+watch(() => form.value.date, async (newDate) => {
+  if (newDate) {
+    await updateAvailableTimes(newDate)
+  }
+})
+
+// Watch for technician data changes to fetch availability
+watch(() => technician.value.uid, async (newUid) => {
+  if (newUid) {
+    await fetchTechnicianAvailability(newUid)
+    if (form.value.date) {
+      await updateAvailableTimes(form.value.date)
+    }
+  }
+})
+
+// Watch for available times changes to reinitialize PayPal
+watch(() => availableTimes.value, () => {
+  if (form.value.payment === 'Paypal' && paypalLoaded.value) {
+    setTimeout(() => {
+      initializePayPalButton();
+    }, 100);
+  }
+})
+
+// Watch for technician availability changes to update available dates
+watch(() => technicianAvailability.value, () => {
+  // When availability changes, update the selected date if current date is no longer available
+  if (form.value.date && availableDates.value.length > 0) {
+    const isCurrentDateAvailable = availableDates.value.includes(form.value.date);
+    if (!isCurrentDateAvailable) {
+      form.value.date = availableDates.value[0];
+      updateAvailableTimes(form.value.date);
+    }
+  }
 })
 
 // Helper functions for date formatting
@@ -283,6 +442,7 @@ onMounted(async () => {
     errorMsg.value = 'Technician ID is missing. Please try again or contact support.';
     return;
   }
+  
   // Try to find in stockTechnicians first
   const stock = stockTechnicians.find(t => t.id === id)
   if (stock) {
@@ -308,11 +468,23 @@ onMounted(async () => {
       console.log('Technician image:', technician.value.image);
     } else {
       errorMsg.value = 'Technician not found. Please try again or contact support.';
+      return;
     }
   }
+  
+  // Fetch technician availability first
+  if (technician.value.uid) {
+    await fetchTechnicianAvailability(technician.value.uid);
+  }
+  
   // Set default date to the first available date
   if (availableDates.value.length > 0) {
     form.value.date = availableDates.value[0];
+    // Initialize availability times for the default date
+    await updateAvailableTimes(form.value.date);
+  } else {
+    // No available dates found
+    errorMsg.value = 'This technician has not set their availability yet. Please contact them directly or try again later.';
   }
   
   // Load PayPal script
@@ -386,6 +558,16 @@ function initializePayPalButton() {
   
   if (!technician.value.visitPrice && !technician.value.basePrice) {
     console.log('No technician price available');
+    return;
+  }
+
+  // Check if times are available
+  if (availableTimes.value.length === 0) {
+    console.log('No available times for booking');
+    const container = document.getElementById('paypal-button-container');
+    if (container) {
+      container.innerHTML = '<div class="text-red-500 text-center p-4">No available time slots for the selected date. Please choose a different date.</div>';
+    }
     return;
   }
 
@@ -471,6 +653,18 @@ function handlePaymentMethodChange() {
 }
 
 async function createBookingWithPayment(paymentDetails) {
+  // Validate that a date is selected
+  if (!form.value.date || availableDates.value.length === 0) {
+    errorMsg.value = 'Please select an available date for booking.';
+    return;
+  }
+
+  // Validate that a time is selected
+  if (!form.value.time || availableTimes.value.length === 0) {
+    errorMsg.value = 'Please select an available time slot for booking.';
+    return;
+  }
+
   const bookingData = {
     technicianId: technician.value.uid || technician.value.id,
     technicianName: technician.value.name,
@@ -546,7 +740,15 @@ async function createBookingWithPayment(paymentDetails) {
       sendConfirmationEmail(form.value.email, technician.value.name, form.value.date, form.value.time, form.value.payment);
     }
     
-    // Redirect to confirmation page
+    // Store booking data for confirmation page
+    const confirmationData = {
+      technicianName: technician.value.name,
+      date: form.value.date,
+      time: form.value.time,
+      payment: form.value.payment
+    };
+    localStorage.setItem('bookingData', JSON.stringify(confirmationData));
+    
     router.push('/bookingconfirmation');
     
   } catch (error) {
@@ -582,6 +784,18 @@ async function confirmBooking() {
     return;
   }
 
+  // Validate that a date is selected
+  if (!form.value.date || availableDates.value.length === 0) {
+    errorMsg.value = 'Please select an available date for booking.';
+    return;
+  }
+
+  // Validate that a time is selected
+  if (!form.value.time || availableTimes.value.length === 0) {
+    errorMsg.value = 'Please select an available time slot for booking.';
+    return;
+  }
+
   const bookingData = {
     technicianId: technician.value.uid || technician.value.id,
     technicianName: technician.value.name,
@@ -602,6 +816,15 @@ async function confirmBooking() {
     if (form.value.email) {
       sendConfirmationEmail(form.value.email, technician.value.name, form.value.date, form.value.time, form.value.payment);
     }
+    
+    // Store booking data for confirmation page
+    const confirmationData = {
+      technicianName: technician.value.name,
+      date: form.value.date,
+      time: form.value.time,
+      payment: form.value.payment
+    };
+    localStorage.setItem('bookingData', JSON.stringify(confirmationData));
     
     router.push('/bookingconfirmation');
   } catch (e) {

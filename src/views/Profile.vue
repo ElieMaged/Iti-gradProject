@@ -12,14 +12,44 @@
             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/></svg>
             <span>{{ $t('settings') }}</span>
           </router-link>
-          <router-link to="/technician-booking-completed" :class="[ 'flex items-center space-x-3 py-2 px-3 rounded-lg transition-colors', activeTab === 'booking' ? 'bg-purple-200 text-purple-700 font-medium' : 'text-gray-700 hover:text-purple-700']" @click="activeTab = 'booking'">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg>
-            <span>Completed Bookings</span>
-          </router-link>
-          <router-link :to="getRoute('payment')" :class="[ 'flex items-center space-x-3 py-2 px-3 rounded-lg transition-colors', activeTab === 'payment' ? 'bg-purple-200 text-purple-700 font-medium' : 'text-gray-700 hover:text-purple-700']" @click="activeTab = 'payment'">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4zM18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z"/></svg>
-            <span>{{ $t('payment') }}</span>
-          </router-link>
+          
+          <!-- Booking Dropdown -->
+          <div class="relative">
+            <div 
+              @click="toggleBookingDropdown"
+              :class="[ 'flex items-center space-x-3 py-2 px-3 rounded-lg transition-colors cursor-pointer', activeTab === 'booking' ? 'bg-purple-200 text-purple-700 font-medium' : 'text-gray-700 hover:text-purple-700']"
+            >
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg>
+              <span>My Bookings</span>
+              <svg class="w-4 h-4 ml-auto transition-transform" :class="{ 'rotate-180': isBookingDropdownOpen }" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <div v-show="isBookingDropdownOpen" class="mt-2 ml-4 space-y-1">
+              <router-link 
+                to="/user-booking-pending" 
+                :class="[ 'block py-2 px-3 rounded-lg transition-colors text-sm', activeBookingStatus === 'pending' ? 'bg-purple-100 text-purple-700' : 'text-gray-600 hover:text-purple-700']"
+                @click="activeBookingStatus = 'pending'"
+              >
+                Pending
+              </router-link>
+              <router-link 
+                to="/user-booking-upcoming" 
+                :class="[ 'block py-2 px-3 rounded-lg transition-colors text-sm', activeBookingStatus === 'upcoming' ? 'bg-purple-100 text-purple-700' : 'text-gray-600 hover:text-purple-700']"
+                @click="activeBookingStatus = 'upcoming'"
+              >
+                Upcoming
+              </router-link>
+              <router-link 
+                to="/user-booking-completed" 
+                :class="[ 'block py-2 px-3 rounded-lg transition-colors text-sm', activeBookingStatus === 'completed' ? 'bg-purple-100 text-purple-700' : 'text-gray-600 hover:text-purple-700']"
+                @click="activeBookingStatus = 'completed'"
+              >
+                Completed
+              </router-link>
+            </div>
+          </div>
+
           <router-link :to="getRoute('previous-services')" :class="[ 'flex items-center space-x-3 py-2 px-3 rounded-lg transition-colors', activeTab === 'history' ? 'bg-purple-200 text-purple-700 font-medium' : 'text-gray-700 hover:text-purple-700']" @click="activeTab = 'history'">
             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
             <span>{{ $t('history') }}</span>
@@ -111,47 +141,10 @@
                     </svg>
                   </div>
                 </div>
-                <button class="bg-purple-500 text-white px-6 py-2 rounded-lg hover:bg-purple-600 transition-colors">
-                  {{ $t('upload') }}
+                <button class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                  {{ $t('changePhoto') }}
                 </button>
               </div>
-            </div>
-          </div>
-
-          <!-- Change Address Section -->
-          <div class="mb-8 border-t pt-8">
-            <div class="flex justify-between items-center mb-6">
-              <h3 class="text-xl font-bold text-purple-800">{{ $t('changeAddress') }}</h3>
-              <button class="bg-purple-300 text-white px-4 py-2 rounded-lg hover:bg-purple-400 transition-colors">
-                {{ $t('edit') }}
-              </button>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('city') }}</label>
-                <input type="text" :value="technicianData.government" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('area') }}</label>
-                <input type="text" :value="technicianData.district" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('streetName') }}</label>
-                <input type="text" :value="technicianData.streetName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
-              </div>
-            </div>
-            
-            <div class="flex items-center space-x-6">
-              <span class="text-gray-700 font-medium">{{ $t('willingToTravel') }}</span>
-              <label class="flex items-center space-x-2">
-                <input type="radio" name="travel" value="yes" :checked="technicianData.willingToTravel === 'yes'" class="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-500" />
-                <span class="text-gray-700">{{ $t('yes') }}</span>
-              </label>
-              <label class="flex items-center space-x-2">
-                <input type="radio" name="travel" value="no" :checked="technicianData.willingToTravel === 'no'" class="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-500" />
-                <span class="text-gray-700">{{ $t('no') }}</span>
-              </label>
             </div>
           </div>
 
@@ -171,29 +164,8 @@
             </div>
           </div>
 
-          <!-- Change Password Section -->
-          <div class="mb-8 border-t pt-8">
-            <div class="flex justify-between items-center mb-6">
-              <h3 class="text-xl font-bold text-purple-800">{{ $t('changePassword') }}</h3>
-              <button class="bg-purple-300 text-white px-4 py-2 rounded-lg hover:bg-purple-400 transition-colors">
-                {{ $t('edit') }}
-              </button>
-            </div>
-            
-            <div class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('oldPassword') }}</label>
-                <input type="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('newPassword') }}</label>
-                <input type="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
-              </div>
-            </div>
-          </div>
-
-          <!-- Save Button -->
-          <div class="text-center pt-6">
+          <!-- Save Changes Button -->
+          <div class="flex justify-end">
             <button class="bg-purple-600 text-white px-8 py-3 rounded-lg hover:bg-purple-700 transition-colors font-medium text-lg">
               {{ $t('saveChanges') }}
             </button>
@@ -214,6 +186,8 @@ import { useI18n } from 'vue-i18n';
 
 const router = useRouter();
 const activeTab = ref('profile');
+const activeBookingStatus = ref('');
+const isBookingDropdownOpen = ref(false);
 const loading = ref(true);
 const error = ref('');
 const technicianData = ref(null);
@@ -221,6 +195,11 @@ const technicianData = ref(null);
 const { locale } = useI18n();
 function getRoute(path) {
   return locale.value === 'ar' ? `/ar/${path}` : `/${path}`;
+}
+
+function toggleBookingDropdown() {
+  isBookingDropdownOpen.value = !isBookingDropdownOpen.value;
+  activeTab.value = 'booking';
 }
 
 onMounted(async () => {

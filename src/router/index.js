@@ -37,6 +37,12 @@ import TechnicianBookingPending from '../views/TechnicianBookingPending.vue'
 import TechnicianBookingUpcoming from '../views/TechnicianBookingUpcoming.vue'
 import TechnicianBookingCompleted from '../views/TechnicianBookingCompleted.vue'
 
+// User booking views
+import UserBookingPending from '../views/UserBookingPending.vue'
+import UserBookingUpcoming from '../views/UserBookingUpcoming.vue'
+import UserBookingCompleted from '../views/UserBookingCompleted.vue'
+import UserProfile from '../views/UserProfile.vue'
+
 //admin
 import AdminUsers from '../views/adminDashboard/admin-users.vue'
 import AdminPayment from '../views/adminDashboard/admin-payment.vue'
@@ -98,6 +104,12 @@ const routes = [
   { path: '/technician-booking-pending', component: TechnicianBookingPending },
   { path: '/technician-booking-upcoming', component: TechnicianBookingUpcoming },
   { path: '/technician-booking-completed', component: TechnicianBookingCompleted },
+
+  // User booking routes
+  { path: '/user-booking-pending', component: UserBookingPending },
+  { path: '/user-booking-upcoming', component: UserBookingUpcoming },
+  { path: '/user-booking-completed', component: UserBookingCompleted },
+  { path: '/user-profile', component: UserProfile },
 
   //admin
   { path: '/admin-users', component: AdminUsers },

@@ -1,10 +1,16 @@
 <template>
   <div class="flex min-h-screen">
     <!-- Sidebar -->
-    <Sidebar :activeMenu="'booking'" :activeBookingStatus="'upcoming'" @navigate="handleSidebarNavigate" />
+    <Sidebar 
+      :activeMenu="'booking'" 
+      :activeBookingStatus="'upcoming'"
+      userType="user"
+      @navigate="handleSidebarNavigate" 
+    />
+    
     <!-- Main Content -->
     <div class="flex-1 p-8">
-      <div class="technician-dashboard-layout">
+      <div class="user-dashboard-layout">
         <div class="booking-main">
           <div class="booking-container">
             <div class="title-search-row">
@@ -43,7 +49,6 @@
               <table class="booking-table">
                 <thead>
                   <tr class="table-header">
-                    <th>User Name</th>
                     <th>Technician Name</th>
                     <th>Specialization</th>
                     <th>Date</th>
@@ -51,11 +56,11 @@
                     <th>Address</th>
                     <th>Price</th>
                     <th>Status</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-for="booking in filteredBookings" :key="booking.id" class="table-row">
-                    <td>{{ booking.userName }}</td>
                     <td>{{ booking.technicianName }}</td>
                     <td>{{ booking.specialization }}</td>
                     <td>{{ booking.date }}</td>
@@ -63,6 +68,11 @@
                     <td>{{ booking.address }}</td>
                     <td>{{ booking.price }}</td>
                     <td class="booking-status">{{ booking.status }}</td>
+                    <td>
+                      <button @click="cancelBooking(booking.id)" class="cancel-btn">
+                        Cancel
+                      </button>
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -91,7 +101,7 @@ const searchQuery = ref('');
 const bookings = ref([]);
 const loading = ref(true);
 const error = ref(null);
-const technicianUid = ref(null);
+const userUid = ref(null);
 const checkingExpired = ref(false);
 const lastCheckResult = ref(null);
 
@@ -104,10 +114,6 @@ const filteredBookings = computed(() => {
     Object.values(b).some(val => String(val).toLowerCase().includes(q))
   );
 });
-
-function handleSidebarNavigate(path) {
-  router.push(path);
-}
 
 // Client-side function to check and move expired bookings
 async function checkExpiredBookingsClientSide() {
@@ -210,13 +216,13 @@ async function fetchBookings() {
   try {
     loading.value = true;
     error.value = null;
-    if (!technicianUid.value) {
-      error.value = 'Technician not authenticated.';
+    if (!userUid.value) {
+      error.value = 'User not authenticated.';
       return;
     }
     const q = query(
       collection(db, 'bookings'),
-      where('technicianId', '==', technicianUid.value),
+      where('userId', '==', userUid.value),
       where('status', '==', 'upcoming')
     );
     const snapshot = await getDocs(q);
@@ -228,17 +234,46 @@ async function fetchBookings() {
   }
 }
 
+async function cancelBooking(bookingId) {
+  if (confirm('Are you sure you want to cancel this booking?')) {
+    try {
+      const bookingRef = doc(db, 'bookings', bookingId);
+      await updateDoc(bookingRef, {
+        status: 'cancelled',
+        cancelledAt: new Date()
+      });
+      await fetchBookings(); // Refresh the list
+    } catch (err) {
+      console.error('Error cancelling booking:', err);
+      alert('Failed to cancel booking. Please try again.');
+    }
+  }
+}
+
+function handleSidebarNavigate(route) {
+  if (route === 'logout') {
+    const auth = getAuth();
+    auth.signOut();
+    router.push('/');
+    return;
+  }
+  
+  if (route.startsWith('/')) {
+    router.push(route);
+  }
+}
+
 onMounted(() => {
   const auth = getAuth();
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      technicianUid.value = user.uid;
+      userUid.value = user.uid;
       fetchBookings().then(() => {
         // Automatically check for expired bookings when component loads
         checkExpiredBookings();
       });
     } else {
-      error.value = 'Technician not authenticated.';
+      error.value = 'User not authenticated.';
       loading.value = false;
     }
   });
@@ -246,7 +281,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.admin-dashboard-layout {
+.user-dashboard-layout {
   min-height: 100vh;
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
   background: #faf8fd;
@@ -484,6 +519,21 @@ onMounted(() => {
   font-weight: 600;
 }
 
+.cancel-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.cancel-btn:hover {
+  background: #dc2626;
+}
+
 @media (max-width: 768px) {
   .booking-main {
     padding: 1rem;
@@ -509,4 +559,4 @@ onMounted(() => {
     padding: 0.5rem 0.5rem;
   }
 }
-</style> 
+</style>

@@ -7,7 +7,7 @@
   </div>
   <div v-else-if="technician">
     <div class="profile-hero">
-      <h1 class="profile-title">{{ $t('technicianProfileTitle') }}</h1>
+      <h1 class="profile-title">Technician Profile</h1>
     </div>
     <div class="profile-main">
       <div class="profile-card">
@@ -23,12 +23,20 @@
           </div>
           <div class="profile-rating">
             <div class="rating-stars">
-              <i 
-                v-for="n in 5" 
-                :key="n" 
-                class="fa-solid fa-star"
-                :class="{ 'filled': n <= averageRating, 'empty': n > averageRating }"
-              ></i>
+              <template v-for="n in 5" :key="n">
+                <i 
+                  v-if="n <= Math.floor(averageRating)"
+                  class="fa-solid fa-star filled"
+                ></i>
+                <i 
+                  v-else-if="n === Math.ceil(averageRating) && averageRating % 1 !== 0"
+                  class="fa-solid fa-star-half-stroke half-filled"
+                ></i>
+                <i 
+                  v-else
+                  class="fa-solid fa-star empty"
+                ></i>
+              </template>
             </div>
             <div class="rating-text">
               {{ averageRating.toFixed(1) }} ({{ reviews.length }} {{ $t('reviews') }})
@@ -108,10 +116,10 @@
           <div class="star-rating-input">
             <label>{{ $t('rating') }}:</label>
             <div class="stars">
-              <i 
+              <button 
                 v-for="n in 5" 
                 :key="n" 
-                class="fa-solid fa-star star-input"
+                class="star-button"
                 :class="{ 
                   'filled': n <= (hoverRating || newReview.rating), 
                   'empty': n > (hoverRating || newReview.rating) 
@@ -119,9 +127,14 @@
                 @click="setRating(n)"
                 @mouseenter="hoverRating = n"
                 @mouseleave="hoverRating = 0"
-              ></i>
+              >
+                <i class="fa-solid fa-star"></i>
+              </button>
             </div>
             <span class="rating-text">{{ newReview.rating }}/5</span>
+            <button @click="testReactive" style="margin-left: 10px; padding: 5px 10px; background: #007bff; color: white; border: none; border-radius: 4px;">
+              Test Reactive
+            </button>
           </div>
           <div class="form-group">
             <label>{{ $t('review') }}:</label>
@@ -134,6 +147,20 @@
             <div class="char-count">{{ newReview.text.length }}/500</div>
           </div>
           <div class="form-actions">
+            <div class="validation-status">
+              <div v-if="newReview.rating === 0" class="validation-error">
+                <i class="fa-solid fa-exclamation-circle"></i>
+                Please select a rating
+              </div>
+              <div v-else-if="newReview.text.trim().length < 10" class="validation-error">
+                <i class="fa-solid fa-exclamation-circle"></i>
+                Review must be at least 10 characters ({{ newReview.text.trim().length }}/10)
+              </div>
+              <div v-else class="validation-success">
+                <i class="fa-solid fa-check-circle"></i>
+                Ready to submit!
+              </div>
+            </div>
             <button @click="submitReview" :disabled="!isValidReview || submittingReview" class="submit-btn">
               {{ submittingReview ? $t('submitting') : $t('submitReview') }}
             </button>
@@ -150,20 +177,22 @@
             <p>{{ $t('loadingReviews') }}</p>
           </div>
           <div v-else-if="reviewsError" class="error-state">
+            <p class="error-message">{{ reviewsError }}</p>
             <button @click="fetchReviews" class="retry-btn">{{ $t('retry') }}</button>
           </div>
           <div v-else-if="reviews.length > 0" class="reviews-container">
+            <h3 class="reviews-subtitle">{{ reviews.length }} {{ reviews.length === 1 ? $t('review') : $t('reviews') }}</h3>
             <div v-for="review in reviews" :key="review.id" class="review-card">
               <div class="review-header">
-                              <div class="review-rating">
-                <i 
-                  v-for="n in 5" 
-                  :key="n" 
-                  class="fa-solid fa-star"
-                  :class="{ 'filled': n <= review.rating, 'empty': n > review.rating }"
-                ></i>
-                <span class="rating-number">({{ review.rating }}/5)</span>
-              </div>
+                <div class="review-rating">
+                  <i 
+                    v-for="n in 5" 
+                    :key="n" 
+                    class="fa-solid fa-star"
+                    :class="{ 'filled': n <= review.rating, 'empty': n > review.rating }"
+                  ></i>
+                  <span class="rating-text">{{ review.rating }} {{ review.rating === 1 ? $t('star') : $t('stars') }}</span>
+                </div>
                 <div class="review-meta">
                   <span class="review-author">{{ review.userName || review.userEmail }}</span>
                   <span class="review-date">{{ formatDate(review.createdAt) }}</span>
@@ -173,8 +202,10 @@
             </div>
           </div>
           <div v-else class="empty-reviews">
+            <div class="empty-icon">⭐</div>
             <p>{{ $t('noReviewsYet') }}</p>
-            <p>{{ $t('beFirstToReview') }}</p>
+            <p v-if="canReview">{{ $t('beFirstToReview') }}</p>
+            <p v-else>{{ $t('loginToLeaveReview') }}</p>
           </div>
         </div>
       </div>
@@ -295,15 +326,8 @@ const canReview = computed(() => {
     review.userEmail === auth.currentUser.email
   );
   
-  if (existingReview) return false;
-  
-  // Check if user has booked with this technician
-  const userBookings = bookings.value.filter(booking => 
-    booking.userEmail === auth.currentUser.email && 
-    booking.technicianId === route.params.id
-  );
-  
-  return userBookings.length > 0;
+  // User can review if they haven't already reviewed this technician (no booking requirement)
+  return !existingReview;
 })
 
 onMounted(async () => {
@@ -358,14 +382,42 @@ async function fetchReviews() {
     reviewsLoading.value = true
     reviewsError.value = null
     const technicianId = route.params.id
-    const q = query(
-      collection(db, 'reviews'), 
-      where('technicianId', '==', technicianId),
-      orderBy('createdAt', 'desc')
-    )
-    const snapshot = await getDocs(q)
-    reviews.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+    console.log('Fetching reviews for technician:', technicianId);
+    
+    // Try the indexed query first
+    try {
+      const q = query(
+        collection(db, 'reviews'), 
+        where('technicianId', '==', technicianId),
+        orderBy('createdAt', 'desc')
+      )
+      const snapshot = await getDocs(q)
+      console.log('Reviews snapshot (indexed):', snapshot.docs.length, 'reviews found');
+      reviews.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+    } catch (indexError) {
+      console.log('Index not ready, using fallback query:', indexError.message);
+      
+      // Fallback: Simple query without orderBy, sort in JavaScript
+      const q = query(
+        collection(db, 'reviews'), 
+        where('technicianId', '==', technicianId)
+      )
+      const snapshot = await getDocs(q)
+      console.log('Reviews snapshot (fallback):', snapshot.docs.length, 'reviews found');
+      
+      // Sort reviews in JavaScript
+      reviews.value = snapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }))
+        .sort((a, b) => {
+          const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+          const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+          return dateB - dateA; // Sort by newest first
+        });
+    }
+    
+    console.log('Reviews loaded:', reviews.value);
   } catch (e) {
+    console.error('Error fetching reviews:', e);
     reviewsError.value = t('retry')
   } finally {
     reviewsLoading.value = false
@@ -375,11 +427,6 @@ async function fetchReviews() {
 async function submitReview() {
   if (!auth.currentUser) {
     alert(t('loginRequired'))
-    return
-  }
-
-  if (!canReview.value) {
-    alert(t('bookingRequiredToReview'))
     return
   }
 
@@ -426,7 +473,18 @@ async function submitReview() {
 }
 
 function setRating(rating) {
-  newReview.value.rating = rating
+  console.log('Setting rating to:', rating);
+  newReview.value.rating = rating;
+  hoverRating.value = 0; // Reset hover state
+  console.log('New review state:', newReview.value);
+  console.log('Is valid review:', isValidReview.value);
+}
+
+function testReactive() {
+  console.log('Testing reactive system...');
+  newReview.value.rating = Math.floor(Math.random() * 5) + 1;
+  alert(`Rating set to: ${newReview.value.rating}`);
+  console.log('New review state:', newReview.value);
 }
 
 function cancelReview() {
@@ -553,6 +611,10 @@ function getSpecializationTranslation(specialization) {
 }
 
 .rating-stars .filled {
+  color: #FFC230;
+}
+
+.rating-stars .half-filled {
   color: #FFC230;
 }
 
@@ -715,171 +777,19 @@ function getSpecializationTranslation(specialization) {
 }
 
 .reviews-title {
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: #333;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #374151;
   margin: 0;
 }
 
-.add-review-btn {
-  background: #667eea;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background-color 0.2s;
-}
-
-.add-review-btn:hover {
-  background: #5a6fd8;
-}
-
-.review-actions {
-  display: flex;
-  align-items: center;
-}
-
-.review-notice {
-  color: #666;
-  font-size: 0.9rem;
-  font-style: italic;
-  padding: 0.5rem 1rem;
-  background: #f8f9fa;
-  border-radius: 6px;
-  border-left: 3px solid #667eea;
-}
-
-/* Review Form */
-.review-form {
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.review-form h3 {
+.reviews-subtitle {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #6b7280;
   margin: 0 0 1rem 0;
-  color: #333;
-}
-
-.star-rating-input {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.star-rating-input label {
-  font-weight: 600;
-  color: #333;
-}
-
-.stars {
-  display: flex;
-  gap: 0.2rem;
-  cursor: pointer;
-}
-
-.star-input {
-  font-size: 1.5rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.star-input.filled {
-  color: #FFC230;
-}
-
-.star-input.empty {
-  color: #ddd;
-}
-
-.star-input:hover {
-  color: #FFC230;
-  transform: scale(1.1);
-}
-
-.stars {
-  display: flex;
-  gap: 0.2rem;
-  cursor: pointer;
-}
-
-.star-input {
-  font-size: 1.5rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.form-group {
-  margin-bottom: 1rem;
-}
-
-.form-group label {
-  display: block;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 0.5rem;
-}
-
-.form-group textarea {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  resize: vertical;
-  font-family: inherit;
-}
-
-.char-count {
-  text-align: right;
-  font-size: 0.8rem;
-  color: #666;
-  margin-top: 0.25rem;
-}
-
-.form-actions {
-  display: flex;
-  gap: 1rem;
-}
-
-.submit-btn, .cancel-btn {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background-color 0.2s;
-}
-
-.submit-btn {
-  background: #28a745;
-  color: white;
-}
-
-.submit-btn:hover:not(:disabled) {
-  background: #218838;
-}
-
-.submit-btn:disabled {
-  background: #6c757d;
-  cursor: not-allowed;
-}
-
-.cancel-btn {
-  background: #6c757d;
-  color: white;
-}
-
-.cancel-btn:hover {
-  background: #5a6268;
-}
-
-/* Reviews List */
-.reviews-list {
-  margin-top: 2rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .reviews-container {
@@ -889,95 +799,109 @@ function getSpecializationTranslation(specialization) {
 }
 
 .review-card {
-  background: #f8f9fa;
+  background: #f9fafb;
   border-radius: 8px;
   padding: 1.5rem;
-  border-left: 4px solid #667eea;
+  border: 1px solid #e5e7eb;
+  transition: box-shadow 0.2s ease;
+}
+
+.review-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .review-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 1rem;
 }
 
 .review-rating {
   display: flex;
-  gap: 0.2rem;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .review-rating .fa-star {
-  font-size: 1rem;
+  font-size: 0.875rem;
 }
 
-.review-rating .filled {
-  color: #FFC230;
+.review-rating .fa-star.filled {
+  color: #fbbf24;
 }
 
-.review-rating .empty {
-  color: #ddd;
+.review-rating .fa-star.empty {
+  color: #d1d5db;
 }
 
-.rating-number {
-  margin-left: 0.5rem;
-  font-size: 0.9rem;
-  color: #666;
+.rating-text {
+  font-size: 0.875rem;
+  color: #6b7280;
   font-weight: 500;
+  margin-left: 0.5rem;
 }
 
 .review-meta {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.25rem;
+  text-align: right;
 }
 
 .review-author {
+  display: block;
   font-weight: 600;
-  color: #333;
+  color: #374151;
+  font-size: 0.875rem;
 }
 
 .review-date {
-  font-size: 0.8rem;
-  color: #666;
+  display: block;
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
 }
 
 .review-text {
-  color: #333;
+  color: #374151;
   line-height: 1.6;
+  font-size: 1rem;
 }
 
 .empty-reviews {
   text-align: center;
-  padding: 3rem;
-  color: #666;
+  padding: 3rem 2rem;
+  color: #6b7280;
 }
 
 .empty-reviews p {
   margin: 0.5rem 0;
 }
 
+.empty-reviews p:first-of-type {
+  font-weight: 500;
+  font-size: 1rem;
+  color: #374151;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
 /* Loading and Error States */
-.loading-state, .error-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem;
-  background: #fff;
-  border-radius: 0.75rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+.loading-state {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
 }
 
 .loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #7c6bb0;
+  border: 2px solid #e5e7eb;
+  border-top: 2px solid #7c6bb0;
   border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
   animation: spin 1s linear infinite;
-  margin-bottom: 1rem;
+  margin: 0 auto 1rem;
 }
 
 @keyframes spin {
@@ -985,10 +909,14 @@ function getSpecializationTranslation(specialization) {
   100% { transform: rotate(360deg); }
 }
 
-.error-message {
-  color: #ef4444;
-  margin-bottom: 1rem;
+.error-state {
   text-align: center;
+  padding: 2rem;
+}
+
+.error-message {
+  color: #dc2626;
+  margin-bottom: 1rem;
 }
 
 .retry-btn {
@@ -996,13 +924,14 @@ function getSpecializationTranslation(specialization) {
   color: white;
   border: none;
   padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
 .retry-btn:hover {
-  background: #6b5fa7;
+  background: #6b5a9f;
 }
 
 /* --- Copied from admin-dashboard/Booking-pending.vue --- */
@@ -1130,6 +1059,200 @@ function getSpecializationTranslation(specialization) {
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 600;
+}
+
+.add-review-btn {
+  background: #667eea;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.add-review-btn:hover {
+  background: #5a6fd8;
+}
+
+.review-actions {
+  display: flex;
+  align-items: center;
+}
+
+.review-notice {
+  color: #666;
+  font-size: 0.9rem;
+  font-style: italic;
+  padding: 0.5rem 1rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 3px solid #667eea;
+}
+
+/* Review Form */
+.review-form {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.review-form h3 {
+  margin: 0 0 1rem 0;
+  color: #333;
+}
+
+.star-rating-input {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.star-rating-input label {
+  font-weight: 600;
+  color: #333;
+}
+
+.stars {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.star-button {
+  background: transparent;
+  border: none;
+  padding: 0.25rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1.5rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  min-height: 2rem;
+}
+
+.star-button:hover {
+  transform: scale(1.1);
+  background-color: rgba(255, 194, 48, 0.1);
+}
+
+.star-button.filled {
+  color: #FFC230;
+}
+
+.star-button.empty {
+  color: #d1d5db;
+}
+
+.star-button.filled:hover {
+  color: #FFB800;
+}
+
+.star-button.empty:hover {
+  color: #FFC230;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.char-count {
+  text-align: right;
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 0.25rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.validation-status {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.validation-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #dc3545;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.validation-error i {
+  font-size: 0.9rem;
+}
+
+.validation-success {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #28a745;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.validation-success i {
+  font-size: 0.9rem;
+}
+
+.submit-btn, .cancel-btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.submit-btn {
+  background: #28a745;
+  color: white;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: #218838;
+}
+
+.submit-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.cancel-btn {
+  background: #6c757d;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background: #5a6268;
 }
 
 @media (max-width: 768px) {
