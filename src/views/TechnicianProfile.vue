@@ -7,7 +7,7 @@
   </div>
   <div v-else-if="technician">
     <div class="profile-hero">
-      <h1 class="profile-title">Technician Profile</h1>
+      <h1 class="profile-title">{{ $t('technicianProfileTitle') }}</h1>
     </div>
     <div class="profile-main">
       <div class="profile-card">
@@ -311,7 +311,14 @@ const filteredBookings = computed(() => {
 const averageRating = computed(() => {
   if (reviews.value.length === 0) return 0;
   const total = reviews.value.reduce((sum, review) => sum + review.rating, 0);
-  return total / reviews.value.length;
+  const average = total / reviews.value.length;
+  console.log('Average rating calculation:', {
+    totalReviews: reviews.value.length,
+    totalRating: total,
+    average: average,
+    reviews: reviews.value.map(r => ({ rating: r.rating, user: r.userName }))
+  });
+  return average;
 })
 
 const isValidReview = computed(() => {
@@ -863,7 +870,7 @@ function getSpecializationTranslation(specialization) {
 .review-text {
   color: #374151;
   line-height: 1.6;
-  font-size: 1rem;
+  font-size: 0.875rem;
 }
 
 .empty-reviews {

@@ -775,7 +775,7 @@ function setRating(rating) {
 .review-text {
   color: #374151;
   line-height: 1.5;
-  font-size: 1rem;
+  font-size: 0.875rem;
 }
 
 .dark .review-text {

@@ -1,13 +1,5 @@
 <template>
   <div class="flex min-h-screen">
-    <!-- Sidebar -->
-    <Sidebar 
-      :activeMenu="'booking'" 
-      :activeBookingStatus="'completed'"
-      userType="user"
-      @navigate="handleSidebarNavigate" 
-    />
-    
     <!-- Main Content -->
     <div class="flex-1 p-8">
       <div class="user-dashboard-layout">
@@ -43,14 +35,14 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="booking in filteredBookings" :key="booking.id" class="table-row">
+                  <tr v-for="(booking, index) in filteredBookings" :key="booking.id" class="table-row">
                     <td>{{ booking.technicianName }}</td>
                     <td>{{ booking.specialization }}</td>
                     <td>{{ booking.date }}</td>
                     <td>{{ booking.time }}</td>
                     <td>{{ booking.address }}</td>
                     <td>{{ booking.price }}</td>
-                    <td class="booking-status">{{ booking.status }}</td>
+                    <td><span class="status-completed">{{ booking.status }}</span></td>
                     <td>
                       <button @click="addReview(booking)" class="review-btn">
                         Add Review
@@ -76,7 +68,6 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'vue-router';
-import Sidebar from '../components/Sidebar.vue';
 
 const router = useRouter();
 const searchQuery = ref('');
@@ -125,19 +116,6 @@ function addReview(booking) {
       technicianName: booking.technicianName
     }
   });
-}
-
-function handleSidebarNavigate(route) {
-  if (route === 'logout') {
-    const auth = getAuth();
-    auth.signOut();
-    router.push('/');
-    return;
-  }
-  
-  if (route.startsWith('/')) {
-    router.push(route);
-  }
 }
 
 onMounted(() => {
@@ -333,7 +311,7 @@ onMounted(() => {
   color: #333;
 }
 
-.booking-status {
+.status-completed {
   background: #dcfce7;
   color: #166534;
   padding: 0.25rem 0.75rem;

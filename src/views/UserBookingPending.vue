@@ -1,13 +1,5 @@
 <template>
   <div class="flex min-h-screen">
-    <!-- Sidebar -->
-    <Sidebar 
-      :activeMenu="'booking'" 
-      :activeBookingStatus="'pending'"
-      userType="user"
-      @navigate="handleSidebarNavigate" 
-    />
-    
     <!-- Main Content -->
     <div class="flex-1 p-8">
       <div class="user-dashboard-layout">
@@ -76,7 +68,6 @@ import { collection, getDocs, query, where, updateDoc, doc } from 'firebase/fire
 import { db } from '../firebase';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'vue-router';
-import Sidebar from '../components/Sidebar.vue';
 
 const router = useRouter();
 const searchQuery = ref('');
@@ -127,19 +118,6 @@ async function cancelBooking(bookingId) {
       console.error('Error cancelling booking:', err);
       alert('Failed to cancel booking. Please try again.');
     }
-  }
-}
-
-function handleSidebarNavigate(route) {
-  if (route === 'logout') {
-    const auth = getAuth();
-    auth.signOut();
-    router.push('/');
-    return;
-  }
-  
-  if (route.startsWith('/')) {
-    router.push(route);
   }
 }
 

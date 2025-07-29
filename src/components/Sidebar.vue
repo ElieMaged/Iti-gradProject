@@ -3,24 +3,23 @@
     <div class="sidebar-menu">
       <div
         class="menu-item"
-        :class="{ active: activeMenu === 'profile' }"
-        @click="$emit('navigate', userType === 'technician' ? '/technicion-profile' : '/profile')"
+        :class="{ active: activeMenu === 'technicionprofile' }"
+        @click="$emit('navigate', '/technicion-profile')"
         >
         <i class="fa-regular fa-user"></i>
         <span>My Profile</span>
       </div>
       <div
         class="menu-item"
-        :class="{ active: activeMenu === 'settings' }"
-        @click="$emit('navigate', userType === 'technician' ? '/technician-edit-profile' : '/profile-edit')"
+        :class="{ active: activeMenu === 'technicianeditprofile' }"
+        @click="$emit('navigate', '/technician-edit-profile')"
       >
         <i class="fa-solid fa-gear"></i>
         <span>Settings</span>
       </div>
       <div
-        v-if="userType === 'technician'"
         class="menu-item"
-        :class="{ active: activeMenu === 'availability' }"
+        :class="{ active: activeMenu === 'technicianavailbility' }"
         @click="$emit('navigate', '/technicianavailbility')"
       >
         <i class="fa-regular fa-clock"></i>
@@ -48,7 +47,6 @@
         </div>
       </div>
       <div
-        v-if="userType === 'technician'"
         class="menu-item"
         :class="{ active: activeMenu === 'payment' }"
         @click="$emit('navigate', 'payment')"
@@ -81,12 +79,7 @@ import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 const props = defineProps({
   activeMenu: String,
-  activeBookingStatus: String,
-  userType: {
-    type: String,
-    default: 'technician',
-    validator: (value) => ['user', 'technician'].includes(value)
-  }
+  activeBookingStatus: String
 });
 const router = useRouter();
 const isBookingDropdownOpen = ref(props.activeMenu === 'booking');
@@ -98,22 +91,12 @@ function toggleBookingDropdown() {
   if (!isBookingDropdownOpen.value) return;
 }
 function navigateBookingStatus(status) {
-  if (props.userType === 'technician') {
-    if (status === 'pending') {
-      router.push('/technician-booking-pending');
-    } else if (status === 'upcoming') {
-      router.push('/technician-booking-upcoming');
-    } else if (status === 'completed') {
-      router.push('/technician-booking-completed');
-    }
-  } else {
-    if (status === 'pending') {
-      router.push('/user-booking-pending');
-    } else if (status === 'upcoming') {
-      router.push('/user-booking-upcoming');
-    } else if (status === 'completed') {
-      router.push('/user-booking-completed');
-    }
+  if (status === 'pending') {
+    router.push('/technician-booking-pending');
+  } else if (status === 'upcoming') {
+    router.push('/technician-booking-upcoming');
+  } else if (status === 'completed') {
+    router.push('/technician-booking-completed');
   }
 }
 </script>
