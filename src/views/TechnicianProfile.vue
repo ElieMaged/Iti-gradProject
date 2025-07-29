@@ -23,26 +23,21 @@
           </div>
           <div class="profile-rating">
             <div class="rating-stars">
-              <template v-for="n in 5" :key="n">
-                <i 
-                  v-if="n <= Math.floor(averageRating)"
-                  class="fa-solid fa-star filled"
-                ></i>
-                <i 
-                  v-else-if="n === Math.ceil(averageRating) && averageRating % 1 !== 0"
-                  class="fa-solid fa-star-half-stroke half-filled"
-                ></i>
-                <i 
-                  v-else
-                  class="fa-solid fa-star empty"
-                ></i>
-              </template>
+              <i class="fa-solid fa-star" :style="{ color: 1 <= averageRating ? '#FFC230' : '#ddd', fontSize: '1.2rem' }"></i>
+              <i class="fa-solid fa-star" :style="{ color: 2 <= averageRating ? '#FFC230' : '#ddd', fontSize: '1.2rem' }"></i>
+              <i class="fa-solid fa-star" :style="{ color: 3 <= averageRating ? '#FFC230' : '#ddd', fontSize: '1.2rem' }"></i>
+              <i class="fa-solid fa-star" :style="{ color: 4 <= averageRating ? '#FFC230' : '#ddd', fontSize: '1.2rem' }"></i>
+              <i class="fa-solid fa-star" :style="{ color: 5 <= averageRating ? '#FFC230' : '#ddd', fontSize: '1.2rem' }"></i>
             </div>
             <div class="rating-text">
               {{ averageRating.toFixed(1) }} ({{ reviews.length }} {{ $t('reviews') }})
             </div>
             <div v-if="reviews.length === 0" class="no-rating">
               {{ $t('noReviewsYet') }}
+            </div>
+            <!-- Debug to see what's happening -->
+            <div style="font-size: 0.8rem; color: #666; margin-top: 0.5rem;">
+              Debug: Avg={{ averageRating }}, Reviews={{ reviews.length }}, Reviews: {{ reviews.map(r => r.rating).join(', ') }}
             </div>
           </div>
           <div class="profile-skills">
@@ -68,16 +63,26 @@
             <span>{{ $t('verifiedTechnician') }}</span>
           </div>
           <div class="about-item">
-            <i class="fas fa-star"></i>
-            <span>{{ $t('professionalService') }}</span>
+            <div class="about-stars">
+              <i 
+                v-for="n in 5" 
+                :key="n" 
+                class="fa-solid fa-star"
+                :class="{
+                  'filled': n <= averageRating,
+                  'empty': n > averageRating
+                }"
+              ></i>
+            </div>
+            <span>{{ $t('professionalService') }} ({{ averageRating.toFixed(1) }})</span>
           </div>
           <div class="about-item">
             <i class="fas fa-shield-alt"></i>
-            <span>{{ $t('qualityGuarantee') }}</span>
+            <span>{{ $t('qualityGuarantee') }} ({{ positiveReviewPercentage }}% {{ $t('positive') }})</span>
           </div>
           <div class="about-item">
             <i class="fas fa-heart"></i>
-            <span>{{ $t('customerSatisfaction') }}</span>
+            <span>{{ $t('customerSatisfaction') }} ({{ reviews.length }} {{ $t('reviews') }})</span>
           </div>
         </div>
         <div class="action-buttons">
@@ -320,6 +325,12 @@ const averageRating = computed(() => {
   });
   return average;
 })
+
+const positiveReviewPercentage = computed(() => {
+  if (reviews.value.length === 0) return 0;
+  const positiveReviews = reviews.value.filter(review => review.rating >= 4);
+  return (positiveReviews.length / reviews.value.length) * 100;
+});
 
 const isValidReview = computed(() => {
   return newReview.value.rating > 0 && newReview.value.text.trim().length >= 10;
@@ -612,21 +623,16 @@ function getSpecializationTranslation(specialization) {
   gap: 0.2rem;
 }
 
-.rating-stars .fa-star {
+.rating-stars .fa-solid {
   font-size: 1.2rem;
-  cursor: pointer;
 }
 
-.rating-stars .filled {
-  color: #FFC230;
+.rating-stars .fa-star.filled {
+  color: #FFC230 !important;
 }
 
-.rating-stars .half-filled {
-  color: #FFC230;
-}
-
-.rating-stars .empty {
-  color: #ddd;
+.rating-stars .fa-star.empty {
+  color: #ddd !important;
 }
 
 .rating-text {
@@ -704,10 +710,11 @@ function getSpecializationTranslation(specialization) {
 }
 
 .about-content {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  display: flex;
+  flex-wrap: nowrap;
   gap: 1rem;
   margin-bottom: 2rem;
+  overflow-x: auto;
 }
 
 .about-item {
@@ -718,6 +725,8 @@ function getSpecializationTranslation(specialization) {
   background: #f8fafc;
   border-radius: 0.5rem;
   border-left: 4px solid #7c6bb0;
+  min-width: 200px;
+  flex-shrink: 0;
 }
 
 .about-item i {
@@ -728,6 +737,23 @@ function getSpecializationTranslation(specialization) {
 .about-item span {
   font-weight: 500;
   color: #374151;
+}
+
+.about-stars {
+  display: flex;
+  gap: 0.2rem;
+}
+
+.about-stars .fa-solid {
+  font-size: 1.2rem;
+}
+
+.about-stars .fa-star.filled {
+  color: #FFC230;
+}
+
+.about-stars .fa-star.empty {
+  color: #ddd;
 }
 
 .action-buttons {
@@ -1315,6 +1341,16 @@ function getSpecializationTranslation(specialization) {
   
   .table-wrapper {
     font-size: 0.8rem;
+  }
+  
+  .about-content {
+    gap: 0.5rem;
+  }
+  
+  .about-item {
+    min-width: 150px;
+    padding: 0.75rem;
+    font-size: 0.9rem;
   }
   
   .table-header th,

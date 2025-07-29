@@ -560,6 +560,7 @@ const messages = {
     loginRequired: "Please log in to continue",
     retry: "Retry",
     submitting: "Submitting...",
+    positive: "positive",
   },
   ar: {
     // Navbar
@@ -1167,6 +1168,7 @@ const messages = {
     paymentMethod: "طريقة الدفع",
     backToHome: "العودة للرئيسية",
     whatHappensNext: "ماذا يحدث بعد ذلك؟",
+    positive: "إيجابي",
   },
 };
 
