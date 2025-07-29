@@ -13,6 +13,21 @@
                 <input v-model="searchQuery" class="search-input" type="text" placeholder="Search" />
                 <span class="search-icon"><i class="fas fa-search"></i></span>
               </div>
+              <!-- Test notification button for debugging -->
+              <button 
+                @click="testNotification" 
+                class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+              >
+                Test Notification
+              </button>
+              
+              <!-- Debug booking data button -->
+              <button 
+                @click="debugBookingData" 
+                class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors ml-2"
+              >
+                🐛 Debug Booking Data
+              </button>
             </div>
             <div v-if="loading" class="loading-state">
               <div class="loading-spinner"></div>
@@ -29,24 +44,27 @@
                     <th>User Name</th>
                     <th>User Email</th>
                     <th>Technician</th>
+                    <th>Technician Email</th>
                     <th>Specialization</th>
                     <th>Date</th>
                     <th>Time</th>
                     <th>Address</th>
                     <th>Price</th>
                     <th>Status</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-for="(booking, index) in filteredBookings" :key="booking.id" class="table-row">
                     <td>{{ booking.userName }}</td>
-                    <td>{{ booking.userEmail }}</td>
+                    <td>{{ booking.userEmail || 'N/A' }}</td>
                     <td>{{ booking.technicianName || booking.technicianId }}</td>
-                    <td>{{ booking.specialization }}</td>
+                    <td>{{ booking.technicianEmail || 'N/A' }}</td>
+                    <td>{{ booking.specialization || 'N/A' }}</td>
                     <td>{{ booking.date }}</td>
                     <td>{{ booking.time }}</td>
-                    <td>{{ booking.address }}</td>
-                    <td>{{ booking.price }}</td>
+                    <td>{{ booking.address && booking.address.trim() ? booking.address : 'Address not provided' }}</td>
+                    <td>{{ booking.price || 'N/A' }}</td>
                     <td><span class="status-pending">{{ booking.status }}</span></td>
                     <td>
                       <button class="accept-btn" @click="acceptBooking(booking.id)" :disabled="actionLoading === booking.id">Accept</button>
@@ -68,11 +86,12 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { collection, getDocs, query, where, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, updateDoc, deleteDoc, addDoc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'vue-router';
 import Sidebar from '../components/Sidebar.vue';
+import emailjs from 'emailjs-com';
 
 const router = useRouter();
 const searchQuery = ref('');
@@ -93,6 +112,69 @@ function handleSidebarNavigate(path) {
   router.push(path);
 }
 
+// Function to check and update expired bookings
+async function checkAndUpdateExpiredBookings() {
+  try {
+    console.log('=== CHECKING FOR EXPIRED BOOKINGS ===');
+    
+    // Get all upcoming bookings for this technician
+    const upcomingQuery = query(
+      collection(db, 'bookings'),
+      where('technicianId', '==', technicianUid.value),
+      where('status', '==', 'upcoming')
+    );
+    const upcomingSnapshot = await getDocs(upcomingQuery);
+    
+    console.log('Found upcoming bookings:', upcomingSnapshot.docs.length);
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to start of day for comparison
+    
+    const expiredBookings = [];
+    
+    upcomingSnapshot.docs.forEach(doc => {
+      const booking = doc.data();
+      const bookingDate = new Date(booking.date);
+      bookingDate.setHours(0, 0, 0, 0);
+      
+      console.log('Checking booking date:', booking.date, 'vs today:', today.toDateString());
+      console.log('Booking date object:', bookingDate.toDateString());
+      
+      // If booking date is in the past, mark it as expired
+      if (bookingDate < today) {
+        expiredBookings.push({
+          id: doc.id,
+          ...booking
+        });
+        console.log('✅ Found expired booking:', booking.date, 'for booking ID:', doc.id);
+      }
+    });
+    
+    console.log('Total expired bookings found:', expiredBookings.length);
+    
+    // Update expired bookings to completed status
+    for (const booking of expiredBookings) {
+      try {
+        console.log('Updating expired booking to completed:', booking.id);
+        await updateDoc(doc(db, 'bookings', booking.id), { 
+          status: 'complete',
+          completedAt: new Date()
+        });
+        console.log('✅ Successfully updated booking to completed:', booking.id);
+      } catch (updateError) {
+        console.error('❌ Error updating expired booking:', booking.id, updateError);
+      }
+    }
+    
+    console.log('=== EXPIRED BOOKINGS CHECK COMPLETE ===');
+    return expiredBookings.length;
+    
+  } catch (error) {
+    console.error('❌ Error checking expired bookings:', error);
+    return 0;
+  }
+}
+
 async function fetchBookings() {
   try {
     loading.value = true;
@@ -104,6 +186,12 @@ async function fetchBookings() {
     
     console.log('Fetching bookings for technician UID:', technicianUid.value);
     
+    // First, check and update any expired bookings
+    const expiredCount = await checkAndUpdateExpiredBookings();
+    if (expiredCount > 0) {
+      console.log(`Updated ${expiredCount} expired bookings to completed status`);
+    }
+    
     const q = query(
       collection(db, 'bookings'),
       where('technicianId', '==', technicianUid.value),
@@ -112,9 +200,173 @@ async function fetchBookings() {
     const snapshot = await getDocs(q);
     
     console.log('Found bookings:', snapshot.docs.length);
-    console.log('Booking data:', snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     
-    bookings.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // Fetch technician details for each booking
+    const bookingsWithTechDetails = await Promise.all(
+      snapshot.docs.map(async (doc) => {
+        const bookingData = { id: doc.id, ...doc.data() };
+        
+        // Debug: Log the raw booking data to see what's actually stored
+        console.log('=== BOOKING DATA DEBUG ===');
+        console.log('Booking ID:', bookingData.id);
+        console.log('Raw booking data:', bookingData);
+        console.log('User email from booking:', bookingData.userEmail);
+        console.log('User email type:', typeof bookingData.userEmail);
+        console.log('Address field:', bookingData.address);
+        console.log('Address type:', typeof bookingData.address);
+        console.log('Address length:', bookingData.address ? bookingData.address.length : 'undefined');
+        console.log('All booking fields:', Object.keys(bookingData));
+        
+        try {
+          console.log('=== TECHNICIAN LOOKUP DEBUG ===');
+          console.log('Looking up technician with ID:', bookingData.technicianId);
+          
+          const technicianDoc = await getDoc(doc(db, 'technicians', bookingData.technicianId));
+          if (technicianDoc.exists()) {
+            const techData = technicianDoc.data();
+            console.log('=== TECHNICIAN DATA DEBUG ===');
+            console.log('Technician ID:', bookingData.technicianId);
+            console.log('Technician document exists:', technicianDoc.exists());
+            console.log('Technician data found:', techData);
+            console.log('All technician fields:', Object.keys(techData));
+            console.log('Email field value:', techData.email);
+            console.log('UserEmail field value:', techData.userEmail);
+            console.log('TechnicianEmail field value:', techData.technicianEmail);
+            console.log('ContactEmail field value:', techData.contactEmail);
+            
+            // Get the technician's login email (the email they used to register/login)
+            const loginEmail = techData.email || techData.userEmail || techData.technicianEmail || techData.contactEmail;
+            console.log('Technician login email:', loginEmail);
+            
+            // Debug price fields - look for costpervisit specifically
+            console.log('CostPerVisit field value:', techData.costpervisit);
+            console.log('BasePrice field value:', techData.basePrice);
+            console.log('VisitPrice field value:', techData.visitPrice);
+            console.log('Price field value:', techData.price);
+            
+            // Try to get price from costpervisit first, then fallback to other fields
+            const price = techData.costpervisit || techData.basePrice || techData.visitPrice || techData.price;
+            console.log('Selected price value:', price);
+            
+            bookingData.technicianEmail = loginEmail || 'N/A';
+            // Use the technician's actual specialization from their profile
+            bookingData.specialization = techData.specialization || 'N/A';
+            // Use the technician's base price from their profile
+            bookingData.price = price || 'N/A';
+            console.log('Technician details mapped:', {
+              email: bookingData.technicianEmail,
+              specialization: bookingData.specialization,
+              price: bookingData.price,
+              allFields: Object.keys(techData)
+            });
+            
+            // Debug specialization fields specifically
+            console.log('=== SPECIALIZATION DEBUG ===');
+            console.log('Specialization field value:', techData.specialization);
+            console.log('Specialization type:', typeof techData.specialization);
+            console.log('All possible specialization fields:');
+            console.log('- specialization:', techData.specialization);
+            console.log('- service:', techData.service);
+            console.log('- services:', techData.services);
+            console.log('- category:', techData.category);
+            console.log('- type:', techData.type);
+            console.log('- jobType:', techData.jobType);
+            console.log('- workType:', techData.workType);
+            console.log('- profession:', techData.profession);
+            console.log('- trade:', techData.trade);
+            console.log('- skill:', techData.skill);
+            console.log('- skills:', techData.skills);
+            console.log('=== END SPECIALIZATION DEBUG ===');
+            
+            // Try multiple specialization field names
+            const specialization = techData.specialization || 
+                                 techData.service || 
+                                 techData.services || 
+                                 techData.category || 
+                                 techData.type || 
+                                 techData.jobType || 
+                                 techData.workType || 
+                                 techData.profession || 
+                                 techData.trade || 
+                                 techData.skill || 
+                                 techData.skills || 
+                                 'N/A';
+            
+            bookingData.specialization = specialization;
+            console.log('Final specialization value:', bookingData.specialization);
+            
+            console.log('=== END TECHNICIAN DATA DEBUG ===');
+          } else {
+            console.log('⚠️ Technician document not found for ID:', bookingData.technicianId);
+            console.log('Trying to find technician by name:', bookingData.technicianName);
+            
+            // Try to find technician by name or email
+            try {
+              const techQuery = query(
+                collection(db, 'technicians'),
+                where('fullName', '==', bookingData.technicianName)
+              );
+              const techSnapshot = await getDocs(techQuery);
+              
+              if (!techSnapshot.empty) {
+                const techDoc = techSnapshot.docs[0];
+                const techData = techDoc.data();
+                console.log('✅ Found technician by name:', techData);
+                console.log('Technician email:', techData.email);
+                
+                bookingData.technicianEmail = techData.email || 'N/A';
+                
+                // Try multiple specialization field names for fallback search too
+                const specialization = techData.specialization || 
+                                     techData.service || 
+                                     techData.services || 
+                                     techData.category || 
+                                     techData.type || 
+                                     techData.jobType || 
+                                     techData.workType || 
+                                     techData.profession || 
+                                     techData.trade || 
+                                     techData.skill || 
+                                     techData.skills || 
+                                     'N/A';
+                
+                bookingData.specialization = specialization;
+                bookingData.price = techData.costpervisit || techData.basePrice || techData.visitPrice || techData.price || 'N/A';
+              } else {
+                console.log('⚠️ No technician found by name either');
+                bookingData.technicianEmail = 'N/A';
+                bookingData.specialization = 'N/A';
+                bookingData.price = 'N/A';
+              }
+            } catch (nameError) {
+              console.error('❌ Error searching by name:', nameError);
+              bookingData.technicianEmail = 'N/A';
+              bookingData.specialization = 'N/A';
+              bookingData.price = 'N/A';
+            }
+          }
+        } catch (error) {
+          console.error('❌ Error fetching technician details:', error);
+          console.error('Error details:', {
+            code: error.code,
+            message: error.message,
+            stack: error.stack
+          });
+          bookingData.technicianEmail = 'N/A';
+          bookingData.specialization = 'N/A';
+          bookingData.price = 'N/A';
+        }
+        
+        // Debug: Log the final booking data
+        console.log('Final booking data with address:', bookingData.address);
+        console.log('=== END BOOKING DATA DEBUG ===');
+        
+        return bookingData;
+      })
+    );
+    
+    console.log('Bookings with technician details:', bookingsWithTechDetails);
+    bookings.value = bookingsWithTechDetails;
   } catch (e) {
     console.error('Error fetching bookings:', e);
     error.value = 'Failed to fetch bookings: ' + e.message;
@@ -126,24 +378,274 @@ async function fetchBookings() {
 async function acceptBooking(id) {
   actionLoading.value = id;
   try {
+    // Find the booking data before updating
+    const booking = bookings.value.find(b => b.id === id);
+    if (!booking) {
+      throw new Error('Booking not found');
+    }
+    
+    // Update booking status
     await updateDoc(doc(db, 'bookings', id), { status: 'upcoming' });
+    
+    // Get technician name
+    const technicianName = booking.technicianName || 'Technician';
+    
+    // Send notification to user
+    await sendBookingStatusNotification(booking, 'accepted', technicianName);
+    
+    // Remove from pending list
     bookings.value = bookings.value.filter(b => b.id !== id);
+    
+    console.log('✅ Booking accepted and notification sent');
   } catch (e) {
+    console.error('❌ Error accepting booking:', e);
     alert('Failed to accept booking: ' + e.message);
   } finally {
     actionLoading.value = null;
   }
 }
+
 async function rejectBooking(id) {
   actionLoading.value = id;
   try {
+    // Find the booking data before deleting
+    const booking = bookings.value.find(b => b.id === id);
+    if (!booking) {
+      throw new Error('Booking not found');
+    }
+    
+    // Get technician name
+    const technicianName = booking.technicianName || 'Technician';
+    
+    // Send notification to user before deleting
+    await sendBookingStatusNotification(booking, 'rejected', technicianName);
+    
+    // Delete the booking
     await deleteDoc(doc(db, 'bookings', id));
+    
+    // Remove from pending list
     bookings.value = bookings.value.filter(b => b.id !== id);
+    
+    console.log('✅ Booking rejected and notification sent');
   } catch (e) {
+    console.error('❌ Error rejecting booking:', e);
     alert('Failed to reject booking: ' + e.message);
   } finally {
     actionLoading.value = null;
   }
+}
+
+// Function to send booking status notification to user
+async function sendBookingStatusNotification(booking, status, technicianName) {
+  try {
+    console.log('=== SENDING BOOKING STATUS NOTIFICATION ===');
+    console.log('Booking:', booking);
+    console.log('Status:', status);
+    console.log('Technician name:', technicianName);
+    
+    // Get the user's email from the booking
+    const userEmail = booking.userEmail;
+    
+    if (!userEmail) {
+      console.error('❌ No user email found in booking data');
+      return false;
+    }
+    
+    // Try to find the user's UID - first check if it's in the booking data
+    let userUid = booking.userId;
+    
+    // If not in booking data, try to find it by email
+    if (!userUid) {
+      try {
+        // Query the users collection to find the user by email
+        const usersQuery = query(
+          collection(db, 'users'),
+          where('email', '==', userEmail)
+        );
+        const userSnapshot = await getDocs(usersQuery);
+        
+        if (!userSnapshot.empty) {
+          userUid = userSnapshot.docs[0].id;
+          console.log('✅ Found user UID:', userUid, 'for email:', userEmail);
+        } else {
+          console.log('⚠️ No user found with email:', userEmail);
+          // Try to find in technicians collection as well
+          const techQuery = query(
+            collection(db, 'technicians'),
+            where('email', '==', userEmail)
+          );
+          const techSnapshot = await getDocs(techQuery);
+          if (!techSnapshot.empty) {
+            userUid = techSnapshot.docs[0].id;
+            console.log('✅ Found user UID in technicians:', userUid, 'for email:', userEmail);
+          }
+        }
+      } catch (userError) {
+        console.error('❌ Error looking up user by email:', userError);
+      }
+    } else {
+      console.log('✅ User UID found in booking data:', userUid);
+    }
+    
+    const notificationData = {
+      type: 'booking_status_update',
+      title: status === 'accepted' ? 'Booking Accepted!' : 'Booking Rejected',
+      message: status === 'accepted' 
+        ? `Your booking with ${technicianName} for ${booking.date} at ${booking.time} has been accepted!`
+        : `Your booking with ${technicianName} for ${booking.date} at ${booking.time} has been rejected.`,
+      bookingId: booking.id,
+      technicianId: booking.technicianId,
+      technicianName: technicianName,
+      customerEmail: booking.userEmail,
+      customerName: booking.userName,
+      bookingDate: booking.date,
+      bookingTime: booking.time,
+      status: status,
+      createdAt: new Date(),
+      read: false
+    };
+    
+    console.log('Notification data prepared:', notificationData);
+    
+    // Send notification to the user if we found their UID
+    if (userUid) {
+      const userNotification = {
+        ...notificationData,
+        recipientId: userUid,
+        recipientType: 'user',
+        message: status === 'accepted' 
+          ? `Great news! Your booking with ${technicianName} for ${booking.date} at ${booking.time} has been accepted. Please prepare for your appointment.`
+          : `Unfortunately, your booking with ${technicianName} for ${booking.date} at ${booking.time} has been rejected. You can try booking with another technician.`
+      };
+      
+      console.log('User notification object:', userNotification);
+      
+      console.log('Adding user notification to Firebase...');
+      const userNotificationRef = await addDoc(collection(db, 'notifications'), userNotification);
+      console.log('User notification added with ID:', userNotificationRef.id);
+    } else {
+      console.log('⚠️ Skipping user notification - no UID found');
+    }
+    
+    // Send fallback notification using email as recipientId
+    const fallbackNotification = {
+      ...notificationData,
+      recipientId: userEmail, // Use email as recipientId for fallback
+      recipientType: 'user',
+      recipientEmail: userEmail, // Add email field for easier lookup
+      message: status === 'accepted' 
+        ? `Great news! Your booking with ${technicianName} for ${booking.date} at ${booking.time} has been accepted. Please prepare for your appointment.`
+        : `Unfortunately, your booking with ${technicianName} for ${booking.date} at ${booking.time} has been rejected. You can try booking with another technician.`
+    };
+    
+    console.log('Fallback notification object:', fallbackNotification);
+    console.log('Adding fallback notification to Firebase...');
+    const fallbackNotificationRef = await addDoc(collection(db, 'notifications'), fallbackNotification);
+    console.log('Fallback notification added with ID:', fallbackNotificationRef.id);
+    
+    // Send email notification to user
+    await sendBookingStatusEmail(booking, status, technicianName);
+    
+    // Send notification to admin
+    const adminNotification = {
+      ...notificationData,
+      recipientId: 'admin',
+      recipientType: 'admin',
+      message: `Booking ${status}: ${booking.userName} (${booking.userEmail}) booked ${technicianName} for ${booking.date} at ${booking.time}.`
+    };
+    
+    console.log('Admin notification object:', adminNotification);
+    
+    console.log('Adding admin notification to Firebase...');
+    const adminNotificationRef = await addDoc(collection(db, 'notifications'), adminNotification);
+    console.log('Admin notification added with ID:', adminNotificationRef.id);
+    
+    console.log('=== BOOKING STATUS NOTIFICATIONS SENT SUCCESSFULLY ===');
+    return true;
+    
+  } catch (error) {
+    console.error('=== ERROR SENDING BOOKING STATUS NOTIFICATION ===');
+    console.error('Error details:', error);
+    console.error('Error message:', error.message);
+    console.error('Error code:', error.code);
+    return false;
+  }
+}
+
+// Function to send email notification for booking status
+async function sendBookingStatusEmail(booking, status, technicianName) {
+  try {
+    console.log('=== SENDING BOOKING STATUS EMAIL ===');
+    console.log('Sending email to:', booking.userEmail);
+    
+    const emailData = {
+      to_email: booking.userEmail,
+      to_name: booking.userName,
+      technician_name: technicianName,
+      booking_date: booking.date,
+      booking_time: booking.time,
+      booking_status: status === 'accepted' ? 'ACCEPTED' : 'REJECTED',
+      status_message: status === 'accepted' 
+        ? 'Your booking has been accepted! Please prepare for your appointment.'
+        : 'Your booking has been rejected. You can try booking with another technician.',
+      customer_name: booking.userName,
+      customer_email: booking.userEmail,
+      customer_phone: booking.userPhone || 'Not provided',
+      booking_address: booking.address || 'Address not provided',
+      payment_method: booking.payment || 'Not specified'
+    };
+    
+    console.log('Email data:', emailData);
+    
+    // Send email using EmailJS
+    const response = await emailjs.send(
+      import.meta.env.VITE_EMAILJS_SERVICE_ID || '123321',
+      import.meta.env.VITE_EMAILJS_BOOKING_STATUS_TEMPLATE_ID || 'template_booking_status',
+      emailData,
+      import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'kGW9e5lc8iBvIT3Qw'
+    );
+    
+    console.log('✅ Email sent successfully:', response.status, response.text);
+    return true;
+    
+  } catch (error) {
+    console.error('❌ Error sending email:', error);
+    console.error('Email error details:', {
+      code: error.code,
+      message: error.message,
+      status: error.status
+    });
+    return false;
+  }
+}
+
+function testNotification() {
+  const booking = {
+    id: 'test-booking-id',
+    userName: 'Test User',
+    userEmail: 'narutossj23@yahoo.com', // Use the actual email for testing
+    technicianId: 'test-technician-id',
+    technicianName: 'Test Technician',
+    specialization: 'Test Specialization',
+    date: '2023-10-27',
+    time: '10:00 AM',
+    address: '123 Test St, Test City',
+    price: '$100',
+    status: 'pending',
+    userId: 'test-user-id'
+  };
+  const technicianName = booking.technicianName || 'Technician';
+  sendBookingStatusNotification(booking, 'accepted', technicianName);
+  alert('Test notification sent to narutossj23@yahoo.com!');
+}
+
+function debugBookingData() {
+  console.log('=== DEBUGGING BOOKING DATA ===');
+  console.log('Current bookings:', bookings.value);
+  console.log('Technician UID:', technicianUid.value);
+  console.log('Search Query:', searchQuery.value);
+  console.log('Filtered Bookings:', filteredBookings.value);
+  console.log('=== END DEBUGGING ===');
 }
 
 onMounted(() => {

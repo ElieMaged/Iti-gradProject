@@ -1,10 +1,8 @@
 <template>
   <div class="flex min-h-screen">
-    <!-- Sidebar -->
-    <Sidebar :activeMenu="'booking'" :activeBookingStatus="'completed'" @navigate="handleSidebarNavigate" />
     <!-- Main Content -->
     <div class="flex-1 p-8">
-      <div class="admin-dashboard-layout">
+      <div class="user-dashboard-layout">
         <div class="booking-main">
           <div class="booking-container">
             <div class="title-search-row">
@@ -26,8 +24,6 @@
               <table class="booking-table">
                 <thead>
                   <tr class="table-header">
-                    <th>User Name</th>
-                    <th>User Email</th>
                     <th>Technician Name</th>
                     <th>Technician Email</th>
                     <th>Specialization</th>
@@ -36,12 +32,11 @@
                     <th>Address</th>
                     <th>Price</th>
                     <th>Status</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-for="(booking, index) in filteredBookings" :key="booking.id" class="table-row">
-                    <td>{{ booking.userName }}</td>
-                    <td>{{ booking.userEmail || 'N/A' }}</td>
                     <td>{{ booking.technicianName }}</td>
                     <td>{{ booking.technicianEmail || 'N/A' }}</td>
                     <td>{{ booking.specialization || 'N/A' }}</td>
@@ -50,6 +45,11 @@
                     <td>{{ booking.address && booking.address.trim() ? booking.address : 'Address not provided' }}</td>
                     <td>{{ booking.price || 'N/A' }}</td>
                     <td><span class="status-completed">{{ booking.status === 'complete' ? 'Complete' : booking.status }}</span></td>
+                    <td>
+                      <button @click="addReview(booking)" class="review-btn">
+                        Add Review
+                      </button>
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -70,14 +70,13 @@ import { collection, getDocs, query, where, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'vue-router';
-import Sidebar from '../components/Sidebar.vue';
 
 const router = useRouter();
 const searchQuery = ref('');
 const bookings = ref([]);
 const loading = ref(true);
 const error = ref(null);
-const technicianUid = ref(null);
+const userUid = ref(null);
 
 const filteredBookings = computed(() => {
   const q = searchQuery.value.toLowerCase();
@@ -86,26 +85,22 @@ const filteredBookings = computed(() => {
   );
 });
 
-function handleSidebarNavigate(path) {
-  router.push(path);
-}
-
 async function fetchBookings() {
   try {
     loading.value = true;
     error.value = null;
-    if (!technicianUid.value) {
-      error.value = 'Technician not authenticated.';
+    if (!userUid.value) {
+      error.value = 'User not authenticated.';
       return;
     }
     const q = query(
       collection(db, 'bookings'),
-      where('technicianId', '==', technicianUid.value),
+      where('userId', '==', userUid.value),
       where('status', 'in', ['completed', 'complete']) // Include both statuses
     );
     const snapshot = await getDocs(q);
     
-    console.log('Found completed/complete bookings:', snapshot.docs.length);
+    console.log('Found completed/complete bookings for user:', snapshot.docs.length);
     
     // Fetch technician details for each booking
     const bookingsWithTechDetails = await Promise.all(
@@ -113,7 +108,7 @@ async function fetchBookings() {
         const bookingData = { id: doc.id, ...doc.data() };
         
         // Debug: Log the raw booking data to see what's actually stored
-        console.log('=== COMPLETED BOOKING DATA DEBUG ===');
+        console.log('=== COMPLETED BOOKING DATA DEBUG (USER) ===');
         console.log('Booking ID:', bookingData.id);
         console.log('Raw booking data:', bookingData);
         console.log('User email from booking:', bookingData.userEmail);
@@ -123,7 +118,6 @@ async function fetchBookings() {
         console.log('Address length:', bookingData.address ? bookingData.address.length : 'undefined');
         console.log('All booking fields:', Object.keys(bookingData));
         
-        // Try to get technician details from technicians collection
         try {
           console.log('=== TECHNICIAN LOOKUP DEBUG ===');
           console.log('Looking up technician with ID:', bookingData.technicianId);
@@ -155,10 +149,7 @@ async function fetchBookings() {
             const price = techData.costpervisit || techData.basePrice || techData.visitPrice || techData.price;
             console.log('Selected price value:', price);
             
-            // Use the correct field names based on the technician document structure
-            // Try multiple possible field names for email
             bookingData.technicianEmail = loginEmail || 'N/A';
-            
             // Try multiple specialization field names
             const specialization = techData.specialization || 
                                  techData.service || 
@@ -174,10 +165,8 @@ async function fetchBookings() {
                                  'N/A';
             
             bookingData.specialization = specialization;
-
             // Use the technician's base price from their profile
             bookingData.price = price || 'N/A';
-            
             console.log('Technician details mapped:', {
               email: bookingData.technicianEmail,
               specialization: bookingData.specialization,
@@ -205,7 +194,7 @@ async function fetchBookings() {
         
         // Debug: Log the final booking data
         console.log('Final booking data with address:', bookingData.address);
-        console.log('=== END COMPLETED BOOKING DATA DEBUG ===');
+        console.log('=== END COMPLETED BOOKING DATA DEBUG (USER) ===');
         
         return bookingData;
       })
@@ -219,14 +208,27 @@ async function fetchBookings() {
   }
 }
 
+function addReview(booking) {
+  // Navigate to review page or open review modal
+  // You can implement this based on your review system
+  router.push({
+    path: '/add-review',
+    query: { 
+      bookingId: booking.id,
+      technicianId: booking.technicianId,
+      technicianName: booking.technicianName
+    }
+  });
+}
+
 onMounted(() => {
   const auth = getAuth();
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      technicianUid.value = user.uid;
+      userUid.value = user.uid;
       fetchBookings();
     } else {
-      error.value = 'Technician not authenticated.';
+      error.value = 'User not authenticated.';
       loading.value = false;
     }
   });
@@ -234,7 +236,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.admin-dashboard-layout {
+.user-dashboard-layout {
   min-height: 100vh;
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
   background: #faf8fd;
@@ -421,6 +423,21 @@ onMounted(() => {
   font-weight: 600;
 }
 
+.review-btn {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.review-btn:hover {
+  background: #059669;
+}
+
 @media (max-width: 768px) {
   .booking-main {
     padding: 1rem;
@@ -442,4 +459,4 @@ onMounted(() => {
     padding: 0.5rem 0.5rem;
   }
 }
-</style> 
+</style>

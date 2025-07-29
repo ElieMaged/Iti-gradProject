@@ -65,6 +65,7 @@
           </select>
           <input v-model="formData.bio" type="text" :placeholder="$t('briefDescriptionBio')" class="input-field" required />
           <input v-model="formData.basePrice" type="text" :placeholder="$t('baseVisitPrice')" class="input-field" required />
+          <input v-model="formData.paypalEmail" type="email" :placeholder="$t('paypalEmail')" class="input-field" required />
         </div>
         <!-- Location -->
         <div class="flex flex-col gap-4 md:col-span-1">
@@ -144,10 +145,11 @@ import { ref, reactive, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { auth, db, storage } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { collection, serverTimestamp, doc, setDoc } from 'firebase/firestore';
+import { collection, serverTimestamp, doc, setDoc, addDoc } from 'firebase/firestore';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useI18n } from 'vue-i18n';
 import { ensureUserRole, fetchUserRole } from '../utils/userRole';
+import emailjs from 'emailjs-com';
 
 const { t } = useI18n();
 
@@ -172,7 +174,8 @@ const formData = reactive({
   willingToTravel: '',
   confirmInfo: false,
   agreeTerms: false,
-  idPhotoBase64: null // New field to store Base64 string
+  idPhotoBase64: null, // New field to store Base64 string
+  paypalEmail: '' // New field for PayPal email
 });
 
 // Password validation
@@ -268,6 +271,7 @@ async function handleRegister() {
       district: formData.district,
       willingToTravel: formData.willingToTravel,
       idPhotoUrl: formData.idPhotoBase64 || '', // Save Base64 string
+      paypalEmail: formData.paypalEmail || '', // Save PayPal email
       status: 'pending', // Admin approval status
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
@@ -287,6 +291,12 @@ async function handleRegister() {
     // Set localStorage to pending
     localStorage.setItem('userType', 'pending');
     
+    // Send notification to admin about new technician application
+    await sendTechnicianApplicationNotification(technicianData);
+    
+    // Send welcome email to the technician
+    await sendWelcomeEmail(formData.email, formData.fullName);
+    
     success.value = t('applicationSubmitted');
     // Redirect to pending status page
     setTimeout(() => {
@@ -295,23 +305,127 @@ async function handleRegister() {
     
   } catch (err) {
     console.error('Registration error:', err);
-    
-    // Provide more specific error messages
-    // if (err.code === 'permission-denied') {
-    //   error.value = 'Permission denied. Please check your Firebase Firestore rules.';
-    // } else if (err.code === 'unavailable') {
-    //   error.value = 'Firestore is currently unavailable. Please try again later.';
-    // } else if (err.code === 'auth/email-already-in-use') {
-    //   error.value = 'An account with this email already exists.';
-    // } else if (err.code === 'auth/weak-password') {
-    //   error.value = 'Password should be at least 6 characters long.';
-    // } else if (err.message.includes('Missing or insufficient permissions')) {
-    //   error.value = 'Database permissions error. Please contact support or try again later.';
-    // } else {
-      error.value = t('registrationFailed', { err: err.message });
-    // }
+    error.value = err.message;
   } finally {
     loading.value = false;
+  }
+}
+
+// Function to send notification to admin about new technician application
+async function sendTechnicianApplicationNotification(technicianData) {
+  try {
+    console.log('=== SENDING TECHNICIAN APPLICATION NOTIFICATION ===');
+    console.log('Technician data:', technicianData);
+    
+    const notificationData = {
+      type: 'technician_application',
+      title: 'New Technician Application',
+      message: `New technician application from ${technicianData.fullName} (${technicianData.email}) for ${technicianData.specialization}`,
+      technicianId: technicianData.uid,
+      technicianName: technicianData.fullName,
+      technicianEmail: technicianData.email,
+      specialization: technicianData.specialization,
+      experience: technicianData.experience,
+      government: technicianData.government,
+      district: technicianData.district,
+      basePrice: technicianData.basePrice,
+      status: 'pending',
+      createdAt: new Date(),
+      read: false
+    };
+    
+    console.log('Notification data prepared:', notificationData);
+    
+    // Send notification to admin
+    const adminNotification = {
+      ...notificationData,
+      recipientId: 'admin',
+      recipientType: 'admin',
+      message: `New technician application: ${technicianData.fullName} (${technicianData.email}) has applied for ${technicianData.specialization} position. Experience: ${technicianData.experience} years, Location: ${technicianData.government}, ${technicianData.district}, Base Price: ${technicianData.basePrice}.`
+    };
+    
+    console.log('Admin notification object:', adminNotification);
+    
+    // Add notification to Firebase
+    console.log('Adding admin notification to Firebase...');
+    const adminNotificationRef = await addDoc(collection(db, 'notifications'), adminNotification);
+    console.log('Admin notification added with ID:', adminNotificationRef.id);
+    
+    // Send email notification to admin
+    await sendAdminEmailNotification(technicianData);
+    
+    console.log('=== TECHNICIAN APPLICATION NOTIFICATION SENT SUCCESSFULLY ===');
+    return true;
+    
+  } catch (error) {
+    console.error('=== ERROR SENDING TECHNICIAN APPLICATION NOTIFICATION ===');
+    console.error('Error details:', error);
+    console.error('Error message:', error.message);
+    console.error('Error code:', error.code);
+    return false;
+  }
+}
+
+// Function to send email notification to admin about new technician application
+async function sendAdminEmailNotification(technicianData) {
+  try {
+    console.log('=== SENDING ADMIN EMAIL NOTIFICATION ===');
+    
+    // Use environment variable for admin email, with fallback
+    const adminEmail = import.meta.env.VITE_ADMIN_EMAIL || 'admin@boltfix.com';
+    
+    const templateParams = {
+      to_email: adminEmail,
+      to_name: 'BoltFix Admin',
+      subject: 'New Technician Application - Action Required',
+      message: `Dear Admin,\n\nA new technician has applied to join BoltFix:\n\nTechnician Details:\n- Name: ${technicianData.fullName}\n- Email: ${technicianData.email}\n- Specialization: ${technicianData.specialization}\n- Experience: ${technicianData.experience} years\n- Location: ${technicianData.government}, ${technicianData.district}\n- Base Price: ${technicianData.basePrice}\n- PayPal Email: ${technicianData.paypalEmail || 'Not provided'}\n\nPlease review this application in your admin dashboard.\n\nBest regards,\nBoltFix System`
+    };
+
+    await emailjs.send(
+      import.meta.env.VITE_EMAILJS_SERVICE_ID,
+      import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+      templateParams,
+      import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+    );
+    console.log('Admin email notification sent successfully!');
+    return true;
+  } catch (error) {
+    console.error('=== ERROR SENDING ADMIN EMAIL NOTIFICATION ===');
+    console.error('Error details:', error);
+    console.error('Error message:', error.message);
+    console.error('Error code:', error.code);
+    return false;
+  }
+}
+
+// Function to send welcome email to the technician
+async function sendWelcomeEmail(email, fullName) {
+  try {
+    console.log('=== SENDING WELCOME EMAIL TO TECHNICIAN ===');
+    console.log('Email:', email);
+    console.log('Full Name:', fullName);
+
+    const templateParams = {
+      to_email: email,
+      to_name: fullName,
+      subject: 'Welcome to BoltFix! Your Technician Account is Ready',
+      message: `Dear ${fullName},\n\nCongratulations! Your BoltFix technician account has been successfully created. You are now part of our community of skilled professionals.\n\nYour account details:\nEmail: ${email}\n\nPlease keep your password secure and do not share it with anyone.\n\nBest regards,\nThe BoltFix Team`
+    };
+
+    await emailjs.send(
+      import.meta.env.VITE_EMAILJS_SERVICE_ID,
+      import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+      templateParams,
+      import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+    );
+    console.log('Welcome email sent successfully!');
+    return true;
+  } catch (error) {
+    console.error('=== ERROR SENDING WELCOME EMAIL ===');
+    console.error('Error details:', error);
+    console.error('Error message:', error.message);
+    console.error('Error code:', error.code);
+    return false;
   }
 }
 

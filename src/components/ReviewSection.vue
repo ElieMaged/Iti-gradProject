@@ -21,13 +21,17 @@
             v-for="n in 5" 
             :key="n" 
             class="fa-solid fa-star star-input"
-            :class="{ 'filled': n <= newReview.rating, 'empty': n > newReview.rating }"
-            @click="newReview.rating = n"
+            :class="{ 
+              'filled': n <= (hoverRating || newReview.rating), 
+              'empty': n > (hoverRating || newReview.rating) 
+            }"
+            @click="setRating(n)"
             @mouseenter="hoverRating = n"
             @mouseleave="hoverRating = 0"
+            :title="`Rate ${n} star${n > 1 ? 's' : ''}`"
           ></i>
         </div>
-        <span class="rating-text">{{ newReview.rating }}/5</span>
+        <span class="rating-text">{{ newReview.rating > 0 ? `${newReview.rating}/5` : 'Select rating' }}</span>
       </div>
       <div class="form-group">
         <label>{{ $t('review') }}:</label>
@@ -40,6 +44,20 @@
         <div class="char-count">{{ newReview.text.length }}/500</div>
       </div>
       <div class="form-actions">
+        <div class="validation-status">
+          <div v-if="newReview.rating === 0" class="validation-error">
+            <i class="fa-solid fa-exclamation-circle"></i>
+            Please select a rating
+          </div>
+          <div v-else-if="newReview.text.trim().length < 10" class="validation-error">
+            <i class="fa-solid fa-exclamation-circle"></i>
+            Review must be at least 10 characters ({{ newReview.text.trim().length }}/10)
+          </div>
+          <div v-else class="validation-success">
+            <i class="fa-solid fa-check-circle"></i>
+            Ready to submit!
+          </div>
+        </div>
         <button @click="submitReview" :disabled="!isValidReview" class="submit-btn">
           {{ $t('submitReview') }}
         </button>
@@ -49,7 +67,7 @@
       </div>
     </div>
 
-    <!-- Booking Requirement Notice -->
+    <!-- Login Requirement Notice -->
     <div v-if="!auth.currentUser" class="booking-notice">
       <div class="notice-content">
         <i class="fa-solid fa-info-circle notice-icon"></i>
@@ -59,9 +77,9 @@
 
     <div v-else-if="!canReview && !bookingCheckLoading" class="booking-notice">
       <div class="notice-content">
-        <i class="fa-solid fa-calendar-check notice-icon"></i>
-        <p>{{ $t('bookingRequiredToReview') }}</p>
-        <p class="notice-subtitle">{{ $t('bookTechnicianFirst') }}</p>
+        <i class="fa-solid fa-check-circle notice-icon"></i>
+        <p>{{ $t('alreadyReviewed') }}</p>
+        <p class="notice-subtitle">{{ $t('thankYouForReview') }}</p>
       </div>
     </div>
 
@@ -97,7 +115,7 @@
       <div v-else class="empty-reviews">
         <p>{{ $t('noReviewsYet') }}</p>
         <p v-if="canReview">{{ $t('beFirstToReview') }}</p>
-        <p v-else>{{ $t('bookToLeaveFirstReview') }}</p>
+        <p v-else>{{ $t('loginToLeaveReview') }}</p>
       </div>
     </div>
   </div>
@@ -151,16 +169,6 @@ async function checkBookingEligibility() {
   try {
     bookingCheckLoading.value = true
     
-    // Check if user has completed bookings with this technician
-    const bookingsQuery = query(
-      collection(db, 'bookings'),
-      where('technicianId', '==', props.technicianId),
-      where('userEmail', '==', auth.currentUser.email),
-      where('status', '==', 'completed')
-    )
-    
-    const bookingsSnapshot = await getDocs(bookingsQuery)
-    
     // Check if user has already reviewed this technician
     const reviewsQuery = query(
       collection(db, 'reviews'),
@@ -170,11 +178,11 @@ async function checkBookingEligibility() {
     
     const reviewsSnapshot = await getDocs(reviewsQuery)
     
-    // User can review if they have completed bookings but haven't reviewed yet
-    canReview.value = !bookingsSnapshot.empty && reviewsSnapshot.empty
+    // User can review if they haven't reviewed this technician yet (no booking requirement)
+    canReview.value = reviewsSnapshot.empty
     
   } catch (error) {
-    console.error('Error checking booking eligibility:', error)
+    console.error('Error checking review eligibility:', error)
     canReview.value = false
   } finally {
     bookingCheckLoading.value = false
@@ -200,13 +208,13 @@ async function fetchReviews() {
 }
 
 async function submitReview() {
+  console.log('Submit review clicked');
+  console.log('Auth current user:', auth.currentUser);
+  console.log('Is valid review:', isValidReview.value);
+  console.log('New review data:', newReview.value);
+  
   if (!auth.currentUser) {
     alert(t('loginRequired'))
-    return
-  }
-
-  if (!canReview.value) {
-    alert(t('bookingRequiredToReview'))
     return
   }
 
@@ -216,6 +224,7 @@ async function submitReview() {
   }
 
   try {
+    console.log('Submitting review...');
     const reviewData = {
       technicianId: props.technicianId,
       userId: auth.currentUser.uid,
@@ -225,6 +234,8 @@ async function submitReview() {
       text: newReview.value.text.trim(),
       createdAt: new Date()
     }
+    
+    console.log('Review data to submit:', reviewData);
 
     await addDoc(collection(db, 'reviews'), reviewData)
     
@@ -252,6 +263,15 @@ function formatDate(date) {
   if (!date) return ''
   const d = date.toDate ? date.toDate() : new Date(date)
   return d.toLocaleDateString()
+}
+
+function setRating(rating) {
+  console.log('Setting rating to:', rating);
+  alert(`Star ${rating} clicked!`); // Temporary test
+  newReview.value.rating = rating;
+  hoverRating.value = 0; // Reset hover state
+  console.log('New review state:', newReview.value);
+  console.log('Is valid review:', isValidReview.value);
 }
 </script>
 
@@ -401,30 +421,59 @@ function formatDate(date) {
   display: flex;
   gap: 0.25rem;
   margin-bottom: 0.5rem;
+  align-items: center;
 }
 
 .star-input {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: all 0.2s ease;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.star-input:hover {
+  transform: scale(1.15);
+  background-color: rgba(251, 191, 36, 0.1);
+}
+
+.star-input:active {
+  transform: scale(0.95);
 }
 
 .star-input.filled {
   color: #fbbf24;
+  text-shadow: 0 0 4px rgba(251, 191, 36, 0.3);
 }
 
 .star-input.empty {
   color: #d1d5db;
 }
 
+.star-input.empty:hover {
+  color: #fbbf24;
+  opacity: 0.8;
+}
+
 .rating-text {
-  font-size: 0.875rem;
-  color: #6b7280;
-  font-weight: 500;
+  font-size: 1rem;
+  color: #374151;
+  font-weight: 600;
+  margin-left: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  background: #f3f4f6;
+  border-radius: 0.25rem;
+  border: 1px solid #e5e7eb;
 }
 
 .dark .rating-text {
-  color: #9ca3af;
+  color: var(--primary-text);
+  background: #374151;
+  border-color: #4b5563;
 }
 
 .form-group {
@@ -488,16 +537,56 @@ function formatDate(date) {
   justify-content: flex-end;
 }
 
+.validation-status {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.validation-error, .validation-success {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+}
+
+.validation-error {
+  background-color: #fef3c7;
+  color: #d97706;
+  border: 1px solid #fcd34d;
+}
+
+.dark .validation-error {
+  background-color: #4b5563;
+  color: #fcd34d;
+  border-color: #374151;
+}
+
+.validation-success {
+  background-color: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.dark .validation-success {
+  background-color: #065f46;
+  color: #a7f3d0;
+  border-color: #374151;
+}
+
 .submit-btn {
   background: #7c6bb0;
   color: white;
   border: none;
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1.5rem;
   border-radius: 0.375rem;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+  min-width: 120px;
 }
 
 .dark .submit-btn {
@@ -506,19 +595,27 @@ function formatDate(date) {
 
 .submit-btn:hover:not(:disabled) {
   background: #6b5a9f;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(124, 107, 176, 0.3);
 }
 
 .dark .submit-btn:hover:not(:disabled) {
   background: #5a4b8a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(124, 107, 176, 0.3);
 }
 
 .submit-btn:disabled {
   background: #9ca3af;
   cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+  box-shadow: none;
 }
 
 .dark .submit-btn:disabled {
   background: #6b7280;
+  opacity: 0.6;
 }
 
 .cancel-btn {

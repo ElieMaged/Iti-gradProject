@@ -26,35 +26,32 @@
                   <img class="stary" src="../../public/images/star-circle.png" alt="">
          </div>
         <div class="success-message">
-          <h2 class="success-title">{{ $t('requestSubmitted') }}</h2>
-          <p class="success-description">{{ $t('reviewBookingNotify') }}</p>
+          <h2 class="success-title">Request Submitted</h2>
+          <p class="success-description">Your request has been submitted successfully. Our technician will contact you shortly.</p>
         </div>
       </div>
 
       <!-- What Happens Next Section -->
       <div class="next-steps-section">
         <h2 class="section-title">{{ $t('whatHappensNext') }}</h2>
-        <p class="next-steps-description">{{ $t('confirmationEmailInstructions') }}</p>
+        <p class="next-steps-description">Sit tight while our technician responds to your request!</p>
       </div>
 
       <!-- Booking Summary Section -->
       <div class="booking-summary-section">
-        <h2 class="section-title">{{ $t('bookingSummary') }}</h2>
+        <h2 class="section-title">Booking Summary</h2>
         <div class="summary-details">
           <div class="summary-item">
-            <span class="summary-label">{{ $t('technician') }}:</span>
-            <span class="summary-value">{{ booking.technicianName }} ({{ booking.technicianRole }})</span>
+            <span class="summary-label">Technician:</span>
+            <span class="summary-value">{{ booking.technicianName }}</span>
           </div>
           <div class="summary-item">
-            <span class="summary-label">{{ $t('dateAndTime') }}:</span>
+            <span class="summary-label">Date And Time:</span>
             <span class="summary-value">{{ booking.date }} - {{ booking.time }}</span>
           </div>
+
           <div class="summary-item">
-            <span class="summary-label">{{ $t('technicianPhoneNumber') }}:</span>
-            <span class="summary-value">{{ booking.technicianPhone }}</span>
-          </div>
-          <div class="summary-item">
-            <span class="summary-label">{{ $t('paymentMethod') }}:</span>
+            <span class="summary-label">Payment Method:</span>
             <span class="summary-value">{{ booking.payment }}</span>
           </div>
         </div>
@@ -62,7 +59,7 @@
 
       <!-- Back To Home Button -->
       <button class="back-to-home-btn" @click="goHome">
-        {{ $t('backToHome') }}
+        Back to Home
       </button>
     </div>
   </div>
@@ -84,8 +81,13 @@ const booking = ref({
 
 onMounted(() => {
   const stored = localStorage.getItem('bookingData');
+  console.log('Stored booking data:', stored);
   if (stored) {
-    Object.assign(booking.value, JSON.parse(stored));
+    const parsedData = JSON.parse(stored);
+    console.log('Parsed booking data:', parsedData);
+    Object.assign(booking.value, parsedData);
+  } else {
+    console.log('No booking data found in localStorage');
   }
 });
 

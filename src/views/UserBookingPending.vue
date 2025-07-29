@@ -1,36 +1,17 @@
 <template>
   <div class="flex min-h-screen">
-    <!-- Sidebar -->
-    <Sidebar :activeMenu="'booking'" :activeBookingStatus="'upcoming'" @navigate="handleSidebarNavigate" />
     <!-- Main Content -->
     <div class="flex-1 p-8">
-      <div class="technician-dashboard-layout">
+      <div class="user-dashboard-layout">
         <div class="booking-main">
           <div class="booking-container">
             <div class="title-search-row">
-              <h2 class="booking-title">Upcoming Bookings</h2>
+              <h2 class="booking-title">Pending Bookings</h2>
               <div class="search-wrapper">
                 <input v-model="searchQuery" class="search-input" type="text" placeholder="Search" />
                 <span class="search-icon"><i class="fas fa-search"></i></span>
               </div>
             </div>
-            
-            <!-- Manual Check Button -->
-            <div class="action-row">
-              <button 
-                @click="checkExpiredBookings" 
-                :disabled="checkingExpired"
-                class="check-expired-btn"
-              >
-                <i v-if="checkingExpired" class="fas fa-spinner fa-spin"></i>
-                <i v-else class="fas fa-clock"></i>
-                {{ checkingExpired ? 'Checking...' : 'Check for Expired Bookings' }}
-              </button>
-              <div v-if="lastCheckResult" class="check-result" :class="lastCheckResult.success ? 'success' : 'error'">
-                {{ lastCheckResult.message }}
-              </div>
-            </div>
-
             <div v-if="loading" class="loading-state">
               <div class="loading-spinner"></div>
               <p>Loading bookings...</p>
@@ -43,8 +24,6 @@
               <table class="booking-table">
                 <thead>
                   <tr class="table-header">
-                    <th>User Name</th>
-                    <th>User Email</th>
                     <th>Technician Name</th>
                     <th>Technician Email</th>
                     <th>Specialization</th>
@@ -53,12 +32,11 @@
                     <th>Address</th>
                     <th>Price</th>
                     <th>Status</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-for="booking in filteredBookings" :key="booking.id" class="table-row">
-                    <td>{{ booking.userName }}</td>
-                    <td>{{ booking.userEmail || 'N/A' }}</td>
                     <td>{{ booking.technicianName }}</td>
                     <td>{{ booking.technicianEmail || 'N/A' }}</td>
                     <td>{{ booking.specialization || 'N/A' }}</td>
@@ -67,12 +45,17 @@
                     <td>{{ booking.address && booking.address.trim() ? booking.address : 'Address not provided' }}</td>
                     <td>{{ booking.price || 'N/A' }}</td>
                     <td class="booking-status">{{ booking.status }}</td>
+                    <td>
+                      <button @click="cancelBooking(booking.id)" class="cancel-btn">
+                        Cancel
+                      </button>
+                    </td>
                   </tr>
                 </tbody>
               </table>
             </div>
             <div v-else class="empty-state">
-              <p>No upcoming bookings found.</p>
+              <p>No pending bookings found.</p>
             </div>
           </div>
         </div>
@@ -83,24 +66,17 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { collection, getDocs, query, where, updateDoc, doc, writeBatch, getDoc } from 'firebase/firestore';
-import { getFunctions, httpsCallable } from 'firebase/functions';
+import { collection, getDocs, query, where, updateDoc, doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'vue-router';
-import Sidebar from '../components/Sidebar.vue';
 
 const router = useRouter();
 const searchQuery = ref('');
 const bookings = ref([]);
 const loading = ref(true);
 const error = ref(null);
-const technicianUid = ref(null);
-const checkingExpired = ref(false);
-const lastCheckResult = ref(null);
-
-const functions = getFunctions();
-const moveExpiredBookings = httpsCallable(functions, 'moveExpiredBookings');
+const userUid = ref(null);
 
 const filteredBookings = computed(() => {
   const q = searchQuery.value.toLowerCase();
@@ -109,24 +85,20 @@ const filteredBookings = computed(() => {
   );
 });
 
-function handleSidebarNavigate(path) {
-  router.push(path);
-}
-
 // Function to check and update expired bookings
 async function checkAndUpdateExpiredBookings() {
   try {
-    console.log('=== CHECKING FOR EXPIRED BOOKINGS ===');
+    console.log('=== CHECKING FOR EXPIRED BOOKINGS (USER) ===');
     
-    // Get all upcoming bookings for this technician
+    // Get all upcoming bookings for this user
     const upcomingQuery = query(
       collection(db, 'bookings'),
-      where('technicianId', '==', technicianUid.value),
+      where('userId', '==', userUid.value),
       where('status', '==', 'upcoming')
     );
     const upcomingSnapshot = await getDocs(upcomingQuery);
     
-    console.log('Found upcoming bookings:', upcomingSnapshot.docs.length);
+    console.log('Found upcoming bookings for user:', upcomingSnapshot.docs.length);
     
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Set to start of day for comparison
@@ -151,7 +123,7 @@ async function checkAndUpdateExpiredBookings() {
       }
     });
     
-    console.log('Total expired bookings found:', expiredBookings.length);
+    console.log('Total expired bookings found for user:', expiredBookings.length);
     
     // Update expired bookings to completed status
     for (const booking of expiredBookings) {
@@ -167,7 +139,7 @@ async function checkAndUpdateExpiredBookings() {
       }
     }
     
-    console.log('=== EXPIRED BOOKINGS CHECK COMPLETE ===');
+    console.log('=== EXPIRED BOOKINGS CHECK COMPLETE (USER) ===');
     return expiredBookings.length;
     
   } catch (error) {
@@ -176,52 +148,16 @@ async function checkAndUpdateExpiredBookings() {
   }
 }
 
-async function checkExpiredBookings() {
-  try {
-    checkingExpired.value = true;
-    lastCheckResult.value = null;
-    
-    let result;
-    
-    // Try Firebase Functions first, fallback to client-side
-    try {
-      result = await moveExpiredBookings();
-      lastCheckResult.value = result.data;
-    } catch (functionsError) {
-      console.log('Firebase Functions not available, using client-side solution');
-      result = await checkAndUpdateExpiredBookings(); // Changed to call the new function
-      lastCheckResult.value = {
-        success: true,
-        movedCount: result,
-        message: `Successfully moved ${result} expired bookings to completed`
-      };
-    }
-    
-    // Refresh the bookings list after moving expired ones
-    if (result > 0) { // Changed to check result directly
-      await fetchBookings();
-    }
-  } catch (err) {
-    console.error('Error checking expired bookings:', err);
-    lastCheckResult.value = {
-      success: false,
-      message: 'Failed to check for expired bookings. Please try again.'
-    };
-  } finally {
-    checkingExpired.value = false;
-  }
-}
-
 async function fetchBookings() {
   try {
     loading.value = true;
     error.value = null;
-    if (!technicianUid.value) {
-      error.value = 'Technician not authenticated.';
+    if (!userUid.value) {
+      error.value = 'User not authenticated.';
       return;
     }
     
-    console.log('Fetching bookings for technician UID:', technicianUid.value);
+    console.log('Fetching bookings for user UID:', userUid.value);
     
     // First, check and update any expired bookings
     const expiredCount = await checkAndUpdateExpiredBookings();
@@ -231,8 +167,8 @@ async function fetchBookings() {
     
     const q = query(
       collection(db, 'bookings'),
-      where('technicianId', '==', technicianUid.value),
-      where('status', '==', 'upcoming')
+      where('userId', '==', userUid.value),
+      where('status', '==', 'pending')
     );
     const snapshot = await getDocs(q);
     
@@ -240,28 +176,25 @@ async function fetchBookings() {
     const bookingsWithTechDetails = await Promise.all(
       snapshot.docs.map(async (doc) => {
         const bookingData = { id: doc.id, ...doc.data() };
-                try {
-                  const technicianDoc = await getDoc(doc(db, 'technicians', bookingData.technicianId));
-                  if (technicianDoc.exists()) {
-                    const techData = technicianDoc.data();
-                    console.log('Technician data found:', techData);
-                    console.log('All technician fields:', Object.keys(techData));
-                    
-                    // Get the technician's login email (the email they used to register/login)
-                    const loginEmail = techData.email || techData.userEmail || techData.technicianEmail || techData.contactEmail;
-                    console.log('Technician login email:', loginEmail);
-                    
-                    // Debug price fields - look for costpervisit specifically
-                    console.log('CostPerVisit field value:', techData.costpervisit);
-                    console.log('BasePrice field value:', techData.basePrice);
-                    console.log('VisitPrice field value:', techData.visitPrice);
-                    console.log('Price field value:', techData.price);
-                    
-                    // Try to get price from costpervisit first, then fallback to other fields
-                    const price = techData.costpervisit || techData.basePrice || techData.visitPrice || techData.price;
-                    console.log('Selected price value:', price);
-                    
-                    bookingData.technicianEmail = loginEmail || 'N/A';
+        
+        // Try to get technician details from technicians collection
+        try {
+          const technicianDoc = await getDoc(doc(db, 'technicians', bookingData.technicianId));
+          if (technicianDoc.exists()) {
+            const techData = technicianDoc.data();
+            console.log('Technician data found:', techData);
+            console.log('All technician fields:', Object.keys(techData));
+            
+            // Use the correct field names based on the technician document structure
+            // Try multiple possible field names for email
+            // Get the technician's login email (the email they used to register/login)
+            const loginEmail = techData.email || 
+                              techData.userEmail || 
+                              techData.technicianEmail || 
+                              techData.contactEmail || 
+                              'N/A';
+            
+            bookingData.technicianEmail = loginEmail;
             
             // Try multiple specialization field names
             const specialization = techData.specialization || 
@@ -278,28 +211,31 @@ async function fetchBookings() {
                                  'N/A';
             
             bookingData.specialization = specialization;
-            // Use the technician's base price from their profile
-            bookingData.price = price || 'N/A';
-                    console.log('Technician details mapped:', {
-                      email: bookingData.technicianEmail,
-                      specialization: bookingData.specialization,
-                      price: bookingData.price,
-                      allFields: Object.keys(techData)
-                    });
-                  } else {
-                    bookingData.technicianEmail = 'N/A';
-                    bookingData.specialization = 'N/A';
-                    bookingData.price = 'N/A';
-                  }
-                } catch (error) {
-                  console.error('Error fetching technician details:', error);
-                  bookingData.technicianEmail = 'N/A';
-                  bookingData.specialization = 'N/A';
-                  bookingData.price = 'N/A';
-                }
-                return bookingData;
-              })
-            );
+            
+            // Use the technician's costpervisit from their profile, then fallback to other price fields
+            bookingData.price = techData.costpervisit || techData.basePrice || techData.visitPrice || techData.price || 'N/A';
+            
+            console.log('Technician details mapped:', {
+              email: bookingData.technicianEmail,
+              specialization: bookingData.specialization,
+              price: bookingData.price,
+              allFields: Object.keys(techData)
+            });
+          } else {
+            bookingData.technicianEmail = 'N/A';
+            bookingData.specialization = 'N/A';
+            bookingData.price = 'N/A';
+          }
+        } catch (error) {
+          console.error('Error fetching technician details:', error);
+          bookingData.technicianEmail = 'N/A';
+          bookingData.specialization = 'N/A';
+          bookingData.price = 'N/A';
+        }
+        
+        return bookingData;
+      })
+    );
     
     bookings.value = bookingsWithTechDetails;
   } catch (e) {
@@ -309,17 +245,30 @@ async function fetchBookings() {
   }
 }
 
+async function cancelBooking(bookingId) {
+  if (confirm('Are you sure you want to cancel this booking?')) {
+    try {
+      const bookingRef = doc(db, 'bookings', bookingId);
+      await updateDoc(bookingRef, {
+        status: 'cancelled',
+        cancelledAt: new Date()
+      });
+      await fetchBookings(); // Refresh the list
+    } catch (err) {
+      console.error('Error cancelling booking:', err);
+      alert('Failed to cancel booking. Please try again.');
+    }
+  }
+}
+
 onMounted(() => {
   const auth = getAuth();
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      technicianUid.value = user.uid;
-      fetchBookings().then(() => {
-        // Automatically check for expired bookings when component loads
-        checkExpiredBookings();
-      });
+      userUid.value = user.uid;
+      fetchBookings();
     } else {
-      error.value = 'Technician not authenticated.';
+      error.value = 'User not authenticated.';
       loading.value = false;
     }
   });
@@ -327,7 +276,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.admin-dashboard-layout {
+.user-dashboard-layout {
   min-height: 100vh;
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
   background: #faf8fd;
@@ -348,57 +297,6 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1.5rem;
-}
-
-.action-row {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-}
-
-.check-expired-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: #7c6bb0;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.check-expired-btn:hover:not(:disabled) {
-  background: #6b5fa7;
-}
-
-.check-expired-btn:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-}
-
-.check-result {
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.check-result.success {
-  background: #dcfce7;
-  color: #166534;
-  border: 1px solid #bbf7d0;
-}
-
-.check-result.error {
-  background: #fef2f2;
-  color: #dc2626;
-  border: 1px solid #fecaca;
 }
 
 .booking-title {
@@ -557,12 +455,27 @@ onMounted(() => {
 }
 
 .booking-status {
-  background: #dbeafe;
-  color: #1e40af;
+  background: #fef3c7;
+  color: #92400e;
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 600;
+}
+
+.cancel-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.cancel-btn:hover {
+  background: #dc2626;
 }
 
 @media (max-width: 768px) {
@@ -573,10 +486,6 @@ onMounted(() => {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
-  }
-  .action-row {
-    flex-direction: column;
-    align-items: flex-start;
   }
   .search-wrapper {
     width: 100%;
@@ -590,4 +499,4 @@ onMounted(() => {
     padding: 0.5rem 0.5rem;
   }
 }
-</style> 
+</style>

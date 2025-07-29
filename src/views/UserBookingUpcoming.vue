@@ -1,10 +1,8 @@
 <template>
   <div class="flex min-h-screen">
-    <!-- Sidebar -->
-    <Sidebar :activeMenu="'booking'" :activeBookingStatus="'upcoming'" @navigate="handleSidebarNavigate" />
     <!-- Main Content -->
     <div class="flex-1 p-8">
-      <div class="technician-dashboard-layout">
+      <div class="user-dashboard-layout">
         <div class="booking-main">
           <div class="booking-container">
             <div class="title-search-row">
@@ -43,8 +41,6 @@
               <table class="booking-table">
                 <thead>
                   <tr class="table-header">
-                    <th>User Name</th>
-                    <th>User Email</th>
                     <th>Technician Name</th>
                     <th>Technician Email</th>
                     <th>Specialization</th>
@@ -53,12 +49,11 @@
                     <th>Address</th>
                     <th>Price</th>
                     <th>Status</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-for="booking in filteredBookings" :key="booking.id" class="table-row">
-                    <td>{{ booking.userName }}</td>
-                    <td>{{ booking.userEmail || 'N/A' }}</td>
                     <td>{{ booking.technicianName }}</td>
                     <td>{{ booking.technicianEmail || 'N/A' }}</td>
                     <td>{{ booking.specialization || 'N/A' }}</td>
@@ -67,6 +62,11 @@
                     <td>{{ booking.address && booking.address.trim() ? booking.address : 'Address not provided' }}</td>
                     <td>{{ booking.price || 'N/A' }}</td>
                     <td class="booking-status">{{ booking.status }}</td>
+                    <td>
+                      <button @click="cancelBooking(booking.id)" class="cancel-btn">
+                        Cancel
+                      </button>
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -88,14 +88,13 @@ import { getFunctions, httpsCallable } from 'firebase/functions';
 import { db } from '../firebase';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'vue-router';
-import Sidebar from '../components/Sidebar.vue';
 
 const router = useRouter();
 const searchQuery = ref('');
 const bookings = ref([]);
 const loading = ref(true);
 const error = ref(null);
-const technicianUid = ref(null);
+const userUid = ref(null);
 const checkingExpired = ref(false);
 const lastCheckResult = ref(null);
 
@@ -109,24 +108,20 @@ const filteredBookings = computed(() => {
   );
 });
 
-function handleSidebarNavigate(path) {
-  router.push(path);
-}
-
 // Function to check and update expired bookings
 async function checkAndUpdateExpiredBookings() {
   try {
-    console.log('=== CHECKING FOR EXPIRED BOOKINGS ===');
+    console.log('=== CHECKING FOR EXPIRED BOOKINGS (USER) ===');
     
-    // Get all upcoming bookings for this technician
+    // Get all upcoming bookings for this user
     const upcomingQuery = query(
       collection(db, 'bookings'),
-      where('technicianId', '==', technicianUid.value),
+      where('userId', '==', userUid.value),
       where('status', '==', 'upcoming')
     );
     const upcomingSnapshot = await getDocs(upcomingQuery);
     
-    console.log('Found upcoming bookings:', upcomingSnapshot.docs.length);
+    console.log('Found upcoming bookings for user:', upcomingSnapshot.docs.length);
     
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Set to start of day for comparison
@@ -151,7 +146,7 @@ async function checkAndUpdateExpiredBookings() {
       }
     });
     
-    console.log('Total expired bookings found:', expiredBookings.length);
+    console.log('Total expired bookings found for user:', expiredBookings.length);
     
     // Update expired bookings to completed status
     for (const booking of expiredBookings) {
@@ -167,7 +162,7 @@ async function checkAndUpdateExpiredBookings() {
       }
     }
     
-    console.log('=== EXPIRED BOOKINGS CHECK COMPLETE ===');
+    console.log('=== EXPIRED BOOKINGS CHECK COMPLETE (USER) ===');
     return expiredBookings.length;
     
   } catch (error) {
@@ -198,7 +193,7 @@ async function checkExpiredBookings() {
     }
     
     // Refresh the bookings list after moving expired ones
-    if (result > 0) { // Changed to check result directly
+    if (result > 0) {
       await fetchBookings();
     }
   } catch (err) {
@@ -216,12 +211,12 @@ async function fetchBookings() {
   try {
     loading.value = true;
     error.value = null;
-    if (!technicianUid.value) {
-      error.value = 'Technician not authenticated.';
+    if (!userUid.value) {
+      error.value = 'User not authenticated.';
       return;
     }
     
-    console.log('Fetching bookings for technician UID:', technicianUid.value);
+    console.log('Fetching bookings for user UID:', userUid.value);
     
     // First, check and update any expired bookings
     const expiredCount = await checkAndUpdateExpiredBookings();
@@ -231,7 +226,7 @@ async function fetchBookings() {
     
     const q = query(
       collection(db, 'bookings'),
-      where('technicianId', '==', technicianUid.value),
+      where('userId', '==', userUid.value),
       where('status', '==', 'upcoming')
     );
     const snapshot = await getDocs(q);
@@ -245,41 +240,30 @@ async function fetchBookings() {
                   if (technicianDoc.exists()) {
                     const techData = technicianDoc.data();
                     console.log('Technician data found:', techData);
-                    console.log('All technician fields:', Object.keys(techData));
+                                        console.log('All technician fields:', Object.keys(techData));
                     
                     // Get the technician's login email (the email they used to register/login)
-                    const loginEmail = techData.email || techData.userEmail || techData.technicianEmail || techData.contactEmail;
-                    console.log('Technician login email:', loginEmail);
+                    const loginEmail = techData.email || techData.userEmail || techData.technicianEmail || techData.contactEmail || 'N/A';
+                    bookingData.technicianEmail = loginEmail;
                     
-                    // Debug price fields - look for costpervisit specifically
-                    console.log('CostPerVisit field value:', techData.costpervisit);
-                    console.log('BasePrice field value:', techData.basePrice);
-                    console.log('VisitPrice field value:', techData.visitPrice);
-                    console.log('Price field value:', techData.price);
+                    // Try multiple specialization field names
+                    const specialization = techData.specialization || 
+                                         techData.service || 
+                                         techData.services || 
+                                         techData.category || 
+                                         techData.type || 
+                                         techData.jobType || 
+                                         techData.workType || 
+                                         techData.profession || 
+                                         techData.trade || 
+                                         techData.skill || 
+                                         techData.skills || 
+                                         'N/A';
                     
-                    // Try to get price from costpervisit first, then fallback to other fields
-                    const price = techData.costpervisit || techData.basePrice || techData.visitPrice || techData.price;
-                    console.log('Selected price value:', price);
+                    bookingData.specialization = specialization;
                     
-                    bookingData.technicianEmail = loginEmail || 'N/A';
-            
-            // Try multiple specialization field names
-            const specialization = techData.specialization || 
-                                 techData.service || 
-                                 techData.services || 
-                                 techData.category || 
-                                 techData.type || 
-                                 techData.jobType || 
-                                 techData.workType || 
-                                 techData.profession || 
-                                 techData.trade || 
-                                 techData.skill || 
-                                 techData.skills || 
-                                 'N/A';
-            
-            bookingData.specialization = specialization;
-            // Use the technician's base price from their profile
-            bookingData.price = price || 'N/A';
+                    // Use the technician's costpervisit from their profile, then fallback to other price fields
+                    bookingData.price = techData.costpervisit || techData.basePrice || techData.visitPrice || techData.price || 'N/A';
                     console.log('Technician details mapped:', {
                       email: bookingData.technicianEmail,
                       specialization: bookingData.specialization,
@@ -309,17 +293,33 @@ async function fetchBookings() {
   }
 }
 
+async function cancelBooking(bookingId) {
+  if (confirm('Are you sure you want to cancel this booking?')) {
+    try {
+      const bookingRef = doc(db, 'bookings', bookingId);
+      await updateDoc(bookingRef, {
+        status: 'cancelled',
+        cancelledAt: new Date()
+      });
+      await fetchBookings(); // Refresh the list
+    } catch (err) {
+      console.error('Error cancelling booking:', err);
+      alert('Failed to cancel booking. Please try again.');
+    }
+  }
+}
+
 onMounted(() => {
   const auth = getAuth();
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      technicianUid.value = user.uid;
+      userUid.value = user.uid;
       fetchBookings().then(() => {
         // Automatically check for expired bookings when component loads
         checkExpiredBookings();
       });
     } else {
-      error.value = 'Technician not authenticated.';
+      error.value = 'User not authenticated.';
       loading.value = false;
     }
   });
@@ -327,7 +327,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.admin-dashboard-layout {
+.user-dashboard-layout {
   min-height: 100vh;
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
   background: #faf8fd;
@@ -565,6 +565,21 @@ onMounted(() => {
   font-weight: 600;
 }
 
+.cancel-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.cancel-btn:hover {
+  background: #dc2626;
+}
+
 @media (max-width: 768px) {
   .booking-main {
     padding: 1rem;
@@ -590,4 +605,4 @@ onMounted(() => {
     padding: 0.5rem 0.5rem;
   }
 }
-</style> 
+</style>

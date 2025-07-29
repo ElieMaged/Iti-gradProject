@@ -4,12 +4,48 @@ import { useRouter } from 'vue-router';
 import { auth } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { ensureUserRole, fetchUserRole } from '../utils/userRole';
+import emailjs from 'emailjs-com';
 
 const email = ref('');
 const password = ref('');
 const confirmPass = ref('');
+const firstName = ref('');
+const lastName = ref('');
 const error = ref('');
 const router = useRouter();
+
+// Function to send welcome email to the user
+async function sendWelcomeEmail(userEmail, firstName, lastName) {
+  try {
+    console.log('=== SENDING WELCOME EMAIL TO USER ===');
+    console.log('Email:', userEmail);
+    console.log('Name:', firstName, lastName);
+
+    const fullName = `${firstName} ${lastName}`.trim();
+    
+    const templateParams = {
+      to_email: userEmail,
+      to_name: fullName || 'Valued Customer',
+      subject: 'Welcome to BoltFix! Your Account is Ready',
+      message: `Dear ${fullName || 'Valued Customer'},\n\nWelcome to BoltFix! Your account has been successfully created and you're now ready to connect with skilled technicians for all your home service needs.\n\nYour account details:\nEmail: ${userEmail}\n\nYou can now:\n- Browse available technicians\n- Book appointments\n- Track your bookings\n- Leave reviews\n\nThank you for choosing BoltFix!\n\nBest regards,\nThe BoltFix Team`
+    };
+
+    await emailjs.send(
+      import.meta.env.VITE_EMAILJS_SERVICE_ID,
+      import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+      templateParams,
+      import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+    );
+    console.log('Welcome email sent successfully!');
+    return true;
+  } catch (error) {
+    console.error('=== ERROR SENDING WELCOME EMAIL ===');
+    console.error('Error details:', error);
+    console.error('Error message:', error.message);
+    console.error('Error code:', error.code);
+    return false;
+  }
+}
 
 const handleRegister = async () => {
   error.value = '';
@@ -19,6 +55,10 @@ const handleRegister = async () => {
   }
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
+    
+    // Send welcome email using reactive form data
+    await sendWelcomeEmail(email.value, firstName.value, lastName.value);
+    
     // Enforce persistent admin role for elie1400674@gmail.com
     await ensureUserRole(userCredential.user);
     await fetchUserRole(userCredential.user);
@@ -41,12 +81,12 @@ const handleRegister = async () => {
     <!-- first name -->
   <div class="mb-3">
     <label for="firstName" class="block mb-2 text-sm font-medium text-gray-900"></label>
-    <input type="firstName" id="firstName" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block md:w-150 p-3 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400  dark:focus:ring-blue-500 dark:focus:border-blue-500" :placeholder="$t('firstName')" required />
+    <input type="firstName" id="firstName" v-model="firstName" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block md:w-150 p-3 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400  dark:focus:ring-blue-500 dark:focus:border-blue-500" :placeholder="$t('firstName')" required />
   </div>
   <!-- last name -->
     <div class="mb-3">
     <label for="lastName" class="block mb-2 text-sm font-medium text-gray-900"></label>
-    <input type="lastName" id="lastName" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block md:w-150 p-3 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400  dark:focus:ring-blue-500 dark:focus:border-blue-500" :placeholder="$t('lastName')" required />
+    <input type="lastName" id="lastName" v-model="lastName" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block md:w-150 p-3 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400  dark:focus:ring-blue-500 dark:focus:border-blue-500" :placeholder="$t('lastName')" required />
   </div>
   <div class="mb-3">
     <label for="email" class="block mb-2 text-sm font-medium text-gray-900 "></label>

@@ -7,15 +7,17 @@ service cloud.firestore {
     }
     // Allow read access to technicians collection for all users (public listing)
     // Allow write access only for authenticated users
+    // Allow admin users full access
     match /technicians/{technicianId} {
-      allow read: if true;
-      allow write: if request.auth != null;
+      allow read: if true || (request.auth != null && request.auth.token.admin == true);
+      allow write: if request.auth != null || (request.auth != null && request.auth.token.admin == true);
     }
     // Allow read access to pendingTechnicians collection for all users (public listing)
     // Allow write access only for authenticated users
+    // Allow admin users full access
     match /pendingTechnicians/{pendingTechnicianId} {
-      allow read: if true;
-      allow write: if request.auth != null;
+      allow read: if true || (request.auth != null && request.auth.token.admin == true);
+      allow write: if request.auth != null || (request.auth != null && request.auth.token.admin == true);
     }
     // Allow read and write access to bookings collection for all users (for testing)
     match /bookings/{document} {
@@ -29,6 +31,81 @@ service cloud.firestore {
     match /reviews/{reviewId} {
       allow read: if true; // Anyone can read reviews
       allow write: if request.auth != null; // Only authenticated users can write reviews
+    }
+    // Allow technicians to read and write their own availability data
+    // The document ID should match the technician's UID
+    // Allow public read access for booking purposes
+    match /technicianAvailability/{technicianId} {
+      allow read: if true; // Anyone can read availability for booking
+      allow write: if request.auth != null && request.auth.uid == technicianId; // Only the technician can write their own availability
+    }
+    
+    // Payment transactions - allow authenticated users to create, admins to read/write
+    match /paymentTransactions/{transactionId} {
+      allow create: if request.auth != null; // Any authenticated user can create payment transactions
+      allow read, write: if request.auth != null && (
+        request.auth.token.admin == true || 
+        request.auth.token.email == 'elie1400674@gmail.com' || 
+        request.auth.token.email == 'tasneemmostafa200110@gmail.com'
+      ); // Only admins can read/write
+    }
+    
+    // Admin credits - allow authenticated users to create, admins to read/write
+    match /adminCredits/{creditId} {
+      allow create: if request.auth != null; // Any authenticated user can create credit records
+      allow read, write: if request.auth != null && (
+        request.auth.token.admin == true || 
+        request.auth.token.email == 'elie1400674@gmail.com' || 
+        request.auth.token.email == 'tasneemmostafa200110@gmail.com'
+      ); // Only admins can read/write
+    }
+    
+    // Failed PayPal transactions - allow authenticated users to create, admins to read
+    match /failedPayPalTransactions/{failedTransactionId} {
+      allow create: if request.auth != null; // Any authenticated user can create failed transaction records
+      allow read: if request.auth != null && (
+        request.auth.token.admin == true || 
+        request.auth.token.email == 'elie1400674@gmail.com' || 
+        request.auth.token.email == 'tasneemmostafa200110@gmail.com'
+      ); // Only admins can read failed transactions
+    }
+    
+    // Admin payouts - allow admins to create and manage payout records
+    match /adminPayouts/{payoutId} {
+      allow create, read, write: if request.auth != null && (
+        request.auth.token.admin == true || 
+        request.auth.token.email == 'elie1400674@gmail.com' || 
+        request.auth.token.email == 'tasneemmostafa200110@gmail.com'
+      ); // Only admins can manage payouts
+    }
+    
+    // Payment splits - allow authenticated users to create, admins to read/write
+    match /paymentSplits/{splitId} {
+      allow create: if request.auth != null; // Any authenticated user can create split records
+      allow read, write: if request.auth != null && (
+        request.auth.token.admin == true || 
+        request.auth.token.email == 'elie1400674@gmail.com' || 
+        request.auth.token.email == 'tasneemmostafa200110@gmail.com'
+      ); // Only admins can read/write split records
+    }
+    
+    // Notifications - allow users to read their own notifications, admins to read all
+    match /notifications/{notificationId} {
+      allow create: if request.auth != null; // Any authenticated user can create notifications
+      allow read: if request.auth != null && (
+        resource.data.recipientId == request.auth.uid || // User can read their own notifications
+        resource.data.recipientId == 'admin' || // Admin notifications
+        resource.data.recipientType == 'technician' || // Anyone can read technician notifications (for transparency)
+        request.auth.token.admin == true || // Admins can read all
+        request.auth.token.email == 'elie1400674@gmail.com' || 
+        request.auth.token.email == 'tasneemmostafa200110@gmail.com'
+      );
+      allow update: if request.auth != null && (
+        resource.data.recipientId == request.auth.uid || // User can update their own notifications
+        request.auth.token.admin == true || // Admins can update all
+        request.auth.token.email == 'elie1400674@gmail.com' || 
+        request.auth.token.email == 'tasneemmostafa200110@gmail.com'
+      );
     }
   }
 } 
