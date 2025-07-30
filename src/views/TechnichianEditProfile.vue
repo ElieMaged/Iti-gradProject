@@ -98,7 +98,7 @@
               </div>
             </div>
             <div class="edit-profile-actions">
-              <button type="submit" class="save-btn">{{ $t('saveChangesButton') }}</button>
+              <button type="submit" class="save-btn" :disabled="loading">{{ loading ? $t('saving') : $t('saveChangesButton') }}</button>
             </div>
           </form>
         </div>
@@ -107,54 +107,157 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { db } from '../firebase';
 import Sidebar from '../components/Sidebar.vue';
 
-export default {
-  components: {
-    Sidebar
-  },
-  data() {
-    return {
-      activeMenu: 'technicianeditprofile',
-      profileImageUrl: 'https://randomuser.me/api/portraits/men/32.jpg',
-      form: {
-        fullName: '',
-        email: '',
-        phone: '',
-        specialization: '',
-        experience: '',
-        basePrice: '',
-        bio: '',
-        government: '',
-        district: '',
-        willingToTravel: '',
-      }
+const router = useRouter();
+const activeMenu = ref('technicianeditprofile');
+const profileImageUrl = ref('https://randomuser.me/api/portraits/men/32.jpg');
+const fileInput = ref(null);
+const loading = ref(false);
+const error = ref(null);
+const currentUser = ref(null);
+
+const form = ref({
+  fullName: '',
+  email: '',
+  phone: '',
+  specialization: '',
+  experience: '',
+  basePrice: '',
+  bio: '',
+  government: '',
+  district: '',
+  willingToTravel: '',
+});
+
+async function fetchTechnicianData() {
+  try {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    
+    if (!user) {
+      router.push('/userlogin');
+      return;
     }
-  },
-  methods: {
-    handleSidebarNavigate(route) {
-      this.$router.push(route);
-    },
-    triggerFileInput() {
-      this.$refs.fileInput.click();
-    },
-    onFileChange(e) {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          this.profileImageUrl = e.target.result;
-        };
-        reader.readAsDataURL(file);
+
+    currentUser.value = user;
+    
+    // Fetch existing technician data from Firestore
+    const technicianRef = doc(db, 'technicians', user.uid);
+    const technicianSnap = await getDoc(technicianRef);
+    
+    if (technicianSnap.exists()) {
+      const technicianData = technicianSnap.data();
+      console.log('Fetched technician data:', technicianData);
+      
+      // Populate form with existing data
+      form.value = {
+        fullName: technicianData.fullName || '',
+        email: technicianData.email || user.email || '',
+        phone: technicianData.phone || '',
+        specialization: technicianData.specialization || '',
+        experience: technicianData.experience || '',
+        basePrice: technicianData.basePrice || '',
+        bio: technicianData.bio || '',
+        government: technicianData.government || '',
+        district: technicianData.district || '',
+        willingToTravel: technicianData.willingToTravel || '',
+      };
+      
+      // Set profile image if exists
+      if (technicianData.profilePhotoUrl) {
+        profileImageUrl.value = technicianData.profilePhotoUrl;
+      } else if (technicianData.idPhotoUrl) {
+        profileImageUrl.value = technicianData.idPhotoUrl;
       }
-    },
-    saveProfile() {
-      // Implement save logic here (e.g., update Firestore)
-      alert('Profile saved!');
+    } else {
+      // Set default email from auth
+      form.value.email = user.email || '';
     }
+    
+  } catch (err) {
+    console.error('Error fetching technician data:', err);
+    error.value = 'Failed to load technician data: ' + err.message;
   }
 }
+
+function triggerFileInput() {
+  fileInput.value && fileInput.value.click();
+}
+
+function onFileChange(e) {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      profileImageUrl.value = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+async function saveProfile() {
+  try {
+    loading.value = true;
+    error.value = null;
+    
+    if (!currentUser.value) {
+      error.value = 'User not authenticated';
+      return;
+    }
+
+    console.log('Saving technician profile data:', form.value);
+    
+    // Update technician document in Firestore
+    const technicianRef = doc(db, 'technicians', currentUser.value.uid);
+    await setDoc(technicianRef, {
+      ...form.value,
+      profilePhotoUrl: profileImageUrl.value,
+      updatedAt: new Date()
+    }, { merge: true });
+    
+    // Also update the user document to keep it in sync
+    const userRef = doc(db, 'users', currentUser.value.uid);
+    await setDoc(userRef, {
+      ...form.value,
+      profilePhotoUrl: profileImageUrl.value,
+      updatedAt: new Date()
+    }, { merge: true });
+    
+    console.log('Technician profile saved successfully!');
+    alert('Profile saved successfully!');
+    
+  } catch (err) {
+    console.error('Error saving technician profile:', err);
+    error.value = 'Failed to save profile: ' + err.message;
+    alert('Failed to save profile: ' + err.message);
+  } finally {
+    loading.value = false;
+  }
+}
+
+function handleSidebarNavigate(route) {
+  router.push(route);
+}
+
+onMounted(() => {
+  const auth = getAuth();
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      console.log('Technician authenticated:', user.uid);
+      fetchTechnicianData();
+    } else {
+      console.log('No technician authenticated');
+      router.push('/userlogin');
+    }
+  });
+});
 </script>
 
 <style scoped>

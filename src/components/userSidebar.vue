@@ -25,12 +25,12 @@
         <span>{{ $t('history') }}</span>
       </a>
 
-      <a href="/payment" 
+      <a href="/user-bookings" 
          class="sidebar-item" 
-         :class="{ active: activeTab === 'payment' }"
+         :class="{ active: activeTab === 'bookings' }"
          @click="handleNavigation">
-        <i class="fas fa-credit-card"></i>
-        <span>{{ $t('payment') }}</span>
+        <i class="fas fa-calendar-alt"></i>
+        <span>{{ $t('bookings') }}</span>
       </a>
 
       <button @click="handleLogout" class="sidebar-item logout-btn">

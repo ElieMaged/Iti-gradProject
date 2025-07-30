@@ -9,7 +9,14 @@
           </div>
           <form class="edit-profile-form" @submit.prevent="saveProfile">
             <div class="edit-profile-content">
-              <div class="edit-profile-fields">
+                <div class="edit-profile-fields">
+                  <div class="flex flex-col items-center">
+                  <div class="profile-img-wrapper w-40 h-40 rounded-full overflow-hidden shadow-md mb-4">
+                    <img :src="profileImageUrl" alt="Technician Photo" class="w-full h-full object-cover" />
+                  </div>
+                  <input ref="fileInput" type="file" class="hidden" @change="onFileChange" />
+                  <button class="upload-btn bg-secondary text-white rounded px-4 py-2 mb-2" @click="triggerFileInput">{{ $t('uploadPhotoButton') }}</button>
+                </div>
                 <div>
                   <label for="fullName">{{ $t('fullNameLabel') }}</label>
                   <input type="text" id="fullName" v-model="form.fullName" required />
@@ -67,10 +74,13 @@
   </div>
 </template>
 
-<script>
-import userSidebar from '../components/userSidebar.vue';
+<script >
 import { auth, db } from '../firebase';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import userSidebar from '../components/userSidebar.vue';
 
 export default {
   components: {

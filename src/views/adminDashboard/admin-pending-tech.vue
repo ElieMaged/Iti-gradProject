@@ -38,7 +38,7 @@
           >
             <div class="card-header">
               <div class="applicant-info">
-                <img :src="application.idPhotoUrl || 'https://randomuser.me/api/portraits/men/1.jpg'" 
+                <img :src="application.profilePhotoUrl || application.idPhotoUrl || 'https://randomuser.me/api/portraits/men/1.jpg'" 
                      :alt="application.fullName" 
                      class="applicant-avatar" />
                 <div>
@@ -82,7 +82,7 @@
 
             <div class="card-actions">
               <button @click="viewIdPhoto(application)" class="action-btn view-btn">
-                <i class="fas fa-id-card"></i> {{ $t('viewId') }}
+                <i class="fas fa-images"></i> {{ $t('viewPhotos') }}
               </button>
               <button @click="acceptApplication(application)" class="action-btn accept-btn">
                 <i class="fas fa-check"></i> {{ $t('accept') }}
@@ -108,21 +108,41 @@
       </div>
     </div>
 
-    <!-- ID Photo Modal -->
+    <!-- Photos Modal -->
     <div v-if="showIdModal" class="modal-overlay" @click="closeIdModal">
       <div class="modal-content" @click.stop>
         <div class="modal-header">
-          <h3>ID Photo - {{ selectedApplication?.fullName }}</h3>
+          <h3>Application Photos - {{ selectedApplication?.fullName }}</h3>
           <button @click="closeIdModal" class="modal-close">
             <i class="fas fa-times"></i>
           </button>
         </div>
         <div class="modal-body">
-          <img v-if="selectedApplication?.idPhotoUrl" 
-               :src="selectedApplication.idPhotoUrl" 
-               alt="ID Photo" 
-               class="id-photo" />
-          <p v-else class="no-photo">No ID photo uploaded</p>
+          <div class="photos-container">
+            <!-- Profile Photo Section -->
+            <div class="photo-section">
+              <h4 class="photo-title">Profile Picture</h4>
+              <div class="photo-wrapper">
+                <img v-if="selectedApplication?.profilePhotoUrl" 
+                     :src="selectedApplication.profilePhotoUrl" 
+                     alt="Profile Photo" 
+                     class="application-photo" />
+                <p v-else class="no-photo">No profile picture uploaded</p>
+              </div>
+            </div>
+            
+            <!-- ID Photo Section -->
+            <div class="photo-section">
+              <h4 class="photo-title">ID Photo</h4>
+              <div class="photo-wrapper">
+                <img v-if="selectedApplication?.idPhotoUrl" 
+                     :src="selectedApplication.idPhotoUrl" 
+                     alt="ID Photo" 
+                     class="application-photo" />
+                <p v-else class="no-photo">No ID photo uploaded</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -752,16 +772,63 @@ export default {
   text-align: center;
 }
 
-.id-photo {
+.photos-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.photo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.photo-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.photo-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.application-photo {
   max-width: 100%;
-  max-height: 60vh;
+  max-height: 300px;
   border-radius: 0.5rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  object-fit: cover;
 }
 
 .no-photo {
   color: #6b7280;
   font-style: italic;
+  padding: 2rem;
+  background: #f9fafb;
+  border-radius: 0.5rem;
+  border: 2px dashed #d1d5db;
+  text-align: center;
+  width: 100%;
+}
+
+/* Responsive design for photos */
+@media (max-width: 768px) {
+  .photos-container {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .application-photo {
+    max-height: 250px;
+  }
 }
 
 @media (max-width: 768px) {

@@ -237,7 +237,7 @@ const mergedTechnicians = computed(() => {
       allTechs.push({
         id: fbTech.id,
         name: fbTech.fullName,
-        image: fbTech.idPhotoUrl || profile1, // fallback to a default image if needed
+        image: fbTech.profilePhotoUrl || fbTech.idPhotoUrl || profile1, // Use profile photo first, then ID photo as fallback
         bgColor: '#E8E4F3', // or any default color
         price: fbTech.basePrice,
         description: fbTech.bio,

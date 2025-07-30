@@ -11,7 +11,7 @@
     <div v-if="showNotifications" class="notifications-dropdown">
       <div class="notifications-header">
         <h3>Notifications</h3>
-        <button @click="markAllAsRead" class="mark-all-read">Mark all as read</button>
+        <button @click="markAllAsRead" class="mark-all-read purple">Mark all as read</button>
       </div>
       
       <div class="notifications-list">
@@ -45,8 +45,8 @@
       </div>
       
       <div class="notifications-footer">
-        <button @click="viewAllNotifications">View All</button>
-        <button @click="clearAllNotifications" class="test-notification-btn">Clear All</button>
+        <button class="purple" @click="viewAllNotifications">View All</button>
+        <button @click="clearAllNotifications" class="test-notification-btn purple">Clear All</button>
       </div>
     </div>
   </div>
@@ -494,7 +494,7 @@ onMounted(async () => {
 }
 
 .notifications-footer button {
-  background: #6b7280;
+  background-color: #625397;
   color: white;
   border: none;
   padding: 8px 16px;
@@ -504,7 +504,7 @@ onMounted(async () => {
 }
 
 .notifications-footer button:hover {
-  background: #4b5563;
+  background-color: #8772d2;
 }
 
 .test-notification-btn {
@@ -521,4 +521,21 @@ onMounted(async () => {
 .test-notification-btn:hover {
   background: #b91c1c;
 }
+
+.purple:hover {
+  background-color: #7765b7;
+}
+
+.purple {
+  background-color: #625397;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-left: 10px; /* Add some space between buttons */
+}
+
+
 </style>

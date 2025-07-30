@@ -1,16 +1,25 @@
 <template>
-  <div v-if="loading">
-    <p>Loading...</p>
-  </div>
-  <div v-else-if="error">
-    <p>{{ error }}</p>
-  </div>
-  <div v-else class="admin-dashboard-layout">
     <!-- Sidebar -->
     <userSidebar :activeTab="activeTab" />
     <!-- Main Content -->
     <div id="admin-profile-container" class="p-4 mr-20">
       <div id="admin-profile-wrapper">
+        <!-- Loading State -->
+        <div v-if="loading" class="text-center py-12">
+            <div class="loading-spinner mx-auto mb-4"></div>
+            <p class="text-lg text-gray-600">{{ $t('loadingProfileData') }}</p>
+          </div>
+          
+          <!-- Error State -->
+          <div v-else-if="error" class="text-center py-12">
+            <p class="text-lg text-red-600 mb-4">{{ error }}</p>
+            <button @click="fetchUserProfile" class="bg-secondary text-white px-4 py-2 rounded-lg">
+              {{ $t('retry') }}
+            </button>
+          </div>
+          
+          <!-- Profile Content -->
+          <div v-else>
         <div id="admin-profile-card">
           <h2 id="admin-profile-title">{{ $t('personalInformation') }}</h2>
           <div id="admin-profile-content">
@@ -59,6 +68,93 @@
 import userSidebar from '../components/userSidebar.vue';
 import { auth, db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+const router = useRouter();
+const activeTab = ref('profile');
+const profileImageUrl = ref(null);
+const loading = ref(true);
+const error = ref(null);
+const profileData = ref({
+  fullName: '',
+  email: '',
+  phone: '',
+  gender: '',
+  address: ''
+});
+
+async function fetchUserProfile() {
+  try {
+    loading.value = true;
+    error.value = null;
+    
+    const auth = getAuth();
+    const user = auth.currentUser;
+    
+    if (!user) {
+      error.value = 'User not authenticated';
+      router.push('/userlogin');
+      return;
+    }
+
+    console.log('Fetching profile for user:', user.uid);
+    
+    // Fetch user data from Firestore
+    const userRef = doc(db, 'users', user.uid);
+    const userSnap = await getDoc(userRef);
+    
+    if (userSnap.exists()) {
+      const userData = userSnap.data();
+      console.log('User data from Firestore:', userData);
+      
+      // Set profile data from Firebase
+      profileData.value = {
+        fullName: userData.fullName || `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || 'N/A',
+        email: userData.email || user.email || 'N/A',
+        phone: userData.phone || 'N/A',
+        gender: userData.gender || 'N/A',
+        address: userData.address || `${userData.district || ''}${userData.district && userData.government ? ', ' : ''}${userData.government || ''}`.trim() || 'N/A'
+      };
+      
+      // Set profile image if exists
+      if (userData.profileImageUrl) {
+        profileImageUrl.value = userData.profileImageUrl;
+      }
+      
+      console.log('Profile data set:', profileData.value);
+    } else {
+      console.log('No user document found, using auth data');
+      // Fallback to auth data if no Firestore document
+      profileData.value = {
+        fullName: 'N/A',
+        email: user.email || 'N/A',
+        phone: 'N/A',
+        gender: 'N/A',
+        address: 'N/A'
+      };
+    }
+    
+  } catch (err) {
+    console.error('Error fetching user profile:', err);
+    error.value = 'Failed to load profile data: ' + err.message;
+  } finally {
+    loading.value = false;
+  }
+}
+
+onMounted(() => {
+  const auth = getAuth();
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      console.log('User authenticated:', user.uid);
+      fetchUserProfile();
+    } else {
+      console.log('No user authenticated');
+      router.push('/userlogin');
+    }
+  });
+});
 
 export default {
   components: { userSidebar },

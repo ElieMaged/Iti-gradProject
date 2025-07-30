@@ -118,7 +118,12 @@ const mergedTechnicians = computed(() => {
   const allTechs = [...stockTechnicians]
   firebaseTechnicians.value.forEach(fbTech => {
     if (!allTechs.some(t => t.name === fbTech.name && t.price === fbTech.price)) {
-      allTechs.push(fbTech)
+      allTechs.push({
+        ...fbTech,
+        image: fbTech.profilePhotoUrl || fbTech.idPhotoUrl || profile1, // Use profile photo first, then ID photo as fallback
+        name: fbTech.fullName || fbTech.name,
+        price: fbTech.basePrice || fbTech.price
+      })
     }
   })
   return allTechs

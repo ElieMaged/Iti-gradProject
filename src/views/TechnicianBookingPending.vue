@@ -13,21 +13,7 @@
                 <input v-model="searchQuery" class="search-input" type="text" :placeholder="$t('search')" />
                 <span class="search-icon"><i class="fas fa-search"></i></span>
               </div>
-              <!-- Test notification button for debugging -->
-              <button 
-                @click="testNotification" 
-                class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-              >
-                {{ $t('testNotification') }}
-              </button>
-              
-              <!-- Debug booking data button -->
-              <button 
-                @click="debugBookingData" 
-                class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors ml-2"
-              >
-                🐛 {{ $t('debugBookingData') }}
-              </button>
+
             </div>
             <div v-if="loading" class="loading-state">
               <div class="loading-spinner"></div>
@@ -619,34 +605,7 @@ async function sendBookingStatusEmail(booking, status, technicianName) {
   }
 }
 
-function testNotification() {
-  const booking = {
-    id: 'test-booking-id',
-    userName: 'Test User',
-    userEmail: 'narutossj23@yahoo.com', // Use the actual email for testing
-    technicianId: 'test-technician-id',
-    technicianName: 'Test Technician',
-    specialization: 'Test Specialization',
-    date: '2023-10-27',
-    time: '10:00 AM',
-    address: '123 Test St, Test City',
-    price: '$100',
-    status: 'pending',
-    userId: 'test-user-id'
-  };
-  const technicianName = booking.technicianName || 'Technician';
-  sendBookingStatusNotification(booking, 'accepted', technicianName);
-  alert('Test notification sent to narutossj23@yahoo.com!');
-}
 
-function debugBookingData() {
-  console.log('=== DEBUGGING BOOKING DATA ===');
-  console.log('Current bookings:', bookings.value);
-  console.log('Technician UID:', technicianUid.value);
-  console.log('Search Query:', searchQuery.value);
-  console.log('Filtered Bookings:', filteredBookings.value);
-  console.log('=== END DEBUGGING ===');
-}
 
 onMounted(() => {
   const auth = getAuth();

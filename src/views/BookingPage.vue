@@ -49,8 +49,8 @@
                 <div class="day-name">{{ formatDay(date) }}</div>
                 <div class="date-number">{{ formatDateNumber(date) }}</div>
                 <div class="time-slot">
-                  <span v-if="getAvailableTimeForDate(date)">
-                    {{ getAvailableTimeForDate(date) }}
+                  <span v-if="dateAvailability[date]" class="text-green-600">
+                    {{ dateAvailability[date] }}
                   </span>
                   <span v-else class="text-gray-400 text-sm">
                     Unavailable
@@ -89,7 +89,10 @@
                 <option v-for="time in availableTimes" :key="time" :value="time">{{ time }}</option>
               </select>
               <div v-if="availableTimes.length === 0" class="text-sm text-red-500 mt-1">
-                This technician is not available on the selected date. Please choose a different date.
+                All time slots for this date are already booked. Please choose a different date or time.
+              </div>
+              <div v-else-if="availableTimes.length > 0" class="text-sm text-green-600 mt-1">
+                {{ availableTimes.length }} time slot(s) available for this date
               </div>
             </div>
           </div>
@@ -218,6 +221,7 @@ const technician = ref({})
 const errorMsg = ref('')
 const paypalLoaded = ref(false)
 const technicianAvailability = ref(null)
+const dateAvailability = ref({})
 
 // Date and time management
 const currentDateOffset = ref(0)
@@ -373,17 +377,79 @@ async function fetchTechnicianAvailability(technicianId) {
 }
 
 // Function to get available time for a specific date
-function getAvailableTimeForDate(dateString) {
+async function getAvailableTimeForDate(dateString) {
   if (!technicianAvailability.value) return null
   
   const dayName = getDayName(dateString)
   const dayAvailability = technicianAvailability.value[dayName]
   
   if (dayAvailability && dayAvailability.available) {
-    return `${dayAvailability.startTime} - ${dayAvailability.endTime}`
+    // Check if there are any available slots after filtering out booked ones
+    const allTimeSlots = generateTimeSlots(dayAvailability.startTime, dayAvailability.endTime)
+    const existingBookings = await fetchExistingBookings(technician.value.uid, dateString)
+    
+    const availableSlots = allTimeSlots.filter(timeSlot => {
+      return !existingBookings.some(booking => booking.time === timeSlot)
+    })
+    
+    if (availableSlots.length > 0) {
+      return `${availableSlots.length} slot(s) available`
+    } else {
+      return 'Fully booked'
+    }
   }
   
   return null
+}
+
+// Function to update date availability for visible dates
+async function updateDateAvailability() {
+  if (!technician.value.uid || !technicianAvailability.value) return
+  
+  const newDateAvailability = {}
+  
+  for (const date of visibleDates.value) {
+    const availability = await getAvailableTimeForDate(date)
+    newDateAvailability[date] = availability
+  }
+  
+  dateAvailability.value = newDateAvailability
+}
+
+// Function to fetch existing bookings for a technician on a specific date
+async function fetchExistingBookings(technicianId, selectedDate) {
+  try {
+    // Convert date format from MM/DD/YYYY to YYYY-MM-DD for Firestore query
+    const [month, day, year] = selectedDate.split(' ')[0].split('/')
+    const formattedDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
+    
+    console.log('Fetching existing bookings for:', technicianId, 'on date:', formattedDate)
+    
+    const bookingsQuery = query(
+      collection(db, 'bookings'),
+      where('technicianId', '==', technicianId),
+      where('date', '==', formattedDate),
+      where('status', 'in', ['pending', 'upcoming', 'completed']) // Only check active bookings
+    )
+    
+    const snapshot = await getDocs(bookingsQuery)
+    const existingBookings = []
+    
+    snapshot.forEach(doc => {
+      const booking = doc.data()
+      existingBookings.push({
+        id: doc.id,
+        time: booking.time,
+        status: booking.status
+      })
+    })
+    
+    console.log('Found existing bookings:', existingBookings)
+    return existingBookings
+  } catch (error) {
+    console.error('Error fetching existing bookings:', error)
+    return []
+  }
 }
 
 // Function to update available times based on selected date
@@ -398,12 +464,29 @@ async function updateAvailableTimes(selectedDate) {
   
   if (availability && availability[dayName] && availability[dayName].available) {
     const { startTime, endTime } = availability[dayName]
-    availableTimes.value = generateTimeSlots(startTime, endTime)
+    const allTimeSlots = generateTimeSlots(startTime, endTime)
+    
+    // Fetch existing bookings for this technician on this date
+    const existingBookings = await fetchExistingBookings(technician.value.uid, selectedDate)
+    
+    // Filter out already booked time slots
+    const availableTimeSlots = allTimeSlots.filter(timeSlot => {
+      const isBooked = existingBookings.some(booking => booking.time === timeSlot)
+      if (isBooked) {
+        console.log(`Time slot ${timeSlot} is already booked`)
+      }
+      return !isBooked
+    })
+    
+    availableTimes.value = availableTimeSlots
     
     // Set default time if available
     if (availableTimes.value.length > 0) {
       form.value.time = availableTimes.value[0]
       selectedTimeIndex.value = 0
+    } else {
+      form.value.time = ''
+      console.log('No available time slots for this date')
     }
   } else {
     availableTimes.value = []
@@ -438,7 +521,7 @@ watch(() => availableTimes.value, () => {
 })
 
 // Watch for technician availability changes to update available dates
-watch(() => technicianAvailability.value, () => {
+watch(() => technicianAvailability.value, async () => {
   // When availability changes, update the selected date if current date is no longer available
   if (form.value.date && availableDates.value.length > 0) {
     const isCurrentDateAvailable = availableDates.value.includes(form.value.date);
@@ -447,6 +530,14 @@ watch(() => technicianAvailability.value, () => {
       updateAvailableTimes(form.value.date);
     }
   }
+  
+  // Update date availability for visible dates
+  await updateDateAvailability()
+})
+
+// Watch for visible dates changes to update availability display
+watch(() => visibleDates.value, async () => {
+  await updateDateAvailability()
 })
 
 // Helper functions for date formatting
@@ -519,6 +610,7 @@ onMounted(async () => {
   // Fetch technician availability first
   if (technician.value.uid) {
     await fetchTechnicianAvailability(technician.value.uid);
+    await updateDateAvailability();
   }
   
   // Set default date to the first available date
