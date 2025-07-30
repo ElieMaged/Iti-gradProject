@@ -58,7 +58,7 @@
         <span>{{ $t('payment') }}</span>
       </a>
 
-      <a href="/reviews" 
+      <a href="/technician-reviews" 
          class="sidebar-item" 
          :class="{ active: activeMenu === 'reviews' }"
          @click="handleNavigation">

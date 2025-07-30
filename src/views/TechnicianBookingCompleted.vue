@@ -8,34 +8,34 @@
         <div class="booking-main">
           <div class="booking-container">
             <div class="title-search-row">
-              <h2 class="booking-title">Completed Bookings</h2>
+              <h2 class="booking-title">{{ $t('completedBookings') }}</h2>
               <div class="search-wrapper">
-                <input v-model="searchQuery" class="search-input" type="text" placeholder="Search" />
+                <input v-model="searchQuery" class="search-input" type="text" :placeholder="$t('search')" />
                 <span class="search-icon"><i class="fas fa-search"></i></span>
               </div>
             </div>
             <div v-if="loading" class="loading-state">
               <div class="loading-spinner"></div>
-              <p>Loading bookings...</p>
+              <p>{{ $t('loadingBookings') }}</p>
             </div>
             <div v-else-if="error" class="error-state">
               <p class="error-message">{{ error }}</p>
-              <button @click="fetchBookings" class="retry-btn">Retry</button>
+              <button @click="fetchBookings" class="retry-btn">{{ $t('retry') }}</button>
             </div>
             <div v-else-if="filteredBookings.length > 0" class="table-wrapper">
               <table class="booking-table">
                 <thead>
                   <tr class="table-header">
-                    <th>User Name</th>
-                    <th>User Email</th>
-                    <th>Technician Name</th>
-                    <th>Technician Email</th>
-                    <th>Specialization</th>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Address</th>
-                    <th>Price</th>
-                    <th>Status</th>
+                    <th>{{ $t('userName') }}</th>
+                    <th>{{ $t('userEmail') }}</th>
+                    <th>{{ $t('technicianName') }}</th>
+                    <th>{{ $t('technicianEmail') }}</th>
+                    <th>{{ $t('specialization') }}</th>
+                    <th>{{ $t('date') }}</th>
+                    <th>{{ $t('time') }}</th>
+                    <th>{{ $t('address') }}</th>
+                    <th>{{ $t('price') }}</th>
+                    <th>{{ $t('status') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -49,13 +49,13 @@
                     <td>{{ booking.time }}</td>
                     <td>{{ booking.address && booking.address.trim() ? booking.address : 'Address not provided' }}</td>
                     <td>{{ booking.price || 'N/A' }}</td>
-                    <td><span class="status-completed">{{ booking.status === 'complete' ? 'Complete' : booking.status }}</span></td>
+                    <td><span class="status-completed">{{ booking.status === 'complete' ? $t('complete') : booking.status }}</span></td>
                   </tr>
                 </tbody>
               </table>
             </div>
             <div v-else class="empty-state">
-              <p>No completed bookings found.</p>
+              <p>{{ $t('noCompletedBookings') }}</p>
             </div>
           </div>
         </div>
@@ -237,7 +237,10 @@ onMounted(() => {
 .admin-dashboard-layout {
   min-height: 100vh;
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
-  background: #faf8fd;
+}
+
+.dark .admin-dashboard-layout {
+  background: var(--primary-bg);
 }
 
 .booking-main {
@@ -289,8 +292,18 @@ onMounted(() => {
   transition: border 0.2s;
 }
 
+.dark .search-input {
+  background: var(--input-bg);
+  color: var(--text-muted);
+  border-color: var(--border-color);
+}
+
 .search-input:focus {
   border: 1.5px solid #6B5FA7;
+}
+
+.dark .search-input:focus {
+  border-color: var(--secondary);
 }
 
 .search-icon {
@@ -300,6 +313,10 @@ onMounted(() => {
   transform: translateY(-50%);
   color: #b6a7e6;
   font-size: 1.1rem;
+}
+
+.dark .search-icon {
+  color: var(--text-muted);
 }
 
 .loading-state {
@@ -313,6 +330,11 @@ onMounted(() => {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
+.dark .loading-state {
+  background: var(--grey-bg);
+  color: var(--white);
+}
+
 .loading-spinner {
   width: 40px;
   height: 40px;
@@ -321,6 +343,11 @@ onMounted(() => {
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;
+}
+
+.dark .loading-spinner {
+  border-color: var(--input-bg);
+  border-top-color: var(--secondary);
 }
 
 @keyframes spin {
@@ -339,10 +366,18 @@ onMounted(() => {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
+.dark .error-state {
+  background: var(--grey-bg);
+}
+
 .error-message {
   color: #ef4444;
   margin-bottom: 1rem;
   text-align: center;
+}
+
+.dark .error-message {
+  color: #f87171;
 }
 
 .retry-btn {
@@ -355,8 +390,17 @@ onMounted(() => {
   transition: background-color 0.2s;
 }
 
+.dark .retry-btn {
+  background: var(--primary);
+  color: var(--primary-text);
+}
+
 .retry-btn:hover {
   background: #6b5fa7;
+}
+
+.dark .retry-btn:hover {
+  background: var(--primary);
 }
 
 .empty-state {
@@ -371,11 +415,20 @@ onMounted(() => {
   font-size: 1.1rem;
 }
 
+.dark .empty-state {
+  background: var(--grey-bg);
+  color: var(--primary-color);
+}
+
 .table-wrapper {
   overflow-x: auto;
   border-radius: 0.75rem;
   background: #fff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.dark .table-wrapper {
+  background: var(--grey-bg);
 }
 
 .booking-table {
@@ -385,9 +438,18 @@ onMounted(() => {
   border-radius: 0.75rem;
 }
 
+.dark .booking-table {
+  background: var(--grey-bg);
+}
+
 .table-header {
   background: rgba(124, 107, 176, 0.2);
   color: #333;
+}
+
+.dark .table-header {
+  background: rgba(124, 107, 176, 0.1);
+  color: var(--white);
 }
 
 .table-header th {
@@ -397,19 +459,35 @@ onMounted(() => {
   font-size: 0.9rem;
 }
 
+.dark .table-header th {
+  color: var(--white);
+}
+
 .table-row {
   border-bottom: 1px solid #e5e7eb;
   transition: background-color 0.2s;
+}
+
+.dark .table-row {
+  border-bottom-color: var(--border-color);
 }
 
 .table-row:hover {
   background: #ede7f6;
 }
 
+.dark .table-row:hover {
+  background: var(--input-bg);
+}
+
 .table-row td {
   padding: 0.75rem 1rem;
   font-size: 0.9rem;
   color: #333;
+}
+
+.dark .table-row td {
+  color: var(--primary-text-dark);
 }
 
 .status-completed {
@@ -419,6 +497,11 @@ onMounted(() => {
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 600;
+}
+
+.dark .status-completed {
+  background: #166534;
+  color: #dcfce7;
 }
 
 @media (max-width: 768px) {

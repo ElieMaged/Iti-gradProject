@@ -431,169 +431,146 @@ onMounted(async () => {
       console.error('Error checking user type:', error);
     }
     
-    // Build recipient IDs array - start with basic IDs
-    const recipientIds = [user.uid, 'admin'];
-    
-    // Also add user's email to the query for fallback notifications
-    if (user.email) {
-      recipientIds.push(user.email);
-      console.log('Added user email to recipient IDs:', user.email);
-    }
-    
-    // If user is a technician, also add technician-specific queries
-    if (isTechnician) {
-      console.log('User is a technician, adding technician-specific queries...');
-      
-      // Try to find technician by email in technicians collection
-      try {
-        const techQuery = query(
-          collection(db, 'technicians'),
-          where('email', '==', user.email)
-        );
-        const techSnapshot = await getDocs(techQuery);
-        if (!techSnapshot.empty) {
-          const techDoc = techSnapshot.docs[0];
-          const techData = techDoc.data();
-          console.log('Found technician document:', techData);
-          
-          // Add technician document ID to recipient IDs
-          recipientIds.push(techDoc.id);
-          console.log('Added technician document ID to recipient IDs:', techDoc.id);
-          
-          // If technician has a uid field, add that too
-          if (techData.uid && techData.uid !== user.uid) {
-            recipientIds.push(techData.uid);
-            console.log('Added technician UID to recipient IDs:', techData.uid);
-          }
-        }
-      } catch (techError) {
-        console.log('Error finding technician document:', techError);
-      }
-    }
-    
-    // Also check if user exists in users collection and add any additional IDs
     try {
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        console.log('Found user document:', userData);
-        
-        // Add any additional user-specific IDs if they exist
-        if (userData.userId && userData.userId !== user.uid) {
-          recipientIds.push(userData.userId);
-          console.log('Added user ID from document to recipient IDs:', userData.userId);
-        }
-      }
-    } catch (userError) {
-      console.log('Error checking user document:', userError);
-    }
-    
-    console.log('Final recipient IDs for notification query:', recipientIds);
-    
-    try {
-      // Use a simple, reliable approach: query for the most important recipient IDs
-      const primaryRecipientIds = [user.uid, 'admin'];
-      if (user.email) {
-        primaryRecipientIds.push(user.email);
-      }
-      
-      // If user is a technician, add their technician document ID
-      if (isTechnician) {
-        try {
-          const techQuery = query(
-            collection(db, 'technicians'),
-            where('email', '==', user.email)
-          );
-          const techSnapshot = await getDocs(techQuery);
-          if (!techSnapshot.empty) {
-            const techDoc = techSnapshot.docs[0];
-            primaryRecipientIds.push(techDoc.id);
-            console.log('Added technician document ID to primary recipients:', techDoc.id);
-          }
-        } catch (techError) {
-          console.log('Error finding technician document for notifications:', techError);
-        }
-      }
-      
-      console.log('Primary recipient IDs for notification query:', primaryRecipientIds);
-      
-      // Create the main notification query
-      const notificationsQuery = query(
+      // Create separate queries that match the security rules
+      const userNotificationsQuery = query(
         collection(db, 'notifications'),
-        where('recipientId', 'in', primaryRecipientIds),
+        where('recipientId', '==', user.uid),
         orderBy('createdAt', 'desc'),
-        limit(20)
+        limit(10)
       );
       
-      console.log('Notification query created successfully');
+      const adminNotificationsQuery = query(
+        collection(db, 'notifications'),
+        where('recipientId', '==', 'admin'),
+        orderBy('createdAt', 'desc'),
+        limit(10)
+      );
       
-      const unsubscribeNotifications = onSnapshot(notificationsQuery, (snapshot) => {
-        console.log('✅ Notification snapshot received:', snapshot.docs.length, 'notifications');
-        const newNotifications = snapshot.docs.map(doc => ({
-          id: doc.id, ...doc.data()
-        }));
+      console.log('Notification queries created successfully');
+      
+      // Listen to user's notifications
+      const unsubscribeUserNotifications = onSnapshot(userNotificationsQuery, (userSnapshot) => {
+        console.log('✅ User notification snapshot received:', userSnapshot.docs.length, 'notifications');
         
-        // Remove duplicates based on notification ID
-        const uniqueNotifications = newNotifications.filter((notification, index, self) => 
-          index === self.findIndex(n => n.id === notification.id)
-        );
-        
-        console.log('Unique notifications:', uniqueNotifications.length);
-        
-        // Debug: Log each notification's recipientId
-        uniqueNotifications.forEach((notification, index) => {
-          console.log(`Notification ${index + 1}:`, {
-            id: notification.id,
-            recipientId: notification.recipientId,
-            type: notification.type,
-            title: notification.title,
-            message: notification.message
+        // Listen to admin notifications
+        const unsubscribeAdminNotifications = onSnapshot(adminNotificationsQuery, (adminSnapshot) => {
+          console.log('✅ Admin notification snapshot received:', adminSnapshot.docs.length, 'notifications');
+          
+          // Combine both snapshots
+          const userNotifications = userSnapshot.docs.map(doc => ({
+            id: doc.id, ...doc.data()
+          }));
+          
+          const adminNotifications = adminSnapshot.docs.map(doc => ({
+            id: doc.id, ...doc.data()
+          }));
+          
+          // Combine and remove duplicates
+          const allNotifications = [...userNotifications, ...adminNotifications];
+          const uniqueNotifications = allNotifications.filter((notification, index, self) => 
+            index === self.findIndex(n => n.id === notification.id)
+          );
+          
+          // Sort by creation date
+          uniqueNotifications.sort((a, b) => {
+            const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+            const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+            return dateB - dateA;
+          });
+          
+          console.log('Combined unique notifications:', uniqueNotifications.length);
+          
+          // Debug: Log each notification's recipientId
+          uniqueNotifications.forEach((notification, index) => {
+            console.log(`Notification ${index + 1}:`, {
+              id: notification.id,
+              recipientId: notification.recipientId,
+              type: notification.type,
+              title: notification.title,
+              message: notification.message
+            });
+          });
+          
+          notifications.value = uniqueNotifications;
+        }, (adminError) => {
+          console.error('❌ Error listening to admin notifications:', adminError);
+          console.error('Admin error details:', {
+            code: adminError.code,
+            message: adminError.message,
+            stack: adminError.stack
           });
         });
         
-        notifications.value = uniqueNotifications;
-      }, (error) => {
-        console.error('❌ Error listening to notifications:', error);
-        console.error('Error details:', {
-          code: error.code,
-          message: error.message,
-          stack: error.stack
+        // Return cleanup function for admin notifications
+        return () => {
+          unsubscribeAdminNotifications();
+        };
+      }, (userError) => {
+        console.error('❌ Error listening to user notifications:', userError);
+        console.error('User error details:', {
+          code: userError.code,
+          message: userError.message,
+          stack: userError.stack
         });
         
         // If index is still building, try a simpler query without orderBy
-        if (error.code === 'failed-precondition' || error.message.includes('index')) {
+        if (userError.code === 'failed-precondition' || userError.message.includes('index')) {
           console.log('🔄 Index still building, trying fallback query...');
-          const fallbackQuery = query(
+          const fallbackUserQuery = query(
             collection(db, 'notifications'),
-            where('recipientId', 'in', primaryRecipientIds),
-            limit(20)
+            where('recipientId', '==', user.uid),
+            limit(10)
           );
           
-          const unsubscribeFallback = onSnapshot(fallbackQuery, (fallbackSnapshot) => {
-            console.log('✅ Fallback notification snapshot received:', fallbackSnapshot.docs.length, 'notifications');
-            const fallbackNotifications = fallbackSnapshot.docs.map(doc => ({
-              id: doc.id, ...doc.data()
-            }));
+          const fallbackAdminQuery = query(
+            collection(db, 'notifications'),
+            where('recipientId', '==', 'admin'),
+            limit(10)
+          );
+          
+          const unsubscribeFallbackUser = onSnapshot(fallbackUserQuery, (fallbackUserSnapshot) => {
+            console.log('✅ Fallback user notification snapshot received:', fallbackUserSnapshot.docs.length, 'notifications');
             
-            // Remove duplicates and sort client-side
-            const uniqueFallbackNotifications = fallbackNotifications.filter((notification, index, self) => 
-              index === self.findIndex(n => n.id === notification.id)
-            );
-            
-            uniqueFallbackNotifications.sort((a, b) => {
-              const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
-              const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
-              return dateB - dateA;
+            const unsubscribeFallbackAdmin = onSnapshot(fallbackAdminQuery, (fallbackAdminSnapshot) => {
+              console.log('✅ Fallback admin notification snapshot received:', fallbackAdminSnapshot.docs.length, 'notifications');
+              
+              const fallbackUserNotifications = fallbackUserSnapshot.docs.map(doc => ({
+                id: doc.id, ...doc.data()
+              }));
+              
+              const fallbackAdminNotifications = fallbackAdminSnapshot.docs.map(doc => ({
+                id: doc.id, ...doc.data()
+              }));
+              
+              // Combine and remove duplicates
+              const allFallbackNotifications = [...fallbackUserNotifications, ...fallbackAdminNotifications];
+              const uniqueFallbackNotifications = allFallbackNotifications.filter((notification, index, self) => 
+                index === self.findIndex(n => n.id === notification.id)
+              );
+              
+              // Sort client-side
+              uniqueFallbackNotifications.sort((a, b) => {
+                const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+                const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+                return dateB - dateA;
+              });
+              
+              console.log('Fallback notifications data:', uniqueFallbackNotifications);
+              notifications.value = uniqueFallbackNotifications;
+            }, (fallbackAdminError) => {
+              console.error('❌ Fallback admin query also failed:', fallbackAdminError);
             });
             
-            console.log('Fallback notifications data:', uniqueFallbackNotifications);
-            notifications.value = uniqueFallbackNotifications;
-          }, (fallbackError) => {
-            console.error('❌ Fallback query also failed:', fallbackError);
+            return () => {
+              unsubscribeFallbackAdmin();
+            };
+          }, (fallbackUserError) => {
+            console.error('❌ Fallback user query also failed:', fallbackUserError);
           });
           
           return () => {
-            unsubscribeFallback();
+            unsubscribeFallbackUser();
             unsubscribeAuth();
           };
         }
@@ -601,7 +578,7 @@ onMounted(async () => {
       
       console.log('✅ Notification listener set up successfully');
       return () => {
-        unsubscribeNotifications();
+        unsubscribeUserNotifications();
         unsubscribeAuth();
       };
     } catch (error) {

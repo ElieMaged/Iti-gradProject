@@ -149,7 +149,7 @@ export default {
   background: var(--grey-bg);
 }
 .edit-profile-wrapper {
-  max-width: 900px;
+  max-width: 1000px;
   margin: 0 auto;
 }
 .edit-profile-card {
@@ -251,9 +251,6 @@ export default {
 .profile-image-placeholder {
   font-size: 3.5rem;
   color: #9ca3af;
-}
-.dark .profile-image-container img {
-  filter: brightness(0) invert(1);
 }
 .dark .profile-image-placeholder {
   color: var(--text-muted);

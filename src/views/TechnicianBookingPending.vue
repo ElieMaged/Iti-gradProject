@@ -8,9 +8,9 @@
         <div class="booking-main">
           <div class="booking-container">
             <div class="title-search-row">
-              <h2 class="booking-title">Pending Bookings</h2>
+              <h2 class="booking-title">{{ $t('pendingBookings') }}</h2>
               <div class="search-wrapper">
-                <input v-model="searchQuery" class="search-input" type="text" placeholder="Search" />
+                <input v-model="searchQuery" class="search-input" type="text" :placeholder="$t('search')" />
                 <span class="search-icon"><i class="fas fa-search"></i></span>
               </div>
               <!-- Test notification button for debugging -->
@@ -18,7 +18,7 @@
                 @click="testNotification" 
                 class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
               >
-                Test Notification
+                {{ $t('testNotification') }}
               </button>
               
               <!-- Debug booking data button -->
@@ -26,32 +26,32 @@
                 @click="debugBookingData" 
                 class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors ml-2"
               >
-                🐛 Debug Booking Data
+                🐛 {{ $t('debugBookingData') }}
               </button>
             </div>
             <div v-if="loading" class="loading-state">
               <div class="loading-spinner"></div>
-              <p>Loading bookings...</p>
+              <p>{{ $t('loadingBookings') }}</p>
             </div>
             <div v-else-if="error" class="error-state">
               <p class="error-message">{{ error }}</p>
-              <button @click="fetchBookings" class="retry-btn">Retry</button>
+              <button @click="fetchBookings" class="retry-btn">{{ $t('retry') }}</button>
             </div>
             <div v-else-if="filteredBookings.length > 0" class="table-wrapper">
               <table class="booking-table">
                 <thead>
                   <tr class="table-header">
-                    <th>User Name</th>
-                    <th>User Email</th>
-                    <th>Technician</th>
-                    <th>Technician Email</th>
-                    <th>Specialization</th>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Address</th>
-                    <th>Price</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th>{{ $t('userName') }}</th>
+                    <th>{{ $t('userEmail') }}</th>
+                    <th>{{ $t('technician') }}</th>
+                    <th>{{ $t('technicianEmail') }}</th>
+                    <th>{{ $t('specialization') }}</th>
+                    <th>{{ $t('date') }}</th>
+                    <th>{{ $t('time') }}</th>
+                    <th>{{ $t('address') }}</th>
+                    <th>{{ $t('price') }}</th>
+                    <th>{{ $t('status') }}</th>
+                    <th>{{ $t('actions') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -67,15 +67,15 @@
                     <td>{{ booking.price || 'N/A' }}</td>
                     <td><span class="status-pending">{{ booking.status }}</span></td>
                     <td>
-                      <button class="accept-btn" @click="acceptBooking(booking.id)" :disabled="actionLoading === booking.id">Accept</button>
-                      <button class="reject-btn" @click="rejectBooking(booking.id)" :disabled="actionLoading === booking.id">Reject</button>
+                      <button class="accept-btn" @click="acceptBooking(booking.id)" :disabled="actionLoading === booking.id">{{ $t('accept') }}</button>
+                      <button class="reject-btn" @click="rejectBooking(booking.id)" :disabled="actionLoading === booking.id">{{ $t('reject') }}</button>
                     </td>
                   </tr>
                 </tbody>
               </table>
             </div>
             <div v-else class="empty-state">
-              <p>No pending bookings found.</p>
+              <p>{{ $t('noPendingBookings') }}</p>
             </div>
           </div>
         </div>
@@ -671,6 +671,10 @@ onMounted(() => {
   background: #faf8fd;
 }
 
+.dark .admin-dashboard-layout {
+  background: var(--primary-bg);
+}
+
 .booking-main {
   flex: 1;
   padding: 2.5rem;
@@ -694,6 +698,7 @@ onMounted(() => {
   color: #7c6bb0;
   margin-bottom: 0;
 }
+
 
 .search-wrapper {
   display: flex;
@@ -720,8 +725,18 @@ onMounted(() => {
   transition: border 0.2s;
 }
 
+.dark .search-input {
+  background: var(--input-bg);
+  color: var(--text-muted);
+  border-color: var(--border-color);
+}
+
 .search-input:focus {
   border: 1.5px solid #6B5FA7;
+}
+
+.dark .search-input:focus {
+  border-color: var(--secondary);
 }
 
 .search-icon {
@@ -731,6 +746,10 @@ onMounted(() => {
   transform: translateY(-50%);
   color: #b6a7e6;
   font-size: 1.1rem;
+}
+
+.dark .search-icon {
+  color: var(--text-muted);
 }
 
 .loading-state {
@@ -744,6 +763,11 @@ onMounted(() => {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
+.dark .loading-state {
+  background: var(--grey-bg);
+  color: var(--white);
+}
+
 .loading-spinner {
   width: 40px;
   height: 40px;
@@ -752,6 +776,11 @@ onMounted(() => {
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;
+}
+
+.dark .loading-spinner {
+  border-color: var(--input-bg);
+  border-top-color: var(--secondary);
 }
 
 @keyframes spin {
@@ -770,10 +799,18 @@ onMounted(() => {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
+.dark .error-state {
+  background: var(--grey-bg);
+}
+
 .error-message {
   color: #ef4444;
   margin-bottom: 1rem;
   text-align: center;
+}
+
+.dark .error-message {
+  color: #f87171;
 }
 
 .retry-btn {
@@ -786,8 +823,17 @@ onMounted(() => {
   transition: background-color 0.2s;
 }
 
+.dark .retry-btn {
+  background: var(--primary);
+  color: var(--primary-text);
+}
+
 .retry-btn:hover {
   background: #6b5fa7;
+}
+
+.dark .retry-btn:hover {
+  background: var(--primary);
 }
 
 .empty-state {
@@ -802,11 +848,20 @@ onMounted(() => {
   font-size: 1.1rem;
 }
 
+.dark .empty-state {
+  background: var(--grey-bg);
+  color: var(--primary-color);
+}
+
 .table-wrapper {
   overflow-x: auto;
   border-radius: 0.75rem;
   background: #fff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.dark .table-wrapper {
+  background: var(--grey-bg);
 }
 
 .booking-table {
@@ -816,9 +871,18 @@ onMounted(() => {
   border-radius: 0.75rem;
 }
 
+.dark .booking-table {
+  background: var(--grey-bg);
+}
+
 .table-header {
   background: rgba(124, 107, 176, 0.2);
   color: #333;
+}
+
+.dark .table-header {
+  background: rgba(124, 107, 176, 0.1);
+  color: var(--white);
 }
 
 .table-header th {
@@ -828,19 +892,35 @@ onMounted(() => {
   font-size: 0.9rem;
 }
 
+.dark .table-header th {
+  color: var(--white);
+}
+
 .table-row {
   border-bottom: 1px solid #e5e7eb;
   transition: background-color 0.2s;
+}
+
+.dark .table-row {
+  border-bottom-color: var(--border-color);
 }
 
 .table-row:hover {
   background: #ede7f6;
 }
 
+.dark .table-row:hover {
+  background: var(--input-bg);
+}
+
 .table-row td {
   padding: 0.75rem 1rem;
   font-size: 0.9rem;
   color: #333;
+}
+
+.dark .table-row td {
+  color: var(--primary-text-dark);
 }
 
 .status-pending {
@@ -850,6 +930,11 @@ onMounted(() => {
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 600;
+}
+
+.dark .status-pending {
+  background: #92400e;
+  color: #fef3c7;
 }
 
 .accept-btn {
@@ -863,10 +948,22 @@ onMounted(() => {
   font-size: 0.9rem;
   transition: background 0.2s;
 }
+
+.dark .accept-btn {
+  background: #16a34a;
+  color: #fff;
+}
+
 .accept-btn:disabled {
   background: #a7f3d0;
   cursor: not-allowed;
 }
+
+.dark .accept-btn:disabled {
+  background: #166534;
+  color: #9ca3af;
+}
+
 .reject-btn {
   background: #ef4444;
   color: #fff;
@@ -877,9 +974,20 @@ onMounted(() => {
   font-size: 0.9rem;
   transition: background 0.2s;
 }
+
+.dark .reject-btn {
+  background: #dc2626;
+  color: #fff;
+}
+
 .reject-btn:disabled {
   background: #fecaca;
   cursor: not-allowed;
+}
+
+.dark .reject-btn:disabled {
+  background: #7f1d1d;
+  color: #9ca3af;
 }
 
 @media (max-width: 768px) {

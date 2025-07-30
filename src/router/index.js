@@ -36,6 +36,7 @@ import Chatbot from '../components/chatbot.vue'
 import TechnicianBookingPending from '../views/TechnicianBookingPending.vue'
 import TechnicianBookingUpcoming from '../views/TechnicianBookingUpcoming.vue'
 import TechnicianBookingCompleted from '../views/TechnicianBookingCompleted.vue'
+import TechnicianReviews from '../views/TechnicianReviews.vue'
 
 // User booking views
 import UserBookingPending from '../views/UserBookingPending.vue'
@@ -131,6 +132,7 @@ const routes = [
   {path: '/pending-application', component: PendingApplication},
   {path: '/admin-booking-details/:id', name: 'admin-booking-details', component: AdminBookingDetails},
   {path: '/admin-booking-edit/:id', name: 'admin-booking-edit', component: AdminBookingEdit},
+  {path: '/technician-reviews', component: TechnicianReviews},
 ]
 
 const router = createRouter({
