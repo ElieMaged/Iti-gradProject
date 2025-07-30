@@ -47,7 +47,6 @@
       <div class="notifications-footer">
         <button @click="viewAllNotifications">View All</button>
         <button @click="clearAllNotifications" class="test-notification-btn">Clear All</button>
-        <button @click="debugNotifications" class="debug-notification-btn">Debug Notifications</button>
       </div>
     </div>
   </div>
@@ -165,237 +164,25 @@ async function clearAllNotifications() {
       message: error.message,
       stack: error.stack
     });
-    alert('❌ Error deleting notifications: ' + error.message);
-  }
-}
-
-// Debug notifications (for debugging)
-async function debugNotifications() {
-  console.log('=== DEBUGGING NOTIFICATIONS ===');
-  
-  if (!currentUser.value) {
-    console.error('❌ No current user logged in to debug notifications.');
-    alert('❌ No current user logged in to debug notifications.');
-    return;
-  }
-
-  console.log('Current user UID:', currentUser.value.uid);
-  console.log('Current user email:', currentUser.value.email);
-  
-  // Check user type
-  const userType = localStorage.getItem('userType');
-  console.log('User type from localStorage:', userType);
-
-  try {
-    // First, let's check if the user exists in the database
-    console.log('Checking if user exists in database...');
     
-    // Check in users collection
-    try {
-      const userDoc = await getDoc(doc(db, 'users', currentUser.value.uid));
-      if (userDoc.exists()) {
-        console.log('✅ User found in users collection:', userDoc.data());
-      } else {
-        console.log('⚠️ User not found in users collection');
-      }
-    } catch (userError) {
-      console.log('❌ Error checking users collection:', userError);
-    }
-    
-    // Check in technicians collection
-    try {
-      const techDoc = await getDoc(doc(db, 'technicians', currentUser.value.uid));
-      if (techDoc.exists()) {
-        console.log('✅ User found in technicians collection:', techDoc.data());
-      } else {
-        console.log('⚠️ User not found in technicians collection');
-      }
-    } catch (techError) {
-      console.log('❌ Error checking technicians collection:', techError);
-    }
-    
-    // Check by email in both collections
-    console.log('Searching for user by email:', currentUser.value.email);
-    
-    try {
-      const usersQuery = query(
-        collection(db, 'users'),
-        where('email', '==', currentUser.value.email)
-      );
-      const usersSnapshot = await getDocs(usersQuery);
-      console.log('Users found by email:', usersSnapshot.docs.length);
-      usersSnapshot.docs.forEach(doc => {
-        console.log('User by email:', { id: doc.id, ...doc.data() });
-      });
-    } catch (emailError) {
-      console.log('❌ Error searching users by email:', emailError);
-    }
-    
-    try {
-      const techsQuery = query(
-        collection(db, 'technicians'),
-        where('email', '==', currentUser.value.email)
-      );
-      const techsSnapshot = await getDocs(techsQuery);
-      console.log('Technicians found by email:', techsSnapshot.docs.length);
-      techsSnapshot.docs.forEach(doc => {
-        console.log('Technician by email:', { id: doc.id, ...doc.data() });
-      });
-    } catch (emailError) {
-      console.log('❌ Error searching technicians by email:', emailError);
-    }
-    
-    // Check ALL notifications in the database
-    console.log('=== CHECKING ALL NOTIFICATIONS IN DATABASE ===');
-    try {
-      const allNotificationsQuery = query(
-        collection(db, 'notifications'),
-        orderBy('createdAt', 'desc'),
-        limit(20)
-      );
-      const allNotificationsSnapshot = await getDocs(allNotificationsQuery);
-      console.log('Total notifications in database:', allNotificationsSnapshot.docs.length);
+    // Check if it's a permission error and provide more specific guidance
+    if (error.code === 'permission-denied') {
+      console.log('Permission denied - checking notification recipientIds...');
       
-      allNotificationsSnapshot.docs.forEach((doc, index) => {
-        const data = doc.data();
-        console.log(`Database Notification ${index + 1}:`, {
-          id: doc.id,
-          recipientId: data.recipientId,
-          recipientType: data.recipientType,
-          type: data.type,
-          title: data.title,
-          message: data.message,
-          createdAt: data.createdAt
-        });
-      });
-    } catch (allNotificationsError) {
-      console.log('❌ Error checking all notifications:', allNotificationsError);
-    }
-    
-    // Create a persistent test notification
-    console.log('Creating a persistent test notification...');
-    const testNotification = {
-      title: 'Debug Test Notification',
-      message: `This is a persistent test notification for ${currentUser.value.email} (UID: ${currentUser.value.uid})`,
-      type: 'debug',
-      recipientId: currentUser.value.uid,
-      recipientType: userType || 'user',
-      recipientEmail: currentUser.value.email,
-      createdAt: new Date(),
-      read: false,
-      debugInfo: {
-        userUid: currentUser.value.uid,
-        userEmail: currentUser.value.email,
-        userType: userType,
-        timestamp: new Date().toISOString()
-      }
-    };
-    
-    const testDocRef = await addDoc(collection(db, 'notifications'), testNotification);
-    console.log('✅ Persistent test notification created with ID:', testDocRef.id);
-    
-    // Now let's check what notifications exist
-    console.log('Checking existing notifications...');
-    
-    try {
-      // Get all notifications for this user with orderBy
-      const notificationsQuery = query(
-        collection(db, 'notifications'),
-        where('recipientId', '==', currentUser.value.uid),
-        orderBy('createdAt', 'desc')
-      );
-      
-      const snapshot = await getDocs(notificationsQuery);
-      console.log('Total notifications found for user:', snapshot.docs.length);
-      
-      snapshot.docs.forEach((doc, index) => {
-        const data = doc.data();
-        console.log(`Notification ${index + 1}:`, {
-          id: doc.id,
-          type: data.type,
-          title: data.title,
-          message: data.message,
-          recipientId: data.recipientId,
-          recipientType: data.recipientType,
-          createdAt: data.createdAt,
-          read: data.read
-        });
-      });
-    } catch (indexError) {
-      console.log('🔄 Index still building, trying fallback query...');
-      // Fallback query without orderBy
-      const fallbackQuery = query(
-        collection(db, 'notifications'),
-        where('recipientId', '==', currentUser.value.uid)
-      );
-      
-      const fallbackSnapshot = await getDocs(fallbackQuery);
-      console.log('Total notifications found for user (fallback):', fallbackSnapshot.docs.length);
-      
-      const notifications = fallbackSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      
-      // Sort client-side
-      notifications.sort((a, b) => {
-        const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
-        const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
-        return dateB - dateA;
-      });
-      
-      notifications.forEach((notification, index) => {
+      // Log the recipientIds of notifications to debug
+      notifications.value.forEach((notification, index) => {
         console.log(`Notification ${index + 1}:`, {
           id: notification.id,
-          type: notification.type,
-          title: notification.title,
-          message: notification.message,
           recipientId: notification.recipientId,
           recipientType: notification.recipientType,
-          createdAt: notification.createdAt,
-          read: notification.read
+          userUID: currentUser.value.uid
         });
       });
-    }
-    
-    // Also check notifications by email
-    console.log('Checking notifications by email...');
-    try {
-      const emailQuery = query(
-        collection(db, 'notifications'),
-        where('recipientId', '==', currentUser.value.email)
-      );
       
-      const emailSnapshot = await getDocs(emailQuery);
-      console.log('Total notifications found by email:', emailSnapshot.docs.length);
-      
-      emailSnapshot.docs.forEach((doc, index) => {
-        const data = doc.data();
-        console.log(`Email Notification ${index + 1}:`, {
-          id: doc.id,
-          type: data.type,
-          title: data.title,
-          message: data.message,
-          recipientId: data.recipientId,
-          recipientType: data.recipientType,
-          createdAt: data.createdAt,
-          read: data.read
-        });
-      });
-    } catch (emailError) {
-      console.log('❌ Error checking notifications by email:', emailError);
+      alert('❌ Permission denied: You can only delete your own notifications.\n\nThis might happen if some notifications were created with a different recipientId. Check console for details.');
+    } else {
+      alert('❌ Error deleting notifications: ' + error.message);
     }
-    
-    alert(`✅ Persistent test notification created!\nCheck console for details.\n\nUser: ${currentUser.value.email}\nUID: ${currentUser.value.uid}\nType: ${userType || 'user'}`);
-    
-  } catch (error) {
-    console.error('❌ Error debugging notifications:', error);
-    console.error('Error details:', {
-      code: error.code,
-      message: error.message,
-      stack: error.stack
-    });
-    alert('❌ Error debugging notifications: ' + error.message);
   }
 }
 
@@ -420,128 +207,43 @@ onMounted(async () => {
       displayName: user.displayName
     });
     
-    // Check if user is a technician
-    let isTechnician = false;
     try {
-      const userType = localStorage.getItem('userType');
-      isTechnician = userType === 'technician';
-      console.log('User type from localStorage:', userType);
-      console.log('Is technician:', isTechnician);
-    } catch (error) {
-      console.error('Error checking user type:', error);
-    }
-    
-    // Build recipient IDs array - start with basic IDs
-    const recipientIds = [user.uid, 'admin'];
-    
-    // Also add user's email to the query for fallback notifications
-    if (user.email) {
-      recipientIds.push(user.email);
-      console.log('Added user email to recipient IDs:', user.email);
-    }
-    
-    // If user is a technician, also add technician-specific queries
-    if (isTechnician) {
-      console.log('User is a technician, adding technician-specific queries...');
+      // Query for notifications based on user type
+      let notificationsQuery;
       
-      // Try to find technician by email in technicians collection
-      try {
-        const techQuery = query(
-          collection(db, 'technicians'),
-          where('email', '==', user.email)
+      // Check if user is an admin
+      if (user.email === 'elie1400674@gmail.com' || user.email === 'tasneemmostafa200110@gmail.com') {
+        // Admin users see admin notifications
+        console.log('User is admin, querying admin notifications');
+        notificationsQuery = query(
+          collection(db, 'notifications'),
+          where('recipientId', '==', 'admin'),
+          orderBy('createdAt', 'desc'),
+          limit(20)
         );
-        const techSnapshot = await getDocs(techQuery);
-        if (!techSnapshot.empty) {
-          const techDoc = techSnapshot.docs[0];
-          const techData = techDoc.data();
-          console.log('Found technician document:', techData);
-          
-          // Add technician document ID to recipient IDs
-          recipientIds.push(techDoc.id);
-          console.log('Added technician document ID to recipient IDs:', techDoc.id);
-          
-          // If technician has a uid field, add that too
-          if (techData.uid && techData.uid !== user.uid) {
-            recipientIds.push(techData.uid);
-            console.log('Added technician UID to recipient IDs:', techData.uid);
-          }
-        }
-      } catch (techError) {
-        console.log('Error finding technician document:', techError);
-      }
-    }
-    
-    // Also check if user exists in users collection and add any additional IDs
-    try {
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        console.log('Found user document:', userData);
-        
-        // Add any additional user-specific IDs if they exist
-        if (userData.userId && userData.userId !== user.uid) {
-          recipientIds.push(userData.userId);
-          console.log('Added user ID from document to recipient IDs:', userData.userId);
-        }
-      }
-    } catch (userError) {
-      console.log('Error checking user document:', userError);
-    }
-    
-    console.log('Final recipient IDs for notification query:', recipientIds);
-    
-    try {
-      // Use a simple, reliable approach: query for the most important recipient IDs
-      const primaryRecipientIds = [user.uid, 'admin'];
-      if (user.email) {
-        primaryRecipientIds.push(user.email);
+      } else {
+        // Regular users see only their own notifications
+        console.log('User is regular user, querying user notifications');
+        notificationsQuery = query(
+          collection(db, 'notifications'),
+          where('recipientId', '==', user.uid),
+          orderBy('createdAt', 'desc'),
+          limit(20)
+        );
       }
       
-      // If user is a technician, add their technician document ID
-      if (isTechnician) {
-        try {
-          const techQuery = query(
-            collection(db, 'technicians'),
-            where('email', '==', user.email)
-          );
-          const techSnapshot = await getDocs(techQuery);
-          if (!techSnapshot.empty) {
-            const techDoc = techSnapshot.docs[0];
-            primaryRecipientIds.push(techDoc.id);
-            console.log('Added technician document ID to primary recipients:', techDoc.id);
-          }
-        } catch (techError) {
-          console.log('Error finding technician document for notifications:', techError);
-        }
-      }
-      
-      console.log('Primary recipient IDs for notification query:', primaryRecipientIds);
-      
-      // Create the main notification query
-      const notificationsQuery = query(
-        collection(db, 'notifications'),
-        where('recipientId', 'in', primaryRecipientIds),
-        orderBy('createdAt', 'desc'),
-        limit(20)
-      );
-      
-      console.log('Notification query created successfully');
+      console.log('Notification query created for user UID:', user.uid);
       
       const unsubscribeNotifications = onSnapshot(notificationsQuery, (snapshot) => {
         console.log('✅ Notification snapshot received:', snapshot.docs.length, 'notifications');
-        const newNotifications = snapshot.docs.map(doc => ({
+        const userNotifications = snapshot.docs.map(doc => ({
           id: doc.id, ...doc.data()
         }));
         
-        // Remove duplicates based on notification ID
-        const uniqueNotifications = newNotifications.filter((notification, index, self) => 
-          index === self.findIndex(n => n.id === notification.id)
-        );
+        console.log('Total notifications:', userNotifications.length);
         
-        console.log('Unique notifications:', uniqueNotifications.length);
-        
-        // Debug: Log each notification's recipientId
-        uniqueNotifications.forEach((notification, index) => {
+        // Debug: Log each notification
+        userNotifications.forEach((notification, index) => {
           console.log(`Notification ${index + 1}:`, {
             id: notification.id,
             recipientId: notification.recipientId,
@@ -551,7 +253,8 @@ onMounted(async () => {
           });
         });
         
-        notifications.value = uniqueNotifications;
+        notifications.value = userNotifications;
+        
       }, (error) => {
         console.error('❌ Error listening to notifications:', error);
         console.error('Error details:', {
@@ -563,11 +266,21 @@ onMounted(async () => {
         // If index is still building, try a simpler query without orderBy
         if (error.code === 'failed-precondition' || error.message.includes('index')) {
           console.log('🔄 Index still building, trying fallback query...');
-          const fallbackQuery = query(
-            collection(db, 'notifications'),
-            where('recipientId', 'in', primaryRecipientIds),
-            limit(20)
-          );
+          
+          let fallbackQuery;
+          if (user.email === 'elie1400674@gmail.com' || user.email === 'tasneemmostafa200110@gmail.com') {
+            fallbackQuery = query(
+              collection(db, 'notifications'),
+              where('recipientId', '==', 'admin'),
+              limit(20)
+            );
+          } else {
+            fallbackQuery = query(
+              collection(db, 'notifications'),
+              where('recipientId', '==', user.uid),
+              limit(20)
+            );
+          }
           
           const unsubscribeFallback = onSnapshot(fallbackQuery, (fallbackSnapshot) => {
             console.log('✅ Fallback notification snapshot received:', fallbackSnapshot.docs.length, 'notifications');
@@ -575,19 +288,15 @@ onMounted(async () => {
               id: doc.id, ...doc.data()
             }));
             
-            // Remove duplicates and sort client-side
-            const uniqueFallbackNotifications = fallbackNotifications.filter((notification, index, self) => 
-              index === self.findIndex(n => n.id === notification.id)
-            );
-            
-            uniqueFallbackNotifications.sort((a, b) => {
+            // Sort client-side
+            fallbackNotifications.sort((a, b) => {
               const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
               const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
               return dateB - dateA;
             });
             
-            console.log('Fallback notifications data:', uniqueFallbackNotifications);
-            notifications.value = uniqueFallbackNotifications;
+            console.log('Fallback notifications data:', fallbackNotifications);
+            notifications.value = fallbackNotifications;
           }, (fallbackError) => {
             console.error('❌ Fallback query also failed:', fallbackError);
           });
@@ -794,20 +503,5 @@ onMounted(async () => {
 
 .test-notification-btn:hover {
   background: #b91c1c;
-}
-
-.debug-notification-btn {
-  background: #059669; /* A green color for debugging */
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  margin-left: 10px; /* Add some space between buttons */
-}
-
-.debug-notification-btn:hover {
-  background: #047857;
 }
 </style>

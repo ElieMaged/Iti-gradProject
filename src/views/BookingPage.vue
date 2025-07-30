@@ -3,38 +3,6 @@
     <!-- Header -->
     <div class="header">
       <h1 class="page-title">{{ $t('completeYourBooking') }}</h1>
-      <!-- Test button for debugging notifications -->
-      <button 
-        @click="testNotification" 
-        class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors"
-        style="position: absolute; top: 20px; right: 20px;"
-      >
-        Test Notification
-      </button>
-      <!-- Manual notification test button -->
-      <button 
-        @click="createManualNotification" 
-        class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-        style="position: absolute; top: 20px; right: 200px;"
-      >
-        Manual Notification
-      </button>
-      <!-- Simple test notification button -->
-      <button 
-        @click="createSimpleTestNotification" 
-        class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
-        style="position: absolute; top: 20px; right: 380px;"
-      >
-        Simple Test
-      </button>
-      <!-- Check all notifications button -->
-      <button 
-        @click="checkAllNotifications" 
-        class="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition-colors"
-        style="position: absolute; top: 20px; right: 500px;"
-      >
-        Check All
-      </button>
     </div>
 
     <!-- Main Booking Card -->
@@ -1147,10 +1115,25 @@ async function sendBookingRequestNotification(bookingData) {
         console.log('Found technician data by ID:', techData);
         console.log('Technician email:', technicianEmail);
         
-        // If the technician has a uid field, use that
+        // Use the technician's actual UID from Firebase Auth, not the document ID
         if (techData.uid) {
           technicianUid = techData.uid;
           console.log('Using technician UID from data:', technicianUid);
+        } else {
+          // If no uid field, try to find the technician by email in the technicians collection
+          const techEmailQuery = query(
+            collection(db, 'technicians'),
+            where('email', '==', techData.email)
+          );
+          const techEmailSnapshot = await getDocs(techEmailQuery);
+          if (!techEmailSnapshot.empty) {
+            const techDoc = techEmailSnapshot.docs[0];
+            const techDocData = techDoc.data();
+            if (techDocData.uid) {
+              technicianUid = techDocData.uid;
+              console.log('Found technician UID by email lookup:', technicianUid);
+            }
+          }
         }
       } else {
         console.log('Technician document not found by ID, trying to find by name...');
@@ -1164,8 +1147,13 @@ async function sendBookingRequestNotification(bookingData) {
         if (!techNameSnapshot.empty) {
           const techDoc = techNameSnapshot.docs[0];
           const techData = techDoc.data();
-          technicianUid = techDoc.id;
           technicianEmail = techData.email;
+          // Use the technician's actual UID, not the document ID
+          if (techData.uid) {
+            technicianUid = techData.uid;
+          } else {
+            technicianUid = techDoc.id; // Fallback to document ID if no uid field
+          }
           console.log('Found technician by name:', technicianUid, technicianEmail);
         } else {
           console.log('Technician not found by name, trying to find by email...');
@@ -1181,8 +1169,13 @@ async function sendBookingRequestNotification(bookingData) {
             if (!techEmailSnapshot.empty) {
               const techDoc = techEmailSnapshot.docs[0];
               const techData = techDoc.data();
-              technicianUid = techDoc.id;
               technicianEmail = techData.email;
+              // Use the technician's actual UID, not the document ID
+              if (techData.uid) {
+                technicianUid = techData.uid;
+              } else {
+                technicianUid = techDoc.id; // Fallback to document ID if no uid field
+              }
               console.log('Found technician by email:', technicianUid, technicianEmail);
               break;
             }
@@ -1205,7 +1198,12 @@ async function sendBookingRequestNotification(bookingData) {
           const techDoc = techSnapshot.docs[0];
           const techData = techDoc.data();
           technicianEmail = techData.email;
-          technicianUid = techDoc.id;
+          // Use the technician's actual UID, not the document ID
+          if (techData.uid) {
+            technicianUid = techData.uid;
+          } else {
+            technicianUid = techDoc.id; // Fallback to document ID if no uid field
+          }
           console.log('Found technician email by name:', technicianEmail);
         }
       } catch (error) {
@@ -1237,7 +1235,7 @@ async function sendBookingRequestNotification(bookingData) {
     
     console.log('Notification data prepared:', notificationData);
     
-    // Send notification to technician using UID
+    // Send notification to technician using their actual UID
     const technicianNotification = {
       ...notificationData,
       recipientId: technicianUid,
@@ -1435,80 +1433,6 @@ async function createManualNotification() {
   } catch (error) {
     console.error('Manual notification error:', error);
     alert('❌ Manual notification error: ' + error.message);
-  }
-}
-
-// Simple test notification for current user
-async function createSimpleTestNotification() {
-  try {
-    console.log('=== CREATING SIMPLE TEST NOTIFICATION ===');
-    
-    if (!auth.currentUser) {
-      alert('❌ No user logged in');
-      return;
-    }
-    
-    const testNotification = {
-      type: 'test',
-      title: 'Simple Test Notification',
-      message: 'This is a simple test notification for the current user',
-      recipientId: auth.currentUser.uid,
-      recipientType: 'user',
-      createdAt: serverTimestamp(),
-      read: false
-    };
-    
-    console.log('Creating simple test notification:', testNotification);
-    
-    const notificationRef = await addDoc(collection(db, 'notifications'), testNotification);
-    console.log('Simple test notification created with ID:', notificationRef.id);
-    
-    alert(`✅ Simple test notification created successfully!\nUser UID: ${auth.currentUser.uid}\nNotification ID: ${notificationRef.id}`);
-    
-  } catch (error) {
-    console.error('Simple test notification error:', error);
-    alert('❌ Simple test notification error: ' + error.message);
-  }
-}
-
-// Check all notifications in database
-async function checkAllNotifications() {
-  try {
-    console.log('=== CHECKING ALL NOTIFICATIONS IN DATABASE ===');
-    
-    const allNotificationsQuery = query(
-      collection(db, 'notifications'),
-      orderBy('createdAt', 'desc'),
-      limit(50)
-    );
-    
-    const snapshot = await getDocs(allNotificationsQuery);
-    console.log('Total notifications in database:', snapshot.docs.length);
-    
-    const notifications = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-    
-    console.log('All notifications:', notifications);
-    
-    // Group by recipientId
-    const groupedByRecipient = {};
-    notifications.forEach(notification => {
-      const recipientId = notification.recipientId;
-      if (!groupedByRecipient[recipientId]) {
-        groupedByRecipient[recipientId] = [];
-      }
-      groupedByRecipient[recipientId].push(notification);
-    });
-    
-    console.log('Notifications grouped by recipientId:', groupedByRecipient);
-    
-    alert(`✅ Found ${snapshot.docs.length} notifications in database.\nCheck console for details.`);
-    
-  } catch (error) {
-    console.error('Error checking all notifications:', error);
-    alert('❌ Error checking notifications: ' + error.message);
   }
 }
 

@@ -106,6 +106,12 @@ service cloud.firestore {
         request.auth.token.email == 'elie1400674@gmail.com' || 
         request.auth.token.email == 'tasneemmostafa200110@gmail.com'
       );
+      allow delete: if request.auth != null && (
+        resource.data.recipientId == request.auth.uid || // User can delete their own notifications
+        request.auth.token.admin == true || // Admins can delete all
+        request.auth.token.email == 'elie1400674@gmail.com' ||
+        request.auth.token.email == 'tasneemmostafa200110@gmail.com'
+      );
     }
   }
 } 
