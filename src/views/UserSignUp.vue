@@ -1,8 +1,9 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { auth } from '../firebase';
+import { auth, db } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 import { ensureUserRole, fetchUserRole } from '../utils/userRole';
 import emailjs from 'emailjs-com';
 
@@ -55,6 +56,17 @@ const handleRegister = async () => {
   }
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
+    
+    // Store user registration data in Firestore
+    const userRef = doc(db, 'users', userCredential.user.uid);
+    await setDoc(userRef, {
+      email: email.value,
+      firstName: firstName.value,
+      lastName: lastName.value,
+      fullName: `${firstName.value} ${lastName.value}`.trim(),
+      role: 'user',
+      createdAt: new Date()
+    });
     
     // Send welcome email using reactive form data
     await sendWelcomeEmail(email.value, firstName.value, lastName.value);

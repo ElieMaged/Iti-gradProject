@@ -30,27 +30,12 @@
                   <input v-model="form.phone" type="text" class="input-field w-full px-4 py-2 rounded-lg text-sm" />
                 </div>
                 <div>
-                  <label class="block text-sm font-bold text-text-main mb-1">{{ $t('specializationLabel') }}</label>
-                  <select v-model="form.specialization" class="input-field w-full px-4 py-2 rounded-lg text-sm">
-                    <option value="Plumbing">{{ $t('specializationPlumbing') }}</option>
-                    <option value="Electricity">{{ $t('specializationElectrician') }}</option>
-                    <option value="Carpentry">{{ $t('specializationCarpentry') }}</option>
-                    <option value="Painting">{{ $t('specializationPainting') }}</option>
-                    <option value="Air Conditioning">{{ $t('specializationACTechnician') }}</option>
+                  <label class="block text-sm font-bold text-text-main mb-1">{{ $t('gender') }}</label>
+                  <select v-model="form.gender" class="input-field w-full px-4 py-2 rounded-lg text-sm">
+                    <option value="">{{ $t('selectGender') }}</option>
+                    <option value="Male">{{ $t('male') }}</option>
+                    <option value="Female">{{ $t('female') }}</option>
                   </select>
-                </div>
-                <div>
-                  <label class="block text-sm font-bold text-text-main mb-1">{{ $t('yearsOfExperienceLabel') }}</label>
-                  <select v-model="form.experience" class="input-field w-full px-4 py-2 rounded-lg text-sm">
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4+">4+</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-sm font-bold text-text-main mb-1">{{ $t('baseVisitPriceLabel') }}</label>
-                  <input v-model="form.basePrice" type="text" class="input-field w-full px-4 py-2 rounded-lg text-sm" />
                 </div>
                 <div>
                   <label class="block text-sm font-bold text-text-main mb-1">{{ $t('aboutLabel') }}</label>
@@ -76,19 +61,6 @@
                   <option value="Dokki">{{ $t('dokki') }}</option>
                 </select>
               </div>
-              <div>
-                <label class="block text-sm font-bold text-text-main mb-1">{{ $t('willingToTravelLabel') }}</label>
-                <div class="flex items-center gap-6">
-                  <label class="inline-flex items-center">
-                    <input v-model="form.willingToTravel" type="radio" value="yes" class="form-radio text-secondary" />
-                    <span class="ml-2">{{ $t('yes') }}</span>
-                  </label>
-                  <label class="inline-flex items-center">
-                    <input v-model="form.willingToTravel" type="radio" value="no" class="form-radio text-secondary" />
-                    <span class="ml-2">{{ $t('no') }}</span>
-                  </label>
-                </div>
-              </div>
             </div>
           </div>
           <div class="flex justify-end mt-8">
@@ -100,51 +72,137 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { db } from '../firebase';
 import userSidebar from '../components/userSidebar.vue';
-export default {
-  components: { userSidebar },
-  data() {
-    return {
-      activeTab: 'settings',
-      profileImageUrl: 'https://randomuser.me/api/portraits/men/32.jpg',
-      form: {
-        fullName: '',
-        email: '',
-        phone: '',
-        specialization: '',
-        experience: '',
-        basePrice: '',
-        bio: '',
-        government: '',
-        district: '',
-        willingToTravel: '',
-      }
+
+const router = useRouter();
+const activeTab = ref('settings');
+const profileImageUrl = ref('https://randomuser.me/api/portraits/men/32.jpg');
+const fileInput = ref(null);
+const loading = ref(false);
+const error = ref(null);
+const currentUser = ref(null);
+
+const form = ref({
+  fullName: '',
+  email: '',
+  phone: '',
+  bio: '',
+  government: '',
+  district: '',
+  gender: ''
+});
+
+async function fetchUserData() {
+  try {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    
+    if (!user) {
+      router.push('/userlogin');
+      return;
     }
-  },
-  methods: {
-    handleSidebarNavigate(route) {
-      this.$router.push(route);
-    },
-    triggerFileInput() {
-      this.$refs.fileInput.click();
-    },
-    onFileChange(e) {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          this.profileImageUrl = e.target.result;
-        };
-        reader.readAsDataURL(file);
+
+    currentUser.value = user;
+    
+    // Fetch existing user data from Firestore
+    const userRef = doc(db, 'users', user.uid);
+    const userSnap = await getDoc(userRef);
+    
+    if (userSnap.exists()) {
+      const userData = userSnap.data();
+      console.log('Fetched user data:', userData);
+      
+      // Populate form with existing data
+      form.value = {
+        fullName: userData.fullName || `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || '',
+        email: userData.email || user.email || '',
+        phone: userData.phone || '',
+        bio: userData.bio || '',
+        government: userData.government || '',
+        district: userData.district || '',
+        gender: userData.gender || ''
+      };
+      
+      // Set profile image if exists
+      if (userData.profileImageUrl) {
+        profileImageUrl.value = userData.profileImageUrl;
       }
-    },
-    saveProfile() {
-      // Implement save logic here (e.g., update Firestore)
-      alert('Profile saved!');
+    } else {
+      // Set default email from auth
+      form.value.email = user.email || '';
     }
+    
+  } catch (err) {
+    console.error('Error fetching user data:', err);
+    error.value = 'Failed to load user data: ' + err.message;
   }
 }
+
+function triggerFileInput() {
+  fileInput.value && fileInput.value.click();
+}
+
+function onFileChange(e) {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      profileImageUrl.value = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+async function saveProfile() {
+  try {
+    loading.value = true;
+    error.value = null;
+    
+    if (!currentUser.value) {
+      error.value = 'User not authenticated';
+      return;
+    }
+
+    console.log('Saving profile data:', form.value);
+    
+    // Update user document in Firestore
+    const userRef = doc(db, 'users', currentUser.value.uid);
+    await setDoc(userRef, {
+      ...form.value,
+      profileImageUrl: profileImageUrl.value,
+      updatedAt: new Date()
+    }, { merge: true });
+    
+    console.log('Profile saved successfully!');
+    alert('Profile saved successfully!');
+    
+  } catch (err) {
+    console.error('Error saving profile:', err);
+    error.value = 'Failed to save profile: ' + err.message;
+    alert('Failed to save profile: ' + err.message);
+  } finally {
+    loading.value = false;
+  }
+}
+
+onMounted(() => {
+  const auth = getAuth();
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      console.log('User authenticated:', user.uid);
+      fetchUserData();
+    } else {
+      console.log('No user authenticated');
+      router.push('/userlogin');
+    }
+  });
+});
 </script>
 
 <style lang="scss" scoped>
@@ -158,5 +216,17 @@ export default {
 }
 .upload-btn {
   margin-bottom: 1rem;
+}
+
+/* Add .3rem border to all input fields in settings */
+.input-field {
+  border: 0.3rem solid #e5e7eb !important;
+  border-radius: 0.5rem;
+}
+
+.input-field:focus {
+  border-color: #7c6bb0 !important;
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(124, 107, 176, 0.25);
 }
 </style> 

@@ -6,7 +6,6 @@
     <p class="text-red-500">{{ error }}</p>
   </div>
   <div v-else-if="technician">
-    <Sidebar :activeMenu="'technicianprofile'"  />
     <div class="profile-hero">
       <h1 class="profile-title">Technician</h1>
     </div>
@@ -106,8 +105,11 @@
             <div v-else-if="reviews.find(r => r.userEmail === auth.currentUser?.email)" class="review-notice">
               {{ $t('thankYouForReview') }}
             </div>
-            <div v-else class="review-notice">
+            <div v-else-if="!userBookings.some(booking => booking.technicianId === route.params.id && (booking.status === 'completed' || booking.status === 'upcoming'))" class="review-notice">
               {{ $t('bookingRequiredToReview') }}
+            </div>
+            <div v-else class="review-notice">
+              {{ $t('loginToLeaveReview') }}
             </div>
           </div>
         </div>
@@ -134,9 +136,6 @@
               </button>
             </div>
             <span class="rating-text">{{ newReview.rating }}/5</span>
-            <button @click="testReactive" style="margin-left: 10px; padding: 5px 10px; background: #007bff; color: white; border: none; border-radius: 4px;">
-              Test Reactive
-            </button>
           </div>
           <div class="form-group">
             <label>{{ $t('review') }}:</label>
@@ -207,101 +206,9 @@
             <div class="empty-icon">⭐</div>
             <p>{{ $t('noReviewsYet') }}</p>
             <p v-if="canReview">{{ $t('beFirstToReview') }}</p>
+            <p v-else-if="!auth.currentUser">{{ $t('loginToLeaveReview') }}</p>
+            <p v-else-if="!userBookings.some(booking => booking.technicianId === route.params.id && (booking.status === 'completed' || booking.status === 'upcoming'))">{{ $t('bookingRequiredToReview') }}</p>
             <p v-else>{{ $t('loginToLeaveReview') }}</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="profile-booking">
-        <div class="booking-container">
-          <div class="title-search-row">
-            <h2 class="booking-title">{{ $t('pendingBookings') }}</h2>
-            <div class="search-wrapper">
-              <input v-model="searchQuery" class="search-input" type="text" :placeholder="$t('search')" />
-              <span class="search-icon"><i class="fas fa-search"></i></span>
-            </div>
-          </div>
-          <div v-if="bookingsLoading" class="loading-state">
-            <div class="loading-spinner"></div>
-            <p>{{ $t('loadingBookings') }}</p>
-          </div>
-          <div v-else-if="bookingsError" class="error-state">
-            <button @click="fetchBookings" class="retry-btn">{{ $t('retry') }}</button>
-          </div>
-          <div v-else-if="filteredBookings.length > 0" class="table-wrapper">
-            <table class="booking-table">
-              <thead>
-                <tr class="table-header">
-                  <th>{{ $t('userName') }}</th>
-                  <th>{{ $t('userEmail') }}</th>
-                  <th>{{ $t('technician') }}</th>
-                  <th>{{ $t('specialization') }}</th>
-                  <th>{{ $t('date') }}</th>
-                  <th>{{ $t('time') }}</th>
-                  <th>{{ $t('address') }}</th>
-                  <th>{{ $t('price') }}</th>
-                  <th>{{ $t('status') }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(booking, index) in filteredBookings" :key="booking.id" class="table-row">
-                  <td>{{ booking.userName }}</td>
-                  <td>{{ booking.userEmail }}</td>
-                  <td>{{ booking.technicianName || booking.technicianId }}</td>
-                  <td>{{ booking.specialization }}</td>
-                  <td>{{ booking.date }}</td>
-                  <td>{{ booking.time }}</td>
-                  <td>{{ booking.address }}</td>
-                  <td>{{ booking.price }}</td>
-                  <td><span class="status-pending">{{ booking.status }}</span></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div v-else class="empty-state">
-            <p>{{ $t('noPendingBookingsFound') }}</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Notifications Section -->
-      <div class="notifications-section">
-        <div class="section-header">
-          <h3 class="section-title">
-            <i class="fas fa-bell"></i>
-            Notifications
-          </h3>
-          <!-- Debug notification button -->
-        <button 
-          @click="debugNotifications" 
-          class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors mb-4"
-        >
-          🐛 Debug Notifications
-        </button>
-        </div>
-        
-        <div class="notifications-list">
-          <div v-if="notifications.length === 0" class="no-notifications">
-            No notifications yet
-          </div>
-          
-          <div 
-            v-for="notification in notifications" 
-            :key="notification.id"
-            class="notification-item"
-            :class="{ 'unread': !notification.read }"
-            @click="markNotificationAsRead(notification.id)"
-          >
-            <div class="notification-icon">
-              <i class="fas fa-calendar-plus" v-if="notification.type === 'booking_request'"></i>
-              <i class="fas fa-dollar-sign" v-else-if="notification.type === 'payment_received'"></i>
-              <i class="fas fa-info-circle" v-else></i>
-            </div>
-            <div class="notification-content">
-              <div class="notification-title">{{ notification.title }}</div>
-              <div class="notification-message">{{ notification.message }}</div>
-              <div class="notification-time">{{ formatNotificationTime(notification.createdAt) }}</div>
-            </div>
           </div>
         </div>
       </div>
@@ -312,7 +219,7 @@
   </div>
 </template>
 
-<script >
+<script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { collection, query, where, getDocs, doc, getDoc, updateDoc, onSnapshot, orderBy, addDoc } from 'firebase/firestore'
@@ -320,20 +227,6 @@ import { db, auth } from '../firebase'
 import { useI18n } from 'vue-i18n'
 import ReviewSection from '../components/ReviewSection.vue'
 import { stockTechnicians } from '../assets/stockTechnicians'
-import Sidebar from '../components/Sidebar.vue'
-
-export default {
-  name: 'TechnicianProfile',
-  components: {
-    Sidebar
-  },
-  data() {
-    return {
-      activeMenu: 'technicianprofile'
-    }
-  }
-}
-
 
 const route = useRoute()
 const router = useRouter()
@@ -341,11 +234,6 @@ const { t } = useI18n()
 const technician = ref(null)
 const loading = ref(true)
 const error = ref('')
-
-const searchQuery = ref('')
-const bookings = ref([])
-const bookingsLoading = ref(true)
-const bookingsError = ref(null)
 
 // Reviews state
 const reviews = ref([])
@@ -360,17 +248,9 @@ const newReview = ref({
 
 const submittingReview = ref(false)
 
-// Notifications state
-const notifications = ref([])
-const notificationsLoading = ref(true)
-const notificationsError = ref(null)
-
-const filteredBookings = computed(() => {
-  const q = searchQuery.value.toLowerCase();
-  return bookings.value.filter(b =>
-    Object.values(b).some(val => String(val).toLowerCase().includes(q))
-  );
-})
+// User bookings state
+const userBookings = ref([])
+const userBookingsLoading = ref(false)
 
 const averageRating = computed(() => {
   if (reviews.value.length === 0) return 0;
@@ -403,8 +283,14 @@ const canReview = computed(() => {
     review.userEmail === auth.currentUser.email
   );
   
-  // User can review if they haven't already reviewed this technician (no booking requirement)
-  return !existingReview;
+  // Check if user has a booking with this technician
+  const hasBooking = userBookings.value.some(booking => 
+    booking.technicianId === route.params.id && 
+    (booking.status === 'completed' || booking.status === 'upcoming')
+  );
+  
+  // User can review if they haven't already reviewed AND they have a booking with this technician
+  return !existingReview && hasBooking;
 })
 
 onMounted(async () => {
@@ -425,7 +311,7 @@ onMounted(async () => {
           name: data.fullName,
           location: data.government,
           price: data.basePrice,
-          image: data.idPhotoUrl || 'https://randomuser.me/api/portraits/men/32.jpg'
+          image: data.profilePhotoUrl || data.idPhotoUrl || 'https://randomuser.me/api/portraits/men/32.jpg'
         }
       } else {
         error.value = 'Technician profile not found.'
@@ -436,21 +322,30 @@ onMounted(async () => {
       loading.value = false
     }
   }
-  await Promise.all([fetchBookings(), fetchReviews(), fetchNotifications()])
+  await Promise.all([fetchReviews(), fetchUserBookings()])
 })
 
-async function fetchBookings() {
+async function fetchUserBookings() {
   try {
-    bookingsLoading.value = true
-    bookingsError.value = null
-    const id = route.params.id
-    const q = query(collection(db, 'bookings'), where('technicianId', '==', id))
+    userBookingsLoading.value = true
+    const userId = auth.currentUser?.uid
+    
+    if (!userId) {
+      userBookings.value = []
+      return
+    }
+    
+    const q = query(
+      collection(db, 'bookings'),
+      where('userId', '==', userId)
+    )
     const snapshot = await getDocs(q)
-    bookings.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+    userBookings.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
   } catch (e) {
-    bookingsError.value = 'Failed to fetch bookings'
+    console.error('Error fetching user bookings:', e)
+    userBookings.value = []
   } finally {
-    bookingsLoading.value = false
+    userBookingsLoading.value = false
   }
 }
 
@@ -459,7 +354,6 @@ async function fetchReviews() {
     reviewsLoading.value = true
     reviewsError.value = null
     const technicianId = route.params.id
-    console.log('Fetching reviews for technician:', technicianId);
     
     // Try the indexed query first
     try {
@@ -469,18 +363,14 @@ async function fetchReviews() {
         orderBy('createdAt', 'desc')
       )
       const snapshot = await getDocs(q)
-      console.log('Reviews snapshot (indexed):', snapshot.docs.length, 'reviews found');
       reviews.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
     } catch (indexError) {
-      console.log('Index not ready, using fallback query:', indexError.message);
-      
       // Fallback: Simple query without orderBy, sort in JavaScript
       const q = query(
         collection(db, 'reviews'), 
         where('technicianId', '==', technicianId)
       )
       const snapshot = await getDocs(q)
-      console.log('Reviews snapshot (fallback):', snapshot.docs.length, 'reviews found');
       
       // Sort reviews in JavaScript
       reviews.value = snapshot.docs
@@ -491,8 +381,6 @@ async function fetchReviews() {
           return dateB - dateA; // Sort by newest first
         });
     }
-    
-    console.log('Reviews loaded:', reviews.value);
   } catch (e) {
     console.error('Error fetching reviews:', e);
     reviewsError.value = t('retry')
@@ -501,96 +389,10 @@ async function fetchReviews() {
   }
 }
 
-async function fetchNotifications() {
-  try {
-    notificationsLoading.value = true
-    notificationsError.value = null
-    const userId = auth.currentUser?.uid
-    const technicianId = route.params.id
-    
-    console.log('=== FETCHING NOTIFICATIONS ===');
-    console.log('Current user UID:', userId);
-    console.log('Technician ID from route:', technicianId);
-    
-    if (!technicianId) {
-      console.log('No technician ID found, skipping notifications');
-      notificationsLoading.value = false
-      return
-    }
-
-    // Check if current user is the technician viewing their own profile
-    const isOwnProfile = userId === technicianId;
-    console.log('Is viewing own profile:', isOwnProfile);
-
-    // Always query for notifications sent to the technician being viewed
-    // This allows anyone to see the technician's notifications (for transparency)
-    const recipientIds = [technicianId];
-    
-    // If the current user is logged in and is the technician, also include their user notifications
-    if (userId && userId !== technicianId) {
-      recipientIds.push(userId);
-    }
-    
-    console.log('Querying for notifications with recipientIds:', recipientIds);
-
-    const q = query(
-      collection(db, 'notifications'),
-      where('recipientId', 'in', recipientIds),
-      orderBy('createdAt', 'desc')
-    )
-    
-    console.log('Notification query created for recipientIds:', recipientIds);
-    
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      console.log('Notification snapshot received:', snapshot.docs.length, 'notifications');
-      const newNotifications = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-      console.log('Notifications data:', newNotifications);
-      notifications.value = newNotifications
-      notificationsLoading.value = false
-    }, (error) => {
-      console.error('Error fetching notifications:', error)
-      notificationsError.value = error.message
-      notificationsLoading.value = false
-    })
-    return () => unsubscribe()
-  } catch (e) {
-    console.error('Error fetching notifications:', e)
-    notificationsError.value = e.message
-    notificationsLoading.value = false
-  }
-}
-
-async function markNotificationAsRead(notificationId) {
-  const notificationRef = doc(db, 'notifications', notificationId)
-  try {
-    await updateDoc(notificationRef, { read: true })
-    const index = notifications.value.findIndex(n => n.id === notificationId)
-    if (index !== -1) {
-      notifications.value[index].read = true
-    }
-  } catch (e) {
-    console.error('Error marking notification as read:', e)
-  }
-}
-
-function markAllNotificationsAsRead() {
-  notifications.value.forEach(notification => {
-    if (!notification.read) {
-      markNotificationAsRead(notification.id)
-    }
-  })
-}
-
 function formatDate(date) {
   if (!date) return ''
   const d = date.toDate ? date.toDate() : new Date(date)
   return d.toLocaleDateString()
-}
-
-function formatNotificationTime(timestamp) {
-  if (!timestamp) return ''
-  const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp)
-  return date.toLocaleTimeString()
 }
 
 function bookNow() {
@@ -624,62 +426,44 @@ function getSpecializationTranslation(specialization) {
   return specializationMap[specialization] || specialization
 }
 
-// Debug notifications function for development
-async function debugNotifications() {
-  try {
-    console.log('=== DEBUGGING NOTIFICATIONS ===');
-    const currentUserId = auth.currentUser?.uid;
-    const technicianId = route.params.id;
+// Review functions
+function setRating(rating) {
+  newReview.value.rating = rating
+}
 
-    console.log('Current user UID:', currentUserId);
-    console.log('Technician ID:', technicianId);
-
-    // Check existing notifications for this technician
-    console.log('Checking existing notifications...');
-    const notificationsQuery = query(
-      collection(db, 'notifications'),
-      where('recipientId', '==', technicianId)
-    );
-    
-    const snapshot = await getDocs(notificationsQuery);
-    console.log('Found notifications for technician:', snapshot.docs.length);
-    
-    snapshot.docs.forEach((doc, index) => {
-      const data = doc.data();
-      console.log(`Notification ${index + 1}:`, {
-        id: doc.id,
-        type: data.type,
-        title: data.title,
-        message: data.message,
-        recipientId: data.recipientId,
-        createdAt: data.createdAt
-      });
-    });
-
-    // Create a persistent test notification for debugging
-    const testNotification = {
-      title: 'Technician Profile Debug Notification',
-      message: `Debug notification from technician profile for ${technicianId}`,
-      type: 'debug',
-      recipientId: technicianId,
-      recipientType: 'technician',
-      createdAt: new Date(),
-      read: false,
-      debugInfo: {
-        technicianId: technicianId,
-        currentUserId: currentUserId,
-        timestamp: new Date().toISOString()
-      }
-    };
-
-    const result = await addDoc(collection(db, 'notifications'), testNotification);
-    console.log('Debug notification created with ID:', result.id);
-    alert(`Debug notification created!\nFound ${snapshot.docs.length} existing notifications.\nCheck the console for details.`);
-
-  } catch (error) {
-    console.error('Error creating debug notification:', error);
-    alert('Error creating debug notification: ' + error.message);
+function submitReview() {
+  if (!isValidReview.value || submittingReview.value) return
+  
+  submittingReview.value = true
+  
+  const reviewData = {
+    technicianId: route.params.id,
+    rating: newReview.value.rating,
+    text: newReview.value.text.trim(),
+    userName: auth.currentUser?.displayName || auth.currentUser?.email,
+    userEmail: auth.currentUser?.email,
+    createdAt: new Date()
   }
+  
+  addDoc(collection(db, 'reviews'), reviewData)
+    .then(() => {
+      // Reset form
+      newReview.value = { rating: 0, text: '' }
+      showReviewForm.value = false
+      submittingReview.value = false
+      
+      // Refresh reviews and user bookings
+      Promise.all([fetchReviews(), fetchUserBookings()])
+    })
+    .catch(error => {
+      console.error('Error submitting review:', error)
+      submittingReview.value = false
+    })
+}
+
+function cancelReview() {
+  newReview.value = { rating: 0, text: '' }
+  showReviewForm.value = false
 }
 </script>
 
@@ -1101,132 +885,7 @@ async function debugNotifications() {
   background: #6b5a9f;
 }
 
-/* --- Copied from admin-dashboard/Booking-pending.vue --- */
-.admin-dashboard-layout {
-  display: flex;
-  min-height: 100vh;
-  font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
-  background: #faf8fd;
-}
 
-.booking-container {
-  max-width: 80rem;
-  margin: 0 auto;
-}
-
-.title-search-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
-}
-
-.booking-title {
-  font-size: 2rem;
-  font-weight: bold;
-  color: #7c6bb0;
-  margin-bottom: 0;
-}
-
-.search-wrapper {
-  display: flex;
-  align-items: center;
-  width: 411px;
-  height: 50px;
-  padding: 10px;
-  gap: 8px;
-  flex-shrink: 0;
-  margin-bottom: 16px;
-  position: relative;
-}
-
-.search-input {
-  width: 100%;
-  height: 100%;
-  border-radius: 48px;
-  border: 1px solid var(--border-border-primary, #C2C3C4);
-  background: var(--grey-50, #EAEAEA);
-  font-size: 1rem;
-  color: #6B5FA7;
-  outline: none;
-  padding: 0 16px 0 40px;
-  transition: border 0.2s;
-}
-
-.search-input:focus {
-  border: 1.5px solid #6B5FA7;
-}
-
-.search-icon {
-  position: absolute;
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #b6a7e6;
-  font-size: 1.1rem;
-}
-
-.empty-state {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem;
-  background: #fff;
-  border-radius: 0.75rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  color: #666;
-  font-size: 1.1rem;
-}
-
-.table-wrapper {
-  overflow-x: auto;
-  border-radius: 0.75rem;
-  background: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.booking-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: #fff;
-  border-radius: 0.75rem;
-}
-
-.table-header {
-  background: rgba(124, 107, 176, 0.2);
-  color: #333;
-}
-
-.table-header th {
-  padding: 0.75rem 1rem;
-  text-align: left;
-  font-weight: 600;
-  font-size: 0.9rem;
-}
-
-.table-row {
-  border-bottom: 1px solid #e5e7eb;
-  transition: background-color 0.2s;
-}
-
-.table-row:hover {
-  background: #ede7f6;
-}
-
-.table-row td {
-  padding: 0.75rem 1rem;
-  font-size: 0.9rem;
-  color: #333;
-}
-
-.status-pending {
-  background: #fef3c7;
-  color: #92400e;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
 
 .add-review-btn {
   background: #667eea;
@@ -1422,139 +1081,7 @@ async function debugNotifications() {
   background: #5a6268;
 }
 
-/* Notifications Section */
-.notifications-section {
-  background: #fff;
-  border-radius: 0.75rem;
-  padding: 2rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
 
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-}
-
-.section-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #7c6bb0;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.section-title i {
-  color: #7c6bb0;
-  font-size: 1.2rem;
-}
-
-.notification-actions {
-  display: flex;
-  gap: 1rem;
-}
-
-.test-notification-btn {
-  background: #007bff;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.test-notification-btn:hover {
-  background: #0056b3;
-}
-
-.mark-all-read-btn {
-  background: #7c6bb0;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.mark-all-read-btn:hover {
-  background: #6b5fa7;
-}
-
-.notifications-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.notification-item {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  background: #f8f9fa;
-  border-radius: 0.5rem;
-  border: 1px solid #e5e7eb;
-  cursor: pointer;
-  transition: background-color 0.2s, border-color 0.2s;
-}
-
-.notification-item:hover {
-  background: #e9ecef;
-  border-color: #dee2e6;
-}
-
-.notification-item.unread {
-  background: #fdfdff;
-  border-color: #7c6bb0;
-  box-shadow: 0 2px 8px rgba(124, 107, 176, 0.1);
-}
-
-.notification-item.unread:hover {
-  background: #f0f0ff;
-  border-color: #6b5fa7;
-}
-
-.notification-icon {
-  font-size: 1.5rem;
-  color: #7c6bb0;
-}
-
-.notification-content {
-  flex: 1;
-}
-
-.notification-title {
-  font-weight: 600;
-  color: #374151;
-  font-size: 1rem;
-  margin-bottom: 0.25rem;
-}
-
-.notification-message {
-  font-size: 0.875rem;
-  color: #6b7280;
-  line-height: 1.4;
-  margin-bottom: 0.25rem;
-}
-
-.notification-time {
-  font-size: 0.75rem;
-  color: #9ca3af;
-}
-
-.no-notifications {
-  text-align: center;
-  padding: 2rem;
-  color: #6b7280;
-  font-style: italic;
-}
 
 @media (max-width: 768px) {
   .profile-main {
@@ -1592,25 +1119,6 @@ async function debugNotifications() {
     gap: 0.5rem;
   }
   
-  .booking-main {
-    padding: 1rem;
-  }
-  
-  .title-search-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-  
-  .search-wrapper {
-    width: 100%;
-    max-width: none;
-  }
-  
-  .table-wrapper {
-    font-size: 0.8rem;
-  }
-  
   .about-content {
     gap: 0.5rem;
   }
@@ -1619,11 +1127,6 @@ async function debugNotifications() {
     min-width: 150px;
     padding: 0.75rem;
     font-size: 0.9rem;
-  }
-  
-  .table-header th,
-  .table-row td {
-    padding: 0.5rem 0.5rem;
   }
 }
 </style> 

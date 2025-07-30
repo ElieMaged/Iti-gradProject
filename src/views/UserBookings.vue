@@ -1,0 +1,557 @@
+<template>
+  <div class="user-bookings-page">
+    <div class="sidebar-container">
+      <userSidebar :activeTab="'bookings'" />
+    </div>
+    
+    <div class="main-content">
+      <div class="page-header">
+        <h1 class="page-title">{{ $t('myBookings') }}</h1>
+        <p class="page-description">{{ $t('myBookingsDescription') }}</p>
+      </div>
+
+      <div class="bookings-container">
+        <!-- Loading State -->
+        <div v-if="loading" class="loading-state">
+          <div class="loading-spinner"></div>
+          <p>{{ $t('loadingBookings') }}</p>
+        </div>
+
+        <!-- Error State -->
+        <div v-else-if="error" class="error-state">
+          <p class="error-message">{{ error }}</p>
+          <button @click="fetchBookings" class="retry-btn">{{ $t('retry') }}</button>
+        </div>
+
+        <!-- Bookings List -->
+        <div v-else-if="bookings.length > 0" class="table-wrapper">
+          <div class="bookings-header">
+            <h2>{{ $t('currentBookings') }} ({{ bookings.length }})</h2>
+            <div class="filter-controls">
+              <select v-model="statusFilter" class="filter-select">
+                <option value="all">{{ $t('allBookings') }}</option>
+                <option value="pending">{{ $t('pending') }}</option>
+                <option value="upcoming">{{ $t('upcoming') }}</option>
+                <option value="completed">{{ $t('completed') }}</option>
+                <option value="cancelled">{{ $t('cancelled') }}</option>
+              </select>
+            </div>
+          </div>
+          <table class="booking-table">
+            <thead>
+              <tr class="table-header">
+                <th>{{ $t('technician') }}</th>
+                <th>{{ $t('specialization') }}</th>
+                <th>{{ $t('date') }}</th>
+                <th>{{ $t('time') }}</th>
+                <th>{{ $t('address') }}</th>
+                <th>{{ $t('price') }}</th>
+                <th>{{ $t('status') }}</th>
+                <th>{{ $t('actions') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="booking in filteredBookings" :key="booking.id" class="table-row">
+                <td>{{ booking.technicianName }}</td>
+                <td>{{ getSpecializationTranslation(booking.specialization) }}</td>
+                <td>{{ booking.date }}</td>
+                <td>{{ booking.time }}</td>
+                <td>{{ booking.address }}</td>
+                <td>{{ booking.price }} {{ $t('egp') }}</td>
+                <td>
+                  <span :class="getStatusClass(booking.status)">
+                    {{ getStatusTranslation(booking.status) }}
+                  </span>
+                </td>
+                <td>
+                  <button v-if="booking.status === 'pending'" @click="cancelBooking(booking.id)" :disabled="cancellingBooking === booking.id" class="cancel-btn">
+                    {{ cancellingBooking === booking.id ? $t('cancelling') : $t('cancelBooking') }}
+                  </button>
+                  <button v-if="booking.status === 'completed'" @click="bookAgain(booking)" class="book-again-btn">
+                    {{ $t('bookAgain') }}
+                  </button>
+                  <button v-if="booking.status === 'upcoming'" @click="viewTechnicianProfile(booking.technicianId)" class="view-profile-btn">
+                    {{ $t('viewProfile') }}
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        <div v-else class="empty-state">
+          <div class="empty-icon">
+            <i class="fas fa-calendar-times"></i>
+          </div>
+          <h3>{{ $t('noBookingsFound') }}</h3>
+          <p>{{ $t('noBookingsDescription') }}</p>
+          <button @click="goToServices" class="browse-services-btn">
+            {{ $t('browseServices') }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore'
+import { db, auth } from '../firebase'
+import { useI18n } from 'vue-i18n'
+import userSidebar from '../components/userSidebar.vue'
+
+const router = useRouter()
+const { t } = useI18n()
+
+// State
+const bookings = ref([])
+const loading = ref(true)
+const error = ref('')
+const statusFilter = ref('all')
+const cancellingBooking = ref(null)
+
+// Computed
+const filteredBookings = computed(() => {
+  if (statusFilter.value === 'all') {
+    return bookings.value
+  }
+  return bookings.value.filter(booking => booking.status === statusFilter.value)
+})
+
+// Methods
+async function fetchBookings() {
+  try {
+    loading.value = true
+    error.value = ''
+    
+    const userId = auth.currentUser?.uid
+    if (!userId) {
+      error.value = t('loginRequired')
+      return
+    }
+
+    const q = query(
+      collection(db, 'bookings'),
+      where('userId', '==', userId)
+    )
+    
+    const snapshot = await getDocs(q)
+    bookings.value = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }))
+  } catch (e) {
+    console.error('Error fetching bookings:', e)
+    error.value = t('errorLoadingBookings')
+  } finally {
+    loading.value = false
+  }
+}
+
+async function cancelBooking(bookingId) {
+  if (!confirm(t('confirmCancelBooking'))) return
+  
+  try {
+    cancellingBooking.value = bookingId
+    
+    const bookingRef = doc(db, 'bookings', bookingId)
+    await updateDoc(bookingRef, {
+      status: 'cancelled',
+      cancelledAt: new Date()
+    })
+    
+    // Refresh bookings
+    await fetchBookings()
+  } catch (e) {
+    console.error('Error cancelling booking:', e)
+    alert(t('errorCancellingBooking'))
+  } finally {
+    cancellingBooking.value = null
+  }
+}
+
+function bookAgain(booking) {
+  router.push({
+    path: '/bookingpage',
+    query: { 
+      techId: booking.technicianId,
+      specialization: booking.specialization
+    }
+  })
+}
+
+function viewTechnicianProfile(technicianId) {
+  router.push(`/technician/${technicianId}`)
+}
+
+function goToServices() {
+  router.push('/allservices')
+}
+
+function formatDate(date) {
+  if (!date) return ''
+  const d = date.toDate ? date.toDate() : new Date(date)
+  return d.toLocaleDateString()
+}
+
+function getStatusClass(status) {
+  const statusClasses = {
+    'pending': 'status-pending',
+    'upcoming': 'status-upcoming',
+    'completed': 'status-completed',
+    'cancelled': 'status-cancelled'
+  }
+  return statusClasses[status] || 'status-pending'
+}
+
+function getStatusTranslation(status) {
+  const statusTranslations = {
+    'pending': t('pending'),
+    'upcoming': t('upcoming'),
+    'completed': t('completed'),
+    'cancelled': t('cancelled')
+  }
+  return statusTranslations[status] || status
+}
+
+function getSpecializationTranslation(specialization) {
+  if (!specialization) return t('plumber')
+  
+  const specializationMap = {
+    'Plumbing': t('plumber'),
+    'Electrical': t('electrician'),
+    'Carpentry': t('carpenter'),
+    'Air Conditioning': t('acTechnician'),
+    'Wall Finishing': t('wallFinisher'),
+    'plumber': t('plumber'),
+    'electrician': t('electrician'),
+    'carpenter': t('carpenter'),
+    'acTechnician': t('acTechnician'),
+    'wallFinisher': t('wallFinisher')
+  }
+  
+  return specializationMap[specialization] || specialization
+}
+
+onMounted(() => {
+  fetchBookings()
+})
+</script>
+
+<style scoped>
+.user-bookings-page {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.sidebar-container {
+  flex-shrink: 0;
+}
+
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.page-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.page-description {
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.bookings-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+}
+
+.bookings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.bookings-header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.filter-controls {
+  display: flex;
+  gap: 1rem;
+}
+
+.filter-select {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: white;
+  font-size: 0.9rem;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.booking-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.table-header {
+  background-color: #f8f9fa;
+  color: #333;
+  font-weight: 600;
+  text-align: left;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.table-header th {
+  padding: 0.75rem 1.5rem;
+}
+
+.table-row {
+  border-bottom: 1px solid #e5e7eb;
+  transition: background-color 0.2s ease;
+}
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+.table-row:hover {
+  background-color: #f1f3f5;
+}
+
+.table-cell {
+  padding: 0.75rem 1.5rem;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.table-cell.status-pending {
+  color: #92400e;
+}
+
+.table-cell.status-upcoming {
+  color: #1e40af;
+}
+
+.table-cell.status-completed {
+  color: #065f46;
+}
+
+.table-cell.status-cancelled {
+  color: #991b1b;
+  opacity: 0.7;
+}
+
+.booking-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.cancel-btn, .book-again-btn, .view-profile-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancel-btn {
+  background: #ef4444;
+  color: white;
+}
+
+.cancel-btn:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.cancel-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.book-again-btn {
+  background: #10b981;
+  color: white;
+}
+
+.book-again-btn:hover {
+  background: #059669;
+}
+
+.view-profile-btn {
+  background: #3b82f6;
+  color: white;
+}
+
+.view-profile-btn:hover {
+  background: #2563eb;
+}
+
+/* Loading and Error States */
+.loading-state, .error-state {
+  text-align: center;
+  padding: 3rem;
+}
+
+.loading-spinner {
+  border: 3px solid #e5e7eb;
+  border-top: 3px solid #7c6bb0;
+  border-radius: 50%;
+  width: 3rem;
+  height: 3rem;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-message {
+  color: #dc2626;
+  margin-bottom: 1rem;
+}
+
+.retry-btn {
+  background: #7c6bb0;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.retry-btn:hover {
+  background: #6b5fa7;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  color: #9ca3af;
+  margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+.browse-services-btn {
+  background: #7c6bb0;
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.browse-services-btn:hover {
+  background: #6b5fa7;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 1rem;
+  }
+  
+  .table-wrapper {
+    overflow-x: auto;
+  }
+
+  .booking-table {
+    display: block;
+    width: 100%;
+  }
+
+  .table-header {
+    display: none;
+  }
+
+  .table-row {
+    display: block;
+    margin-bottom: 1rem;
+  }
+
+  .table-cell {
+    display: block;
+    text-align: right;
+    padding-left: 50%;
+    position: relative;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .table-cell:before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0;
+    width: 50%;
+    padding-left: 1rem;
+    font-weight: 600;
+    text-align: left;
+  }
+
+  .table-cell:last-child {
+    border-bottom: none;
+  }
+
+  .booking-actions {
+    flex-direction: column;
+  }
+  
+  .page-title {
+    font-size: 2rem;
+  }
+}
+</style> 

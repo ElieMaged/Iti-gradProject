@@ -42,6 +42,7 @@ import TechnicianReviews from '../views/TechnicianReviews.vue'
 import UserBookingPending from '../views/UserBookingPending.vue'
 import UserBookingUpcoming from '../views/UserBookingUpcoming.vue'
 import UserBookingCompleted from '../views/UserBookingCompleted.vue'
+import UserBookings from '../views/UserBookings.vue'
 
 //admin
 import AdminUsers from '../views/adminDashboard/admin-users.vue'
@@ -111,6 +112,7 @@ const routes = [
   { path: '/user-booking-pending', component: UserBookingPending },
   { path: '/user-booking-upcoming', component: UserBookingUpcoming },
   { path: '/user-booking-completed', component: UserBookingCompleted },
+  { path: '/user-bookings', component: UserBookings },
 
   //admin
   { path: '/admin-users', component: AdminUsers },

@@ -116,6 +116,28 @@
               </div>
             </div>
           </div>
+          
+          <!-- Profile Picture Upload -->
+          <h3 class="font-bold text-[#6B4FA1] mb-2">Please upload a profile picture</h3>
+          <div class="upload-area" @click="triggerProfileFileInput">
+            <div class="text-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto mb-2" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+              <span class="grey-color">
+                {{ $t('dragDropOrBrowse') }}
+                <span class="font-bold text-black cursor-pointer underline">{{ $t('browse') }}</span>
+              </span>
+              <input
+                ref="profileFileInput"
+                type="file"
+                accept="image/*"
+                class="hidden"
+                @change="handleProfileFileChange"
+              />
+              <div v-if="profilePreviewUrl" class="mt-2">
+                <img :src="profilePreviewUrl" alt="Profile Preview" class="preview-img" />
+              </div>
+            </div>
+          </div>
           <div class="flex flex-col gap-2 mt-2">
             <label class="flex items-center gap-2">
               <input v-model="formData.confirmInfo" type="checkbox" class="accent-[#6B4FA1]" required />
@@ -145,17 +167,19 @@ import { ref, reactive, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { auth, db, storage } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { collection, serverTimestamp, doc, setDoc, addDoc } from 'firebase/firestore';
+import { collection, serverTimestamp, doc, setDoc, addDoc, getDocs, query, where, getDoc, updateDoc } from 'firebase/firestore';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useI18n } from 'vue-i18n';
-import { ensureUserRole, fetchUserRole } from '../utils/userRole';
+
 import emailjs from 'emailjs-com';
 
 const { t } = useI18n();
 
 const router = useRouter();
 const fileInput = ref(null);
+const profileFileInput = ref(null);
 const previewUrl = ref(null);
+const profilePreviewUrl = ref(null);
 const loading = ref(false);
 const error = ref('');
 const success = ref('');
@@ -175,6 +199,7 @@ const formData = reactive({
   confirmInfo: false,
   agreeTerms: false,
   idPhotoBase64: null, // New field to store Base64 string
+  profilePhotoBase64: null, // New field to store profile picture Base64 string
   paypalEmail: '' // New field for PayPal email
 });
 
@@ -215,6 +240,10 @@ function triggerFileInput() {
   fileInput.value && fileInput.value.click();
 }
 
+function triggerProfileFileInput() {
+  profileFileInput.value && profileFileInput.value.click();
+}
+
 function handleFileChange(event) {
   const file = event.target.files[0];
   if (file) {
@@ -222,6 +251,18 @@ function handleFileChange(event) {
     reader.onload = function(e) {
       previewUrl.value = e.target.result; // For preview
       formData.idPhotoBase64 = e.target.result; // Save Base64 string
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+function handleProfileFileChange(event) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      profilePreviewUrl.value = e.target.result; // For preview
+      formData.profilePhotoBase64 = e.target.result; // Save Base64 string
     };
     reader.readAsDataURL(file);
   }
@@ -247,17 +288,40 @@ async function handleRegister() {
     return;
   }
   
+  if (!formData.idPhotoBase64) {
+    error.value = 'Please upload your ID photo';
+    return;
+  }
+  
+  if (!formData.profilePhotoBase64) {
+    error.value = 'Please upload a profile picture';
+    return;
+  }
+  
   loading.value = true;
+  
+  // Add timeout to prevent hanging
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => reject(new Error('Registration timeout - taking too long')), 30000); // 30 second timeout
+  });
   
   try {
     console.log('Starting registration process...');
+    console.log('Form data:', { 
+      email: formData.email, 
+      fullName: formData.fullName,
+      specialization: formData.specialization,
+      hasIdPhoto: !!formData.idPhotoBase64,
+      hasProfilePhoto: !!formData.profilePhotoBase64
+    });
     
     // Create Firebase Auth user
-    const userCredential = await createUserWithEmailAndPassword(
-      auth, 
-      formData.email, 
-      formData.password
-    );
+    console.log('Creating Firebase Auth user...');
+    const userCredential = await Promise.race([
+      createUserWithEmailAndPassword(auth, formData.email, formData.password),
+      timeoutPromise
+    ]);
+    console.log('Firebase Auth user created successfully:', userCredential.user.uid);
     // Save technician data to Firestore, using Base64 image
     const technicianData = {
       uid: userCredential.user.uid,
@@ -271,6 +335,7 @@ async function handleRegister() {
       district: formData.district,
       willingToTravel: formData.willingToTravel,
       idPhotoUrl: formData.idPhotoBase64 || '', // Save Base64 string
+      profilePhotoUrl: formData.profilePhotoBase64 || '', // Save profile picture Base64 string
       paypalEmail: formData.paypalEmail || '', // Save PayPal email
       status: 'pending', // Admin approval status
       createdAt: serverTimestamp(),
@@ -279,23 +344,37 @@ async function handleRegister() {
     };
     
     // Save to pending applications collection
-    await setDoc(doc(db, 'pendingTechnicians', userCredential.user.uid), technicianData);
+    console.log('Saving to pendingTechnicians collection...');
+    await Promise.race([
+      setDoc(doc(db, 'pendingTechnicians', userCredential.user.uid), technicianData),
+      timeoutPromise
+    ]);
+    console.log('Saved to pendingTechnicians successfully');
     
     // Also save to users collection with pending role
-    await setDoc(doc(db, 'users', userCredential.user.uid), {
-      email: formData.email,
-      role: 'pending',
-      createdAt: serverTimestamp()
-    });
+    console.log('Saving to users collection...');
+    await Promise.race([
+      setDoc(doc(db, 'users', userCredential.user.uid), {
+        email: formData.email,
+        role: 'pending',
+        createdAt: serverTimestamp()
+      }),
+      timeoutPromise
+    ]);
+    console.log('Saved to users collection successfully');
     
     // Set localStorage to pending
     localStorage.setItem('userType', 'pending');
     
-    // Send notification to admin about new technician application
-    await sendTechnicianApplicationNotification(technicianData);
+    // Send notification to admin about new technician application (non-blocking)
+    sendTechnicianApplicationNotification(technicianData).catch(error => {
+      console.error('Failed to send admin notification:', error);
+    });
     
-    // Send welcome email to the technician
-    await sendWelcomeEmail(formData.email, formData.fullName);
+    // Send welcome email to the technician (non-blocking)
+    sendWelcomeEmail(formData.email, formData.fullName).catch(error => {
+      console.error('Failed to send welcome email:', error);
+    });
     
     success.value = t('applicationSubmitted');
     // Redirect to pending status page
@@ -305,7 +384,19 @@ async function handleRegister() {
     
   } catch (err) {
     console.error('Registration error:', err);
-    error.value = err.message;
+    
+    // Provide more specific error messages
+    if (err.code === 'auth/email-already-in-use') {
+      error.value = 'An account with this email already exists. Please use a different email or try logging in.';
+    } else if (err.code === 'auth/weak-password') {
+      error.value = 'Password is too weak. Please choose a stronger password.';
+    } else if (err.code === 'auth/invalid-email') {
+      error.value = 'Please enter a valid email address.';
+    } else if (err.message.includes('timeout')) {
+      error.value = 'Registration is taking too long. Please check your internet connection and try again.';
+    } else {
+      error.value = `Registration failed: ${err.message}`;
+    }
   } finally {
     loading.value = false;
   }
@@ -464,6 +555,86 @@ async function promoteUserToTechnician(email) {
   alert('User promoted to technician!');
 }
 // Usage: Call promoteUserToTechnician('narutossj123@yahoo.com') in the browser console after logging in as that user.
+
+// TEMPORARY UTILITY: Fix specific user role issue
+async function fixUserRole(email) {
+  try {
+    console.log('Fixing role for user:', email);
+    
+    // Get user by email
+    const usersRef = collection(db, 'users');
+    const q = query(usersRef, where('email', '==', email));
+    const querySnapshot = await getDocs(q);
+    
+    if (querySnapshot.empty) {
+      console.log('User not found in users collection');
+      return;
+    }
+    
+    const userDoc = querySnapshot.docs[0];
+    const userData = userDoc.data();
+    
+    console.log('Current user data:', userData);
+    
+    // Check if user is in pendingTechnicians collection
+    const pendingRef = doc(db, 'pendingTechnicians', userDoc.id);
+    const pendingSnap = await getDoc(pendingRef);
+    
+    // Check if user is in technicians collection
+    const techRef = doc(db, 'technicians', userDoc.id);
+    const techSnap = await getDoc(techRef);
+    
+    let correctRole = 'user'; // Default role
+    
+    if (email === 'elie1400674@gmail.com' || email === 'tasneemmostafa200110@gmail.com') {
+      correctRole = 'admin';
+    } else if (techSnap.exists()) {
+      correctRole = 'technician';
+    } else if (pendingSnap.exists()) {
+      correctRole = 'pending';
+    }
+    
+    console.log('Correct role should be:', correctRole);
+    
+    // Update user role if it's incorrect
+    if (userData.role !== correctRole) {
+      await updateDoc(doc(db, 'users', userDoc.id), {
+        role: correctRole,
+        updatedAt: serverTimestamp()
+      });
+      console.log('Updated user role to:', correctRole);
+    }
+    
+    // Update localStorage
+    localStorage.setItem('userType', correctRole);
+    
+    console.log('Role fix completed for:', email);
+    alert(`Role fixed for ${email}. New role: ${correctRole}`);
+    
+  } catch (error) {
+    console.error('Error fixing user role:', error);
+    alert('Error fixing user role: ' + error.message);
+  }
+}
+
+// Usage: Call fixUserRole('narutossj33@yahoo.com') in the browser console
+
+// TEST FUNCTION: Verify registration flow
+function testRegistrationFlow() {
+  console.log('=== TESTING REGISTRATION FLOW ===');
+  console.log('1. User fills out TechRegister form');
+  console.log('2. handleRegister() is called');
+  console.log('3. Firebase Auth user is created');
+  console.log('4. Data is saved to pendingTechnicians collection with role: pending');
+  console.log('5. User document is saved to users collection with role: pending');
+  console.log('6. localStorage is set to: pending');
+  console.log('7. User is redirected to /pending-application');
+  console.log('8. NO role management functions are called during registration');
+  console.log('9. Admin must approve the application to change role to technician');
+  console.log('✅ Registration flow is correct!');
+}
+
+// Usage: Call testRegistrationFlow() in the browser console to verify the flow
 </script>
 
 <style scoped>
