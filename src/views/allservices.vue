@@ -105,9 +105,8 @@
                   +{{ technician.skills.length - 2 }} more
                 </span>
               </div>
-              <button class="service-btn" @click.stop="bookTechnician(technician)">
-                {{ $t('bookNow') }}
-                <span class="arrow">→</span>
+              <button class="service-btn" @click.stop="viewTechnicianDetails(technician)">
+                {{ $t('viewTechnician') }}
               </button>
             </div>
           </div>
@@ -167,8 +166,8 @@
               </div>
             </div>
             <div class="modal-actions">
-              <button class="modal-btn primary" @click="bookTechnician(selectedTechnician)">
-                {{ $t('bookNow') }}
+              <button class="service-btn" @click.stop="viewTechnicianDetails(technician)">
+                {{ $t('viewTechnician') }}
               </button>
               <button class="modal-btn secondary" @click="closeModal">
                 {{ $t('close') }}
@@ -402,14 +401,9 @@ import { stockTechnicians } from '../assets/stockTechnicians.js';
     closeModal() {
       this.selectedTechnician = null;
     },
-    bookTechnician(technician) {
-      // Navigate to booking page with technician info
-      this.$router.push({
-        path: '/bookingpage',
-        query: {
-          techId: technician.id
-        }
-      });
+
+    viewTechnicianDetails(technician) {
+      this.selectedTechnician = technician;
     },
     navigateToService(route) {
       this.$router.push(route);

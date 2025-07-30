@@ -1,66 +1,6 @@
-<template>
-  <!-- Top Bar -->
-  <div class="bg-primary text-white text-sm">
-    <div class="max-w-7xl mx-auto px-4 py-2 flex justify-between items-center">
-      <div class="flex items-center space-x-6">
-        <span class="flex items-center"><i class="fas fa-phone mr-2"></i>{{ $t('phoneNumber') }}</span>
-        <span class="flex items-center"><i class="fas fa-envelope mr-2"></i>{{ $t('emailAddress') }}</span>
-        <span class="flex items-center"><i class="fas fa-map-marker-alt mr-2"></i>{{ $t('address') }}</span>
-      </div>
-      <div class="flex items-center space-x-3">
-        <a href="#" class="text-white hover:text-secondary transition-colors"><i class="fab fa-facebook-f"></i></a>
-        <a href="#" class="text-white hover:text-secondary transition-colors"><i class="fab fa-twitter"></i></a>
-        <a href="#" class="text-white hover:text-secondary transition-colors"><i class="fab fa-linkedin-in"></i></a>
-        <a href="#" class="text-white hover:text-secondary transition-colors"><i class="fab fa-youtube"></i></a>
-      </div>
-    </div>
-  </div>
-  <!-- Header -->
-  <div class="bg-white border-b border-gray-200">
-    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-      <div class="flex items-center">
-        <div class="text-3xl font-bold">
-          <span class="text-primary">{{ $t('boltFix') }}</span>
-        </div>
-      </div>
-      <nav class="flex items-center space-x-8">
-        <a href="#" class="text-text-main hover:text-secondary transition-colors font-medium">{{ $t('home') }}</a>
-        <a href="#" class="text-text-main hover:text-secondary transition-colors font-medium">{{ $t('aboutUs') }}</a>
-        <a href="#" class="text-text-main hover:text-secondary transition-colors font-medium">{{ $t('services') }}</a>
-        <a href="#" class="text-text-main hover:text-secondary transition-colors font-medium">{{ $t('contactUs') }}</a>
-      </nav>
-      <div class="flex items-center space-x-4">
-        <i class="fas fa-bell text-xl text-secondary cursor-pointer"></i>
-        <i class="fas fa-user text-xl text-secondary cursor-pointer"></i>
-      </div>
-    </div>
-  </div>
-  <!-- Main Container -->
+<template>  
   <div class="flex min-h-screen">
-    <!-- Sidebar -->
-    <div class="w-64 bg-sidebar flex flex-col items-center pt-10">
-      <a href="profile-view" class="sidebar-item w-full py-4 px-8 flex items-center space-x-4 text-lg font-medium text-secondary">
-        <i class="fas fa-user text-xl"></i>
-        <span>{{ $t('myProfile') }}</span>
-      </a>
-      <a href="profile-edit" class="sidebar-item w-full py-4 px-8 flex items-center space-x-4 text-lg font-medium text-secondary">
-        <i class="fas fa-cog text-xl"></i>
-        <span>{{ $t('settings') }}</span>
-      </a>
-      <a href="previous-services" class="sidebar-item active w-full py-4 px-8 flex items-center space-x-4 text-lg font-medium">
-        <i class="fas fa-calendar-check text-xl"></i>
-        <span>{{ $t('history') }}</span>
-      </a>
-      <a href="payment" class="sidebar-item w-full py-4 px-8 flex items-center space-x-4 text-lg font-medium text-secondary">
-        <i class="fas fa-credit-card text-xl"></i>
-        <span>{{ $t('payment') }}</span>
-      </a>
-      <a href="#" class="sidebar-item w-full py-4 px-8 flex items-center space-x-4 text-lg font-medium text-secondary">
-        <i class="fas fa-sign-out-alt text-xl"></i>
-        <span>{{ $t('logout') }}</span>
-      </a>
-    </div>
-    <!-- Main Content -->
+    <userSidebar :activeTab="activeTab" />
     <div class="flex-1 p-8">
       <div class="max-w-6xl mx-auto">
         <div class="mb-8">
@@ -131,6 +71,8 @@
 </template>
 <script setup>
 import { ref, computed } from 'vue';
+import userSidebar from '../components/userSidebar.vue';
+const activeTab = ref('history');
 const services = ref([
   { id: 1, technician: 'Samir Mohamed', phone: '+20 111 555 2365', type: 'Electricity', time: '10:00AM, Friday, July 23', review: 'Super professional and friendly', price: 250 },
   { id: 2, technician: 'Mohsen Ali', phone: '+20 111 555 2365', type: 'Plumbing', time: '2:30PM, Wednesday, July 20', review: 'Mohsen fixed our kitchen plumbing without making a mess.', price: 400 },

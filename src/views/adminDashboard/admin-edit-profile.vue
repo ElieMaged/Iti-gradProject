@@ -1,29 +1,29 @@
 <template>
   <div class="admin-dashboard-layout">
     <admin-sidebar />
-    <div class="edit-profile-main">
+    <div class="edit-profile-main mr-20 p-4">
       <div class="edit-profile-wrapper">
         <div class="edit-profile-card">
           <div class="edit-profile-header">
-            <h2>Edit Profile</h2>
+            <h2>{{ $t('editProfile') }}</h2>
           </div>
           <form class="edit-profile-form" @submit.prevent="updateProfile">
             <div class="edit-profile-content">
               <div class="edit-profile-fields">
                 <div>
-                  <label for="name">Full Name</label>
+                  <label for="name">{{ $t('fullName') }}</label>
                   <input type="text" id="name" v-model="form.name" required />
                 </div>
                 <div>
-                  <label for="email">Email Address</label>
+                  <label for="email">{{ $t('emailAddress') }}</label>
                   <input type="email" id="email" v-model="form.email" required />
                 </div>
                 <div>
-                  <label for="phone">Phone Number</label>
+                  <label for="phone">{{ $t('phoneNumber') }}</label>
                   <input type="text" id="phone" v-model="form.phone" required />
                 </div>
                 <div>
-                  <label for="nationalId">National ID</label>
+                  <label for="nationalId">{{ $t('nationalId') }}</label>
                   <input type="text" id="nationalId" v-model="form.nationalId" required />
                 </div>
               </div>
@@ -32,28 +32,28 @@
                   <img v-if="profileImage" :src="profileImage" alt="Profile" class="profile-image" />
                   <i v-else class="fas fa-user profile-image-placeholder"></i>
                 </div>
-                <button type="button" class="upload-btn" @click="triggerUpload">Upload</button>
+                <button type="button" class="upload-btn" @click="triggerUpload">{{ $t('upload') }}</button>
                 <input ref="fileInput" type="file" accept="image/*" class="hidden-input" @change="handleImageUpload" />
               </div>
             </div>
             <div class="edit-profile-section">
-              <h3>Change Address</h3>
+              <h3>{{ $t('changeAddress') }}</h3>
               <div class="edit-profile-address">
                 <div>
-                  <label for="city">City</label>
+                  <label for="city">{{ $t('city') }}</label>
                   <select id="city" v-model="form.city">
-                    <option value="">Select Government</option>
+                    <option value="">{{ $t('selectGovernment') }}</option>
                     <option v-for="city in cities" :key="city" :value="city">{{ city }}</option>
                   </select>
                 </div>
                 <div>
-                  <label for="area">Area</label>
+                  <label for="area">{{ $t('area') }}</label>
                   <select id="area" v-model="form.area">
                     <option v-for="area in areas" :key="area" :value="area">{{ area }}</option>
                   </select>
                 </div>
                 <div>
-                  <label for="street">Street Name</label>
+                  <label for="street">{{ $t('streetName') }}</label>
                   <select id="street" v-model="form.street">
                     <option v-for="street in streets" :key="street" :value="street">{{ street }}</option>
                   </select>
@@ -61,20 +61,20 @@
               </div>
             </div>
             <div class="edit-profile-section">
-              <h3>Change Password</h3>
+              <h3>{{ $t('changePassword') }}</h3>
               <div class="edit-profile-password">
                 <div>
-                  <label for="oldPassword">Old Password</label>
+                  <label for="oldPassword">{{ $t('oldPassword') }}</label>
                   <input type="password" id="oldPassword" v-model="form.oldPassword" />
                 </div>
                 <div>
-                  <label for="newPassword">New Password</label>
+                  <label for="newPassword">{{ $t('newPassword') }}</label>
                   <input type="password" id="newPassword" v-model="form.newPassword" />
                 </div>
               </div>
             </div>
             <div class="edit-profile-actions">
-              <button type="submit" class="save-btn">Save Changes</button>
+              <button type="submit" class="save-btn">{{ $t('saveChanges') }}</button>
             </div>
           </form>
         </div>
@@ -135,13 +135,21 @@ export default {
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
   background: #faf8fd;
 }
+.dark .admin-dashboard-layout {
+  background: var(--primary-bg);
+}
 .edit-profile-main {
   flex: 1;
-  padding: 2rem;
   background: #f9fafb;
 }
+.dark .edit-profile-main {
+  background: var(--primary-bg);
+}
+.dark .edit-profile-card {
+  background: var(--grey-bg);
+}
 .edit-profile-wrapper {
-  max-width: 900px;
+  max-width: 1000px;
   margin: 0 auto;
 }
 .edit-profile-card {
@@ -149,6 +157,12 @@ export default {
   border-radius: 1rem;
   box-shadow: 0 10px 15px rgba(0,0,0,0.08);
   padding: 2rem;
+}
+.dark .edit-profile-header h2 {
+  color: var(--primary-text);
+}
+.dark .edit-profile-card {
+  background: var(--grey-bg);
 }
 .edit-profile-header h2 {
   font-size: 1.5rem;
@@ -184,6 +198,9 @@ export default {
   color: #333;
   margin-bottom: 0.25rem;
 }
+.dark .edit-profile-fields label {
+  color: var(--primary-text-dark);
+}
 .edit-profile-fields input {
   width: 100%;
   padding: 0.5rem 1rem;
@@ -194,8 +211,16 @@ export default {
   color: #333;
   transition: border-color 0.2s;
 }
+.dark .edit-profile-fields input {
+  background: var(--input-bg);
+  color: var(--text-muted);
+}
 .edit-profile-fields input:focus {
   border-color: #7c6bb0;
+  outline: none;
+}
+.dark .edit-profile-fields input:focus {
+  border-color: var(--secondary);
   outline: none;
 }
 .edit-profile-image-section {
@@ -215,6 +240,9 @@ export default {
   justify-content: center;
   overflow: hidden;
 }
+.dark .profile-image-container {
+  background: var(--input-bg);
+}
 .profile-image {
   width: 100%;
   height: 100%;
@@ -223,6 +251,9 @@ export default {
 .profile-image-placeholder {
   font-size: 3.5rem;
   color: #9ca3af;
+}
+.dark .profile-image-placeholder {
+  color: var(--text-muted);
 }
 .upload-btn {
   background: #7c6bb0;
@@ -235,8 +266,16 @@ export default {
   cursor: pointer;
   transition: background 0.2s;
 }
+.dark .upload-btn {
+  background: var(--primary);
+  color: var(--primary-text);
+}
 .upload-btn:hover {
   background: #5a4e99;
+}
+.dark .upload-btn:hover {
+  background: var(--primary);
+  color: var(--primary-text);
 }
 .hidden-input {
   display: none;
@@ -249,6 +288,9 @@ export default {
   font-weight: bold;
   color: #333;
   margin-bottom: 1rem;
+}
+.dark .edit-profile-section h3 {
+  color: var(--primary-text-dark);
 }
 .edit-profile-address {
   display: grid;
@@ -266,6 +308,9 @@ export default {
   color: #333;
   margin-bottom: 0.25rem;
 }
+.dark .edit-profile-address label {
+  color: var(--primary-text-dark);
+}
 .edit-profile-address select {
   width: 100%;
   padding: 0.5rem 1rem;
@@ -276,8 +321,16 @@ export default {
   color: #333;
   transition: border-color 0.2s;
 }
+.dark .edit-profile-address select {
+  background: var(--input-bg);
+  color: var(--text-muted);
+}
 .edit-profile-address select:focus {
   border-color: #7c6bb0;
+  outline: none;
+}
+.dark .edit-profile-address select:focus {
+  border-color: var(--secondary);
   outline: none;
 }
 .edit-profile-password {
@@ -296,6 +349,9 @@ export default {
   color: #333;
   margin-bottom: 0.25rem;
 }
+.dark .edit-profile-password label {
+  color: var(--primary-text-dark);
+}
 .edit-profile-password input {
   width: 100%;
   padding: 0.5rem 1rem;
@@ -306,8 +362,16 @@ export default {
   color: #333;
   transition: border-color 0.2s;
 }
+.dark .edit-profile-password input {
+  background: var(--input-bg);
+  color: var(--text-muted);
+}
 .edit-profile-password input:focus {
   border-color: #7c6bb0;
+  outline: none;
+}
+.dark .edit-profile-password input:focus {
+  border-color: var(--secondary);
   outline: none;
 }
 .edit-profile-actions {
@@ -326,8 +390,16 @@ export default {
   cursor: pointer;
   transition: background 0.2s;
 }
+.dark .save-btn {
+  background: var(--primary);
+  color: var(--primary-text);
+}
 .save-btn:hover {
   background: #5a4e99;
+}
+.dark .save-btn:hover {
+  background: var(--primary);
+  color: var(--primary-text);
 }
 </style>
   

@@ -50,7 +50,7 @@
         <div class="footer__col-title">{{ $t('footerContactUs') }}</div>
         <ul class="footer__contact-list">
           <li><i class="fa-solid fa-phone footer__contact-icon"></i><span>{{ $t('footerPhone') }}</span></li>
-          <li><i class="fa-solid fa-envelope footer__contact-icon"></i><span>boltfix@gmail.com</span></li>
+          <li><i class="fa-solid fa-envelope footer__contact-icon"></i><a href="mailto:boltfix@gmail.com">boltfix@gmail.com</a></li>
           <li><i class="fa-solid fa-location-dot footer__contact-icon"></i><span>{{ $t('footerAddress') }}</span></li>
         </ul>
       </div>

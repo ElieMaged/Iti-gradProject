@@ -1,0 +1,161 @@
+<template>
+  <div class="layout">
+    <div class="sidebar mx-20">
+      <a href="/profile-view" 
+         class="sidebar-item" 
+         :class="{ active: activeTab === 'profile' }"
+         @click="handleNavigation">
+        <i class="fas fa-user"></i>
+        <span>{{ $t('myProfile') }}</span>
+      </a>
+
+      <a href="/profile-edit" 
+         class="sidebar-item" 
+         :class="{ active: activeTab === 'settings' }"
+         @click="handleNavigation">
+        <i class="fas fa-cog"></i>
+        <span>{{ $t('settings') }}</span>
+      </a>
+
+      <a href="/previous-services" 
+         class="sidebar-item" 
+         :class="{ active: activeTab === 'history' }"
+         @click="handleNavigation">
+        <i class="fas fa-calendar-check"></i>
+        <span>{{ $t('history') }}</span>
+      </a>
+
+      <a href="/payment" 
+         class="sidebar-item" 
+         :class="{ active: activeTab === 'payment' }"
+         @click="handleNavigation">
+        <i class="fas fa-credit-card"></i>
+        <span>{{ $t('payment') }}</span>
+      </a>
+
+      <button @click="handleLogout" class="sidebar-item logout-btn">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>{{ $t('logout') }}</span>
+      </button>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { useRouter } from 'vue-router';
+
+const props = defineProps({
+  activeTab: {
+    type: String,
+    default: 'profile'
+  }
+});
+
+const router = useRouter();
+
+function handleNavigation(event) {
+  // Prevent default behavior for href links
+  event.preventDefault();
+  const href = event.currentTarget.getAttribute('href');
+  
+  if (href) {
+    router.push(href);
+  }
+}
+
+function handleLogout() {
+  if (confirm('Are you sure you want to logout?')) {
+    // Clear any stored authentication data
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    sessionStorage.clear();
+    
+    // Redirect to login page
+    router.push('/login');
+    
+    // Optional: Show success message
+    alert('You have been logged out successfully!');
+  }
+}
+</script>
+
+<style scoped>
+:root {
+  --primary: #ffd54f;
+  --secondary: #7c6bb0;
+  --sidebar: #ede7f6;
+  --text-main: #333333;
+  --text-muted: #aaaaaa;
+}
+
+body {
+  margin: 0;
+}
+
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 16rem;
+  background-color: var(--sidebar);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 2.5rem;
+}
+
+.dark .sidebar {
+  background: var(--sidebar);
+  color: var(--text-main);
+}
+
+.sidebar-item {
+  width: 100%;
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--secondary);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+  border-radius: 12px;
+}
+
+.dark .sidebar-item {
+  color: var(--text-main);
+}
+
+.sidebar-item:hover {
+  background-color: #c5b7e6;
+  color: white;
+}
+
+.sidebar-item.active {
+  background-color: var(--secondary);
+  color: white;
+}
+
+.dark .sidebar-item.active {
+  background-color: var(--icon-color);
+  color: var(--primary-text-dark);
+}
+
+.logout-btn {
+  margin-top: 0.5rem;
+  color: #ef4444;
+}
+
+.logout-btn:hover {
+  background-color: #ef4444;
+  color: white;
+}
+</style>
+

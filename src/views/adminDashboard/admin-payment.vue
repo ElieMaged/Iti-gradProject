@@ -1,10 +1,10 @@
 <template>
   <div class="admin-dashboard-layout">
     <admin-sidebar />
-    <div class="dashboard-main">
+    <div class="dashboard-main p-4 mr-20">
       <div class="dashboard-container">
         <div class="dashboard-header">
-          <h2 class="dashboard-title">Payment Management</h2>
+          <h2 class="dashboard-title">{{ $('paymentManagement') }}</h2>
           <div class="dashboard-actions">
             <NotificationBell />
           </div>
@@ -33,7 +33,7 @@
               <i class="fas fa-clock stat-icon"></i>
               <span class="stat-number">{{ pendingTransactions.length }}</span>
             </div>
-            <div class="stat-title">Pending Transactions</div>
+            <div class="stat-title">{{ $t('pendingTransactions') }}</div>
           </div>
           
           <div class="stat-card">
@@ -41,7 +41,7 @@
               <i class="fas fa-check-circle stat-icon"></i>
               <span class="stat-number">{{ approvedTransactions.length }}</span>
             </div>
-            <div class="stat-title">Approved Transactions</div>
+            <div class="stat-title">{{ $t('approvedTransactions') }}</div>
           </div>
           
           <div class="stat-card">
@@ -203,12 +203,12 @@
         <!-- Transactions Table -->
         <div class="transactions-table">
           <div class="table-header">
-            <h3>Payment Transactions</h3>
+            <h3>{{ $t('paymentTransactions') }}</h3>
             <div class="filter-buttons">
-              <button class="filter-btn" @click="filterByStatus('all')" :class="{ active: currentFilter === 'all' }">All</button>
-              <button class="filter-btn" @click="filterByStatus('pending')" :class="{ active: currentFilter === 'pending' }">Pending</button>
-              <button class="filter-btn" @click="filterByStatus('approved')" :class="{ active: currentFilter === 'approved' }">Approved</button>
-              <button class="filter-btn" @click="filterByStatus('rejected')" :class="{ active: currentFilter === 'rejected' }">Rejected</button>
+              <button class="filter-btn" @click="filterByStatus('all')" :class="{ active: currentFilter === 'all' }">{{ $t('all') }}</button>
+              <button class="filter-btn" @click="filterByStatus('pending')" :class="{ active: currentFilter === 'pending' }">{{ $t('pending') }}</button>
+              <button class="filter-btn" @click="filterByStatus('approved')" :class="{ active: currentFilter === 'approved' }">{{ $t('approved') }}</button>
+              <button class="filter-btn" @click="filterByStatus('rejected')" :class="{ active: currentFilter === 'rejected' }">{{ $t('rejected') }}</button>
             </div>
           </div>
           
@@ -216,13 +216,13 @@
             <table>
               <thead>
                 <tr>
-                  <th>Date</th>
-                  <th>Technician</th>
-                  <th>Customer</th>
-                  <th>Amount</th>
-                  <th>PayPal Order ID</th>
-                  <th>Status</th>
-                  <th>Actions</th>
+                  <th>{{ $t('date') }}</th>
+                  <th>{{ $t('technician') }}</th>
+                  <th>{{ $t('customer') }}</th>
+                  <th>{{ $t('amount') }}</th>
+                  <th>{{ $t('paypalOrderId') }}</th>
+                  <th>{{ $t('status') }}</th>
+                  <th>{{ $t('actions') }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -240,10 +240,10 @@
                   <td>
                     <div class="action-buttons" v-if="transaction.status === 'pending'">
                       <button class="approve-btn" @click="approveTransaction(transaction.id)">
-                        <i class="fas fa-check"></i> Approve
+                        <i class="fas fa-check"></i> {{ $t('approve') }}
                       </button>
                       <button class="reject-btn" @click="rejectTransaction(transaction.id)">
-                        <i class="fas fa-times"></i> Reject
+                        <i class="fas fa-times"></i> {{ $t('reject') }}
                       </button>
                     </div>
                     <div v-else class="action-info">
@@ -885,10 +885,12 @@ onMounted(() => {
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
   background: #f9fafb;
 }
+.dark .admin-dashboard-layout {
+  background-color: var(--primary-bg);
+}
 
 .dashboard-main {
   flex: 1;
-  padding: 2.5rem;
 }
 
 .dashboard-container {
@@ -932,6 +934,9 @@ onMounted(() => {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   text-align: center;
 }
+.dark .stat-card {
+  background-color: var(--grey-bg) !important;
+}
 
 .stat-header {
   display: flex;
@@ -945,11 +950,17 @@ onMounted(() => {
   color: #7c6bb0;
   margin-right: 0.5rem;
 }
+.dark .stat-icon {
+  color: var(--icon-color);
+}
 
 .stat-number {
   font-size: 1.875rem;
   font-weight: bold;
   color: #1f2937;
+}
+.dark .stat-number {
+  color: var(--primary-text);
 }
 
 .stat-title {
@@ -957,12 +968,18 @@ onMounted(() => {
   font-weight: 600;
   color: #6b7280;
 }
+.dark .stat-title {
+  color: var(--primary-text);
+}
 
 .transactions-table {
   background: white;
   border-radius: 1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+}
+.dark .transactions-table {
+  background-color: var(--grey-bg) !important;
 }
 
 .table-header {
@@ -972,12 +989,21 @@ onMounted(() => {
   padding: 1.5rem;
   border-bottom: 1px solid #e5e7eb;
 }
+.dark .table-header {
+  background-color: var(--grey-bg) !important;
+}
 
 .table-header h3 {
   margin: 0;
   color: #1f2937;
   font-size: 1.25rem;
   font-weight: 600;
+}
+.dark .table-header {
+  background-color: var(--grey-bg) !important;
+}
+.dark .table-header h3 {
+  color: var(--primary-text);
 }
 
 .filter-buttons {
@@ -994,11 +1020,19 @@ onMounted(() => {
   cursor: pointer;
   transition: all 0.2s;
 }
+.dark .filter-btn {
+  background-color: var(--input-bg) !important;
+  color: var(--text-muted);
+}
 
 .filter-btn.active {
   background: #7c6bb0;
   color: white;
   border-color: #7c6bb0;
+}
+.dark .filter-btn.active {
+  background-color: var(--primary-color) !important;
+  color: var(--primary-text);
 }
 
 .table-container {
@@ -1015,11 +1049,17 @@ th, td {
   text-align: left;
   border-bottom: 1px solid #e5e7eb;
 }
+.dark th, .dark td {
+  background-color: var(--input-bg) !important;
+}
 
 th {
   background: #f9fafb;
   font-weight: 600;
   color: #374151;
+}
+.dark th {
+  background-color: var(--input-bg) !important;
 }
 
 .status-badge {
@@ -1033,6 +1073,7 @@ th {
   background: #fef3c7;
   color: #92400e;
 }
+
 
 .badge-approved {
   background: #d1fae5;

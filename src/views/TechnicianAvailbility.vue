@@ -10,7 +10,7 @@
             <!-- Main Content -->
             <div class="flex-1 p-8">
                 <div class="max-w-5xl mx-auto">
-                    <h2 class="text-2xl font-bold text-secondary mb-8">Availability</h2>
+                    <h2 class="text-2xl font-bold text-secondary mb-8">{{ $t('availabilityTitle') }}</h2>
                     
                     <!-- Success/Error Messages -->
                     <div v-if="message" :class="['message', messageType]" class="mb-4 p-4 rounded-lg">
@@ -81,25 +81,25 @@
                     </div>
                     <!-- Set Available Hours Form -->
                     <div class="bg-secondary bg-opacity-20 rounded-2xl p-8 max-w-4xl mx-auto">
-                        <h3 class="text-xl font-bold text-text-main mb-6">Set Your Available Hours For Each Day Of The Week</h3>
+                        <h3 class="text-xl font-bold text-text-main mb-6">{{ $t('availabilityDesc') }}</h3>
                         <form class="flex flex-col md:flex-row gap-4 items-center justify-between" @submit.prevent="updateAvailability">
                             <div class="flex flex-col w-full md:w-1/3">
-                                <label class="text-sm font-medium text-text-main mb-1">Day</label>
+                                <label class="text-sm font-medium text-text-main mb-1">{{ $t('day') }}</label>
                                 <select v-model="form.day" class="input-field w-full px-4 py-2 rounded-lg text-sm" required>
-                                    <option value="">Select a day</option>
-                                    <option value="monday">Monday</option>
-                                    <option value="tuesday">Tuesday</option>
-                                    <option value="wednesday">Wednesday</option>
-                                    <option value="thursday">Thursday</option>
-                                    <option value="friday">Friday</option>
-                                    <option value="saturday">Saturday</option>
-                                    <option value="sunday">Sunday</option>
+                                    <option value="">{{ $t('selectDay') }}</option>
+                                    <option value="monday">{{ $t('monday') }}</option>
+                                    <option value="tuesday">{{ $t('tuesday') }}</option>
+                                    <option value="wednesday">{{ $t('wednesday') }}</option>
+                                    <option value="thursday">{{ $t('thursday') }}</option>
+                                    <option value="friday">{{ $t('friday') }}</option>
+                                    <option value="saturday">{{ $t('saturday') }}</option>
+                                    <option value="sunday">{{ $t('sunday') }}</option>
                                 </select>
                             </div>
                             <div class="flex flex-col w-full md:w-1/4">
-                                <label class="text-sm font-medium text-text-main mb-1">From</label>
+                                <label class="text-sm font-medium text-text-main mb-1">{{ $t('from') }}</label>
                                 <select v-model="form.startTime" class="input-field w-full px-4 py-2 rounded-lg text-sm" required>
-                                    <option value="">Select time</option>
+                                    <option value="">{{ $t('selectTime') }}</option>
                                     <option value="09:00 AM">09:00 AM</option>
                                     <option value="10:00 AM">10:00 AM</option>
                                     <option value="11:00 AM">11:00 AM</option>
@@ -118,9 +118,9 @@
                                 </select>
                             </div>
                             <div class="flex flex-col w-full md:w-1/4">
-                                <label class="text-sm font-medium text-text-main mb-1">To</label>
+                                <label class="text-sm font-medium text-text-main mb-1">{{ $t('to') }}</label>
                                 <select v-model="form.endTime" class="input-field w-full px-4 py-2 rounded-lg text-sm" required>
-                                    <option value="">Select time</option>
+                                    <option value="">{{ $t('selectTime') }}</option>
                                     <option value="05:00 PM">05:00 PM</option>
                                     <option value="06:00 PM">06:00 PM</option>
                                     <option value="07:00 PM">07:00 PM</option>
@@ -132,7 +132,7 @@
                             </div>
                             <div class="flex items-end w-full md:w-auto gap-2">
                                 <button type="submit" class="bg-secondary text-white px-8 py-2 rounded-lg text-base font-medium hover:bg-opacity-90 transition-colors mt-6 md:mt-0">
-                                    {{ loading ? 'Updating...' : 'Apply' }}
+                                    {{ loading ? $t('updating') : $t('apply') }}
                                 </button>
                                 <button 
                                     v-if="form.day" 
@@ -140,7 +140,7 @@
                                     @click="setUnavailable" 
                                     class="bg-red-500 text-white px-6 py-2 rounded-lg text-base font-medium hover:bg-red-600 transition-colors mt-6 md:mt-0"
                                 >
-                                    Set Unavailable
+                                    {{ $t('setUnavailable') }}
                                 </button>
                             </div>
                         </form>

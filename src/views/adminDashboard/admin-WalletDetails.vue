@@ -1,7 +1,7 @@
 <template>
   <div class="admin-dashboard-layout">
     <admin-sidebar />
-    <div class="wallet-main">
+    <div class="wallet-main mr-20 p-4">
       <div class="wallet-container">
         <h2 class="wallet-title">Payouts Management</h2>
         <div class="wallet-subtitle">Wallet Details</div>

@@ -264,45 +264,62 @@ onMounted(async () => {
         });
         
         // If index is still building, try a simpler query without orderBy
-        if (error.code === 'failed-precondition' || error.message.includes('index')) {
+        if (userError.code === 'failed-precondition' || userError.message.includes('index')) {
           console.log('🔄 Index still building, trying fallback query...');
+          const fallbackUserQuery = query(
+            collection(db, 'notifications'),
+            where('recipientId', '==', user.uid),
+            limit(10)
+          );
           
-          let fallbackQuery;
-          if (user.email === 'elie1400674@gmail.com' || user.email === 'tasneemmostafa200110@gmail.com') {
-            fallbackQuery = query(
-              collection(db, 'notifications'),
-              where('recipientId', '==', 'admin'),
-              limit(20)
-            );
-          } else {
-            fallbackQuery = query(
-              collection(db, 'notifications'),
-              where('recipientId', '==', user.uid),
-              limit(20)
-            );
-          }
+          const fallbackAdminQuery = query(
+            collection(db, 'notifications'),
+            where('recipientId', '==', 'admin'),
+            limit(10)
+          );
           
-          const unsubscribeFallback = onSnapshot(fallbackQuery, (fallbackSnapshot) => {
-            console.log('✅ Fallback notification snapshot received:', fallbackSnapshot.docs.length, 'notifications');
-            const fallbackNotifications = fallbackSnapshot.docs.map(doc => ({
-              id: doc.id, ...doc.data()
-            }));
+          const unsubscribeFallbackUser = onSnapshot(fallbackUserQuery, (fallbackUserSnapshot) => {
+            console.log('✅ Fallback user notification snapshot received:', fallbackUserSnapshot.docs.length, 'notifications');
             
-            // Sort client-side
-            fallbackNotifications.sort((a, b) => {
-              const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
-              const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
-              return dateB - dateA;
+            const unsubscribeFallbackAdmin = onSnapshot(fallbackAdminQuery, (fallbackAdminSnapshot) => {
+              console.log('✅ Fallback admin notification snapshot received:', fallbackAdminSnapshot.docs.length, 'notifications');
+              
+              const fallbackUserNotifications = fallbackUserSnapshot.docs.map(doc => ({
+                id: doc.id, ...doc.data()
+              }));
+              
+              const fallbackAdminNotifications = fallbackAdminSnapshot.docs.map(doc => ({
+                id: doc.id, ...doc.data()
+              }));
+              
+              // Combine and remove duplicates
+              const allFallbackNotifications = [...fallbackUserNotifications, ...fallbackAdminNotifications];
+              const uniqueFallbackNotifications = allFallbackNotifications.filter((notification, index, self) => 
+                index === self.findIndex(n => n.id === notification.id)
+              );
+              
+              // Sort client-side
+              uniqueFallbackNotifications.sort((a, b) => {
+                const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+                const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+                return dateB - dateA;
+              });
+              
+              console.log('Fallback notifications data:', uniqueFallbackNotifications);
+              notifications.value = uniqueFallbackNotifications;
+            }, (fallbackAdminError) => {
+              console.error('❌ Fallback admin query also failed:', fallbackAdminError);
             });
             
-            console.log('Fallback notifications data:', fallbackNotifications);
-            notifications.value = fallbackNotifications;
-          }, (fallbackError) => {
-            console.error('❌ Fallback query also failed:', fallbackError);
+            return () => {
+              unsubscribeFallbackAdmin();
+            };
+          }, (fallbackUserError) => {
+            console.error('❌ Fallback user query also failed:', fallbackUserError);
           });
           
           return () => {
-            unsubscribeFallback();
+            unsubscribeFallbackUser();
             unsubscribeAuth();
           };
         }
@@ -310,7 +327,7 @@ onMounted(async () => {
       
       console.log('✅ Notification listener set up successfully');
       return () => {
-        unsubscribeNotifications();
+        unsubscribeUserNotifications();
         unsubscribeAuth();
       };
     } catch (error) {

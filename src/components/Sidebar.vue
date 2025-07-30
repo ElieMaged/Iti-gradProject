@@ -1,183 +1,272 @@
 <template>
-  <div class="sidebar">
-    <div class="sidebar-menu">
-      <div
-        class="menu-item"
-        :class="{ active: activeMenu === 'technicionprofile' }"
-        @click="$emit('navigate', '/technicion-profile')"
-        >
+  <div class="layout ">
+    <div class="sidebar mx-20">
+      <a href="/technicion-profile" 
+         class="sidebar-item" 
+         :class="{ active: activeMenu === 'technicianprofile' }"
+         @click="handleNavigation">
         <i class="fa-regular fa-user"></i>
-        <span>My Profile</span>
-      </div>
-      <div
-        class="menu-item"
-        :class="{ active: activeMenu === 'technicianeditprofile' }"
-        @click="$emit('navigate', '/technician-edit-profile')"
-      >
-        <i class="fa-solid fa-gear"></i>
-        <span>Settings</span>
-      </div>
-      <div
-        class="menu-item"
-        :class="{ active: activeMenu === 'technicianavailbility' }"
-        @click="$emit('navigate', '/technicianavailbility')"
-      >
-        <i class="fa-regular fa-clock"></i>
-        <span>Availability</span>
-      </div>
-      <div
-        class="menu-item dropdown"
-        :class="{ active: activeMenu === 'booking' }"
-        @click="toggleBookingDropdown" 
+        <span>{{ $t('myProfile') }}</span>
+      </a>
 
-      >
-        <i class="fa-regular fa-calendar"></i>
-        <span>My Booking</span>
-        <i class="fa-solid fa-chevron-down dropdown-arrow" :class="{ rotated: isBookingDropdownOpen }"></i>
+      <a href="/technician-edit-profile" 
+         class="sidebar-item" 
+         :class="{ active: activeMenu === 'technicianeditprofile' }"
+         @click="handleNavigation">
+        <i class="fa-solid fa-gear"></i>
+        <span>{{ $t('settings') }}</span>
+      </a>
+
+      <a href="/technicianavailbility" 
+         class="sidebar-item" 
+         :class="{ active: activeMenu === 'technicianavailbility' }"
+         @click="handleNavigation">
+        <i class="fa-regular fa-clock"></i>
+        <span>{{ $t('availability') }}</span>
+      </a>
+
+      <!-- Booking Dropdown -->
+      <div class="dropdown-container">
+        <div class="sidebar-item dropdown-btn" 
+             :class="{ active: activeMenu === 'booking' }"
+             @click="toggleBookingDropdown">
+          <i class="fa-regular fa-calendar"></i>
+          <span>{{ $t('myBookings') }}</span>
+          <i class="fas fa-chevron-down chevron-icon" :class="{ rotated: isBookingDropdownOpen }"></i>
+        </div>
+        <div class="dropdown-menu" v-show="isBookingDropdownOpen">
+          <a href="/technician-booking-pending" 
+             @click="handleNavigation" 
+             class="dropdown-status-link"
+             :class="{ active: activeBookingStatus === 'pending' }">{{ $t('pending') }}</a>
+          <a href="/technician-booking-upcoming" 
+             @click="handleNavigation" 
+             class="dropdown-status-link"
+             :class="{ active: activeBookingStatus === 'upcoming' }">{{ $t('upcoming') }}</a>
+          <a href="/technician-booking-completed" 
+             @click="handleNavigation" 
+             class="dropdown-status-link"
+             :class="{ active: activeBookingStatus === 'completed' }">{{ $t('completed') }}</a>
+        </div>
       </div>
-      <div class="submenu" v-show="isBookingDropdownOpen">
-        <div class="submenu-item" :class="{ active: activeBookingStatus === 'pending' }" @click.stop="navigateBookingStatus('pending')">
-          <span>Pending</span>
-        </div>
-        <div class="submenu-item" :class="{ active: activeBookingStatus === 'upcoming' }" @click.stop="navigateBookingStatus('upcoming')">
-          <span>Upcoming</span>
-        </div>
-        <div class="submenu-item" :class="{ active: activeBookingStatus === 'completed' }" @click.stop="navigateBookingStatus('completed')">
-          <span>Completed</span>
-        </div>
-      </div>
-      <div
-        class="menu-item"
-        :class="{ active: activeMenu === 'payment' }"
-        @click="$emit('navigate', 'payment')"
-      >
+
+      <a href="/techpayment" 
+         class="sidebar-item" 
+         :class="{ active: activeMenu === 'payment' }"
+         @click="handleNavigation">
         <i class="fa-regular fa-credit-card"></i>
-        <span>Payment</span>
-      </div>
-      <div
-        class="menu-item"
-        :class="{ active: activeMenu === 'reviews' }"
-        @click="$emit('navigate', 'reviews')"
-      >
+        <span>{{ $t('payment') }}</span>
+      </a>
+
+      <a href="/technician-reviews" 
+         class="sidebar-item" 
+         :class="{ active: activeMenu === 'reviews' }"
+         @click="handleNavigation">
         <i class="fa-regular fa-star"></i>
-        <span>My Reviews</span>
-      </div>
-      <div
-        class="menu-item"
-        :class="{ active: activeMenu === 'logout' }"
-        @click="$emit('navigate', 'logout')"
-      >
+        <span>{{ $t('myReviews') }}</span>
+      </a>
+
+      <button @click="handleLogout" class="sidebar-item logout-btn">
         <i class="fa-solid fa-right-from-bracket"></i>
-        <span>Logout</span>
-      </div>
+        <span>{{ $t('logout') }}</span>
+      </button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+
 const props = defineProps({
   activeMenu: String,
   activeBookingStatus: String
 });
+
 const router = useRouter();
+const { t } = useI18n();
 const isBookingDropdownOpen = ref(props.activeMenu === 'booking');
+
 watch(() => props.activeMenu, (val) => {
   isBookingDropdownOpen.value = val === 'booking';
 });
+
 function toggleBookingDropdown() {
   isBookingDropdownOpen.value = !isBookingDropdownOpen.value;
-  if (!isBookingDropdownOpen.value) return;
 }
-function navigateBookingStatus(status) {
-  if (status === 'pending') {
-    router.push('/technician-booking-pending');
-  } else if (status === 'upcoming') {
-    router.push('/technician-booking-upcoming');
-  } else if (status === 'completed') {
-    router.push('/technician-booking-completed');
+
+function handleNavigation(event) {
+  // Prevent default behavior for href links
+  event.preventDefault();
+  const href = event.currentTarget.getAttribute('href');
+  
+  if (href) {
+    router.push(href);
   }
 }
+
+function handleLogout() {
+  if (confirm(t('confirmLogout'))) {
+    // Clear any stored authentication data
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    sessionStorage.clear();
+    
+    // Redirect to login page
+    router.push('/login');
+    
+    // Optional: Show success message
+    alert(t('logoutSuccess'));
+  }
+}
+
+onMounted(() => {
+  // Auto-expand dropdown if current page is in booking section
+  if (props.activeMenu === 'booking') {
+    isBookingDropdownOpen.value = true;
+  }
+  
+  document.addEventListener('click', (e) => {
+    const isClickInsideSidebar = e.target.closest('.sidebar-item') || e.target.closest('.dropdown-menu');
+    if (!isClickInsideSidebar) {
+      isBookingDropdownOpen.value = false;
+    }
+  });
+});
 </script>
 
 <style scoped>
-.sidebar {
-  width: 250px;
-  background: #D3CFE2;
-  padding: 2rem 0;
-  height: auto;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-.dark .sidebar {
-  background: var(--secondary-bg);
-  color: var(--primary-text);
-}
-.sidebar-menu {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.menu-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 24px;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-  border-radius: 8px;
-  font-weight: 500;
-  color: #222;
-  background: none;
-}
-.menu-item.active {
-  background: #625397;
-  color: #fff;
-}
-.dark .menu-item.active {
-  background: var(--primary-color);
-  color: var(--primary-text);
-}
-.menu-item.dropdown {
-  cursor: pointer;
-}
-.dropdown-arrow {
-  transition: transform 0.3s ease;
-  margin-left: auto;
-}
-.dropdown-arrow.rotated {
-  transform: rotate(180deg);
-}
-.dark .dropdown-arrow {
-  color: var(--primary-text);
-}
-.submenu {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  transition: all 0.3s ease;
-}
-.dark .submenu {
-  background: var(--secondary-bg);
-  color: var(--primary-text);
-}
-.submenu-item {
-  padding: 8px 16px;
-  cursor: pointer;
-  transition: background 0.2s;
-  color: #fff;
-  background: #948AB8;
-  font-size: 0.9rem;
-  border-radius: 8px;
-}
-.dark .submenu-item {
-  background: var(--secondary-bg);
-  color: var(--primary-text);
-}
-.submenu-item.active {
-  background: #625397;
-  color: #fff;
+:root {
+  --primary: #ffd54f;
+  --secondary: #7c6bb0;
+  --sidebar: #ede7f6;
+  --text-main: #333333;
+  --text-muted: #aaaaaa;
 }
 
+body {
+  margin: 0;
+}
+
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 16rem;
+  background-color: var(--sidebar);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 2.5rem;
+}
+
+.dark .sidebar {
+  background: var(--sidebar);
+  color: var(--text-main);
+}
+
+.sidebar-item {
+  width: 100%;
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--secondary);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+  border-radius: 12px;
+}
+
+.dark .sidebar-item {
+  color: var(--text-main);
+}
+
+.sidebar-item:hover {
+  background-color: #c5b7e6;
+  color: white;
+}
+
+.sidebar-item.active {
+  background-color: var(--secondary);
+  color: white;
+}
+
+.dark .sidebar-item.active {
+  background-color: var(--icon-color);
+  color: var(--primary-text-dark);
+}
+
+.dropdown-container {
+  position: static;
+  width: 100%;
+}
+
+.dropdown-menu {
+  position: static;
+  min-width: 0;
+  width: 92%;
+  border-radius: 12px;
+  padding: 10px 0;
+  margin: 6px auto 0 auto;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  background: var(--sidebar);
+  border: none;
+}
+
+.dropdown-status-link {
+  padding: 10px 24px;
+  color: var(--text-main);
+  font-weight: 500;
+  font-size: 1rem;
+  border-radius: 8px;
+  text-decoration: none;
+  margin: 0 4px;
+  display: block;
+  transition: background 0.16s, color 0.16s;
+}
+
+.dropdown-status-link:hover {
+  background: #c5b7e6;
+  color: white;
+}
+
+.dropdown-status-link.active {
+  background: var(--secondary);
+  color: white;
+}
+
+.logout-btn {
+  margin-top: 0.5rem;
+  color: #ef4444;
+}
+
+.logout-btn:hover {
+  background-color: #ef4444;
+  color: white;
+}
+
+.chevron-icon {
+  margin-left: auto;
+  transition: transform 0.3s ease;
+}
+
+.chevron-icon.rotated {
+  transform: rotate(180deg);
+}
+
+.dark .chevron-icon {
+  color: var(--primary-text);
+}
 </style> 

@@ -32,7 +32,7 @@
             <i class="fas fa-envelope text-2xl text-[#625397]"></i>
             <h4>{{ $t('email') }}</h4>
           </div>
-          <p>boltfix@gmail.com</p>
+          <a href="mailto:boltfix@gmail.com">boltfix@gmail.com</a>
         </div>
 
         <div class="flex flex-col gap-2">

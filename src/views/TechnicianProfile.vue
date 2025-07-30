@@ -6,6 +6,7 @@
     <p class="text-red-500">{{ error }}</p>
   </div>
   <div v-else-if="technician">
+    <Sidebar :activeMenu="'technicianprofile'"  />
     <div class="profile-hero">
       <h1 class="profile-title">Technician</h1>
     </div>
@@ -311,7 +312,7 @@
   </div>
 </template>
 
-<script setup>
+<script >
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { collection, query, where, getDocs, doc, getDoc, updateDoc, onSnapshot, orderBy, addDoc } from 'firebase/firestore'
@@ -319,6 +320,20 @@ import { db, auth } from '../firebase'
 import { useI18n } from 'vue-i18n'
 import ReviewSection from '../components/ReviewSection.vue'
 import { stockTechnicians } from '../assets/stockTechnicians'
+import Sidebar from '../components/Sidebar.vue'
+
+export default {
+  name: 'TechnicianProfile',
+  components: {
+    Sidebar
+  },
+  data() {
+    return {
+      activeMenu: 'technicianprofile'
+    }
+  }
+}
+
 
 const route = useRoute()
 const router = useRouter()

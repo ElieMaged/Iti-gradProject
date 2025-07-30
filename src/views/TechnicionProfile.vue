@@ -1,146 +1,65 @@
 <template>
-  <div v-if="loading" class="flex min-h-screen items-center justify-center"><p>Loading...</p></div>
-  <div v-else-if="error" class="flex min-h-screen items-center justify-center"><p class="text-red-500">{{ error }}</p></div>
-  <div v-else class="flex min-h-screen">
+  <div v-if="loading">
+    <p>Loading...</p>
+  </div>
+  <div v-else-if="error">
+    <p>{{ error }}</p>
+  </div>
+  <div v-else class="admin-dashboard-layout">
     <!-- Sidebar -->
     <Sidebar :activeMenu="activeMenu" @navigate="handleSidebarNavigate" />
     <!-- Main Content -->
-    <div class="flex-1 p-8">
-      <div class="max-w-4xl mx-auto">
-        <div class="bg-white rounded-xl shadow-lg p-8">
-          <div class="profile-hero mb-6">
-            <h2 class="profile-title text-2xl font-bold text-secondary">{{ $t('editProfileTitle') }}</h2>
-          </div>
-          <div class="profile-main flex flex-col md:flex-row gap-8 items-start">
-            <div class="profile-card flex-1 flex flex-col gap-6">
-              <div class="flex flex-col items-center">
-                <div class="profile-img-wrapper w-40 h-40 rounded-full overflow-hidden shadow-md mb-4">
-                  <img :src="profileImageUrl" alt="Technician Photo" class="w-full h-full object-cover" />
-                </div>
-                <input ref="fileInput" type="file" class="hidden" @change="onFileChange" />
-                <button class="upload-btn bg-secondary text-white rounded px-4 py-2 mb-2" @click="triggerFileInput">{{ $t('uploadPhotoButton') }}</button>
+    <div id="admin-profile-container" class="p-4 mr-20">
+      <div id="admin-profile-wrapper">
+        <div id="admin-profile-card">
+          <h2 id="admin-profile-title">{{ $t('personalInformation') }}</h2>
+          <div id="admin-profile-content">
+            <div id="admin-profile-info">
+              <div class="info-block">
+                <span class="info-label">{{ $t('fullName') }}</span>
+                <span class="info-value">{{ form.fullName || 'Not provided' }}</span>
               </div>
-              <div class="profile-fields space-y-4">
-                <div>
-                  <label class="block text-sm font-bold text-text-main mb-1">{{ $t('fullNameLabel') }}</label>
-                  <input v-model="form.fullName" type="text" class="input-field w-full px-4 py-2 rounded-lg text-sm" />
-                </div>
-                <div>
-                  <label class="block text-sm font-bold text-text-main mb-1">{{ $t('emailAddressLabel') }}</label>
-                  <input v-model="form.email" type="email" class="input-field w-full px-4 py-2 rounded-lg text-sm" />
-                </div>
-                <div>
-                  <label class="block text-sm font-bold text-text-main mb-1">{{ $t('phoneNumberLabel') }}</label>
-                  <input v-model="form.phone" type="text" class="input-field w-full px-4 py-2 rounded-lg text-sm" />
-                </div>
-                <div>
-                  <label class="block text-sm font-bold text-text-main mb-1">{{ $t('specializationLabel') }}</label>
-                  <select v-model="form.specialization" class="input-field w-full px-4 py-2 rounded-lg text-sm">
-                    <option value="Plumbing">{{ $t('specializationPlumbing') }}</option>
-                    <option value="Electricity">{{ $t('specializationElectrician') }}</option>
-                    <option value="Carpentry">{{ $t('specializationCarpentry') }}</option>
-                    <option value="Painting">{{ $t('specializationPainting') }}</option>
-                    <option value="Air Conditioning">{{ $t('specializationACTechnician') }}</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-sm font-bold text-text-main mb-1">{{ $t('yearsOfExperienceLabel') }}</label>
-                  <select v-model="form.experience" class="input-field w-full px-4 py-2 rounded-lg text-sm">
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4+">4+</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-sm font-bold text-text-main mb-1">{{ $t('baseVisitPriceLabel') }}</label>
-                  <input v-model="form.basePrice" type="text" class="input-field w-full px-4 py-2 rounded-lg text-sm" />
-                </div>
-                <div>
-                  <label class="block text-sm font-bold text-text-main mb-1">{{ $t('aboutLabel') }}</label>
-                  <textarea v-model="form.bio" class="input-field w-full px-4 py-2 rounded-lg text-sm" rows="2"></textarea>
-                </div>
+              <div class="info-block">
+                <span class="info-label">{{ $t('emailAddress') }}</span>
+                <span class="info-value">{{ form.email || 'Not provided' }}</span>
+              </div>
+              <div class="info-block">
+                <span class="info-label">{{ $t('phoneNumber') }}</span>
+                <span class="info-value">{{ form.phone || 'Not provided' }}</span>
+              </div>
+              <div class="info-block">
+                <span class="info-label">{{ $t('specialization') }}</span>
+                <span class="info-value">{{ form.specialization || 'Not provided' }}</span>
+              </div>
+              <div class="info-block">
+                <span class="info-label">{{ $t('yearsOfExperience') }}</span>
+                <span class="info-value">{{ form.experience || 'Not provided' }}</span>
+              </div>
+              <div class="info-block">
+                <span class="info-label">{{ $t('baseVisitPrice') }}</span>
+                <span class="info-value">{{ form.basePrice ? `${form.basePrice} EGP` : 'Not provided' }}</span>
+              </div>
+              <div class="info-block">
+                <span class="info-label">{{ $t('city') }}</span>
+                <span class="info-value">{{ form.government || 'Not provided' }}</span>
+              </div>
+              <div class="info-block">
+                <span class="info-label">{{ $t('area') }}</span>
+                <span class="info-value">{{ form.district || 'Not provided' }}</span>
+              </div>
+              <div class="info-block">
+                <span class="info-label">{{ $t('willingToTravel') }}</span>
+                <span class="info-value">{{ form.willingToTravel || 'Not provided' }}</span>
+              </div>
+              <div class="info-block">
+                <span class="info-label">{{ $t('about') }}</span>
+                <span class="info-value">{{ form.bio || 'Not provided' }}</span>
               </div>
             </div>
-            <!-- Address Section -->
-            <div class="profile-address flex-1 space-y-4">
-              <div>
-                <label class="block text-sm font-bold text-text-main mb-1">{{ $t('cityLabel') }}</label>
-                <select v-model="form.government" class="input-field w-full px-4 py-2 rounded-lg text-sm">
-                  <option value="Cairo">{{ $t('cairo') }}</option>
-                  <option value="Giza">{{ $t('giza') }}</option>
-                  <option value="Alexandria">{{ $t('alexandria') }}</option>
-                </select>
+                          <div id="admin-profile-image">
+                <img v-if="profileImageUrl" :src="profileImageUrl" alt="Profile" class="w-full h-full object-cover rounded" />
+                <i v-else class="fas fa-user" id="profile-icon"></i>
               </div>
-              <div>
-                <label class="block text-sm font-bold text-text-main mb-1">{{ $t('areaLabel') }}</label>
-                <select v-model="form.district" class="input-field w-full px-4 py-2 rounded-lg text-sm">
-                  <option value="Nasr City">{{ $t('nasrCity') }}</option>
-                  <option value="Maadi">{{ $t('maadi') }}</option>
-                  <option value="Dokki">{{ $t('dokki') }}</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-bold text-text-main mb-1">{{ $t('willingToTravelLabel') }}</label>
-                <div class="flex items-center gap-6">
-                  <label class="inline-flex items-center">
-                    <input v-model="form.willingToTravel" type="radio" value="yes" class="form-radio text-secondary" />
-                    <span class="ml-2">{{ $t('yes') }}</span>
-                  </label>
-                  <label class="inline-flex items-center">
-                    <input v-model="form.willingToTravel" type="radio" value="no" class="form-radio text-secondary" />
-                    <span class="ml-2">{{ $t('no') }}</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="mt-10">
-            <h3 class="text-xl font-bold mb-4">{{ $t('upcomingBookings') }}</h3>
-            <div v-if="upcomingBookings.length === 0" class="text-gray-500">{{ $t('noUpcomingBookings') }}</div>
-            <div v-for="booking in upcomingBookings" :key="booking.id" class="bg-gray-100 rounded-lg p-4 mb-4 flex flex-col md:flex-row md:items-center md:justify-between">
-              <div>
-                <div><b>{{ $t('user') }}:</b> {{ booking.userName }} ({{ booking.userEmail }})</div>
-                <div><b>{{ $t('date') }}:</b> {{ booking.date }}</div>
-                <div><b>{{ $t('time') }}:</b> {{ booking.time }}</div>
-                <div><b>{{ $t('payment') }}:</b> {{ booking.payment }}</div>
-              </div>
-              <div class="flex gap-2 mt-2 md:mt-0">
-                <button class="bg-green-500 text-white px-4 py-2 rounded" @click="confirmBooking(booking.id)">{{ $t('confirm') }}</button>
-                <button class="bg-red-500 text-white px-4 py-2 rounded" @click="cancelBooking(booking.id)">{{ $t('cancel') }}</button>
-              </div>
-            </div>
-
-            <h3 class="text-xl font-bold mb-4 mt-8">{{ $t('pendingBookings') }}</h3>
-            <div v-if="pendingBookings.length === 0" class="text-gray-500">{{ $t('noPendingBookings') }}</div>
-            <div v-for="booking in pendingBookings" :key="booking.id" class="bg-yellow-100 rounded-lg p-4 mb-4 flex flex-col md:flex-row md:items-center md:justify-between">
-              <div>
-                <div><b>{{ $t('user') }}:</b> {{ booking.userName }} ({{ booking.userEmail }})</div>
-                <div><b>{{ $t('date') }}:</b> {{ booking.date }}</div>
-                <div><b>{{ $t('time') }}:</b> {{ booking.time }}</div>
-                <div><b>{{ $t('payment') }}:</b> {{ booking.payment }}</div>
-              </div>
-              <div class="flex gap-2 mt-2 md:mt-0">
-                <span class="text-yellow-800 font-bold">{{ $t('pendingStatus') }}</span>
-              </div>
-            </div>
-
-            <h3 class="text-xl font-bold mb-4 mt-8">{{ $t('completedBookings') }}</h3>
-            <div v-if="completedBookings.length === 0" class="text-gray-500">{{ $t('noCompletedBookings') }}</div>
-            <div v-for="booking in completedBookings" :key="booking.id" class="bg-green-100 rounded-lg p-4 mb-4 flex flex-col md:flex-row md:items-center md:justify-between">
-              <div>
-                <div><b>{{ $t('user') }}:</b> {{ booking.userName }} ({{ booking.userEmail }})</div>
-                <div><b>{{ $t('date') }}:</b> {{ booking.date }}</div>
-                <div><b>{{ $t('time') }}:</b> {{ booking.time }}</div>
-                <div><b>{{ $t('payment') }}:</b> {{ booking.payment }}</div>
-              </div>
-              <div class="flex gap-2 mt-2 md:mt-0">
-                <span class="text-green-800 font-bold">{{ $t('completedStatus') }}</span>
-              </div>
-            </div>
-          </div>
-          <div class="flex justify-end mt-8">
-            <button class="bg-secondary text-white px-10 py-2 rounded-full text-lg font-medium hover:bg-opacity-90 transition-colors" @click="saveProfile">{{ $t('saveChangesButton') }}</button>
           </div>
         </div>
       </div>
@@ -157,7 +76,7 @@ export default {
   components: { Sidebar },
   data() {
     return {
-      activeMenu: 'technicianeditprofile',
+      activeMenu: 'technicianprofile',
       profileImageUrl: 'https://randomuser.me/api/portraits/men/32.jpg',
       loading: true,
       error: '',
@@ -262,16 +181,135 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
-@import '../style.css';
-.profile-img-wrapper {
-    width: 160px;
-    height: 160px;
-    border-radius: 50%;
-    overflow: hidden;
-    margin-bottom: 1rem;
+<style scoped>
+.admin-dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+  font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
+  background: #faf8fd;
 }
-.upload-btn {
-    margin-bottom: 1rem;
+
+.dark .admin-dashboard-layout {
+  background-color: var(--primary-bg);
+}
+
+#admin-profile-container {
+  background-color: #f9fafb;
+  min-height: 100vh;
+  font-family: sans-serif;
+  flex: 1;
+}
+
+.dark #admin-profile-container {
+  background-color: var(--primary-bg);
+}
+
+#admin-profile-wrapper {
+  max-width: 1000px;
+}
+
+#admin-profile-card {
+  background-color: white;
+  border-radius: 1rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  padding: 2rem;
+}
+
+.dark #admin-profile-card {
+  background-color: var(--grey-bg);
+}
+
+#admin-profile-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #7c6bb0;
+  margin-bottom: 1.5rem;
+}
+
+.dark #admin-profile-title {
+  color: var(--white);
+}
+
+/* RTL Support for Arabic */
+[dir="rtl"] #admin-profile-title {
+  text-align: right;
+}
+
+[dir="rtl"] .info-label {
+  text-align: right;
+}
+
+[dir="rtl"] .info-value {
+  text-align: right;
+}
+
+#admin-profile-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+@media (min-width: 768px) {
+  #admin-profile-content {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+}
+
+#admin-profile-info {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.info-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-label {
+  font-size: 1.125rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.dark .info-label {
+  color: var(--white);
+}
+
+.info-value {
+  font-size: 1rem;
+  color: #4b5563;
+  margin-top: 0.25rem;
+}
+
+.dark .info-value {
+  color: var(--primary-text-dark);
+}
+
+#admin-profile-image {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 10rem;
+  height: 10rem;
+  background-color: #e5e7eb;
+  border-radius: 0.5rem;
+  margin: 0 auto;
+}
+
+.dark #admin-profile-image {
+  background-color: var(--primary-bg);
+}
+
+#profile-icon {
+  font-size: 3.5rem;
+  color: #9ca3af;
+}
+
+.dark #profile-icon {
+  color: var(--white);
 }
 </style>

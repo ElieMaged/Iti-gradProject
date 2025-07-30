@@ -1,66 +1,7 @@
-<template>
-  <!-- Top Bar -->
-  <div class="bg-primary text-white text-sm">
-    <div class="max-w-7xl mx-auto px-4 py-2 flex justify-between items-center">
-      <div class="flex items-center space-x-6">
-        <span class="flex items-center"><i class="fas fa-phone mr-2"></i>925-465-3762</span>
-        <span class="flex items-center"><i class="fas fa-envelope mr-2"></i>boltfix@gmail.com</span>
-        <span class="flex items-center"><i class="fas fa-map-marker-alt mr-2"></i>4096 Modesto, CA 95350, USA</span>
-      </div>
-      <div class="flex items-center space-x-3">
-        <a href="#" class="text-white hover:text-secondary transition-colors"><i class="fab fa-facebook-f"></i></a>
-        <a href="#" class="text-white hover:text-secondary transition-colors"><i class="fab fa-twitter"></i></a>
-        <a href="#" class="text-white hover:text-secondary transition-colors"><i class="fab fa-linkedin-in"></i></a>
-        <a href="#" class="text-white hover:text-secondary transition-colors"><i class="fab fa-youtube"></i></a>
-      </div>
-    </div>
-  </div>
-  <!-- Header -->
-  <div class="bg-white border-b border-gray-200">
-    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-      <div class="flex items-center">
-        <div class="text-3xl font-bold">
-          <span class="text-primary">B</span>
-          <span class="text-secondary">BoltFix</span>
-        </div>
-      </div>
-      <nav class="flex items-center space-x-8">
-        <a href="#" class="text-text-main hover:text-secondary transition-colors font-medium">{{ $t('home') }}</a>
-        <a href="#" class="text-text-main hover:text-secondary transition-colors font-medium">{{ $t('aboutUs') }}</a>
-        <a href="#" class="text-text-main hover:text-secondary transition-colors font-medium">{{ $t('services') }}</a>
-        <a href="#" class="text-text-main hover:text-secondary transition-colors font-medium">{{ $t('contactUs') }}</a>
-      </nav>
-      <div class="flex items-center space-x-4">
-        <i class="fas fa-bell text-xl text-secondary cursor-pointer"></i>
-        <i class="fas fa-user text-xl text-secondary cursor-pointer"></i>
-      </div>
-    </div>
-  </div>
+<template>      
   <!-- Main Container -->
   <div class="flex min-h-screen">
-    <!-- Sidebar -->
-    <div class="w-64 bg-sidebar flex flex-col items-center pt-10">
-      <a href="profile-view" class="sidebar-item w-full py-4 px-8 flex items-center space-x-4 text-lg font-medium text-secondary">
-        <i class="fas fa-user text-xl"></i>
-        <span>{{ $t('myProfile') }}</span>
-      </a>
-      <a href="profile-edit" class="sidebar-item w-full py-4 px-8 flex items-center space-x-4 text-lg font-medium text-secondary">
-        <i class="fas fa-cog text-xl"></i>
-        <span>{{ $t('settings') }}</span>
-      </a>
-      <a href="previous-services" class="sidebar-item w-full py-4 px-8 flex items-center space-x-4 text-lg font-medium text-secondary">
-        <i class="fas fa-calendar-check text-xl"></i>
-        <span>{{ $t('history') }}</span>
-      </a>
-      <a href="payment" class="sidebar-item active w-full py-4 px-8 flex items-center space-x-4 text-lg font-medium">
-        <i class="fas fa-credit-card text-xl"></i>
-        <span>{{ $t('payment') }}</span>
-      </a>
-      <a href="#" class="sidebar-item w-full py-4 px-8 flex items-center space-x-4 text-lg font-medium text-secondary">
-        <i class="fas fa-sign-out-alt text-xl"></i>
-        <span>{{ $t('logout') }}</span>
-      </a>
-    </div>
+    <userSidebar :activeTab="activeTab" />
     <!-- Main Content -->
     <div class="flex-1 p-20">
       <div class="max-w-7xl mx-auto">
@@ -125,30 +66,38 @@
   </div>
 </template>
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import userSidebar from '../components/userSidebar.vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
+const activeTab = ref('payment');
+
 const transactions = ref([
-  { id: 1, technician: $t('technicianMohsenAli'), phone: '+20 111 555 2365', type: $t('plumbing'), icon: 'fas fa-wrench', time: '10:00AM, Friday, July 23', price: 400 },
-  { id: 2, technician: $t('technicianSamirMohamed'), phone: '+20 111 555 2365', type: $t('electricity'), icon: 'fas fa-lightbulb', time: '2:30PM, Wednesday, July 20', price: 250 },
-  { id: 3, technician: $t('technicianAhmedHassan'), phone: '+20 111 555 2365', type: $t('airConditioning'), icon: 'fas fa-snowflake', time: '11:00AM, Saturday, July 15', price: 500 },
-  { id: 4, technician: $t('technicianMahmoudOmar'), phone: '+20 111 555 2365', type: $t('electricalWiring'), icon: 'fas fa-bolt', time: '3:00PM, Thursday, July 12', price: 350 },
+  { id: 1, technician: t('technicianMohsenAli'), phone: '+20 111 555 2365', type: t('plumbing'), icon: 'fas fa-wrench', time: '10:00AM, Friday, July 23', price: 400 },
+  { id: 2, technician: t('technicianSamirMohamed'), phone: '+20 111 555 2365', type: t('electricity'), icon: 'fas fa-lightbulb', time: '2:30PM, Wednesday, July 20', price: 250 },
+  { id: 3, technician: t('technicianAhmedHassan'), phone: '+20 111 555 2365', type: t('airConditioning'), icon: 'fas fa-snowflake', time: '11:00AM, Saturday, July 15', price: 500 },
+  { id: 4, technician: t('technicianMahmoudOmar'), phone: '+20 111 555 2365', type: t('electricalWiring'), icon: 'fas fa-bolt', time: '3:00PM, Thursday, July 12', price: 350 },
 ]);
+
 const paypalEmail = ref('exampletech@gmail.com');
 const paypalEmailInput = ref(paypalEmail.value);
 const editingPaypal = ref(false);
+
 function savePaypal() {
   if (paypalEmailInput.value && paypalEmailInput.value.includes('@')) {
     paypalEmail.value = paypalEmailInput.value;
     editingPaypal.value = false;
-    alert($t('paypalUpdated'));
+    alert(t('paypalUpdated'));
   } else {
-    alert($t('invalidEmail'));
+    alert(t('invalidEmail'));
   }
 }
+
 function cancelPaypal() {
   paypalEmailInput.value = paypalEmail.value;
   editingPaypal.value = false;
 }
-
 </script>
 <style scoped>
 .sidebar-item {

@@ -1,16 +1,16 @@
 <template>
   <div class="admin-dashboard-layout">
     <admin-sidebar />
-    <div class="technicians-main">
+    <div class="technicians-main mr-20 p-4">
       <div class="technicians-container">
-        <h2 class="technicians-title">Technician Management</h2>
+        <h2 class="technicians-title">{{ $t('technicianManagement') }}</h2>
         <div class="subtitle-search-row">
-          <div class="technicians-subtitle">All Technicians</div>
+          <div class="technicians-subtitle">{{ $t('allTechnicians') }}</div>
           <div class="search-wrapper">
             <input 
               type="text" 
               v-model="searchQuery" 
-              placeholder="Search" 
+              :placeholder="$t('search')" 
               class="search-input" 
             />
             <span class="search-icon"><i class="fas fa-search"></i></span>
@@ -20,13 +20,13 @@
         <!-- Loading State -->
         <div v-if="loading" class="loading-state">
           <div class="loading-spinner"></div>
-          <p>Loading technicians...</p>
+          <p>{{ $t('loadingTechnicians') }}</p>
         </div>
 
         <!-- Error State -->
         <div v-else-if="error" class="error-state">
-          <p class="error-message">{{ error }}</p>
-          <button @click="fetchTechnicians" class="retry-btn">Retry</button>
+          <p class="error-message">{{ $t('failedToFetchTechnicians') }}</p>
+          <button @click="fetchTechnicians" class="retry-btn">{{ $t('retry') }}</button>
         </div>
 
         <!-- Technicians Table -->
@@ -34,14 +34,14 @@
           <table class="technicians-table">
             <thead>
               <tr class="table-header">
-                <th>No</th>
-                <th>Technician</th>
-                <th>Specialization</th>
-                <th>Location</th>
-                <th>Email</th>
-                <th>Experience</th>
-                <th>Base Price</th>
-                <th>Action</th>
+                <th>{{ $t('no') }}</th>
+                <th>{{ $t('technician') }}</th>
+                <th>{{ $t('specialization') }}</th>
+                <th>{{ $t('location') }}</th>
+                <th>{{ $t('mail') }}</th>
+                <th>{{ $t('experience') }}</th>
+                <th>{{ $t('basePrice') }}</th>
+                <th>{{ $t('action') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -58,13 +58,13 @@
                 <td>{{ technician.specialization }}</td>
                 <td>{{ technician.location }}</td>
                 <td>{{ technician.email }}</td>
-                <td>{{ technician.experience }} years</td>
+                <td>{{ technician.experience }} {{ $t('years') }}</td>
                 <td>${{ technician.basePrice }}</td>
                 <td class="action-cell">
-                  <a @click="viewTechnician(technician)" class="action-btn view-btn">
+                  <a @click="viewTechnician(technician)" class="action-btn view-btn" :title="$t('viewTechnician')">
                     <i class="fas fa-eye"></i>
                   </a>
-                  <button @click="deleteTechnician(technician)" class="action-btn delete-btn">
+                  <button @click="deleteTechnician(technician)" class="action-btn delete-btn" :title="$t('deleteTechnician')">
                     <i class="fas fa-trash-alt"></i>
                   </button>
                 </td>
@@ -75,7 +75,7 @@
 
         <!-- Empty State -->
         <div v-else class="empty-state">
-          <p>No technicians found in the database.</p>
+          <p>{{ $t('noTechniciansFound') }}</p>
         </div>
       </div>
     </div>
@@ -158,7 +158,7 @@ export default {
     },
     
     async deleteTechnician(technician) {
-      if (!confirm(`Are you sure you want to delete ${technician.name}? This action cannot be undone.`)) {
+      if (!confirm(this.$t('confirmDeleteTechnician', { name: technician.name }))) {
         return;
       }
 
@@ -178,11 +178,11 @@ export default {
         }
 
         // Show success message
-        alert(`Technician ${technician.name} has been deleted successfully from the database!`);
+        alert(this.$t('technicianDeletedSuccess', { name: technician.name }));
         
       } catch (error) {
         console.error('❌ Error deleting technician:', error);
-        alert('Failed to delete technician. Please try again.');
+        alert(this.$t('failedToDeleteTechnician'));
       }
     }
   }
@@ -196,24 +196,32 @@ export default {
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
   background: #faf8fd;
 }
-
+.dark .admin-dashboard-layout {
+  background-color: var(--primary-bg);
+}
 .technicians-main {
   flex: 1;
   padding: 2.5rem;
 }
-
+.dark .technicians-main {
+  background-color: var(--primary-bg);
+}
 .technicians-container {
   max-width: 80rem;
   margin: 0 auto;
 }
-
+.dark .technicians-container {
+  background-color: var(--primary-bg);
+}
 .technicians-title {
   font-size: 2rem;
   font-weight: bold;
   color: #7c6bb0;
   margin-bottom: 0;
 }
-
+.dark .technicians-title {
+  color: var(--primary-text);
+}
 .subtitle-search-row {
   display: flex;
   align-items: center;
@@ -226,7 +234,9 @@ export default {
   font-weight: 600;
   color: #7c6bb0;
 }
-
+.dark .technicians-subtitle {
+  color: var(--primary-text);
+}
 .search-wrapper {
   display: flex;
   align-items: center;
@@ -251,11 +261,19 @@ export default {
   padding: 0 16px 0 40px;
   transition: border 0.2s;
 }
-
+.dark .search-input {
+  background-color: var(--input-bg);
+  color: var(--text-muted);
+}
+.dark .search-input::placeholder {
+  color: var(--text-muted);
+}
 .search-input:focus {
   border: 1.5px solid #6B5FA7;
 }
-
+.dark .search-input:focus {
+  border: 1.5px solid var(--primary-text);
+}
 .search-icon {
   position: absolute;
   left: 16px;
@@ -264,7 +282,9 @@ export default {
   color: #b6a7e6;
   font-size: 1.1rem;
 }
-
+.dark .search-icon {
+  color: var(--icon-color);
+}
 /* Loading State */
 .loading-state {
   display: flex;
@@ -276,7 +296,9 @@ export default {
   border-radius: 0.75rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
-
+.dark .loading-state {
+  background-color: var(--grey-bg);
+}
 .loading-spinner {
   width: 40px;
   height: 40px;
@@ -286,7 +308,10 @@ export default {
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;
 }
-
+.dark .loading-spinner {
+  border: 4px solid var(--grey-bg);
+  border-top: 4px solid var(--primary-text);
+}
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
@@ -303,7 +328,9 @@ export default {
   border-radius: 0.75rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
-
+.dark .error-state {
+  background-color: var(--grey-bg);
+}
 .error-message {
   color: #ef4444;
   margin-bottom: 1rem;
@@ -319,11 +346,17 @@ export default {
   cursor: pointer;
   transition: background-color 0.2s;
 }
-
+.dark .retry-btn {
+  background-color: var(--primary-text);
+  color: var(--primary-bg);
+}   
 .retry-btn:hover {
   background: #6b5fa7;
 }
-
+.dark .retry-btn:hover {
+  background-color: var(--primary-text);
+  color: var(--primary-bg);
+}
 /* Empty State */
 .empty-state {
   display: flex;
@@ -336,61 +369,75 @@ export default {
   color: #666;
   font-size: 1.1rem;
 }
-
+.dark .empty-state {
+  background-color: var(--grey-bg);
+}
 .table-wrapper {
   overflow-x: auto;
   border-radius: 0.75rem;
   background: #fff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
-
+.dark .table-wrapper {
+  background-color: var(--grey-bg);
+}
 .technicians-table {
   width: 100%;
   border-collapse: collapse;
   background: #fff;
   border-radius: 0.75rem;
 }
-
+.dark .technicians-table {
+  background-color: var(--grey-bg);
+}
 .table-header {
   background: rgba(124, 107, 176, 0.2);
   color: #333;
 }
-
+.dark .table-header {
+  background-color: var(--grey-bg);
+}
 .table-header th {
   padding: 0.75rem 1rem;
   text-align: left;
   font-weight: 600;
   font-size: 0.9rem;
 }
-
+.dark .table-header th {
+  color: var(--primary-text);
+}
 .table-row {
   border-bottom: 1px solid #e5e7eb;
   transition: background-color 0.2s;
 }
-
+.dark .table-row {
+  background-color: var(--input-bg);
+}
 .table-row:hover {
   background: #ede7f6;
 }
-
+.dark .table-row:hover {
+  background-color: var(--icon-color);
+}
 .table-row td {
   padding: 0.75rem 1rem;
   font-size: 0.9rem;
   color: #333;
 }
-
+.dark .table-row td {
+  color: var(--text-muted);
+}
 .technician-cell {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
-
 .technician-avatar {
   width: 2rem;
   height: 2rem;
   border-radius: 50%;
   object-fit: cover;
 }
-
 .action-cell {
   display: flex;
   gap: 0.5rem;

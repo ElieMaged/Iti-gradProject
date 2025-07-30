@@ -10,7 +10,7 @@
           {{ $t('heroDescription') }}
         </p>
         <div class="mt-6 flex gap-4">
-        <button id="service-btn"  @click="$router.push('/allservices')" class="bg-purple-200 text-purple-900 px-4 py-2 rounded-full">
+        <button id="service-btn"  @click="$router.push('/allservices')" class="bg-purple-200 text-purple-900 rounded-full">
             {{ $t('heroShowServicesBtn') }} →
         </button>
     </div>
@@ -140,7 +140,7 @@ h1{
 font-family: Outfit, sans-serif;
 font-size: 70px;
 font-style: normal;
-font-weight: 600;
+font-weight: 500;
 line-height: 96px; /* 120% */
 }
 .dark h1{
@@ -166,16 +166,17 @@ line-height: 28px; /* 140% */
     color: white;
     font-size: 16px;
     font-weight: 600;
-    line-height: 24px;
+    line-height: 30px;
     font-family: Outfit, sans-serif;
     font-style: normal;
-    padding: 10px 20px;
+    padding: 10px 60px;
     position: relative;
     z-index: 4;
+    margin-top: 60px;
 }
 .dark #service-btn {
   background: var(--primary);
-  color: var(--primary-text-dark);
+  color: var(--primary-text);
 }
 .dark #service-btn:hover {
   background: var(--primary);

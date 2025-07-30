@@ -236,7 +236,7 @@ export default {
       <div class="flex flex-col sm:flex-row gap-2 items-center">
         <a href="tel:+12095551234" class="contact-links no-underline mx-1 flex items-center text-sm"><i
             class="fa-solid fa-phone px-2"></i>{{ $t('contactPhone') }}</a>
-        <a :href="`mailto:Boltfix@gmail.com`" class="contact-links no-underline mx-1 flex items-center text-sm"><i
+        <a :href="`mailto:boltfix@gmail.com`" class="contact-links no-underline mx-1 flex items-center text-sm"><i
             class="fa-solid fa-envelope px-2"></i>boltfix@gmail.com</a>
         <a href="https://www.google.com/maps/place/123+Main+St,+Anytown,+USA"
           class="contact-links no-underline mx-1 flex items-center text-sm"><i
@@ -285,7 +285,7 @@ export default {
         </span>
         <div
           :class="['services-dropdown', isMobile ? 'static mt-2 relative w-full' : 'absolute left-0 mt-2 shadow-lg rounded z-50']"
-          v-show="true" @mouseenter="!isMobile && showDropdown"> <router-link to="/allservices">All services</router-link>
+          v-show="true" @mouseenter="!isMobile && showDropdown"> <router-link to="/allservices">{{ $t('allServices') }}</router-link>
           <router-link to="/plumbing">{{ $t('navPlumbing') }}</router-link>
 
           <router-link to="/aircondition">{{ $t('navAirConditioner') }}</router-link>
@@ -365,8 +365,7 @@ export default {
               </span>
               <div
                 :class="['services-dropdown', isMobile ? 'static mt-2 relative w-full' : 'absolute left-0 mt-2 shadow-lg rounded z-50']"
-                v-show="servicesDropdownOpen" @mouseenter="!isMobile && showDropdown"> <router-link to="/allservices">All
-                  services</router-link>
+                v-show="servicesDropdownOpen" @mouseenter="!isMobile && showDropdown"> <router-link to="/allservices">{{ $t('allServices') }}</router-link>
                 <router-link to="/plumbing">{{ $t('navPlumbing') }}</router-link>
                 <router-link to="/aircondition">{{ $t('navAirConditioner') }}</router-link>
                 <router-link to="/electricity">{{ $t('navElectricity') }}</router-link>

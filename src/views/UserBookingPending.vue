@@ -6,33 +6,33 @@
         <div class="booking-main">
           <div class="booking-container">
             <div class="title-search-row">
-              <h2 class="booking-title">Pending Bookings</h2>
+              <h2 class="booking-title">{{ $t('pendingBookings') }}</h2>
               <div class="search-wrapper">
-                <input v-model="searchQuery" class="search-input" type="text" placeholder="Search" />
+                <input v-model="searchQuery" class="search-input" type="text" :placeholder="$t('search')" />
                 <span class="search-icon"><i class="fas fa-search"></i></span>
               </div>
             </div>
             <div v-if="loading" class="loading-state">
               <div class="loading-spinner"></div>
-              <p>Loading bookings...</p>
+              <p>{{ $t('loadingBookings') }}</p>
             </div>
             <div v-else-if="error" class="error-state">
               <p class="error-message">{{ error }}</p>
-              <button @click="fetchBookings" class="retry-btn">Retry</button>
+              <button @click="fetchBookings" class="retry-btn">{{ $t('retry') }}</button>
             </div>
             <div v-else-if="filteredBookings.length > 0" class="table-wrapper">
               <table class="booking-table">
                 <thead>
                   <tr class="table-header">
-                    <th>Technician Name</th>
-                    <th>Technician Email</th>
-                    <th>Specialization</th>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Address</th>
-                    <th>Price</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th>{{ $t('technicianName') }}</th>
+                    <th>{{ $t('technicianEmail') }}</th>
+                    <th>{{ $t('specialization') }}</th>
+                    <th>{{ $t('date') }}</th>
+                    <th>{{ $t('time') }}</th>
+                    <th>{{ $t('address') }}</th>
+                    <th>{{ $t('price') }}</th>
+                    <th>{{ $t('status') }}</th>
+                    <th>{{ $t('actions') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -47,7 +47,7 @@
                     <td class="booking-status">{{ booking.status }}</td>
                     <td>
                       <button @click="cancelBooking(booking.id)" class="cancel-btn">
-                        Cancel
+                        {{ $t('cancel') }}
                       </button>
                     </td>
                   </tr>
@@ -55,7 +55,7 @@
               </table>
             </div>
             <div v-else class="empty-state">
-              <p>No pending bookings found.</p>
+              <p>{{ $t('noPendingBookings') }}</p>
             </div>
           </div>
         </div>

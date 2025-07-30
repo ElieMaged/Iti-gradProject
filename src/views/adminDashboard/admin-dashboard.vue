@@ -1,7 +1,7 @@
 <template>
   <div class="admin-dashboard-layout">
     <admin-sidebar />
-    <div class="dashboard-main mr-20">
+    <div class="dashboard-main mr-20 p-4">
       <div class="dashboard-container">
         <div class="title-search-row">
           <h2 class="dashboard-title">{{ $t('adminDashboard') }}</h2>

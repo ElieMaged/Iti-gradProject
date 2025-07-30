@@ -74,8 +74,7 @@
                 <span class="rating-text">({{ technician.rating }})</span>
               </div>
               <p class="technician-description">{{ $t('technicianDescription') }}</p>
-              <button class="view-profile-btn" @click="viewProfile(technician.id)">{{ $t('viewProfile') }}</button>
-              <button class="view-profile-btn" @click="goToBooking(technician.id)">{{ $t('bookNow') }}</button>
+                              <button class="view-profile-btn" @click="viewProfile(technician.id)">{{ $t('viewProfile') }}</button>
             </div>
           </div>
         </div>
@@ -334,9 +333,7 @@ function viewProfile(id) {
   router.push({ name: 'TechnicianProfile', params: { id } })
 }
 
-function goToBooking(id) {
-  router.push({ path: '/bookingpage', query: { techId: id } })
-}
+
 
 const heroBackgroundStyle = computed(() => {
   return {

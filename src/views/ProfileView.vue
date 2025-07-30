@@ -2,37 +2,12 @@
   <!-- Main Container -->
   <div class="flex min-h-screen">
     <!-- Sidebar -->
-    <div class="w-64 bg-sidebar flex flex-col items-center">
-      <router-link :to="getRoute('profile-view')"
-        class="sidebar-item active w-full py-4 px-8 flex items-center space-x-4 text-lg font-medium">
-        <i class="fas fa-user text-xl"></i>
-        <span>{{ $t('myProfile') }}</span>
-      </router-link>
-      <router-link :to="{ path: '/profile-edit' }"
-        class="sidebar-item w-full py-4 px-8 flex items-center space-x-4 text-lg font-medium text-secondary">
-        <i class="fas fa-cog text-xl"></i>
-        <span>{{ $t('settings') }}</span>
-      </router-link>
-      <router-link :to="getRoute('previous-services')"
-        class="sidebar-item w-full py-4 px-8 flex items-center space-x-4 text-lg font-medium text-secondary">
-        <i class="fas fa-calendar-check text-xl"></i>
-        <span>{{ $t('history') }}</span>
-      </router-link>
-      <router-link :to="getRoute('payment')"
-        class="sidebar-item w-full py-4 px-8 flex items-center space-x-4 text-lg font-medium text-secondary">
-        <i class="fas fa-credit-card text-xl"></i>
-        <span>{{ $t('payment') }}</span>
-      </router-link>
-      <a href="#" class="sidebar-item w-full py-4 px-8 flex items-center space-x-4 text-lg font-medium text-secondary">
-        <i class="fas fa-sign-out-alt text-xl"></i>
-        <span>{{ $t('logout') }}</span>
-      </a>
-    </div>
+    <userSidebar :activeTab="activeTab" />
     <!-- Main Content -->
     <div class="flex-1">
       <div class="max-w-4xl mx-auto">
         <div class="bg-white rounded-xl shadow-lg p-8">
-          <!-- Header -->
+          <!-- Header --> 
           <div class="mb-8">
             <h1 class="text-3xl font-bold text-text-main mb-2">{{ $t('helloUser', {
               name: profileData.fullName ||
@@ -94,10 +69,11 @@
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import userSidebar from '../components/userSidebar.vue';
 
 const { locale } = useI18n();
 const router = useRouter();
-
+const activeTab = ref('profile');
 const profileImageUrl = ref(null);
 const fileInput = ref(null);
 const profileData = ref({
@@ -132,6 +108,7 @@ onMounted(() => {
 function triggerFileInput() {
   fileInput.value && fileInput.value.click();
 }
+
 function handleFileChange(event) {
   const file = event.target.files[0];
   if (file) {

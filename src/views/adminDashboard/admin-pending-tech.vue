@@ -1,15 +1,15 @@
 <template>
   <div class="admin-dashboard-layout">
     <admin-sidebar />
-    <div class="pending-main">
+    <div class="pending-main mr-20 p-4">
       <div class="pending-container">
-        <h2 class="pending-title">Pending Technician Applications</h2>
+        <h2 class="pending-title">{{ $t('pendingTechnicianApplications') }}</h2>
         <div class="subtitle-search-row">
-          <div class="pending-subtitle">Review Applications</div>
+          <div class="pending-subtitle">{{ $t('reviewApplications') }}</div>
           <div class="search-wrapper">
             <input 
               type="text" 
-              placeholder="Search applications" 
+              :placeholder="$t('searchApplications')" 
               v-model="searchQuery"
               class="search-input"
             />
@@ -20,13 +20,13 @@
         <!-- Loading State -->
         <div v-if="loading" class="loading-state">
           <div class="loading-spinner"></div>
-          <p>Loading pending applications...</p>
+          <p>{{ $t('loadingPendingApplications') }}</p>
         </div>
 
         <!-- Error State -->
         <div v-else-if="error" class="error-state">
           <p class="error-message">{{ error }}</p>
-          <button @click="fetchPendingApplications" class="retry-btn">Retry</button>
+          <button @click="fetchPendingApplications" class="retry-btn">{{ $t('retry') }}</button>
         </div>
 
         <!-- Applications List -->
@@ -51,44 +51,44 @@
 
             <div class="card-content">
               <div class="info-row">
-                <span class="info-label">Specialization:</span>
+                <span class="info-label">{{ $t('specialization') }}:</span>
                 <span class="info-value">{{ application.specialization }}</span>
               </div>
               <div class="info-row">
-                <span class="info-label">Experience:</span>
-                <span class="info-value">{{ application.experience }} years</span>
+                <span class="info-label">{{ $t('experience') }}:</span>
+                <span class="info-value">{{ application.experience }} {{ $t('years') }}</span>
               </div>
               <div class="info-row">
-                <span class="info-label">Location:</span>
+                <span class="info-label">{{ $t('location') }}:</span>
                 <span class="info-value">{{ application.government }}, {{ application.district }}</span>
               </div>
               <div class="info-row">
-                <span class="info-label">Base Price:</span>
+                <span class="info-label">{{ $t('basePrice') }}:</span>
                 <span class="info-value">${{ application.basePrice }}</span>
               </div>
               <div class="info-row">
-                <span class="info-label">Willing to Travel:</span>
-                <span class="info-value">{{ application.willingToTravel === 'yes' ? 'Yes' : 'No' }}</span>
+                <span class="info-label">{{ $t('willingToTravel') }}:</span>
+                <span class="info-value">{{ application.willingToTravel === 'yes' ? $t('yes') : $t('no') }}</span>
               </div>
               <div class="info-row">
-                <span class="info-label">Bio:</span>
+                <span class="info-label">{{ $t('bio') }}:</span>
                 <span class="info-value bio-text">{{ application.bio }}</span>
               </div>
               <div class="info-row">
-                <span class="info-label">Applied:</span>
+                <span class="info-label">{{ $t('applied') }}:</span>
                 <span class="info-value">{{ formatDate(application.createdAt) }}</span>
               </div>
             </div>
 
             <div class="card-actions">
               <button @click="viewIdPhoto(application)" class="action-btn view-btn">
-                <i class="fas fa-id-card"></i> View ID
+                <i class="fas fa-id-card"></i> {{ $t('viewId') }}
               </button>
               <button @click="acceptApplication(application)" class="action-btn accept-btn">
-                <i class="fas fa-check"></i> Accept
+                <i class="fas fa-check"></i> {{ $t('accept') }}
               </button>
               <button @click="rejectApplication(application)" class="action-btn reject-btn">
-                <i class="fas fa-times"></i> Reject
+                <i class="fas fa-times"></i> {{ $t('reject') }}
               </button>
             </div>
           </div>
@@ -96,7 +96,7 @@
 
         <!-- Empty State -->
         <div v-else class="empty-state">
-          <p>No pending technician applications found.</p>
+          <p>{{ $t('noPendingApplications') }}</p>
         </div>
         
         <pagination
@@ -390,6 +390,9 @@ export default {
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
   background: #faf8fd;
 }
+.dark .admin-dashboard-layout {
+  background-color: var(--primary-bg);
+}
 
 .pending-main {
   flex: 1;
@@ -407,6 +410,9 @@ export default {
   color: #7c6bb0;
   margin-bottom: 0;
 }
+.dark .pending-title {
+  color: var(--primary-text);
+}
 
 .subtitle-search-row {
   display: flex;
@@ -419,6 +425,9 @@ export default {
   font-size: 1.2rem;
   font-weight: 600;
   color: #7c6bb0;
+}
+.dark .pending-subtitle {
+  color: var(--primary-text);
 }
 
 .search-wrapper {
@@ -445,9 +454,16 @@ export default {
   padding: 0 16px 0 40px;
   transition: border 0.2s;
 }
+.dark .search-input {
+  background-color: var(--input-bg) !important;
+  color: var(--text-muted) !important;
+}
 
 .search-input:focus {
   border: 1.5px solid #6B5FA7;
+}
+.dark .search-input:focus {
+  border: 1.5px solid var(--primary-color) !important;
 }
 
 .search-icon {
@@ -457,6 +473,9 @@ export default {
   transform: translateY(-50%);
   color: #b6a7e6;
   font-size: 1.1rem;
+}
+.dark .search-icon {
+  color: var(--icon-color);
 }
 
 .applications-grid {
@@ -473,25 +492,37 @@ export default {
   overflow: hidden;
   transition: transform 0.2s, box-shadow 0.2s;
 }
+.dark .application-card {
+  background-color: var(--grey-bg) !important;
+}
 
 .application-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
+.dark .application-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+}
 
 .card-header {
-  background: linear-gradient(135deg, #7c6bb0, #6b5fa7);
+  background: var(--primary-color);
   color: white;
   padding: 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
+.dark .card-header {
+  background-color: var(--primary) !important;
+}
 
 .applicant-info {
   display: flex;
   align-items: center;
   gap: 1rem;
+}
+.dark .applicant-info {
+  background-color: var(--primary) !important;
 }
 
 .applicant-avatar {
@@ -501,11 +532,17 @@ export default {
   object-fit: cover;
   border: 2px solid white;
 }
+.dark .applicant-avatar {
+  border: 2px solid var(--primary-color) !important;
+}
 
 .applicant-name {
   font-size: 1.1rem;
   font-weight: 600;
   margin: 0;
+}
+.dark .applicant-name {
+  color: var(--primary-text);
 }
 
 .applicant-email {
@@ -520,6 +557,9 @@ export default {
   border-radius: 2rem;
   font-weight: 600;
 }
+.dark .application-number {
+  background-color: var(--icon-color) !important;
+}
 
 .card-content {
   padding: 1.5rem;
@@ -533,6 +573,9 @@ export default {
   padding-bottom: 0.75rem;
   border-bottom: 1px solid #f3f4f6;
 }
+.dark .info-row {
+  border-bottom: 1px solid var(--input-bg) !important;
+}
 
 .info-row:last-child {
   border-bottom: none;
@@ -543,6 +586,9 @@ export default {
   font-weight: 600;
   color: #6b7280;
   min-width: 120px;
+}
+.dark .info-label {
+  color: var(--primary-text);
 }
 
 .info-value {
@@ -565,6 +611,9 @@ export default {
   display: flex;
   gap: 0.5rem;
   justify-content: center;
+}
+.dark .card-actions {
+  background-color: var(--grey-bg) !important;
 }
 
 .action-btn {
