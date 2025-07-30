@@ -8,9 +8,9 @@
         <div class="booking-main">
           <div class="booking-container">
             <div class="title-search-row">
-              <h2 class="booking-title">{{ $t('upcomingBookings') }}</h2>
+              <h2 class="booking-title">Upcoming Bookings</h2>
               <div class="search-wrapper">
-                <input v-model="searchQuery" class="search-input" type="text" :placeholder="$t('search')" />
+                <input v-model="searchQuery" class="search-input" type="text" placeholder="Search" />
                 <span class="search-icon"><i class="fas fa-search"></i></span>
               </div>
             </div>
@@ -24,7 +24,7 @@
               >
                 <i v-if="checkingExpired" class="fas fa-spinner fa-spin"></i>
                 <i v-else class="fas fa-clock"></i>
-                {{ checkingExpired ? $t('checking') : $t('checkForExpiredBookings') }}
+                {{ checkingExpired ? 'Checking...' : 'Check for Expired Bookings' }}
               </button>
               <div v-if="lastCheckResult" class="check-result" :class="lastCheckResult.success ? 'success' : 'error'">
                 {{ lastCheckResult.message }}
@@ -33,27 +33,26 @@
 
             <div v-if="loading" class="loading-state">
               <div class="loading-spinner"></div>
-              <p>{{ $t('loadingBookings') }}</p>
+              <p>Loading bookings...</p>
             </div>
             <div v-else-if="error" class="error-state">
               <p class="error-message">{{ error }}</p>
-              <button @click="fetchBookings" class="retry-btn">{{ $t('retry') }}</button>
+              <button @click="fetchBookings" class="retry-btn">Retry</button>
             </div>
             <div v-else-if="filteredBookings.length > 0" class="table-wrapper">
               <table class="booking-table">
                 <thead>
                   <tr class="table-header">
-                    <th>{{ $t('userName') }}</th>
-                    <th>{{ $t('userEmail') }}</th>
-                    <th>{{ $t('technicianName') }}</th>
-                    <th>{{ $t('technicianEmail') }}</th>
-                    <th>{{ $t('specialization') }}</th>
-                    <th>{{ $t('date') }}</th>
-                    <th>{{ $t('time') }}</th>
-                    <th>{{ $t('address') }}</th>
-                    <th>{{ $t('price') }}</th>
-                    <th>{{ $t('status') }}</th>
-                    <th>{{ $t('actions') }}</th>
+                    <th>User Name</th>
+                    <th>User Email</th>
+                    <th>Technician Name</th>
+                    <th>Technician Email</th>
+                    <th>Specialization</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Address</th>
+                    <th>Price</th>
+                    <th>Status</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -73,7 +72,7 @@
               </table>
             </div>
             <div v-else class="empty-state">
-              <p>{{ $t('noUpcomingBookings') }}</p>
+              <p>No upcoming bookings found.</p>
             </div>
           </div>
         </div>
@@ -593,7 +592,7 @@ onMounted(() => {
 
 .dark .empty-state {
   background: var(--grey-bg);
-  color: var(--primary-color);
+  color: var(--text-muted);
 }
 
 .table-wrapper {

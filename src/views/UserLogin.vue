@@ -10,6 +10,8 @@ const { t } = useI18n();
 const email = ref('');
 const password = ref('');
 const error = ref('');
+const errors = ref({});
+const showPassword = ref(false);
 const router = useRouter();
 
 // Forgot password functionality
@@ -18,8 +20,65 @@ const forgotPasswordEmail = ref('');
 const forgotPasswordError = ref('');
 const forgotPasswordSuccess = ref('');
 
+// Validation functions
+const validateEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+const validateRequired = (value, fieldName) => {
+  // Handle different data types
+  if (value === null || value === undefined) {
+    return false;
+  }
+  
+  // For strings, check if trimmed length is greater than 0
+  if (typeof value === 'string') {
+    return value.trim().length > 0;
+  }
+  
+  // For numbers, check if it's not 0 and not NaN
+  if (typeof value === 'number') {
+    return value !== 0 && !isNaN(value);
+  }
+  
+  // For other types, check if the value exists
+  return Boolean(value);
+};
+
+const validatePassword = (password) => {
+  return password.length >= 6;
+};
+
+// Main validation function
+const validateForm = () => {
+  errors.value = {};
+
+  // Email validation
+  if (!validateRequired(email.value, 'email')) {
+    errors.value.email = 'Email is required';
+  } else if (!validateEmail(email.value)) {
+    errors.value.email = 'Please enter a valid email address';
+  }
+
+  // Password validation
+  if (!validateRequired(password.value, 'password')) {
+    errors.value.password = 'Password is required';
+  } else if (!validatePassword(password.value)) {
+    errors.value.password = 'Password must be at least 6 characters long';
+  }
+
+  return Object.keys(errors.value).length === 0;
+};
+
 const handleLogin = async () => {
   error.value = '';
+  
+  // Validate form
+  if (!validateForm()) {
+    return;
+  }
+
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email.value, password.value);
     // Enforce persistent admin role for admin emails
@@ -27,7 +86,26 @@ const handleLogin = async () => {
     await fetchUserRole(userCredential.user);
     router.push('/');
   } catch (err) {
-    error.value = err.message;
+    console.error('Login error:', err);
+    switch (err.code) {
+      case 'auth/user-not-found':
+        error.value = 'No account found with this email address';
+        break;
+      case 'auth/wrong-password':
+        error.value = 'Incorrect password';
+        break;
+      case 'auth/invalid-email':
+        error.value = 'Invalid email address';
+        break;
+      case 'auth/too-many-requests':
+        error.value = 'Too many failed attempts. Please try again later';
+        break;
+      case 'auth/user-disabled':
+        error.value = 'This account has been disabled';
+        break;
+      default:
+        error.value = 'Login failed. Please check your credentials and try again';
+    }
   }
 };
 
@@ -45,8 +123,20 @@ const handleGoogleSignIn = async () => {
       console.error('Google sign-in failed. No user returned.', result);
     }
   } catch (err) {
-    error.value = err.message;
     console.error('Google sign-in error:', err);
+    switch (err.code) {
+      case 'auth/popup-closed-by-user':
+        error.value = 'Sign-in was cancelled';
+        break;
+      case 'auth/popup-blocked':
+        error.value = 'Sign-in popup was blocked. Please allow popups for this site';
+        break;
+      case 'auth/cancelled-popup-request':
+        error.value = 'Sign-in was cancelled';
+        break;
+      default:
+        error.value = 'Google sign-in failed. Please try again';
+    }
   }
 };
 
@@ -64,12 +154,30 @@ const closeForgotPasswordModal = () => {
   forgotPasswordSuccess.value = '';
 };
 
+const validateForgotPasswordEmail = (email) => {
+  if (!email.trim()) {
+    return 'Email is required';
+  }
+  if (!validateEmail(email)) {
+    return 'Please enter a valid email address';
+  }
+  return null;
+};
+
+const togglePasswordVisibility = () => {
+  console.log('Toggle function called');
+  console.log('Current showPassword value:', showPassword.value);
+  showPassword.value = !showPassword.value;
+  console.log('New showPassword value:', showPassword.value);
+};
+
 const handleForgotPassword = async () => {
   forgotPasswordError.value = '';
   forgotPasswordSuccess.value = '';
   
-  if (!forgotPasswordEmail.value.trim()) {
-    forgotPasswordError.value = t('pleaseEnterEmail');
+  const emailError = validateForgotPasswordEmail(forgotPasswordEmail.value);
+  if (emailError) {
+    forgotPasswordError.value = emailError;
     return;
   }
 
@@ -117,19 +225,33 @@ const handleForgotPassword = async () => {
             type="email" 
             :placeholder="$t('email')" 
             class="form-input" 
+            :class="{ 'error': errors.email }"
             required 
           />
+          <p v-if="errors.email" class="field-error">{{ errors.email }}</p>
         </div>
         
         <div class="input-group password-group">
           <input
             v-model="password"
-            type="password"
+            :type="showPassword ? 'text' : 'password'"
             :placeholder="$t('enterPassword')"
             class="form-input"
+            :class="{ 'error': errors.password }"
             required
           />
-          <i class="fa-solid fa-eye password-toggle"></i>
+          <button 
+            type="button"
+            class="password-toggle-btn"
+            @click="togglePasswordVisibility"
+          >
+            <i :class="showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+          </button>
+          <!-- Debug info - remove this later -->
+          <small style="position: absolute; top: -20px; right: 0; font-size: 10px; color: #666;">
+            Debug: {{ showPassword ? 'SHOW' : 'HIDE' }}
+          </small>
+          <p v-if="errors.password" class="field-error">{{ errors.password }}</p>
         </div>
 
         <div class="form-options">
@@ -183,6 +305,7 @@ const handleForgotPassword = async () => {
             type="email"
             :placeholder="$t('enterYourEmail')"
             class="form-input"
+            :class="{ 'error': forgotPasswordError && !forgotPasswordSuccess }"
             required
           />
         </div>
@@ -291,12 +414,49 @@ aspect-ratio: 106.44/101.00;
   font-size: 16px;
   transition: border-color 0.3s;
   box-sizing: border-box;
+  color: #1f2937;
+}
+
+.dark .form-input {
+  background-color: #374151;
+  border-color: #4b5563;
+  color: #f9fafb;
 }
 
 .form-input:focus {
   outline: none;
   border-color: #625397;
   background-color: white;
+}
+
+.dark .form-input:focus {
+  border-color: var(--primary-color);
+  background-color: #4b5563;
+}
+
+.form-input::placeholder {
+  color: #9ca3af;
+}
+
+.dark .form-input::placeholder {
+  color: #6b7280;
+}
+
+.form-input.error {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.dark .form-input.error {
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
+}
+
+.field-error {
+  color: #dc2626;
+  font-size: 12px;
+  margin-top: 4px;
+  margin-left: 4px;
+  font-weight: 500;
 }
 
 .password-group {
@@ -307,13 +467,53 @@ aspect-ratio: 106.44/101.00;
   border-radius: 16px !important;
 }
 
-.password-toggle {
+.password-toggle-btn {
   position: absolute;
   right: 15px;
   top: 50%;
   transform: translateY(-50%);
+  background: none;
+  border: none;
   color: #9ca3af;
   cursor: pointer;
+  transition: color 0.2s ease, background-color 0.2s ease;
+  padding: 8px;
+  border-radius: 6px;
+  user-select: none;
+  z-index: 10;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.password-toggle-btn:hover {
+  color: #625397;
+  background-color: rgba(98, 83, 151, 0.1);
+}
+
+.password-toggle-btn:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.password-toggle-btn:focus {
+  outline: none;
+  color: #625397;
+  background-color: rgba(98, 83, 151, 0.1);
+}
+
+.dark .password-toggle-btn {
+  color: #6b7280;
+}
+
+.dark .password-toggle-btn:hover {
+  color: #f9fafb;
+  background-color: rgba(249, 250, 251, 0.1);
+}
+
+.dark .password-toggle-btn:focus {
+  color: #f9fafb;
+  background-color: rgba(249, 250, 251, 0.1);
 }
 
 .form-options {
@@ -369,6 +569,11 @@ aspect-ratio: 106.44/101.00;
   color: #dc2626;
   text-align: center;
   font-size: 14px;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  padding: 12px;
+  border-radius: 8px;
+  margin: 10px 0;
 }
 
 .divider {
@@ -409,6 +614,11 @@ aspect-ratio: 106.44/101.00;
   justify-content: center;
   gap: 10px;
   transition: all 0.3s;
+}
+.dark .google-btn {
+  background-color: #374151;
+  border-color: #4b5563;
+  color: #f9fafb;
 }
 
 .google-btn:hover {

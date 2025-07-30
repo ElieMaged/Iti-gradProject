@@ -1,62 +1,52 @@
 <template>
-  <!-- Main Container -->
-  <div class="flex min-h-screen">
+  <div v-if="loading">
+    <p>Loading...</p>
+  </div>
+  <div v-else-if="error">
+    <p>{{ error }}</p>
+  </div>
+  <div v-else class="admin-dashboard-layout">
     <!-- Sidebar -->
     <userSidebar :activeTab="activeTab" />
     <!-- Main Content -->
-    <div class="flex-1">
-      <div class="max-w-4xl mx-auto">
-        <div class="bg-white rounded-xl shadow-lg p-8">
-          <!-- Header --> 
-          <div class="mb-8">
-            <h1 class="text-3xl font-bold text-text-main mb-2">{{ $t('helloUser', {
-              name: profileData.fullName ||
-                $t('user')
-            }) }}</h1>
-            <h2 class="text-xl font-bold text-secondary">{{ $t('yourPersonalInformation') }}</h2>
+    <div id="admin-profile-container" class="p-4 mr-20">
+      <div id="admin-profile-wrapper">
+        <div id="admin-profile-card">
+          <h2 id="admin-profile-title">{{ $t('personalInformation') }}</h2>
+          <div id="admin-profile-content">
+            <div id="admin-profile-info">
+              <div class="info-block">
+                <span class="info-label">{{ $t('fullName') }}</span>
+                <span class="info-value">{{ form.fullName || 'Not provided' }}</span>
+              </div>
+              <div class="info-block">
+                <span class="info-label">{{ $t('emailAddress') }}</span>
+                <span class="info-value">{{ form.email || 'Not provided' }}</span>
           </div>
-          <!-- Profile Content -->
-          <div class="flex gap-8">
-            <!-- Left Column - Information -->
-            <div class="flex-1 space-y-6">
-              <div>
-                <label class="block text-sm font-bold text-text-main mb-2">{{ $t('fullName') }}</label>
-                <input type="text" :value="profileData.fullName" disabled
-                  class="input-field w-full px-4 py-3 rounded-lg text-sm">
+              <div class="info-block">
+                <span class="info-label">{{ $t('phoneNumber') }}</span>
+                <span class="info-value">{{ form.phone || 'Not provided' }}</span>
               </div>
-              <div>
-                <label class="block text-sm font-bold text-text-main mb-2">{{ $t('emailAddress') }}</label>
-                <input type="email" :value="profileData.email" disabled
-                  class="input-field w-full px-4 py-3 rounded-lg text-sm">
+              <div class="info-block">
+                <span class="info-label">{{ $t('gender') }}</span>
+                <span class="info-value">{{ form.gender || 'Not provided' }}</span>
               </div>
-              <div>
-                <label class="block text-sm font-bold text-text-main mb-2">{{ $t('phoneNumber') }}</label>
-                <input type="text" :value="profileData.phone" disabled
-                  class="input-field w-full px-4 py-3 rounded-lg text-sm">
+              <div class="info-block">
+                <span class="info-label">{{ $t('address') }}</span>
+                <span class="info-value">{{ form.address || 'Not provided' }}</span>
               </div>
-              <div>
-                <label class="block text-sm font-bold text-text-main mb-2">{{ $t('gender') }}</label>
-                <input type="text" :value="profileData.gender" disabled
-                  class="input-field w-full px-4 py-3 rounded-lg text-sm">
+              <div class="info-block">
+                <span class="info-label">{{ $t('city') }}</span>
+                <span class="info-value">{{ form.city || 'Not provided' }}</span>
               </div>
-              <div>
-                <label class="block text-sm font-bold text-text-main mb-2">{{ $t('address') }}</label>
-                <input type="text" :value="profileData.address" disabled
-                  class="input-field w-full px-4 py-3 rounded-lg text-sm">
+              <div class="info-block">
+                <span class="info-label">{{ $t('area') }}</span>
+                <span class="info-value">{{ form.area || 'Not provided' }}</span>
               </div>
             </div>
-            <!-- Right Column - Profile Image -->
-            <div class="flex flex-col items-center space-y-4">
-              <div class="w-32 h-32 bg-gray-300 rounded-full flex items-center justify-center overflow-hidden"
-                id="profileImage">
-                <img v-if="profileImageUrl" :src="profileImageUrl" alt="Profile"
-                  class="w-full h-full object-cover rounded-full" />
-                <i v-else class="fas fa-user text-4xl text-gray-500"></i>
-              </div>
-              <button @click="triggerFileInput"
-                class="bg-secondary text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-opacity-90 transition-colors">{{
-                  $t('uploadPhoto') }}</button>
-              <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="handleFileChange" />
+            <div id="admin-profile-image">
+              <img v-if="profileImageUrl" :src="profileImageUrl" alt="Profile" class="w-full h-full object-cover rounded" />
+              <i v-else class="fas fa-user" id="profile-icon"></i>
             </div>
           </div>
         </div>
@@ -65,118 +55,209 @@
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
+<script>
 import userSidebar from '../components/userSidebar.vue';
+import { auth, db } from '../firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
-const { locale } = useI18n();
-const router = useRouter();
-const activeTab = ref('profile');
-const profileImageUrl = ref(null);
-const fileInput = ref(null);
-const profileData = ref({
+export default {
+  components: { userSidebar },
+  data() {
+    return {
+      activeTab: 'profile',
+      profileImageUrl: 'https://randomuser.me/api/portraits/men/32.jpg',
+      loading: true,
+      error: '',
+      form: {
   fullName: '',
   email: '',
   phone: '',
   gender: '',
-  address: ''
-});
-
-onMounted(() => {
-  // Load profile data
-  const savedData = localStorage.getItem('profileData');
-  if (savedData) {
-    const data = JSON.parse(savedData);
-    // Compose address for display
-    profileData.value = {
-      fullName: data.fullName || '',
-      email: data.email || '',
-      phone: data.phone || '',
-      gender: data.gender || '',
-      address: `${data.address || ''}${data.city ? ', ' + data.city : ''}${data.government ? ', ' + data.government : ''}`
-    };
-  }
-  // Load profile image
-  const savedImage = localStorage.getItem('profileImageUrl');
-  if (savedImage) {
-    profileImageUrl.value = savedImage;
-  }
-});
-
-function triggerFileInput() {
-  fileInput.value && fileInput.value.click();
-}
-
-function handleFileChange(event) {
-  const file = event.target.files[0];
+        address: '',
+        city: '',
+        area: '',
+      }
+    }
+  },
+  async mounted() {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        this.error = 'Not logged in.';
+        this.loading = false;
+        return;
+      }
+      const docRef = doc(db, 'users', user.uid);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        this.form.fullName = data.fullName || '';
+        this.form.email = data.email || '';
+        this.form.phone = data.phone || '';
+        this.form.gender = data.gender || '';
+        this.form.address = data.address || '';
+        this.form.city = data.city || '';
+        this.form.area = data.area || '';
+        this.profileImageUrl = data.profileImageUrl || this.profileImageUrl;
+      } else {
+        this.error = 'User profile not found.';
+      }
+    } catch (e) {
+      this.error = 'Error loading profile.';
+    } finally {
+      this.loading = false;
+    }
+  },
+  methods: {
+    handleSidebarNavigate(route) {
+      this.$router.push(route);
+    },
+    triggerFileInput() {
+      this.$refs.fileInput.click();
+    },
+    onFileChange(e) {
+      const file = e.target.files[0];
   if (file) {
     const reader = new FileReader();
-    reader.onload = function (e) {
-      profileImageUrl.value = e.target.result;
+        reader.onload = (e) => {
+          this.profileImageUrl = e.target.result;
     };
     reader.readAsDataURL(file);
   }
 }
-
-function getRoute(path) {
-  return locale.value === 'ar' ? `/ar/${path}` : `/${path}`;
+  }
 }
 </script>
 
 <style scoped>
-.sidebar-item {
-  transition: all 0.2s ease;
+.admin-dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+  font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
+  background: #faf8fd;
 }
 
-.sidebar-item:hover {
-  background-color: #c5b7e6;
-  color: white;
+.dark .admin-dashboard-layout {
+  background-color: var(--primary-bg);
 }
 
-.sidebar-item.active {
-  background-color: #7c6bb0;
-  color: white;
+#admin-profile-container {
+  background-color: #f9fafb;
+  min-height: 100vh;
+  font-family: sans-serif;
+  flex: 1;
 }
 
-.input-field {
-  background-color: #f5f5f5;
-  border: 1px solid #e0e0e0;
-  color: #666666;
+.dark #admin-profile-container {
+  background-color: var(--primary-bg);
 }
 
-.input-field:disabled {
-  cursor: not-allowed;
-  background-color: #f5f5f5;
-  color: #666666;
+#admin-profile-wrapper {
+  max-width: 1000px;
 }
 
-.bg-primary {
-  background-color: #ffd54f;
+#admin-profile-card {
+  background-color: white;
+  border-radius: 1rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  padding: 2rem;
 }
 
-.bg-secondary {
-  background-color: #7c6bb0;
+.dark #admin-profile-card {
+  background-color: var(--grey-bg);
 }
 
-.bg-sidebar {
-  background-color: #ede7f6;
-}
-
-.text-primary {
-  color: #ffd54f;
-}
-
-.text-secondary {
+#admin-profile-title {
+  font-size: 1.5rem;
+  font-weight: bold;
   color: #7c6bb0;
+  margin-bottom: 1.5rem;
 }
 
-.text-text-main {
-  color: #333333;
+.dark #admin-profile-title {
+  color: var(--white);
 }
 
-.text-muted {
-  color: #aaaaaa;
+/* RTL Support for Arabic */
+[dir="rtl"] #admin-profile-title {
+  text-align: right;
+}
+
+[dir="rtl"] .info-label {
+  text-align: right;
+}
+
+[dir="rtl"] .info-value {
+  text-align: right;
+}
+
+#admin-profile-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+@media (min-width: 768px) {
+  #admin-profile-content {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+}
+
+#admin-profile-info {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.info-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-label {
+  font-size: 1.125rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.dark .info-label {
+  color: var(--white);
+}
+
+.info-value {
+  font-size: 1rem;
+  color: #4b5563;
+  margin-top: 0.25rem;
+}
+
+.dark .info-value {
+  color: var(--primary-text-dark);
+}
+
+#admin-profile-image {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 10rem;
+  height: 10rem;
+  background-color: #e5e7eb;
+  border-radius: 0.5rem;
+  margin: 0 auto;
+}
+
+.dark #admin-profile-image {
+  background-color: var(--primary-bg);
+}
+
+#profile-icon {
+  font-size: 3.5rem;
+  color: #9ca3af;
+}
+
+.dark #profile-icon {
+  color: var(--white);
 }
 </style>

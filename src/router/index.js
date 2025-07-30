@@ -28,7 +28,6 @@ import BookingConfirmation from '../views/BookingConfirmation.vue'
 import TechnicianDetails from '../views/TechnicianDetails.vue'
 import TechnicionProfile from '../views/TechnicionProfile.vue'
 import TechnicianEditProfile from '../views/TechnichianEditProfile.vue'
-import PendingBookings from '../views/PendingBookings.vue'
   
 import TechnicianAvailability from '../views/TechnicianAvailbility.vue'
 import TechPayment from '../views/TechPayment.vue'
