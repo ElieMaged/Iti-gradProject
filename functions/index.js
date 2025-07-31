@@ -1,9 +1,24 @@
 const functions = require('firebase-functions');
 const nodemailer = require('nodemailer');
 const admin = require('firebase-admin');
+const paypal = require('@paypal/paypal-server-sdk');
 
 // Initialize Firebase Admin
 admin.initializeApp();
+
+// Configure PayPal environment
+function environment() {
+  const clientId = functions.config().paypal.client_id;
+  const clientSecret = functions.config().paypal.client_secret;
+  
+  if (functions.config().paypal.mode === 'live') {
+    return new paypal.core.LiveEnvironment(clientId, clientSecret);
+  } else {
+    return new paypal.core.SandboxEnvironment(clientId, clientSecret);
+  }
+}
+
+const paypalClient = new paypal.core.PayPalHttpClient(environment());
 
 const GMAIL_USER = 'elie1400674@gmail.com';
 const GMAIL_PASS = 'Harambe100';
@@ -89,30 +104,62 @@ exports.splitPayPalPayment = functions.https.onCall(async (data, context) => {
   }
 });
 
-// Function to execute actual PayPal payouts (requires PayPal server SDK)
-exports.executePayPalPayouts = functions.https.onCall(async (data, context) => {
-  try {
-    const { splitId } = data;
-    
-    // This would require PayPal server SDK setup
-    // For now, just update the status
-    const db = admin.firestore();
-    
-    await db.collection('paymentSplits').doc(splitId).update({
-      status: 'completed',
-      completedAt: admin.firestore.FieldValue.serverTimestamp()
-    });
-    
-    return {
-      success: true,
-      message: 'Payouts executed successfully'
-    };
-    
-  } catch (error) {
-    console.error('Error executing PayPal payouts:', error);
-    throw new functions.https.HttpsError('internal', error.message);
-  }
-});
+  // Function to execute actual PayPal payouts
+  exports.executePayPalPayouts = functions.https.onCall(async (data, context) => {
+    try {
+      const { splitId } = data;
+      const db = admin.firestore();
+      
+      // Get the payment split record
+      const splitDoc = await db.collection('paymentSplits').doc(splitId).get();
+      const splitData = splitDoc.data();
+      
+      if (!splitData) {
+        throw new Error('Payment split record not found');
+      }
+      
+      // Create PayPal payout request
+      const request = new paypal.payouts.PayoutsPostRequest();
+      request.requestBody({
+        sender_batch_header: {
+          sender_batch_id: `batch_${Date.now()}`,
+          email_subject: "You have a payment from BoltFix"
+        },
+        items: [
+          {
+            recipient_type: "EMAIL",
+            amount: {
+              value: splitData.technicianAmountUSD.toString(),
+              currency: "USD"
+            },
+            receiver: splitData.technicianAccount,
+            note: "Payment for your service on BoltFix"
+          }
+        ]
+      });
+      
+      const response = await paypalClient.execute(request);
+      
+      // Update the split record
+      await db.collection('paymentSplits').doc(splitId).update({
+        status: 'completed',
+        paypalPayoutId: response.result.batch_header.payout_batch_id,
+        success: true,
+        message: 'Payouts executed successfully',
+        completedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+      
+      return { 
+        success: true, 
+        payoutId: response.result.batch_header.payout_batch_id,
+        message: 'Payouts executed successfully'
+      };
+      
+    } catch (error) {
+      console.error('Error executing PayPal payouts:', error);
+      throw new functions.https.HttpsError('internal', error.message);
+    }
+  });
 
 // Function to move expired bookings from upcoming to completed
 exports.moveExpiredBookings = functions.https.onCall(async (data, context) => {

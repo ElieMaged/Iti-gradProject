@@ -128,7 +128,14 @@
             <span class="price-value">{{ technician.basePrice || technician.visitPrice || '300' }} EGP</span>
           </div>
 
-          <button @click="bookNow" class="book-now-btn">{{ $t('bookNow') }}</button>
+          <button 
+            @click="bookNow" 
+            class="book-now-btn"
+            :class="{ 'disabled': !isAuthenticated }"
+            :disabled="!isAuthenticated"
+          >
+            {{ isAuthenticated ? $t('bookNow') : $t('loginToBook') }}
+          </button>
         </div>
       </div>
       
@@ -334,8 +341,9 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { doc, getDoc, collection, query, where, getDocs, orderBy, addDoc } from 'firebase/firestore'
+import { doc, getDoc, collection, query, where, getDocs, orderBy, addDoc } from 'firebase/firestore' 
 import { db, auth } from '../firebase.js'
+import { onAuthStateChanged } from 'firebase/auth'
 
 const route = useRoute()
 const router = useRouter()
@@ -351,6 +359,10 @@ const reviewsError = ref(null)
 const userBookings = ref([])
 const userBookingsLoading = ref(false)
 const selectedDate = ref('')
+
+// Authentication state
+const currentUser = ref(null)
+const isAuthenticated = ref(false)
 const technicianAvailability = ref(null)
 const availableDates = ref([])
 const visibleDates = ref([])
@@ -668,9 +680,17 @@ const nextDates = () => {
 }
 
 const bookNow = () => {
+  if (!isAuthenticated.value) {
+    // Show login prompt
+    if (confirm(t('loginRequiredToBook'))) {
+      router.push('/userlogin')
+    }
+    return
+  }
+  
   router.push({
     path: '/bookingpage',
-    query: { 
+    query: {
       technicianId: route.params.id,
       technicianName: technician.value?.name || technician.value?.fullName
     }
@@ -725,12 +745,18 @@ const formatDate = (date) => {
 
 // Lifecycle
 onMounted(async () => {
+  // Set up authentication listener
+  onAuthStateChanged(auth, (user) => {
+    currentUser.value = user
+    isAuthenticated.value = !!user
+  })
+
   await fetchTechnician()
   await fetchReviews()
   await fetchUserBookings()
   await fetchTechnicianAvailability(route.params.id)
   updateVisibleDates()
-  
+
   // Set initial selected date and fetch time slots
   if (visibleDates.value.length > 0) {
     await selectDate(visibleDates.value[0])
@@ -1163,6 +1189,16 @@ onMounted(async () => {
 
 .book-now-btn:hover {
   background: #52467f;
+}
+
+.book-now-btn.disabled {
+  background: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
+}
+
+.book-now-btn.disabled:hover {
+  background: #cccccc;
 }
 
 /* Reviews Section */

@@ -295,31 +295,7 @@ const closeTermsModal = () => {
   showTermsModal.value = false;
 };
 
-// Test EmailJS function for debugging
-const testEmailJS = async () => {
-  try {
-    console.log('Testing EmailJS...');
-    const testParams = {
-      to_email: 'test@example.com',
-      to_name: 'Test User',
-      subject: 'Test Email',
-      message: 'This is a test email from BoltFix.'
-    };
-    
-    const result = await emailjs.send(
-      '123321',
-      'template_rn9r37x',
-      testParams,
-      'kGW9e5lc8iBvIT3Qw'
-    );
-    
-    console.log('Test email sent successfully:', result);
-    alert('Test email sent successfully!');
-  } catch (error) {
-    console.error('Test email failed:', error);
-    alert(`Test email failed: ${error.message}`);
-  }
-};
+
 </script>
 
 <template>
@@ -508,10 +484,7 @@ const testEmailJS = async () => {
         </svg>
       </button>
 
-      <!-- Test EmailJS button (remove in production) -->
-      <button type="button" @click="testEmailJS" class="test-btn" style="margin-top: 1rem; background: #10b981; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer;">
-        🧪 Test EmailJS
-      </button>
+      
 
       <p v-if="error" class="error-text">{{ error }}</p>
       <p class="login-link">{{ $t('haveAccount') }} <a href="/userlogin">{{ $t('signIn') }}</a></p>

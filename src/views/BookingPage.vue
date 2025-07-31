@@ -657,10 +657,15 @@ function loadPayPalScript() {
 
   const clientId = import.meta.env.VITE_PAYPAL_CLIENT_ID;
   
-  // Use a test client ID if none is configured
-  const finalClientId = clientId && clientId !== 'YOUR_SANDBOX_CLIENT_ID' 
-    ? clientId 
-    : 'test'; // This will show the button for testing
+  // Use production client ID if configured, otherwise show error
+  const finalClientId = clientId && clientId !== 'YOUR_PAYPAL_CLIENT_ID'
+    ? clientId
+    : null;
+
+  if (!finalClientId) {
+    console.error('PayPal Client ID not configured. Please add VITE_PAYPAL_CLIENT_ID to your environment variables.');
+    return;
+  }
 
   const script = document.createElement('script');
   script.src = `https://www.paypal.com/sdk/js?client-id=${finalClientId}&currency=USD&intent=capture`;
