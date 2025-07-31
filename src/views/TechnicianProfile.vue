@@ -24,14 +24,14 @@
           <i class="fas fa-map-marker-alt"></i>
           4096 Modesto, CA 95350, USA
         </span>
-      </div>
+    </div>
       <div class="social-media">
         <a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>
         <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
         <a href="#" class="social-icon"><i class="fab fa-linkedin"></i></a>
         <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
-      </div>
-    </div>
+          </div>
+            </div>
 
     <!-- Navigation bar -->
     <nav class="main-nav">
@@ -39,17 +39,17 @@
         <div class="nav-logo">
           <div class="logo-icon">B</div>
           <span class="logo-text">BoltFix</span>
-        </div>
+            </div>
         <div class="nav-links">
           <a href="#" class="nav-link">Home</a>
           <a href="#" class="nav-link">About us</a>
           <a href="#" class="nav-link">Services</a>
           <a href="#" class="nav-link">Contact Us</a>
-        </div>
+            </div>
         <div class="nav-actions">
           <i class="fas fa-bell nav-icon"></i>
           <i class="fas fa-user nav-icon"></i>
-        </div>
+          </div>
       </div>
     </nav>
 
@@ -120,7 +120,7 @@
               </li>
             </ul>
           </div>
-        </div>
+          </div>
 
         <!-- Right section - Booking Information -->
         <div class="booking-info-card">
@@ -135,7 +135,7 @@
               <div class="date-options">
                 <div v-if="visibleDates.length > 0" v-for="date in visibleDates" :key="date" class="date-option" :class="{ 'selected': selectedDate === date }" @click="selectDate(date)">
                   {{ date }}
-                </div>
+        </div>
                 <div v-else-if="!loading && availableDates.length === 0" class="date-option unavailable">
                   {{ $t('noAvailableDates') }}
                 </div>
@@ -146,25 +146,25 @@
               <button class="date-nav-btn" @click="nextDates">
                 <i class="fas fa-chevron-right"></i>
               </button>
-            </div>
-            
+      </div>
+      
             <div class="time-slots">
               <div v-if="loading || !technicianAvailability" class="time-slot loading">
                 {{ $t('loadingAvailability') }}
-              </div>
+          </div>
               <div v-else-if="selectedDate && availableTimeSlots.length > 0" v-for="timeSlot in availableTimeSlots" :key="timeSlot" class="time-slot">
                 {{ timeSlot }}
-              </div>
+            </div>
               <div v-else-if="selectedDate && availableTimeSlots.length === 0" class="time-slot unavailable">
                 {{ $t('noAvailableTimeSlots') }}
-              </div>
+          </div>
               <div v-else-if="availableDates.length === 0" class="time-slot unavailable">
                 {{ $t('technicianNotSetAvailability') }}
-              </div>
+          </div>
               <div v-else class="time-slot">
                 {{ $t('selectDateToSeeSlots') }}
-              </div>
-            </div>
+          </div>
+        </div>
           </div>
 
           <div class="visit-price">
@@ -175,133 +175,133 @@
           <button @click="bookNow" class="book-now-btn">{{ $t('bookNow') }}</button>
         </div>
       </div>
-
-             <!-- Reviews Section -->
-       <div class="reviews-section">
-         <div class="reviews-header">
-           <h2 class="reviews-title">{{ $t('reviews') }}</h2>
-           <div v-if="!showReviewForm" class="review-actions">
-             <button 
-               v-if="canReview" 
-               @click="showReviewForm = true" 
-               class="add-review-btn"
-             >
-               {{ $t('addReview') }}
-             </button>
-             <div v-else-if="!auth.currentUser" class="review-notice">
-               {{ $t('loginToReview') }}
-             </div>
-             <div v-else-if="reviews.find(r => r.userEmail === auth.currentUser?.email)" class="review-notice">
-               {{ $t('thankYouForReview') }}
-             </div>
+      
+      <!-- Reviews Section -->
+      <div class="reviews-section">
+        <div class="reviews-header">
+          <h2 class="reviews-title">{{ $t('reviews') }}</h2>
+          <div v-if="!showReviewForm" class="review-actions">
+            <button 
+              v-if="canReview" 
+              @click="showReviewForm = true" 
+              class="add-review-btn"
+            >
+              {{ $t('addReview') }}
+            </button>
+            <div v-else-if="!auth.currentUser" class="review-notice">
+              {{ $t('loginToReview') }}
+            </div>
+            <div v-else-if="reviews.find(r => r.userEmail === auth.currentUser?.email)" class="review-notice">
+              {{ $t('thankYouForReview') }}
+            </div>
              <div v-else-if="!userBookings.some(booking => booking.technicianId === route.params.id && (booking.status === 'completed' || booking.status === 'upcoming'))" class="review-notice">
-               {{ $t('bookingRequiredToReview') }}
-             </div>
+              {{ $t('bookingRequiredToReview') }}
+            </div>
              <div v-else class="review-notice">
                {{ $t('loginToLeaveReview') }}
-             </div>
-           </div>
-         </div>
+            </div>
+          </div>
+        </div>
 
-         <!-- Review Submission Form -->
-         <div v-if="showReviewForm" class="review-form">
-           <h3>{{ $t('writeReview') }}</h3>
-           <div class="star-rating-input">
-             <label>{{ $t('rating') }}:</label>
-             <div class="stars">
-               <button 
-                 v-for="n in 5" 
-                 :key="n" 
-                 class="star-button"
-                 :class="{ 
-                   'filled': n <= (hoverRating || newReview.rating), 
-                   'empty': n > (hoverRating || newReview.rating) 
-                 }"
-                 @click="setRating(n)"
-                 @mouseenter="hoverRating = n"
-                 @mouseleave="hoverRating = 0"
-               >
-                 <i class="fa-solid fa-star"></i>
-               </button>
-             </div>
-             <span class="rating-text">{{ newReview.rating }}/5</span>
-           </div>
-           <div class="form-group">
-             <label>{{ $t('review') }}:</label>
-             <textarea 
-               v-model="newReview.text" 
-               :placeholder="$t('writeYourReview')"
-               rows="4"
-               maxlength="500"
-             ></textarea>
-             <div class="char-count">{{ newReview.text.length }}/500</div>
-           </div>
-           <div class="form-actions">
-             <div class="validation-status">
-               <div v-if="newReview.rating === 0" class="validation-error">
-                 <i class="fa-solid fa-exclamation-circle"></i>
+        <!-- Review Submission Form -->
+        <div v-if="showReviewForm" class="review-form">
+          <h3>{{ $t('writeReview') }}</h3>
+          <div class="star-rating-input">
+            <label>{{ $t('rating') }}:</label>
+            <div class="stars">
+              <button 
+                v-for="n in 5" 
+                :key="n" 
+                class="star-button"
+                :class="{ 
+                  'filled': n <= (hoverRating || newReview.rating), 
+                  'empty': n > (hoverRating || newReview.rating) 
+                }"
+                @click="setRating(n)"
+                @mouseenter="hoverRating = n"
+                @mouseleave="hoverRating = 0"
+              >
+                <i class="fa-solid fa-star"></i>
+              </button>
+            </div>
+            <span class="rating-text">{{ newReview.rating }}/5</span>
+          </div>
+          <div class="form-group">
+            <label>{{ $t('review') }}:</label>
+            <textarea 
+              v-model="newReview.text" 
+              :placeholder="$t('writeYourReview')"
+              rows="4"
+              maxlength="500"
+            ></textarea>
+            <div class="char-count">{{ newReview.text.length }}/500</div>
+          </div>
+          <div class="form-actions">
+            <div class="validation-status">
+              <div v-if="newReview.rating === 0" class="validation-error">
+                <i class="fa-solid fa-exclamation-circle"></i>
                  {{ $t('pleaseSelectRating') }}
-               </div>
-               <div v-else-if="newReview.text.trim().length < 10" class="validation-error">
-                 <i class="fa-solid fa-exclamation-circle"></i>
+              </div>
+              <div v-else-if="newReview.text.trim().length < 10" class="validation-error">
+                <i class="fa-solid fa-exclamation-circle"></i>
                  {{ $t('reviewMustBeAtLeast') }} {{ newReview.text.trim().length }}/{{ $t('reviewMustBeAtLeastCharacters') }}
-               </div>
-               <div v-else class="validation-success">
-                 <i class="fa-solid fa-check-circle"></i>
+              </div>
+              <div v-else class="validation-success">
+                <i class="fa-solid fa-check-circle"></i>
                  {{ $t('readyToSubmit') }}
-               </div>
-             </div>
-             <button @click="submitReview" :disabled="!isValidReview || submittingReview" class="submit-btn">
-               {{ submittingReview ? $t('submitting') : $t('submitReview') }}
-             </button>
-             <button @click="cancelReview" class="cancel-btn">
-               {{ $t('cancel') }}
-             </button>
-           </div>
-         </div>
+              </div>
+            </div>
+            <button @click="submitReview" :disabled="!isValidReview || submittingReview" class="submit-btn">
+              {{ submittingReview ? $t('submitting') : $t('submitReview') }}
+            </button>
+            <button @click="cancelReview" class="cancel-btn">
+              {{ $t('cancel') }}
+            </button>
+          </div>
+        </div>
 
-         <!-- Reviews List -->
-         <div class="reviews-list">
-           <div v-if="reviewsLoading" class="loading-state">
-             <div class="loading-spinner"></div>
-             <p>{{ $t('loadingReviews') }}</p>
-           </div>
-           <div v-else-if="reviewsError" class="error-state">
-             <p class="error-message">{{ reviewsError }}</p>
-             <button @click="fetchReviews" class="retry-btn">{{ $t('retry') }}</button>
-           </div>
-           <div v-else-if="reviews.length > 0" class="reviews-container">
-             <h3 class="reviews-subtitle">{{ reviews.length }} {{ reviews.length === 1 ? $t('review') : $t('reviews') }}</h3>
-             <div v-for="review in reviews" :key="review.id" class="review-card">
-               <div class="review-header">
-                 <div class="review-rating">
-                   <i 
-                     v-for="n in 5" 
-                     :key="n" 
-                     class="fa-solid fa-star"
-                     :class="{ 'filled': n <= review.rating, 'empty': n > review.rating }"
-                   ></i>
-                   <span class="rating-text">{{ review.rating }} {{ review.rating === 1 ? $t('star') : $t('stars') }}</span>
-                 </div>
-                 <div class="review-meta">
-                   <span class="review-author">{{ review.userName || review.userEmail }}</span>
-                   <span class="review-date">{{ formatDate(review.createdAt) }}</span>
-                 </div>
-               </div>
-               <div class="review-text">{{ review.text }}</div>
-             </div>
-           </div>
-           <div v-else class="empty-reviews">
-             <div class="empty-icon">⭐</div>
-             <p>{{ $t('noReviewsYet') }}</p>
-             <p v-if="canReview">{{ $t('beFirstToReview') }}</p>
+        <!-- Reviews List -->
+        <div class="reviews-list">
+          <div v-if="reviewsLoading" class="loading-state">
+            <div class="loading-spinner"></div>
+            <p>{{ $t('loadingReviews') }}</p>
+          </div>
+          <div v-else-if="reviewsError" class="error-state">
+            <p class="error-message">{{ reviewsError }}</p>
+            <button @click="fetchReviews" class="retry-btn">{{ $t('retry') }}</button>
+          </div>
+          <div v-else-if="reviews.length > 0" class="reviews-container">
+            <h3 class="reviews-subtitle">{{ reviews.length }} {{ reviews.length === 1 ? $t('review') : $t('reviews') }}</h3>
+            <div v-for="review in reviews" :key="review.id" class="review-card">
+              <div class="review-header">
+                <div class="review-rating">
+                  <i 
+                    v-for="n in 5" 
+                    :key="n" 
+                    class="fa-solid fa-star"
+                    :class="{ 'filled': n <= review.rating, 'empty': n > review.rating }"
+                  ></i>
+                  <span class="rating-text">{{ review.rating }} {{ review.rating === 1 ? $t('star') : $t('stars') }}</span>
+                </div>
+                <div class="review-meta">
+                  <span class="review-author">{{ review.userName || review.userEmail }}</span>
+                  <span class="review-date">{{ formatDate(review.createdAt) }}</span>
+                </div>
+              </div>
+              <div class="review-text">{{ review.text }}</div>
+            </div>
+          </div>
+          <div v-else class="empty-reviews">
+            <div class="empty-icon">⭐</div>
+            <p>{{ $t('noReviewsYet') }}</p>
+            <p v-if="canReview">{{ $t('beFirstToReview') }}</p>
              <p v-else-if="!auth.currentUser">{{ $t('loginToLeaveReview') }}</p>
              <p v-else-if="!userBookings.some(booking => booking.technicianId === route.params.id && (booking.status === 'completed' || booking.status === 'upcoming'))">{{ $t('bookingRequiredToReview') }}</p>
-             <p v-else>{{ $t('loginToLeaveReview') }}</p>
+            <p v-else>{{ $t('loginToLeaveReview') }}</p>
            </div>
-         </div>
-       </div>
-    </div>
+          </div>
+        </div>
+      </div>
 
     <!-- Footer -->
     <footer class="main-footer">
@@ -318,10 +318,10 @@
               <i class="fab fa-twitter"></i>
               <i class="fab fa-linkedin"></i>
               <i class="fab fa-instagram"></i>
-            </div>
           </div>
         </div>
-        
+      </div>
+
         <div class="footer-section">
           <h4>{{ $t('quickLink') }}</h4>
           <ul class="footer-links">
@@ -342,8 +342,8 @@
             <li><a href="#">{{ $t('wallFinishing') }}</a></li>
             <li><a href="#">{{ $t('carpentry') }}</a></li>
           </ul>
-        </div>
-        
+          </div>
+          
         <div class="footer-section">
           <h4>{{ $t('contactUs') }}</h4>
           <div class="contact-details">
@@ -358,17 +358,17 @@
             <div class="contact-item">
               <i class="fas fa-map-marker-alt"></i>
               4096 Modesto, CA 95350, USA
-            </div>
           </div>
         </div>
       </div>
+    </div>
       
       <div class="footer-bottom">
         <div class="copyright">{{ $t('copyright') }} 2025 {{ $t('designAndDevelopedBy') }} ITI {{ $t('students') }}</div>
         <div class="footer-legal">
           <a href="#">{{ $t('privacyPolicy') }}</a>
           <a href="#">{{ $t('termsOfService') }}</a>
-        </div>
+  </div>
       </div>
     </footer>
   </div>
@@ -427,7 +427,7 @@ const fetchTechnician = async () => {
         id: technicianDoc.id,
         ...technicianDoc.data()
       }
-    } else {
+  } else {
       console.log('Technician not found in technicians collection, checking users collection...')
       // If not found in technicians, try users collection
       const userDoc = await getDoc(doc(db, 'users', technicianId))
@@ -435,11 +435,11 @@ const fetchTechnician = async () => {
         const userData = userDoc.data()
         console.log('Found user in users collection:', userData)
         if (userData.role === 'technician') {
-          technician.value = {
+        technician.value = {
             id: userDoc.id,
             ...userData
-          }
-        } else {
+        }
+      } else {
           throw new Error('User is not a technician')
         }
       } else {
@@ -462,10 +462,10 @@ const fetchReviews = async () => {
     const technicianId = route.params.id
     
     const reviewsQuery = query(
-      collection(db, 'reviews'),
-      where('technicianId', '==', technicianId),
-      orderBy('createdAt', 'desc')
-    )
+        collection(db, 'reviews'), 
+        where('technicianId', '==', technicianId),
+        orderBy('createdAt', 'desc')
+      )
     
     const reviewsSnapshot = await getDocs(reviewsQuery)
     reviews.value = reviewsSnapshot.docs.map(doc => ({

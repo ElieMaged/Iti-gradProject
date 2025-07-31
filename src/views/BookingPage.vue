@@ -564,7 +564,7 @@ function nextDates() {
 }
 
 onMounted(async () => {
-  const id = route.query.techId
+  const id = route.query.techId || route.query.technicianId
   if (!id) {
     errorMsg.value = 'Technician ID is missing. Please try again or contact support.';
     return;

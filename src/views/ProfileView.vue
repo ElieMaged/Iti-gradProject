@@ -4,6 +4,14 @@
     <!-- Main Content -->
     <div id="admin-profile-container" class="p-4 mr-20">
       <div id="admin-profile-wrapper">
+        <!-- Debug info -->
+        <div style="background: #f0f0f0; padding: 10px; margin-bottom: 20px; border-radius: 5px;">
+          <p><strong>Debug Info:</strong></p>
+          <p>Loading: {{ loading }}</p>
+          <p>Error: {{ error || 'None' }}</p>
+          <p>User Data: {{ form.fullName || 'Not loaded' }}</p>
+        </div>
+        
         <!-- Loading State -->
         <div v-if="loading" class="text-center py-12">
             <div class="loading-spinner mx-auto mb-4"></div>
@@ -64,24 +72,27 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import userSidebar from '../components/userSidebar.vue';
 import { auth, db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+
 const router = useRouter();
 const activeTab = ref('profile');
-const profileImageUrl = ref(null);
+const profileImageUrl = ref('https://randomuser.me/api/portraits/men/32.jpg');
 const loading = ref(true);
 const error = ref(null);
-const profileData = ref({
+const form = ref({
   fullName: '',
   email: '',
   phone: '',
   gender: '',
-  address: ''
+  address: '',
+  city: '',
+  area: ''
 });
 
 async function fetchUserProfile() {
@@ -92,8 +103,11 @@ async function fetchUserProfile() {
     const auth = getAuth();
     const user = auth.currentUser;
     
+    console.log('Current user:', user);
+    
     if (!user) {
       error.value = 'User not authenticated';
+      console.log('No user, redirecting to login');
       router.push('/userlogin');
       return;
     }
@@ -109,12 +123,14 @@ async function fetchUserProfile() {
       console.log('User data from Firestore:', userData);
       
       // Set profile data from Firebase
-      profileData.value = {
+      form.value = {
         fullName: userData.fullName || `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || 'N/A',
         email: userData.email || user.email || 'N/A',
         phone: userData.phone || 'N/A',
         gender: userData.gender || 'N/A',
-        address: userData.address || `${userData.district || ''}${userData.district && userData.government ? ', ' : ''}${userData.government || ''}`.trim() || 'N/A'
+        address: userData.address || 'N/A',
+        city: userData.city || 'N/A',
+        area: userData.area || 'N/A'
       };
       
       // Set profile image if exists
@@ -122,107 +138,66 @@ async function fetchUserProfile() {
         profileImageUrl.value = userData.profileImageUrl;
       }
       
-      console.log('Profile data set:', profileData.value);
+      console.log('Profile data set:', form.value);
     } else {
       console.log('No user document found, using auth data');
       // Fallback to auth data if no Firestore document
-      profileData.value = {
+      form.value = {
         fullName: 'N/A',
         email: user.email || 'N/A',
         phone: 'N/A',
         gender: 'N/A',
-        address: 'N/A'
+        address: 'N/A',
+        city: 'N/A',
+        area: 'N/A'
       };
     }
     
   } catch (err) {
     console.error('Error fetching user profile:', err);
+    console.error('Error details:', {
+      message: err.message,
+      code: err.code,
+      stack: err.stack
+    });
     error.value = 'Failed to load profile data: ' + err.message;
   } finally {
     loading.value = false;
+    console.log('Loading set to false, error:', error.value);
   }
 }
 
 onMounted(() => {
+  console.log('ProfileView onMounted called');
+  
+  // Add a timeout to prevent infinite loading
+  setTimeout(() => {
+    if (loading.value) {
+      console.log('Loading timeout reached, setting loading to false');
+      loading.value = false;
+      if (!error.value) {
+        error.value = 'Failed to load profile data. Please try again.';
+      }
+    }
+  }, 10000); // 10 second timeout
+  
   const auth = getAuth();
   onAuthStateChanged(auth, (user) => {
+    console.log('Auth state changed:', user);
     if (user) {
       console.log('User authenticated:', user.uid);
       fetchUserProfile();
     } else {
       console.log('No user authenticated');
-      router.push('/userlogin');
+      loading.value = false;
+      error.value = 'Please log in to view your profile.';
+      // Don't redirect immediately, let user see the error
+      setTimeout(() => {
+        router.push('/userlogin');
+      }, 2000);
     }
   });
 });
-
-export default {
-  components: { userSidebar },
-  data() {
-    return {
-      activeTab: 'profile',
-      profileImageUrl: 'https://randomuser.me/api/portraits/men/32.jpg',
-      loading: true,
-      error: '',
-      form: {
-  fullName: '',
-  email: '',
-  phone: '',
-  gender: '',
-        address: '',
-        city: '',
-        area: '',
-      }
-    }
-  },
-  async mounted() {
-    try {
-      const user = auth.currentUser;
-      if (!user) {
-        this.error = 'Not logged in.';
-        this.loading = false;
-        return;
-      }
-      const docRef = doc(db, 'users', user.uid);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        this.form.fullName = data.fullName || '';
-        this.form.email = data.email || '';
-        this.form.phone = data.phone || '';
-        this.form.gender = data.gender || '';
-        this.form.address = data.address || '';
-        this.form.city = data.city || '';
-        this.form.area = data.area || '';
-        this.profileImageUrl = data.profileImageUrl || this.profileImageUrl;
-      } else {
-        this.error = 'User profile not found.';
-      }
-    } catch (e) {
-      this.error = 'Error loading profile.';
-    } finally {
-      this.loading = false;
-    }
-  },
-  methods: {
-    handleSidebarNavigate(route) {
-      this.$router.push(route);
-    },
-    triggerFileInput() {
-      this.$refs.fileInput.click();
-    },
-    onFileChange(e) {
-      const file = e.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-        reader.onload = (e) => {
-          this.profileImageUrl = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  }
-}
-  }
-}
 </script>
 
 <style scoped>

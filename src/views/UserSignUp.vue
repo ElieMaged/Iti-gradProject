@@ -143,22 +143,70 @@ async function sendWelcomeEmail(userEmail, firstName, lastName) {
       to_email: userEmail,
       to_name: fullName || 'Valued Customer',
       subject: 'Welcome to BoltFix! Your Account is Ready',
-      message: `Dear ${fullName || 'Valued Customer'},\n\nWelcome to BoltFix! Your account has been successfully created and you're now ready to connect with skilled technicians for all your home service needs.\n\nYour account details:\nEmail: ${userEmail}\n\nYou can now:\n- Browse available technicians\n- Book appointments\n- Track your bookings\n- Leave reviews\n\nThank you for choosing BoltFix!\n\nBest regards,\nThe BoltFix Team`
+      message: `Dear ${fullName || 'Valued Customer'},
+
+Welcome to BoltFix! Your account has been successfully created and you're now ready to connect with skilled technicians for all your home service needs.
+
+Your account details:
+Email: ${userEmail}
+
+What you can do now:
+✅ Browse available technicians in your area
+✅ Book appointments for home services
+✅ Track your booking status
+✅ Leave reviews for technicians
+✅ Manage your profile and settings
+
+Getting Started:
+1. Browse our services (Plumbing, Electricity, Carpentry, etc.)
+2. Find a technician that matches your needs
+3. Book an appointment with your preferred date and time
+4. Track your booking status in real-time
+
+Need help? Contact our support team or check our FAQ section.
+
+Thank you for choosing BoltFix!
+
+Best regards,
+The BoltFix Team
+
+---
+This is an automated email. Please do not reply to this message.`
     };
 
+    // Use the provided EmailJS credentials
+    const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'default_service'; // You need to add your service ID
+    const templateId = 'template_rn9r37x'; // Your provided template ID
+    const publicKey = 'kGW9e5lc8iBvIT3Qw'; // Your provided public key
+
+    console.log('EmailJS configuration found, sending email...');
+    console.log('Service ID:', serviceId);
+    console.log('Template ID:', templateId);
+    console.log('Public Key:', publicKey);
+
     await emailjs.send(
-      import.meta.env.VITE_EMAILJS_SERVICE_ID,
-      import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+      serviceId,
+      templateId,
       templateParams,
-      import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+      publicKey
     );
+    
     console.log('Welcome email sent successfully!');
+    alert(`Welcome email sent successfully to ${userEmail}!`);
     return true;
   } catch (error) {
     console.error('=== ERROR SENDING WELCOME EMAIL ===');
     console.error('Error details:', error);
     console.error('Error message:', error.message);
     console.error('Error code:', error.code);
+    
+    // Log additional error information for debugging
+    if (error.response) {
+      console.error('Response status:', error.response.status);
+      console.error('Response data:', error.response.data);
+    }
+    
+    alert(`Email sending failed: ${error.message}\n\nPlease check EmailJS configuration.`);
     return false;
   }
 }
@@ -172,7 +220,11 @@ const handleRegister = async () => {
   }
 
   try {
+    console.log('Starting user registration process...');
+    
+    // Create user account with Firebase Auth
     const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
+    console.log('User account created successfully:', userCredential.user.uid);
     
     // Create user document in Firestore
     const userDoc = {
@@ -191,15 +243,27 @@ const handleRegister = async () => {
     };
 
     await setDoc(doc(db, 'users', userCredential.user.uid), userDoc);
+    console.log('User document created in Firestore');
     
-    // Send welcome email using reactive form data
-    await sendWelcomeEmail(email.value, firstName.value, lastName.value);
+    // Send welcome email (non-blocking)
+    console.log('Attempting to send welcome email...');
+    const emailSent = await sendWelcomeEmail(email.value, firstName.value, lastName.value);
+    
+    if (emailSent) {
+      console.log('Welcome email sent successfully');
+    } else {
+      console.log('Welcome email failed to send, but registration completed');
+      // Don't fail the registration if email fails - just log it
+    }
     
     // Enforce persistent admin role for elie1400674@gmail.com
     await ensureUserRole(userCredential.user);
     await fetchUserRole(userCredential.user);
+    
+    console.log('Registration completed successfully');
     router.push('/'); // Redirect to home page after registration
   } catch (err) {
+    console.error('Registration error:', err);
     error.value = err.message;
   }
 };
@@ -226,7 +290,7 @@ const closeTermsModal = () => {
     </div>
     
     <div class="form-grid">
-      <!-- first name -->
+    <!-- first name -->
       <div class="form-group">
         <label for="firstName" class="form-label">{{ $t('firstName') }}</label>
         <input 
@@ -239,9 +303,9 @@ const closeTermsModal = () => {
           required 
         />
         <p v-if="errors.firstName" class="error-message">{{ errors.firstName }}</p>
-      </div>
+  </div>
 
-      <!-- last name -->
+  <!-- last name -->
       <div class="form-group">
         <label for="lastName" class="form-label">{{ $t('lastName') }}</label>
         <input 
@@ -304,7 +368,7 @@ const closeTermsModal = () => {
           required 
         />
         <p v-if="errors.age" class="error-message">{{ errors.age }}</p>
-      </div>
+  </div>
 
       <!-- address -->
       <div class="form-group">
@@ -319,7 +383,7 @@ const closeTermsModal = () => {
           required 
         />
         <p v-if="errors.address" class="error-message">{{ errors.address }}</p>
-      </div>
+  </div>
 
       <!-- area -->
       <div class="form-group">
@@ -334,7 +398,7 @@ const closeTermsModal = () => {
           required 
         />
         <p v-if="errors.area" class="error-message">{{ errors.area }}</p>
-      </div>
+  </div>
 
       <!-- city -->
       <div class="form-group">
@@ -364,7 +428,7 @@ const closeTermsModal = () => {
           required 
         />
         <p v-if="errors.password" class="error-message">{{ errors.password }}</p>
-      </div>
+  </div>
 
       <!-- confirm password -->
       <div class="form-group">
@@ -380,7 +444,7 @@ const closeTermsModal = () => {
         />
         <p v-if="errors.confirmPass" class="error-message">{{ errors.confirmPass }}</p>
       </div>
-    </div>
+  </div>
 
     <div class="form-footer">
       <div class="checkbox-group">
@@ -395,10 +459,10 @@ const closeTermsModal = () => {
       <button type="submit" class="submit-btn">
         <span>{{ $t('register') }}</span>
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="arrow-icon" viewBox="0 0 16 16">
-          <path fill-rule="evenodd" d="M14 2.5a.5.5 0 0 0-.5-.5h-6a.5.5 0 0 0 0 1h4.793L2.146 13.146a.5.5 0 0 0 .708.708L13 3.707V8.5a.5.5 0 0 0 1 0z"/>
+  <path fill-rule="evenodd" d="M14 2.5a.5.5 0 0 0-.5-.5h-6a.5.5 0 0 0 0 1h4.793L2.146 13.146a.5.5 0 0 0 .708.708L13 3.707V8.5a.5.5 0 0 0 1 0z"/>
         </svg>
       </button>
-      
+
       <p v-if="error" class="error-text">{{ error }}</p>
       <p class="login-link">{{ $t('haveAccount') }} <a href="/userlogin">{{ $t('signIn') }}</a></p>
     </div>
@@ -607,7 +671,7 @@ body {
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
     margin-bottom: 2rem;
-}
+ }
 
 .form-group {
     display: flex;
@@ -789,11 +853,11 @@ body {
     text-decoration: none;
     font-weight: 600;
     transition: color 0.2s ease;
-}
+ }
 
 .dark .login-link a {
   color: var(--primary-color);
-}
+ }
 
 .login-link a:hover {
     color: #7c3aed;
@@ -1036,5 +1100,5 @@ body {
     .modal-content {
         margin: 0.5rem;
     }
-}
+ }
 </style>
