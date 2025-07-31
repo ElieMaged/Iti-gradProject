@@ -8,7 +8,7 @@
   <div v-else-if="technician">
     <!-- Main Heading -->
     <div class="main-heading m-20">
-      <h1 class="heading-title">{{ $t('bookNowWithBestTechnicians') }}</h1>
+      <h1 class="heading-title">{{ $t('bookNowWithBestTechnicians') }}!</h1>
     </div>
 
     <div class="profile-layout m-20">

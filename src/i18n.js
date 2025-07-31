@@ -1182,6 +1182,14 @@ const messages = {
     paymentStatus: 'Payment Status',
     paymentDate: 'Payment Date',
     paymentAmount: 'Payment Amount',
+    //tech view
+    reviews: 'Reviews',
+    addReview: 'Add Review',
+    writeReview: 'Write Review',
+    rating: 'Rating',
+    submitReview: 'Submit Review',
+    reviewSuccess: 'Review submitted successfully',
+    bookNowWithBestTechnicians: 'Book Now With Best Technicians',
       },
 
   ar: {
@@ -2316,6 +2324,14 @@ const messages = {
     paymentStatus: 'حالة الدفع',
     paymentDate: 'تاريخ الدفع',
     paymentAmount: 'المبلغ',    
+    //tech view
+    reviews: 'التقييمات',
+    addReview: 'أضف تقييم',
+    writeReview: 'اكتب تقييم',
+    rating: 'التقييم',
+    submitReview: 'إرسال التقييم',
+    reviewSuccess: 'تم إرسال التقييم بنجاح',
+    bookNowWithBestTechnicians: 'احجز الآن مع أفضل الفنيين',
       },
 };
 
