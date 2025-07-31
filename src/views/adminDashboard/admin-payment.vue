@@ -1,10 +1,10 @@
 <template>
   <div class="admin-dashboard-layout">
-    <admin-sidebar />
+    <AdminSidebar />
     <div class="dashboard-main p-4 mr-20">
       <div class="dashboard-container">
         <div class="dashboard-header">
-          <h2 class="dashboard-title">{{ $('paymentManagement') }}</h2>
+          <h2 class="dashboard-title">{{ $t('paymentManagement') }}</h2>
           <div class="dashboard-actions">
             <NotificationBell />
           </div>
@@ -17,7 +17,7 @@
               <i class="fas fa-wallet stat-icon"></i>
               <span class="stat-number">{{ totalAmount }} EGP</span>
             </div>
-            <div class="stat-title">Total Revenue</div>
+            <div class="stat-title">{{ $t('totalRevenue') }}</div>
           </div>
           
           <div class="stat-card">
@@ -25,7 +25,7 @@
               <i class="fas fa-coins stat-icon"></i>
               <span class="stat-number">{{ totalApprovedCredits }} EGP</span>
             </div>
-            <div class="stat-title">Total Approved Credits</div>
+            <div class="stat-title">{{ $t('totalApprovedCredits') }}</div>
           </div>
           
           <div class="stat-card">
@@ -49,79 +49,79 @@
               <i class="fas fa-times-circle stat-icon"></i>
               <span class="stat-number">{{ rejectedTransactions.length }}</span>
             </div>
-            <div class="stat-title">Rejected Transactions</div>
+            <div class="stat-title">{{ $t('rejectedTransactions') }}</div>
           </div>
         </div>
 
         <!-- PayPal Payout Section -->
         <div class="payout-section">
           <div class="section-header">
-            <h3>PayPal Payout to Technician</h3>
+            <h3>{{ $t('paypalPayoutToTechnician') }}</h3>
             <div class="available-credits">
               <i class="fas fa-coins"></i>
-              <span>Available Credits: {{ totalApprovedCredits }} EGP</span>
+              <span>{{ $t('availableCredits') }}: {{ totalApprovedCredits }} EGP</span>
             </div>
           </div>
           
           <div class="payout-form">
             <div class="form-row">
               <div class="form-group">
-                <label for="technicianSelect">Select Technician</label>
+                <label for="technicianSelect">{{ $t('selectTechnician') }}</label>
                 <select id="technicianSelect" v-model="selectedTechnician" @change="onTechnicianChange">
-                  <option value="">{{ loading ? 'Loading technicians...' : 'Choose a technician...' }}</option>
-                  <option v-if="!loading && technicians.length === 0" value="" disabled>No technicians found</option>
+                  <option value="">{{ loading ? $t('loadingTechnicians') : $t('chooseTechnician') }}</option>
+                  <option v-if="!loading && technicians.length === 0" value="" disabled>{{ $t('noTechniciansFound') }}</option>
                   <option v-for="tech in technicians" :key="tech.id" :value="tech.id">
-                    {{ tech.fullName || tech.name || 'Unknown Technician' }} ({{ tech.email || 'No email' }})
+                    {{ tech.fullName || tech.name || $t('unknownTechnician') }} ({{ tech.email || $t('noEmail') }})
                   </option>
                 </select>
                 <div v-if="!loading && technicians.length === 0" class="error-message">
-                  No technicians found in the database. Please check if technicians have been added.
+                  {{ $t('noTechniciansInDatabase') }}
                 </div>
                 <div v-if="!loading && technicians.length > 0" class="success-message">
-                  Found {{ technicians.length }} technician(s) in the database.
+                  {{ $t('foundTechniciansInDatabase', { count: technicians.length }) }}
                 </div>
               </div>
               
               <div class="form-group">
-                <label for="payoutAmount">Amount (EGP)</label>
+                <label for="payoutAmount">{{ $t('amount') }} (EGP)</label>
                 <input 
                   id="payoutAmount" 
                   type="number" 
                   v-model="payoutAmount" 
                   min="1" 
                   step="0.01"
-                  placeholder="Enter amount in EGP"
+                  :placeholder="$t('enterAmountInEGP')"
                   @input="validatePayoutAmount"
                 />
                 <div v-if="amountError" class="error-message">{{ amountError }}</div>
               </div>
               
               <div class="form-group">
-                <label for="payoutReason">Reason (Optional)</label>
+                <label for="payoutReason">{{ $t('reason') }} ({{ $t('optional') }})</label>
                 <input 
                   id="payoutReason" 
                   type="text" 
                   v-model="payoutReason" 
-                  placeholder="e.g., Bonus, Commission, etc."
+                  :placeholder="$t('reasonPlaceholder')"
                 />
               </div>
             </div>
             
             <div class="payout-summary" v-if="payoutAmount && selectedTechnician">
               <div class="summary-item">
-                <span>Amount:</span>
+                <span>{{ $t('amount') }}:</span>
                 <span>{{ payoutAmount }} EGP</span>
               </div>
               <div class="summary-item">
-                <span>PayPal Fee:</span>
+                <span>{{ $t('paypalFee') }}:</span>
                 <span>{{ paypalFee }} EGP</span>
               </div>
               <div class="summary-item total">
-                <span>Total Deduction:</span>
+                <span>{{ $t('totalDeduction') }}:</span>
                 <span>{{ totalDeduction }} EGP</span>
               </div>
               <div class="summary-item remaining">
-                <span>Remaining Credits:</span>
+                <span>{{ $t('remainingCredits') }}:</span>
                 <span>{{ remainingCredits }} EGP</span>
               </div>
             </div>
@@ -135,7 +135,7 @@
               >
                 <i v-if="!payoutLoading" class="fab fa-paypal"></i>
                 <i v-else class="fas fa-spinner fa-spin"></i>
-                {{ payoutLoading ? 'Processing...' : 'Send PayPal Payout' }}
+                {{ payoutLoading ? $t('processing') : $t('sendPaypalPayout') }}
               </button>
             </div>
           </div>
@@ -879,9 +879,11 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.layout{
+  min-height: auto;
+}
 .admin-dashboard-layout {
   display: flex;
-  min-height: 100vh;
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
   background: #f9fafb;
 }
@@ -891,11 +893,11 @@ onMounted(() => {
 
 .dashboard-main {
   flex: 1;
+  margin: 20px;
 }
 
 .dashboard-container {
   max-width: 80rem;
-  margin: 0 auto;
 }
 
 .dashboard-header {
@@ -910,7 +912,7 @@ onMounted(() => {
 .dashboard-title {
   font-size: 2rem;
   font-weight: bold;
-  color: #7c6bb0;
+  color: var(--primary-color);
   margin: 0;
 }
 
@@ -947,7 +949,7 @@ onMounted(() => {
 
 .stat-icon {
   font-size: 1.5rem;
-  color: #7c6bb0;
+  color: var(--primary-color);
   margin-right: 0.5rem;
 }
 .dark .stat-icon {
@@ -1026,9 +1028,9 @@ onMounted(() => {
 }
 
 .filter-btn.active {
-  background: #7c6bb0;
+  background: var(--primary-color);
   color: white;
-  border-color: #7c6bb0;
+  border-color: var(--primary-color);
 }
 .dark .filter-btn.active {
   background-color: var(--primary-color) !important;
@@ -1138,7 +1140,7 @@ th {
 }
 
 .simulate-btn {
-  background: #4f46e5; /* A darker blue for simulation */
+  background: var(--primary-color); /* A darker blue for simulation */
   color: white;
   border: none;
   padding: 0.25rem 0.75rem;
@@ -1154,6 +1156,18 @@ th {
 
 .simulate-btn:hover {
   background: #4338ca;
+}
+.dark  .simulate-btn {
+  background-color: var(--primary-color) !important;
+}
+.dark #technicianSelect {
+  background-color: var(--input-bg) !important;
+  color: var(--text-muted);
+
+}
+.dark #technicianSelect option {
+  background-color: var(--input-bg) !important;
+  color: var(--text-muted);
 }
 
 .action-info {
@@ -1174,6 +1188,10 @@ th {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   margin-bottom: 2rem;
   overflow: hidden;
+}
+.dark .payment-splits-section {
+  background-color: var(--input-bg) !important;
+  color: var(--text-muted);
 }
 
 .split-stats {
@@ -1221,18 +1239,24 @@ th {
 }
 
 .section-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--primary-color);
   color: white;
   padding: 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
+.dark .section-header {
+  background-color: var(--grey-bg) !important;
+}
 
 .section-header h3 {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 600;
+}
+.dark .section-header h3 {
+  color: var(--primary-text);
 }
 
 .available-credits {
@@ -1245,6 +1269,11 @@ th {
 
 .payout-form {
   padding: 2rem;
+}
+
+.dark .payout-form {
+  background-color: var(--input-bg) !important;
+  color: var(--text-muted);
 }
 
 .form-row {
@@ -1265,6 +1294,9 @@ th {
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
 }
+.dark .form-group label {
+  color: var(--text-muted);
+}
 
 .form-group input,
 .form-group select {
@@ -1273,6 +1305,11 @@ th {
   border-radius: 0.5rem;
   font-size: 0.9rem;
   transition: border-color 0.2s ease;
+}
+.dark .form-group input,
+.dark .form-group select {
+  background-color: var(--input-bg) !important;
+  color: var(--text-muted);
 }
 
 .form-group input:focus,
@@ -1332,7 +1369,7 @@ th {
 }
 
 .payout-btn {
-  background: linear-gradient(135deg, #0070ba 0%, #1546a0 100%);
+  background: var(--primary-color);
   color: white;
   border: none;
   padding: 1rem 2rem;
@@ -1365,6 +1402,17 @@ th {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .admin-dashboard-layout {
+    flex-direction: column;
+    min-height: auto;
+  }
+  
+  .dashboard-main {
+    margin-right: 0;
+    padding: 0.5rem;
+    margin-top: 30px;
+  }
+  
   .form-row {
     grid-template-columns: 1fr;
     gap: 1rem;
@@ -1378,6 +1426,112 @@ th {
   
   .available-credits {
     font-size: 0.8rem;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  
+  .stat-card {
+    min-height: auto;
+  }
+  
+  .dashboard-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .dashboard-title {
+    font-size: 1.5rem;
+  }
+  
+  .table-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .filter-buttons {
+    flex-wrap: wrap;
+  }
+  
+  .table-container {
+    font-size: 0.875rem;
+  }
+  
+  th, td {
+    padding: 0.5rem;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .approve-btn, .reject-btn, .execute-btn, .simulate-btn {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-dashboard-layout {
+    flex-direction: column;
+    min-height: auto;
+  }
+  
+  .dashboard-main {
+    padding: 0.25rem;
+    margin-top: 70px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .stat-card {
+    padding: 1rem;
+  }
+  
+  .stat-number {
+    font-size: 1.5rem;
+  }
+  
+  .stat-title {
+    font-size: 0.875rem;
+  }
+  
+  .dashboard-title {
+    font-size: 1.25rem;
+  }
+  
+  .payout-form {
+    padding: 1rem;
+  }
+  
+  .section-header {
+    padding: 1rem;
+  }
+  
+  .section-header h3 {
+    font-size: 1rem;
+  }
+  
+  .payout-summary {
+    padding: 1rem;
+  }
+  
+  .summary-item {
+    font-size: 0.875rem;
+  }
+  
+  .payout-btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.875rem;
+    min-width: 150px;
   }
 }
 </style>

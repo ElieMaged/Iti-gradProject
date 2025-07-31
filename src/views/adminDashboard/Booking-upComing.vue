@@ -133,7 +133,7 @@ const filteredBookings = computed(() => {
   background: #faf8fd;
 }
 .dark .admin-dashboard-layout {
-  background-color: var(--primary-bg);
+  background: var(--primary-bg);
 }
 
 .booking-main {
@@ -169,7 +169,7 @@ const filteredBookings = computed(() => {
   margin-bottom: 0;
 }
 .dark .booking-title {
-  color: var(--primary-text);
+  color: var(--primary-color);
 }
 
 .search-wrapper {
@@ -329,25 +329,32 @@ const filteredBookings = computed(() => {
   cursor: not-allowed;
 }
 
+/* Mobile Responsive Styles */
 @media (max-width: 768px) {
-  .booking-main {
-    padding: 1rem;
+  .layout{
+    min-height: auto;
   }
-  .title-search-row {
+  .admin-dashboard-layout {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
+    min-height: auto;
   }
-  .search-wrapper {
-    width: 100%;
-    max-width: none;
+  
+  .booking-main {
+    padding: 0.5rem;
+    margin: 20px;
   }
-  .table-wrapper {
-    font-size: 0.8rem;
+}
+
+@media (max-width: 480px) {
+  .booking-main {
+    margin-top: 70px;
+    padding: 0.25rem;
   }
-  .table-header th,
-  .table-row td {
-    padding: 0.5rem 0.5rem;
+}
+
+@media (max-width: 360px) {
+  .booking-main {
+    margin-top: 60px;
   }
 }
 </style>

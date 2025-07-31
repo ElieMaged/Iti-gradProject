@@ -184,6 +184,35 @@ async function saveChanges() {
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
   background: #faf8fd;
 }
+.dark .admin-dashboard-layout {
+  background: var(--primary-bg);
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .admin-dashboard-layout {
+    flex-direction: column;
+    min-height: auto;
+  }
+  
+  .booking-main {
+    margin-top: 30px;
+    padding: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .booking-main {
+    margin-top: 70px;
+    padding: 0.25rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .booking-main {
+    margin-top: 60px;
+  }
+}
 
 .booking-main {
   flex: 1;
@@ -352,6 +381,9 @@ async function saveChanges() {
 }
 
 @media (max-width: 768px) {
+  .layout{
+    min-height: auto;
+  }
   .booking-main {
     padding: 1rem;
   }

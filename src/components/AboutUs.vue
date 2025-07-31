@@ -39,11 +39,15 @@
       
       <div class="about-images">
         <div class="image-container">
-   
-          <div class="">
-            <img src="/images/About-Us images/allview.jpg" alt="Carpentry work" />
+          <div class="circular-image top-right">
+            <img src="/images/About-Us images/Rectangle 34624196.png" alt="Network cables work" />
           </div>
-        
+          <div class="circular-image middle">
+            <img src="/images/About-Us images/Rectangle 34624197.png" alt="Carpentry work" />
+          </div>
+          <div class="circular-image bottom-right">
+            <img src="/images/About-Us images/Rectangle 34624198.png" alt="Plumbing work" />
+          </div>
           
           <!-- Decorative stars -->
           <div class="star star-1"></div>
@@ -71,15 +75,6 @@ export default {
   position: relative;
 }
 
-@media (max-width: 1000px) {
-  .about-container {
-    display:flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-}
-
 .about-container {
   width: 90%;
   max-width: 1200px;
@@ -97,16 +92,13 @@ export default {
   max-width: 500px;
 }
 
-.about-title {  
+.about-title {
   font-size: 2.5rem;
   font-weight: 700;
   color: #333;
   line-height: 1.2;
   margin-bottom: 24px;
   font-family: Outfit, sans-serif;
-}
-.dark .about-title {
-  color: var(--primary-text);
 }
 
 .about-description {
@@ -185,7 +177,7 @@ export default {
 .about-images {
   flex: 1;
   position: relative;
-  height: 500px;
+  height: 600px;
 }
 
 .image-container {
@@ -201,6 +193,214 @@ export default {
   border-radius: 240px;
 }
 
+.circular-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.top-right {
+  width: 232px;
+  height: 300px;
+  top: -50px;
+  right: 60px;
+}
+
+.middle {
+  width: 295px;
+  height: 400px;
+  top: 60%;
+  left: 25%;
+  transform: translate(-50%, -50%);
+}
+
+.bottom-right {
+  width: 217px;
+  height: 271px;
+  bottom: -30px;
+  right: 30px;
+}
+
+/* Decorative stars */
+.star {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #333;
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+}
+
+.star-1 {
+  top: 10%;
+  left: 20%;
+}
+
+.star-2 {
+  top: 30%;
+  right: 15%;
+}
+
+.star-3 {
+  bottom: 20%;
+  left: 10%;
+}
+
+.star-4 {
+  top: 60%;
+  left: 30%;
+}
+
+.star-5 {
+  bottom: 40%;
+  right: 25%;
+}
+.dark .about-us {
+  background-color: var(--secondary);
+}
+@media (max-width: 1000px) {
+  .about-container {
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.about-container {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 60px;
+}
+
+.about-content {
+  flex: 1;
+}
+
+.about-text {
+  max-width: 500px;
+}
+
+.about-title {  
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: #333;
+  line-height: 1.2;
+  margin-bottom: 24px;
+  font-family: Outfit, sans-serif;
+}
+.dark .about-title {
+  color: var(--primary-text);
+}
+
+.about-description {
+  font-size: 1.5rem;
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 32px;
+  font-family: Outfit, sans-serif;
+}
+.dark .about-description {
+  color: var(--primary-text);
+}
+.about-features {
+  display: flex;
+  flex-direction: row;
+  gap: 50px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+.feature-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.feature-icon i {
+  color: #fff;
+  font-size: 0.8rem;
+}
+
+.feature-content {
+  flex: 1;
+}
+
+.feature-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+  font-family: Outfit, sans-serif;
+}
+
+.feature-description {
+  font-size: 0.95rem;
+  color: #666;
+  line-height: 1.5;
+  font-family: Outfit, sans-serif;
+}
+.dark .feature-title {
+  color: var(--primary-text);
+}
+.dark .feature-description {
+  color: var(--primary-text);
+}
+
+.about-btn {
+  background: #625397;
+  color: #fff;
+  border: none;
+  border-radius: 30px;
+  padding: 14px 32px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-family: Outfit, sans-serif;
+}
+.dark .about-btn {
+  background: var(--primary-color);
+}
+
+.about-btn:hover {
+  background: #4e3b7a;
+}
+
+.about-images {
+  flex: 1;
+  position: relative;
+  height: 600px;
+}
+
+.image-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.circular-image {
+  position: absolute;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  border-radius: 240px;
+}
+
+.about-images{
+  background-color: var(--secondary);
+}
 .circular-image img {
   width: 100%;
   height: 100%;
@@ -300,9 +500,13 @@ export default {
 }
 
 @media (max-width: 768px) {
+  .about-us {
+    min-height: 300vh;
+  }
   .about-container {
     flex-direction: column;
     gap: 40px;
+    
   }
   
   .about-title {
@@ -314,35 +518,42 @@ export default {
   }
   
   .about-images {
-    height: 400px;
+    height: 500px;
     position: relative;
+    order: 2; /* Move images below content */
+  }
+  
+  .about-content {
+    order: 1; /* Move content above images */
   }
   
   .circular-image {
-    width: 150px;
-    height: 150px;
+    width: 50px;
+    height: 50px;
   }
   
   .top-right {
-    width: 180px;
-    height: 220px;
-    top: -30px;
-    right: 40px;
+    width: 140px;
+    height: 180px;
+    top: -20px;
+    right: 30px;
   }
   
   .middle {
-    width: 220px;
-    height: 300px;
+    width: 180px;
+    height: 240px;
     top: 50%;
     left: 50%;
+    transform: translate(-50%, -50%);
   }
   
   .bottom-right {
-    width: 160px;
-    height: 200px;
-    bottom: -20px;
-    right: 20px;
+    width: 120px;
+    height: 160px;
+    bottom: -10px;
+    right: 15px;
   }
+  
   .star-1 {
     top: 5%;
     left: 15%;
@@ -407,23 +618,65 @@ export default {
   }
   
   .about-images {
-    height: 300px;
-    display: none; /* Hide images on small screens */
+    height: 250px;
+    order: 2;
   }
   
   .circular-image {
-    display: none; /* Hide all circular images */
+    width: 80px;
+    height: 80px;
+  }
+  
+  .top-right {
+    width: 100px;
+    height: 130px;
+    top: -4px;
+    left: -10px;
+  }
+  
+  .middle {
+    width: 120px;
+    height: 160px;
+    top: 200px;
+    left: -35px;
+    transform: translate(-50%, -50%);
+  }
+  
+  .bottom-right {
+    width: 90px;
+    height: 120px;
+    top: 130px;
+    left: 35px;
   }
   
   .star {
-    display: none; /* Hide all stars */
+    width: 6px;
+    height: 6px;
   }
   
-  /* Remove specific positioning since images are hidden */
-  .top-right,
-  .middle,
-  .bottom-right {
-    display: none;
+  .star-1 {
+    top: 5%;
+    left: 10%;
+  }
+  
+  .star-2 {
+    top: 20%;
+    right: 5%;
+  }
+  
+  .star-3 {
+    bottom: 10%;
+    left: 5%;
+  }
+  
+  .star-4 {
+    top: 50%;
+    left: 20%;
+  }
+  
+  .star-5 {
+    bottom: 30%;
+    right: 15%;
   }
 }
 </style> 

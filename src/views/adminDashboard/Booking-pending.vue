@@ -123,7 +123,7 @@ export default {
   background: #faf8fd;
 }
 .dark .admin-dashboard-layout {
-  background-color: var(--primary-bg);
+  background: var(--primary-bg);
 }
 .booking-main {
   flex: 1;
@@ -155,7 +155,7 @@ export default {
   margin-bottom: 0;
 }
 .dark .booking-title {
-  color: var(--primary-text);
+  color: var(--primary-color);
 }
 .search-wrapper {
   display: flex;
@@ -345,6 +345,35 @@ export default {
   color: #92400e !important;
   font-size: 0.75rem;
   font-weight: 600;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .layout{
+    min-height: auto;
+  }
+  .admin-dashboard-layout {
+    flex-direction: column;
+    min-height: auto;
+  }
+  
+  .booking-main {
+    padding: 0.5rem;
+    margin: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .booking-main {
+    margin-top: 70px;
+    padding: 0.25rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .booking-main {
+    margin-top: 60px;
+  }
 }
 
 @media (max-width: 768px) {

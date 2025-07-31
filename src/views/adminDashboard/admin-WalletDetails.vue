@@ -3,37 +3,37 @@
     <admin-sidebar />
     <div class="wallet-main mr-20 p-4">
       <div class="wallet-container">
-        <h2 class="wallet-title">Payouts Management</h2>
-        <div class="wallet-subtitle">Wallet Details</div>
+        <h2 class="wallet-title">{{ $t('payoutsManagement') }}</h2>
+        <div class="wallet-subtitle">{{ $t('walletDetails') }}</div>
         <div class="quick-actions-section">
           <div class="quick-actions">
             <a href="/admin-send-money" class="quick-action">
               <i class="fas fa-paper-plane"></i>
-              <span>Send Money</span>
+              <span>{{ $t('sendMoney') }}</span>
             </a>
             <div class="quick-action active">
               <i class="fas fa-wallet"></i>
-              <span>Wallet Details</span>
+              <span>{{ $t('walletDetails') }}</span>
             </div>
             <a href="/admin-payment" class="quick-action">
               <i class="fas fa-list"></i>
-              <span>All transaction</span>
+              <span>{{ $t('allTransactions') }}</span>
             </a>
           </div>
         </div>
         <div class="wallet-cards-section">
           <div class="wallet-cards">
             <div class="wallet-card">
-              <span class="wallet-card-label">Wallet Balance</span>
+              <span class="wallet-card-label">{{ $t('walletBalance') }}</span>
               <span class="wallet-card-value">${{ formatCurrency(walletData.balance) }}</span>
             </div>
             <div class="wallet-card">
-              <span class="wallet-card-label">Pending</span>
+              <span class="wallet-card-label">{{ $t('pending') }}</span>
               <span class="wallet-card-value">${{ formatCurrency(walletData.pending) }}</span>
             </div>
             <div class="wallet-card add-balance" @click="showAddBalanceModal">
               <i class="fas fa-plus add-balance-icon"></i>
-              <span class="add-balance-label">Add Balance</span>
+              <span class="add-balance-label">{{ $t('addBalance') }}</span>
             </div>
           </div>
         </div>
@@ -42,33 +42,33 @@
         <div v-if="showModal" class="modal-overlay" @click="closeModal">
           <div class="modal-content" @click.stop>
             <div class="modal-header">
-              <h3 class="modal-title">Add Balance</h3>
+              <h3 class="modal-title">{{ $t('addBalanceTitle') }}</h3>
               <button class="modal-close" @click="closeModal">
                 <i class="fas fa-times"></i>
               </button>
             </div>
             <div class="modal-body">
               <div class="form-group">
-                <label>Amount to Add:</label>
+                <label>{{ $t('amountToAdd') }}</label>
                 <input 
                   type="number" 
                   v-model="addAmount" 
-                  placeholder="Enter amount"
+                  :placeholder="$t('enterAmount')"
                   class="form-input"
                 />
               </div>
               <div class="form-group">
-                <label>Payment Method:</label>
+                <label>{{ $t('paymentMethod') }}</label>
                 <select v-model="paymentMethod" class="form-select">
-                  <option value="credit-card">Credit Card</option>
-                  <option value="bank-transfer">Bank Transfer</option>
-                  <option value="paypal">PayPal</option>
+                  <option value="credit-card">{{ $t('creditCard') }}</option>
+                  <option value="bank-transfer">{{ $t('bankTransfer') }}</option>
+                  <option value="paypal">{{ $t('paypal') }}</option>
                 </select>
               </div>
             </div>
             <div class="modal-footer">
-              <button class="btn-cancel" @click="closeModal">Cancel</button>
-              <button class="btn-submit" @click="addBalance">Add Balance</button>
+              <button class="btn-cancel" @click="closeModal">{{ $t('cancel') }}</button>
+              <button class="btn-submit" @click="addBalance">{{ $t('addBalanceButton') }}</button>
             </div>
           </div>
         </div>
@@ -127,7 +127,7 @@ export default {
     },
     addBalance() {
       if (!this.addAmount || this.addAmount <= 0) {
-        alert('Please enter a valid amount');
+        alert(this.$t('pleaseEnterValidAmount'));
         return;
       }
 
@@ -147,7 +147,7 @@ export default {
         });
 
         this.closeModal();
-        alert(`Successfully added $${this.formatCurrency(amount)} to your wallet!`);
+        alert(`${this.$t('successfullyAdded')} $${this.formatCurrency(amount)} ${this.$t('toYourWallet')}`);
       }, 1000);
     },
     getTransactionStatus(status) {
@@ -170,16 +170,20 @@ export default {
   min-height: 100vh;
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
   background: #faf8fd;
+  overflow-x: hidden;
 }
 
 .wallet-main {
   flex: 1;
   padding: 2.5rem;
+  overflow-y: auto;
+  min-height: 100vh;
 }
 
 .wallet-container {
   max-width: 80rem;
   margin: 0 auto;
+  padding: 0 1rem;
 }
 
 .wallet-title {
@@ -187,6 +191,7 @@ export default {
   font-weight: bold;
   color: #7c6bb0;
   margin-bottom: 0;
+  word-wrap: break-word;
 }
 
 .wallet-subtitle {
@@ -194,6 +199,7 @@ export default {
   font-weight: 600;
   color: #7c6bb0;
   margin-bottom: 2rem;
+  word-wrap: break-word;
 }
 
 .quick-actions-section {
@@ -204,6 +210,7 @@ export default {
   display: flex;
   gap: 1rem;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
 .quick-action {
@@ -221,6 +228,8 @@ export default {
   cursor: pointer;
   color: #333;
   min-width: 120px;
+  text-align: center;
+  word-wrap: break-word;
 }
 
 .quick-action i {
@@ -246,6 +255,7 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  width: 100%;
 }
 
 .wallet-card {
@@ -260,6 +270,7 @@ export default {
   padding: 2.5rem 1.5rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   text-align: center;
+  min-height: 120px;
 }
 
 .wallet-card-label {
@@ -314,6 +325,8 @@ export default {
   width: 90%;
   max-width: 500px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .modal-header {
@@ -412,36 +425,272 @@ export default {
   background: #5a4a8c;
 }
 
-@media (min-width: 768px) {
+/* Responsive Design */
+@media (min-width: 1200px) {
+  .wallet-container {
+    max-width: 90rem;
+  }
+  
   .wallet-cards {
     flex-direction: row;
+    gap: 2.5rem;
+  }
+  
+  .wallet-card {
+    padding: 3rem 2rem;
+  }
+  
+  .quick-actions {
+    gap: 1.5rem;
+  }
+  
+  .quick-action {
+    min-width: 150px;
+    padding: 1.25rem 2rem;
   }
 }
 
-@media (max-width: 768px) {
+@media (min-width: 768px) and (max-width: 1199px) {
+  .wallet-cards {
+    flex-direction: row;
+    gap: 1.5rem;
+  }
+  
+  .wallet-card {
+    padding: 2.5rem 1.5rem;
+  }
+  
+  .quick-actions {
+    gap: 1.25rem;
+  }
+  
+  .quick-action {
+    min-width: 130px;
+    padding: 1.1rem 1.75rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .admin-dashboard-layout {
+    min-height: 10vh;
+    flex-direction: column;
+  }
+  
   .wallet-main {
     padding: 1rem;
+    margin-right: 0;
   }
+  
+  .wallet-container {
+    max-width: 100%;
+  }
+  
+  .wallet-title {
+    font-size: 1.75rem;
+    text-align: center;
+  }
+  
+  .wallet-subtitle {
+    font-size: 1.1rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  
   .quick-actions {
     flex-direction: column;
     align-items: center;
+    gap: 1rem;
   }
+  
   .quick-action {
     width: 100%;
-    max-width: 200px;
+    max-width: 280px;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
   }
+  
+  .quick-action i {
+    font-size: 1.5rem;
+  }
+  
   .wallet-cards {
     gap: 1rem;
   }
+  
   .wallet-card {
     padding: 2rem 1rem;
   }
-  .wallet-card-value {
-    font-size: 1.875rem;
+  
+  .wallet-card-label {
+    font-size: 1rem;
   }
+  
+  .wallet-card-value {
+    font-size: 1.75rem;
+  }
+  
+  .add-balance-icon {
+    font-size: 1.5rem;
+  }
+  
+  .add-balance-label {
+    font-size: 1rem;
+  }
+  
   .modal-content {
     width: 95%;
     margin: 1rem;
+    padding: 1.5rem;
+  }
+  
+  .modal-title {
+    font-size: 1.25rem;
+  }
+  
+  .modal-footer {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .btn-cancel,
+  .btn-submit {
+    width: 100%;
+    padding: 0.875rem 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .wallet-main {
+    padding: 0.75rem;
+  }
+  
+  .wallet-title {
+    font-size: 1.5rem;
+  }
+  
+  .wallet-subtitle {
+    font-size: 1rem;
+  }
+  
+  .quick-action {
+    max-width: 250px;
+    padding: 0.875rem 1.25rem;
+    font-size: 0.95rem;
+  }
+  
+  .quick-action i {
+    font-size: 1.25rem;
+  }
+  
+  .wallet-card {
+    padding: 1.5rem 0.75rem;
+  }
+  
+  .wallet-card-label {
+    font-size: 0.95rem;
+  }
+  
+  .wallet-card-value {
+    font-size: 1.5rem;
+  }
+  
+  .add-balance-icon {
+    font-size: 1.25rem;
+  }
+  
+  .add-balance-label {
+    font-size: 0.95rem;
+  }
+  
+  .modal-content {
+    width: 98%;
+    margin: 0.5rem;
+    padding: 1.25rem;
+  }
+  
+  .modal-title {
+    font-size: 1.125rem;
+  }
+  
+  .form-input,
+  .form-select {
+    padding: 0.625rem 0.875rem;
+    font-size: 0.95rem;
+  }
+  
+  .btn-cancel,
+  .btn-submit {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.95rem;
+  }
+}
+
+/* Landscape orientation for mobile */
+@media (max-width: 767px) and (orientation: landscape) {
+  .wallet-main {
+    padding: 0.5rem;
+  }
+  
+  .wallet-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .wallet-subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+  
+  .quick-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+  }
+  
+  .quick-action {
+    max-width: 150px;
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+  }
+  
+  .wallet-cards {
+    flex-direction: row;
+    gap: 0.75rem;
+  }
+  
+  .wallet-card {
+    padding: 1.25rem 0.75rem;
+  }
+  
+  .wallet-card-label {
+    font-size: 0.85rem;
+  }
+  
+  .wallet-card-value {
+    font-size: 1.25rem;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .wallet-card {
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  }
+  
+  .quick-action {
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .quick-action,
+  .add-balance,
+  .btn-cancel,
+  .btn-submit,
+  .modal-close {
+    transition: none;
   }
 }
 </style>

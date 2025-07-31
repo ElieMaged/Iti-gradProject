@@ -1,8 +1,8 @@
 // AdminProfile.vue
 <template>
   <div class="admin-dashboard-layout">
-    <admin-sidebar />
-    <div id="admin-profile-container">
+    <AdminSidebar />
+    <div id="admin-profile-container" class="mr-20 p-4">
       <div id="admin-profile-wrapper">
         <div id="admin-profile-card">
           <h2 id="admin-profile-title">{{ $t('personalInformation') }}</h2>
@@ -58,7 +58,6 @@ export default {
 <style scoped>
 .admin-dashboard-layout {
   display: flex;
-  min-height: 100vh;
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
   background: #faf8fd;
 }
@@ -67,7 +66,6 @@ export default {
 }
 #admin-profile-container {
   background-color: #f9fafb;
-  min-height: 100vh;
   font-family: sans-serif;
   flex: 1;
 }
@@ -75,9 +73,7 @@ export default {
   background-color: var(--primary-bg);
 }
 #admin-profile-wrapper {
-  padding: 2rem;
   max-width: 1000px;
-  margin: 0 auto;
 }
 
 #admin-profile-card {
@@ -96,7 +92,7 @@ export default {
   margin-bottom: 1.5rem;
 }
 .dark #admin-profile-title {
-  color: var(--white);
+  color: var(--primary-color);
 }
 
 /* RTL Support for Arabic */
@@ -151,7 +147,7 @@ export default {
   margin-top: 0.25rem;
 }
 .dark .info-value {
-  color: var(--primary-text-dark);
+  color: var(--text-muted);
 }
 #admin-profile-image {
   flex-shrink: 0;
@@ -165,14 +161,114 @@ export default {
   margin: 0 auto;
 }
 .dark #admin-profile-image {
-  background-color: var(--primary-bg);
+  background-color: var(--input-bg);
 }
 
 #profile-icon {
   font-size: 3.5rem;
-  color: #9ca3af;
+  color: var(--icon-color);
 }
 .dark #profile-icon {
-  color: var(--white);
+  color: var(--text-muted);
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .layout{
+    min-height: auto;
+  }
+  .admin-dashboard-layout {
+    flex-direction: column;
+    min-height: auto;
+  }
+
+  #admin-profile-container {
+    min-height: auto;
+    margin-top: 30px;
+    padding: 0.5rem;
+  }
+
+  #admin-profile-wrapper {
+    padding: 1rem;
+  }
+
+  #admin-profile-card {
+    padding: 1.5rem;
+  }
+
+  #admin-profile-title {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+  }
+
+  #admin-profile-content {
+    gap: 1.5rem;
+  }
+
+  #admin-profile-info {
+    gap: 1rem;
+  }
+
+  .info-label {
+    font-size: 1rem;
+  }
+
+  .info-value {
+    font-size: 0.9rem;
+  }
+
+  #admin-profile-image {
+    width: 8rem;
+    height: 8rem;
+  }
+
+  #profile-icon {
+    font-size: 3rem;
+  }
+}
+
+@media (max-width: 480px) {
+  #admin-profile-container {
+    margin-top: 70px;
+    padding: 0.25rem;
+  }
+
+  #admin-profile-wrapper {
+    padding: 0.5rem;
+  }
+
+  #admin-profile-card {
+    padding: 1rem;
+  }
+
+  #admin-profile-title {
+    font-size: 1.2rem;
+    margin-bottom: 0.8rem;
+  }
+
+  #admin-profile-content {
+    gap: 1rem;
+  }
+
+  #admin-profile-info {
+    gap: 0.8rem;
+  }
+
+  .info-label {
+    font-size: 0.9rem;
+  }
+
+  .info-value {
+    font-size: 0.85rem;
+  }
+
+  #admin-profile-image {
+    width: 6rem;
+    height: 6rem;
+  }
+
+  #profile-icon {
+    font-size: 2.5rem;
+  }
 }
 </style>

@@ -11,10 +11,6 @@
         </div>
         <h3 class="service-title">{{ $t(service.title) }}</h3>
         <p class="service-description">{{ $t(service.description) }}</p>
-        <button class="get-started-btn" @click="$router.push('/allservices')">
-          {{ $t('getStartedButtonText') }}
-          <i class="fas fa-arrow-right"></i>
-        </button>
       </div>
     </div>
   </section>
@@ -70,13 +66,12 @@ export default {
   margin-bottom: 20px;
 }
 .dark .services-header {
-  background-color: var(--secondary-bg);
   color: var(--primary-text);
 }
 
 .commitment-title {
   font-family: Outfit, sans-serif;
-  font-size: 2.5rem;
+  font-size: 3.5rem;
   font-style: normal;
   font-weight: 700;
   line-height: 1.2;
@@ -89,9 +84,9 @@ export default {
 
 .commitment-description {
   font-family: Outfit, sans-serif;
-  font-size: 16px;
+  font-size: 1rem;
   font-style: normal;
-  font-weight: 600;
+  font-weight: 400;
   line-height: 24px;
 }
 .dark .commitment-description {
@@ -138,50 +133,26 @@ export default {
 }
 
 .service-title {
-  font-size: 1.3rem;
+  font-size: 2rem;
   font-weight: 700;
   color: #333;
-  margin-bottom: 16px;
+  margin: 16px;
   font-family: Outfit, sans-serif;
 }
 .dark .service-title {
   color: var(--primary-text);
 }
 .service-description {
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: #666;
   line-height: 1.5;
-  margin-bottom: 24px;
+  margin: 16px;
   font-family: Outfit, sans-serif;
+  text-align: center;
+  align-items: center;
 }
 .dark .service-description {
   color: var(--text-muted);
-}
-.get-started-btn {
-  color: var(--primary-color);
-  margin-left: 100px;
-  border: none;
-  border-radius: 25px;
-  padding: 10px 16px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  justify-content: flex-end;
-  transition: background 0.2s;
-
-}
-.dark .get-started-btn {
-  color: var(--primary-text);
-}
-.get-started-btn:hover {
-  border: 1px solid var(--primary-color);
-}
-
-.get-started-btn i {
-  font-size: 0.8rem;
 }
 
 /* Responsive design */

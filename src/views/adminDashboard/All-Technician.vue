@@ -197,7 +197,36 @@ export default {
   background: #faf8fd;
 }
 .dark .admin-dashboard-layout {
-  background-color: var(--primary-bg);
+  background: var(--primary-bg);
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .layout{
+    min-height: auto;
+  }
+  .admin-dashboard-layout {
+    flex-direction: column;
+    min-height: auto;
+  }
+  
+  .technicians-main {
+    margin:20px;
+    padding: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .technicians-main {
+    margin-top: 70px;
+    padding: 0.25rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .technicians-main {
+    margin-top: 60px;
+  }
 }
 .technicians-main {
   flex: 1;
@@ -220,7 +249,7 @@ export default {
   margin-bottom: 0;
 }
 .dark .technicians-title {
-  color: var(--primary-text);
+  color: var(--primary-color);
 }
 .subtitle-search-row {
   display: flex;
@@ -235,7 +264,7 @@ export default {
   color: #7c6bb0;
 }
 .dark .technicians-subtitle {
-  color: var(--primary-text);
+  color: var(--primary-color);
 }
 .search-wrapper {
   display: flex;

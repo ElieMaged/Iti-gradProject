@@ -159,7 +159,7 @@ export default {
   padding: 2rem;
 }
 .dark .edit-profile-header h2 {
-  color: var(--primary-text);
+  color: var(--primary-color);
 }
 .dark .edit-profile-card {
   background: var(--grey-bg);
@@ -199,7 +199,7 @@ export default {
   margin-bottom: 0.25rem;
 }
 .dark .edit-profile-fields label {
-  color: var(--primary-text-dark);
+  color: var(--primary-text);
 }
 .edit-profile-fields input {
   width: 100%;
@@ -259,7 +259,7 @@ export default {
   background: #7c6bb0;
   color: #fff;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: 2rem;
   padding: 0.5rem 1.5rem;
   font-size: 1rem;
   font-weight: 500;
@@ -290,7 +290,7 @@ export default {
   margin-bottom: 1rem;
 }
 .dark .edit-profile-section h3 {
-  color: var(--primary-text-dark);
+  color: var(--primary-text);
 }
 .edit-profile-address {
   display: grid;
@@ -309,7 +309,7 @@ export default {
   margin-bottom: 0.25rem;
 }
 .dark .edit-profile-address label {
-  color: var(--primary-text-dark);
+  color: var(--primary-text);
 }
 .edit-profile-address select {
   width: 100%;
@@ -350,7 +350,7 @@ export default {
   margin-bottom: 0.25rem;
 }
 .dark .edit-profile-password label {
-  color: var(--primary-text-dark);
+  color: var(--primary-text);
 }
 .edit-profile-password input {
   width: 100%;
@@ -400,6 +400,37 @@ export default {
 .dark .save-btn:hover {
   background: var(--primary);
   color: var(--primary-text);
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .layout{
+    min-height: auto;
+  }
+  .admin-dashboard-layout {
+    flex-direction: column;
+    min-height: auto;
+    
+  }
+  
+  .edit-profile-main {
+    margin-top: 30px;
+    padding: 0.5rem;
+    margin: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .edit-profile-main {
+    margin-top: 70px;
+    padding: 0.5rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .edit-profile-main {
+    margin-top: 60px;
+  }
 }
 </style>
   

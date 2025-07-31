@@ -264,7 +264,7 @@ export default {
 }
 
 @media (max-width: 768px) {
-  .send-money-main {
+   .send-money-main {
     padding: 1rem;
   }
   .quick-actions {

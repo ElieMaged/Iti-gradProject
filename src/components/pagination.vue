@@ -89,7 +89,9 @@
     box-shadow: 0 2px 12px 0 rgba(124,107,176,0.08);
     padding: 6px 12px;
   }
-
+  .dark .pagination {
+    background: var(--primary-bg);
+  }
   .page-btn {
     min-width: 36px;
     height: 36px;
@@ -108,32 +110,48 @@
     align-items: center;
     justify-content: center;
   }
-
+  .dark .page-btn {
+    background: var(--primary-bg);
+    color: var(--primary-color);
+  }
   .page-btn:hover:not(.active):not(.disabled):not(.ellipsis) {
     background: #e6e0f3;
     color: #4e3b7a;
     box-shadow: 0 1px 4px 0 rgba(124,107,176,0.10);
   }
-
+  .dark .page-btn:hover:not(.active):not(.disabled):not(.ellipsis) {
+    background: var(--primary-bg);
+    color: var(--primary-color);
+  }
   .page-btn.active {
     background: #7c6bb0;
     color: #fff;
     font-weight: 600;
     box-shadow: 0 2px 8px 0 rgba(124,107,176,0.16);
   }
-
+  .dark .page-btn.active {
+    background: var(--grey-bg);
+    color: var(--primary-color);
+  }
   .page-btn.disabled {
     pointer-events: none;
     opacity: 0.5;
     background: #f3f0fa;
     color: #b6a7e6;
   }
-
+  .dark .page-btn.disabled {
+    background: var(--primary-bg);
+    color: var(--primary-color);
+  }
   .page-btn.ellipsis {
     cursor: default;
     pointer-events: none;
     background: transparent;
     color: #b6a7e6;
+  }
+  .dark .page-btn.ellipsis {
+    background: var(--primary-bg);
+    color: var(--primary-color);
   }
   </style>
   

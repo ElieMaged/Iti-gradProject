@@ -67,6 +67,27 @@ const messages = {
     paypalOrderId: "PayPal Order ID",
     status: "Status",
     actions: "Actions",
+    
+    // Admin Wallet Details
+    payoutsManagement: "Payouts Management",
+    walletDetails: "Wallet Details",
+    sendMoney: "Send Money",
+    allTransactions: "All Transactions",
+    walletBalance: "Wallet Balance",
+    pending: "Pending",
+    addBalance: "Add Balance",
+    addBalanceTitle: "Add Balance",
+    amountToAdd: "Amount to Add:",
+    enterAmount: "Enter amount",
+    paymentMethod: "Payment Method:",
+    creditCard: "Credit Card",
+    bankTransfer: "Bank Transfer",
+    paypal: "PayPal",
+    cancel: "Cancel",
+    addBalanceButton: "Add Balance",
+    pleaseEnterValidAmount: "Please enter a valid amount",
+    successfullyAdded: "Successfully added",
+    toYourWallet: "to your wallet!",
     // Admin Pending Technicians
     pendingTechnicianApplications: "Pending Technician Applications",
     reviewApplications: "Review Applications",
@@ -1153,6 +1174,14 @@ const messages = {
     status: 'Status',
     actions: 'Actions',
     cancel: 'Cancel',
+
+    //admin-payment.vue
+    paymentManagement: 'Payment Management',
+    paymentDetails: 'Payment Details',
+    paymentMethod: 'Payment Method',
+    paymentStatus: 'Payment Status',
+    paymentDate: 'Payment Date',
+    paymentAmount: 'Payment Amount',
       },
 
   ar: {
@@ -1258,6 +1287,28 @@ const messages = {
     paypalOrderId: 'معرف طلب PayPal',
     status: 'الحالة',
     actions: 'الإجراءات',
+    
+    // Admin Wallet Details
+    payoutsManagement: 'إدارة المدفوعات',
+    walletDetails: 'تفاصيل المحفظة',
+    sendMoney: 'إرسال أموال',
+    allTransactions: 'جميع المعاملات',
+    walletBalance: 'رصيد المحفظة',
+    pending: 'معلق',
+    addBalance: 'إضافة رصيد',
+    addBalanceTitle: 'إضافة رصيد',
+    amountToAdd: 'المبلغ المراد إضافته:',
+    enterAmount: 'أدخل المبلغ',
+    paymentMethod: 'طريقة الدفع:',
+    creditCard: 'بطاقة ائتمان',
+    bankTransfer: 'تحويل بنكي',
+    paypal: 'باي بال',
+    cancel: 'إلغاء',
+    addBalanceButton: 'إضافة رصيد',
+    pleaseEnterValidAmount: 'يرجى إدخال مبلغ صحيح',
+    successfullyAdded: 'تمت الإضافة بنجاح',
+    toYourWallet: 'إلى محفظتك!',
+    
     // Admin Pending Technicians
     pendingTechnicianApplications: 'طلبات الفنيين المعلقة',
     reviewApplications: 'مراجعة الطلبات',
@@ -2249,6 +2300,22 @@ const messages = {
     status: 'الحالة',
     actions: 'الإجراءات',
     cancel: 'إلغاء',
+
+    //admin-WalletDetails.vue
+    payoutsManagement: 'إدارة المدفوعات',
+    walletDetails: 'تفاصيل المحفظة',
+    sendMoney: 'إرسال المال',
+    allTransactions: 'جميع المعاملات',
+    addBalanceTitle: 'إضافة الرصيد',
+    amountToAdd: 'المبلغ المراد إضافته',
+
+    //admin-payment.vue
+    paymentManagement: 'إدارة الدفع',
+    paymentDetails: 'تفاصيل الدفع',
+    paymentMethod: 'طريقة الدفع',    
+    paymentStatus: 'حالة الدفع',
+    paymentDate: 'تاريخ الدفع',
+    paymentAmount: 'المبلغ',    
       },
 };
 

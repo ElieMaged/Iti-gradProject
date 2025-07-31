@@ -1,86 +1,83 @@
 <template>
-  <div class="bg-gray-50">
-    <div class="flex">
-      <!-- Sidebar -->
-      <Sidebar />
-
+  <div id="profile-container">
+    <div id="profile-layout">  
       <!-- Main Content -->
-      <main class="flex-1 p-8 bg-white">
+      <main id="profile-main">
         <!-- Loading State -->
-        <div v-if="loading" class="text-center py-8">
-          <p class="text-lg text-gray-600">{{ $t('loadingProfileData') }}</p>
+        <div v-if="loading" id="loading-container">
+          <p id="loading-text">{{ $t('loadingProfileData') }}</p>
         </div>
 
         <!-- Error State -->
-        <div v-else-if="error" class="text-center py-8">
-          <p class="text-lg text-red-600">{{ error }}</p>
+        <div v-else-if="error" id="error-container">
+          <p id="error-text">{{ error }}</p>
         </div>
 
         <!-- Profile Content -->
         <div v-else-if="technicianData">
           <!-- Personal Information Section -->
-          <div class="mb-8">
-            <div class="flex justify-between items-center mb-6">
-              <h2 class="text-2xl font-bold title">{{ $t('personalInformation') }}</h2>
-              <button class="bg-purple-300 text-white px-4 py-2 rounded-lg hover:bg-purple-400 transition-colors">
+          <div id="personal-info-section">
+            <div id="section-header">
+              <h2 id="section-title">{{ $t('personalInformation') }}</h2>
+              <button id="edit-button">
                 {{ $t('edit') }}
               </button>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div id="profile-grid">
               <!-- Form Fields -->
-              <div class="lg:col-span-2 space-y-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('fullName') }}</label>
-                  <input type="text" :value="technicianData.fullName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" readonly />
+              <div id="form-fields">
+                <div class="form-field">
+                  <label class="field-label">{{ $t('fullName') }}</label>
+                  <input type="text" :value="technicianData.fullName" class="form-input" readonly />
                 </div>
                 
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('emailAddress') }}</label>
-                  <input type="email" :value="technicianData.email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" readonly />
+                <div class="form-field">
+                  <label class="field-label">{{ $t('emailAddress') }}</label>
+                  <input type="email" :value="technicianData.email" class="form-input" readonly />
                 </div>
                 
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('phoneNumber') }}</label>
-                  <input type="tel" :value="technicianData.phone || '+20 111 222 5555'" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+                <div class="form-field">
+                  <label class="field-label">{{ $t('phoneNumber') }}</label>
+                  <input type="tel" :value="technicianData.phone || '+20 111 222 5555'" class="form-input" />
                 </div>
 
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('specialization') }}</label>
-                  <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                <div class="form-field">
+                  <label class="field-label">{{ $t('specialization') }}</label>
+                  <select class="form-select">
                     <option :selected="technicianData.specialization">{{ technicianData.specialization }}</option>
                   </select>
                 </div>
                 
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('yearsOfExperience') }}</label>
-                  <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                <div class="form-field">
+                  <label class="field-label">{{ $t('yearsOfExperience') }}</label>
+                  <select class="form-select">
                     <option :selected="technicianData.experience">{{ technicianData.experience }} {{ $t('years') }}</option>
                   </select>
                 </div>
 
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('baseVisitPrice') }}</label>
-                  <input type="text" :value="technicianData.basePrice + ' ' + $t('egp')" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+                <div class="form-field">
+                  <label class="field-label">{{ $t('baseVisitPrice') }}</label>
+                  <input type="text" :value="technicianData.basePrice + ' ' + $t('egp')" class="form-input" />
                 </div>
 
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('about') }}</label>
-                  <textarea rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">{{ technicianData.bio }}</textarea>
+                <div class="form-field">
+                  <label class="field-label">{{ $t('about') }}</label>
+                  <textarea rows="3" class="form-textarea">{{ technicianData.bio }}</textarea>
                 </div>
               </div>
 
               <!-- Profile Picture -->
-              <div class="flex flex-col items-center space-y-4">
-                <div class="w-36 h-36 rounded-lg overflow-hidden bg-gray-200">
-                  <img v-if="technicianData.idPhotoUrl" :src="technicianData.idPhotoUrl" alt="Profile" class="w-full h-full object-cover" />
-                  <div v-else class="w-full h-full flex items-center justify-center text-gray-500">
-                    <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+              <div id="profile-picture-section">
+                <div id="profile-picture-container">
+                  <img v-if="technicianData.idPhotoUrl" :src="technicianData.idPhotoUrl" alt="Profile" id="profile-image" />
+                  <div v-else id="profile-placeholder">
+                    <svg id="profile-icon" fill="currentColor" viewBox="0 0 20 20">
                       <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
                     </svg>
                   </div>
                 </div>
-                <button class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                <button id="change-photo-button">
                   {{ $t('changePhoto') }}
                 </button>
               </div>
@@ -88,24 +85,21 @@
           </div>
 
           <!-- Account Status -->
-          <div class="mb-8 border-t pt-8">
-            <div class="flex justify-between items-center mb-6">
-              <h3 class="text-xl font-bold text-purple-800">{{ $t('accountStatus') }}</h3>
+          <div id="account-status-section">
+            <div id="status-header">
+              <h3 id="status-title">{{ $t('accountStatus') }}</h3>
             </div>
-            <div class="flex items-center space-x-4">
-              <span class="text-gray-700 font-medium">{{ $t('status') }}:</span>
-              <span :class="[
-                'px-3 py-1 rounded-full text-sm font-medium',
-                technicianData.status === 'approved' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-              ]">
+            <div id="status-content">
+              <span id="status-label">{{ $t('status') }}:</span>
+              <span :id="technicianData.status === 'approved' ? 'status-approved' : 'status-pending'">
                 {{ technicianData.status === 'approved' ? $t('approved') : $t('pendingApproval') }}
               </span>
             </div>
           </div>
 
           <!-- Save Changes Button -->
-          <div class="flex justify-end">
-            <button class="bg-purple-600 text-white px-8 py-3 rounded-lg hover:bg-purple-700 transition-colors font-medium text-lg">
+          <div id="save-button-container">
+            <button id="save-button">
               {{ $t('saveChanges') }}
             </button>
           </div>

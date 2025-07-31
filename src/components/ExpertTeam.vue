@@ -16,28 +16,35 @@
     </div>
 
     <div v-else class="team-cards">
-      <button @click="prevSlide" :disabled="currentIndex === 0" class="slider-btn">
-        <i class="fas fa-arrow-left"></i>
-      </button>
       <div v-for="(member, index) in teamMembers.slice(currentIndex, currentIndex + 4)" :key="member.id" class="team-card">
         <div class="member-image">
           <img :src="member.image" :alt="member.name" class="member-photo" />
         </div>
         <div class="member-info">
           <h3 class="member-name">{{ $t(member.name) }}</h3>
+          <div class="member-specialization">{{ member.specialization }}</div>
+          <div class="member-location">{{ member.location }}</div>
           <div class="member-rating">
             <i v-for="star in Math.floor(member.rating || 5)" :key="star" class="fas fa-star"></i>
           </div>
           <p class="member-description">{{ $t(member.description) }}</p>
+          <div class="member-experience">{{ member.experience }} {{ $t('yearsOfExperience') }}</div>
           <button class="view-profile-btn" @click="viewProfile(member)">
             {{ $t('viewProfile') }}
             <i class="fas fa-arrow-right arrow-right"></i>
           </button>
         </div>
       </div>
-      <button @click="nextSlide" :disabled="currentIndex + 4 >= teamMembers.length" class="slider-btn">
-        <i class="fas fa-arrow-right"></i>
-      </button>
+    </div>
+
+    <!-- Points navigation -->
+    <div class="slider-points" v-if="teamMembers.length > 4">
+      <div 
+        v-for="(point, index) in totalSlides" 
+        :key="index"
+        @click="goToSlide(index)"
+        :class="['slider-point', { active: currentSlideIndex === index }]"
+      ></div>
     </div>
   </section>
 </template>
@@ -54,10 +61,21 @@ export default {
       teamMembers: [],
       loading: true,
       currentIndex: 0, // start of the visible window
+      currentSlideIndex: 0, // current slide index for points
+      autoSlideInterval: null,
     };
+  },
+  computed: {
+    totalSlides() {
+      return Math.ceil(this.teamMembers.length / 4);
+    }
   },
   async mounted() {
     await this.fetchTechnicians();
+    this.startAutoSlide();
+  },
+  beforeUnmount() {
+    this.stopAutoSlide();
   },
   methods: {
     async fetchTechnicians() {
@@ -75,6 +93,13 @@ export default {
             image: data.idPhotoUrl || data.profileImage || '/images/Avatar.png',
             description: data.bio || data.description || 'Professional technician with years of experience.',
             rating: data.averageRating || 4.5,
+            specialization: data.specialization || 'General Technician',
+            experience: data.experience || data.yearsOfExperience ? `${data.yearsOfExperience || data.experience}+ years` : '5+ years',
+            basePrice: data.basePrice || '300',
+            status: data.status || 'approved',
+            location: data.government || data.location || 'Cairo',
+            phone: data.phone || '+20 111 222 3333',
+            email: data.email || 'technician@example.com'
           });
         });
 
@@ -87,6 +112,13 @@ export default {
               image: tech.image || '/images/Avatar.png',
               description: tech.description,
               rating: tech.rating || 4.5,
+              specialization: tech.specialization || 'General Technician',
+              experience: tech.yearsOfExperience ? `${tech.yearsOfExperience}+ years` : '5+ years',
+              basePrice: tech.price || '300',
+              status: 'approved',
+              location: tech.location || 'Cairo',
+              phone: tech.phone || '+20 111 222 3333',
+              email: 'technician@example.com'
             }));
       } catch (error) {
         console.error('Error fetching technicians:', error);
@@ -97,23 +129,76 @@ export default {
           image: tech.image || '/images/Avatar.png',
           description: tech.description,
           rating: tech.rating || 4.5,
+          specialization: tech.specialization || 'General Technician',
+          experience: tech.yearsOfExperience ? `${tech.yearsOfExperience}+ years` : '5+ years',
+          basePrice: tech.price || '300',
+          status: 'approved',
+          location: tech.location || 'Cairo',
+          phone: tech.phone || '+20 111 222 3333',
+          email: 'technician@example.com'
         }));
       } finally {
         this.loading = false;
       }
     },
     nextSlide() {
-      if (this.currentIndex + 4 < this.teamMembers.length) {
-        this.currentIndex += 4;
+      if (this.currentSlideIndex < this.totalSlides - 1) {
+        this.currentSlideIndex++;
+        this.currentIndex = this.currentSlideIndex * 4;
+      } else {
+        // Loop back to first slide
+        this.currentSlideIndex = 0;
+        this.currentIndex = 0;
       }
     },
     prevSlide() {
-      if (this.currentIndex - 4 >= 0) {
-        this.currentIndex -= 4;
+      if (this.currentSlideIndex > 0) {
+        this.currentSlideIndex--;
+        this.currentIndex = this.currentSlideIndex * 4;
+      } else {
+        // Loop to last slide
+        this.currentSlideIndex = this.totalSlides - 1;
+        this.currentIndex = this.currentSlideIndex * 4;
       }
     },
+    goToSlide(slideIndex) {
+      this.currentSlideIndex = slideIndex;
+      this.currentIndex = slideIndex * 4;
+      this.resetAutoSlide();
+    },
+    startAutoSlide() {
+      this.autoSlideInterval = setInterval(() => {
+        this.nextSlide();
+      }, 10000); // 10 seconds
+    },
+    stopAutoSlide() {
+      if (this.autoSlideInterval) {
+        clearInterval(this.autoSlideInterval);
+        this.autoSlideInterval = null;
+      }
+    },
+    resetAutoSlide() {
+      this.stopAutoSlide();
+      this.startAutoSlide();
+    },
     viewProfile(member) {
-      this.$router.push({ path: `/technician/${member.id}` });
+      // Navigate to technician profile with the specific technician's ID and all available data
+      this.$router.push({
+        path: `/texhView/${member.id}`,
+        query: { 
+          name: member.name,
+          specialization: member.specialization,
+          rating: member.rating,
+          experience: member.experience,
+          basePrice: member.basePrice,
+          bio: member.description,
+          location: member.location,
+          phone: member.phone,
+          email: member.email,
+          status: member.status,
+          image: member.image
+        }
+      });
     }
   }
 };
@@ -180,6 +265,7 @@ export default {
   gap: 20px;
   justify-content: center;
   width: 100%;
+  margin-bottom: 30px;
 }
 
 .dark .member-name {
@@ -193,8 +279,6 @@ export default {
 .dark .member-rating i {
   color: var(--primary-color);
 }
-
-
 
 .team-card {
   width: 300px;
@@ -244,6 +328,21 @@ export default {
   font-family: Outfit, sans-serif;
 }
 
+.member-specialization {
+  font-size: 0.9rem;
+  color: #625397;
+  margin-bottom: 4px;
+  font-weight: 600;
+  font-family: Outfit, sans-serif;
+}
+
+.member-location {
+  font-size: 0.9rem;
+  color: #8c8e90;
+  margin-bottom: 8px;
+  font-family: Outfit, sans-serif;
+}
+
 .member-rating {
   margin-bottom: 16px;
   display: flex;
@@ -261,6 +360,13 @@ export default {
   font-size: 0.9rem;
   color: #8c8e90;
   line-height: 1.5;
+  margin-bottom: 20px;
+  font-family: Outfit, sans-serif;
+}
+
+.member-experience {
+  font-size: 0.9rem;
+  color: #8c8e90;
   margin-bottom: 20px;
   font-family: Outfit, sans-serif;
 }
@@ -320,6 +426,49 @@ export default {
   100% {
     transform: rotate(360deg);
   }
+}
+
+/* Slider Points */
+.slider-points {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.slider-point {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #ddd;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.slider-point:hover {
+  background-color: #625397;
+  transform: scale(1.2);
+}
+
+.slider-point.active {
+  background-color: #625397;
+  transform: scale(1.3);
+  border-color: #625397;
+}
+
+.dark .slider-point {
+  background-color: #444;
+}
+
+.dark .slider-point:hover {
+  background-color: var(--primary-color);
+}
+
+.dark .slider-point.active {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
 }
 
 /* Responsive design */
@@ -421,33 +570,33 @@ export default {
     text-align: center;
   }
 
+  .member-specialization {
+    font-size: 0.8rem;
+    text-align: center;
+  }
+
+  .member-location {
+    font-size: 0.8rem;
+    text-align: center;
+  }
+
   .member-description {
     font-size: 0.85rem;
     text-align: center;
   }
-}
 
-.slider-btn {
-  background: #625397;
-  color: #fff;
-  border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
-  margin: 0 10px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.slider-btn:disabled {
-  background: #ccc;
-  color: #888;
-  cursor: not-allowed;
-}
-.slider-btn i {
-  pointer-events: none;
+  .member-experience {
+    font-size: 0.8rem;
+    text-align: center;
+  }
+
+  .slider-points {
+    gap: 8px;
+  }
+
+  .slider-point {
+    width: 10px;
+    height: 10px;
+  }
 }
 </style>

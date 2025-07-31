@@ -295,31 +295,55 @@ const canReview = computed(() => {
 
 onMounted(async () => {
   const id = route.params.id
-  // Try to find in stockTechnicians first
-  const stock = stockTechnicians.find(t => t.id === id)
-  if (stock) {
-    technician.value = stock
+  
+  // First check if technician data is passed via query parameters
+  if (route.query.name) {
+    // Use data from query parameters
+    technician.value = {
+      id: id,
+      name: route.query.name,
+      specialization: route.query.specialization,
+      rating: parseFloat(route.query.rating) || 4.5,
+      experience: route.query.experience,
+      basePrice: route.query.basePrice,
+      bio: route.query.bio,
+      location: route.query.location,
+      phone: route.query.phone,
+      email: route.query.email,
+      status: route.query.status,
+      image: route.query.image || 'https://randomuser.me/api/portraits/men/32.jpg',
+      government: route.query.location,
+      district: route.query.location,
+      fullName: route.query.name
+    }
     loading.value = false
   } else {
-    try {
-      const docRef = doc(db, 'technicians', id)
-      const docSnap = await getDoc(docRef)
-      if (docSnap.exists()) {
-        const data = docSnap.data()
-        technician.value = {
-          ...data,
-          name: data.fullName,
-          location: data.government,
-          price: data.basePrice,
-          image: data.profilePhotoUrl || data.idPhotoUrl || 'https://randomuser.me/api/portraits/men/32.jpg'
-        }
-      } else {
-        error.value = 'Technician profile not found.'
-      }
-    } catch (e) {
-      error.value = 'Error loading profile.'
-    } finally {
+    // Try to find in stockTechnicians first
+    const stock = stockTechnicians.find(t => t.id === id)
+    if (stock) {
+      technician.value = stock
       loading.value = false
+    } else {
+      try {
+        const docRef = doc(db, 'technicians', id)
+        const docSnap = await getDoc(docRef)
+        if (docSnap.exists()) {
+          const data = docSnap.data()
+          technician.value = {
+            ...data,
+            name: data.fullName,
+            location: data.government,
+            price: data.basePrice,
+            image: data.profilePhotoUrl || data.idPhotoUrl || 'https://randomuser.me/api/portraits/men/32.jpg'
+          }
+        } else {
+          error.value = 'Technician profile not found.'
+        }
+      } catch (e) {
+        error.value = 'Error loading profile.'
+      } finally {
+        loading.value = false
+      }
     }
   }
   await Promise.all([fetchReviews(), fetchUserBookings()])

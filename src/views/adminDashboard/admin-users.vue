@@ -259,6 +259,7 @@ export default {
   min-height: 100vh;
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
   background: #faf8fd;
+  overflow-x: hidden;
 }
 .dark .admin-dashboard-layout {
   background-color: var(--primary-bg);
@@ -266,6 +267,8 @@ export default {
 .users-main {
   flex: 1;
   padding: 2.5rem;
+  overflow-y: auto;
+  min-height: 100vh;
 }
 .dark .users-main {
   background-color: var(--primary-bg);
@@ -273,6 +276,7 @@ export default {
 .users-container {
   max-width: 80rem;
   margin: 0 auto;
+  padding: 0 1rem;
 }
 .dark .users-container {
   background-color: var(--primary-bg);
@@ -282,9 +286,10 @@ export default {
   font-weight: bold;
   color: #7c6bb0;
   margin-bottom: 0;
+  word-wrap: break-word;
 }
 .dark .users-title {
-  color: var(--primary-text);
+  color: var(--primary-color);
 }
 
 .subtitle-search-row {
@@ -292,15 +297,18 @@ export default {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .users-subtitle {
   font-size: 1.2rem;
   font-weight: 600;
   color: #7c6bb0;
+  word-wrap: break-word;
 }
 .dark .users-subtitle {
-  color: var(--primary-text);
+  color: var(--primary-color);
 }
 
 .search-wrapper {
@@ -356,6 +364,8 @@ export default {
   border-radius: 0.75rem;
   background: #fff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  max-height: none;
+  overflow-y: visible;
 }
 .dark .table-wrapper {
   background-color: var(--grey-bg);
@@ -528,25 +538,294 @@ export default {
   margin-top: 0.5rem;
 }
 
-@media (max-width: 768px) {
+/* Responsive Design */
+@media (min-width: 1200px) {
+  .users-container {
+    max-width: 90rem;
+  }
+  
+  .search-wrapper {
+    width: 450px;
+  }
+  
+  .users-table {
+    font-size: 1rem;
+  }
+  
+  .table-header th,
+  .table-row td {
+    padding: 1rem 1.5rem;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .search-wrapper {
+    width: 350px;
+  }
+  
+  .table-header th,
+  .table-row td {
+    padding: 0.75rem 1rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .admin-dashboard-layout {
+    flex-direction: column;
+    overflow-x: hidden;
+    height: 100vh;
+  }
+  
   .users-main {
     padding: 1rem;
+    margin-right: 0;
+    overflow-y: auto;
+    height: auto;
+    min-height: calc(100vh - 60px); /* Adjust for sidebar height */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
   }
+  
+  .users-container {
+    max-width: 100%;
+    padding-bottom: 2rem; /* Add bottom padding for better scrolling */
+  }
+  
+  .users-title {
+    font-size: 1.75rem;
+    text-align: center;
+  }
+  
   .subtitle-search-row {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
   }
+  
+  .users-subtitle {
+    font-size: 1.1rem;
+    text-align: center;
+    width: 100%;
+  }
+  
   .search-wrapper {
     width: 100%;
     max-width: none;
+    height: 45px;
   }
+  
+  .search-input {
+    font-size: 0.95rem;
+    padding: 0 16px 0 40px;
+  }
+  
   .table-wrapper {
     font-size: 0.8rem;
+    overflow-x: auto;
+    border-radius: 0.5rem;
   }
+  
+  .users-table {
+    min-width: 800px;
+  }
+  
   .table-header th,
   .table-row td {
-    padding: 0.5rem 0.5rem;
+    padding: 0.5rem 0.75rem;
+    white-space: nowrap;
+  }
+  
+  .user-cell {
+    gap: 0.25rem;
+  }
+  
+  .user-avatar {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  
+  .action-cell {
+    gap: 0.25rem;
+  }
+  
+  .action-btn {
+    padding: 0.25rem;
+    font-size: 0.9rem;
+  }
+  
+  .role-badge {
+    padding: 0.2rem 0.5rem;
+    font-size: 0.7rem;
+  }
+  
+  .loading-state, .error-state, .empty-state {
+    padding: 2rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .users-main {
+    padding: 0.75rem;
+    overflow-y: auto;
+    height: auto;
+    min-height: calc(100vh - 50px);
+  }
+  
+  .users-title {
+    font-size: 1.5rem;
+  }
+  
+  .users-subtitle {
+    font-size: 1rem;
+  }
+  
+  .search-wrapper {
+    height: 40px;
+  }
+  
+  .search-input {
+    font-size: 0.9rem;
+    padding: 0 12px 0 35px;
+  }
+  
+  .search-icon {
+    left: 12px;
+    font-size: 1rem;
+  }
+  
+  .table-wrapper {
+    font-size: 0.75rem;
+  }
+  
+  .table-header th,
+  .table-row td {
+    padding: 0.4rem 0.5rem;
+  }
+  
+  .user-avatar {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+  
+  .action-btn {
+    padding: 0.2rem;
+    font-size: 0.8rem;
+  }
+  
+  .role-badge {
+    padding: 0.15rem 0.4rem;
+    font-size: 0.65rem;
+  }
+  
+  .loading-spinner {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .error-message {
+    font-size: 0.9rem;
+  }
+  
+  .retry-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+  
+  .debug-info {
+    font-size: 0.8rem;
+  }
+}
+
+/* Landscape orientation for mobile */
+@media (max-width: 767px) and (orientation: landscape) {
+  .users-main {
+    padding: 0.5rem;
+    overflow-y: auto;
+    height: auto;
+    min-height: calc(100vh - 40px);
+  }
+  
+  .users-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .users-subtitle {
+    font-size: 0.9rem;
+  }
+  
+  .subtitle-search-row {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .search-wrapper {
+    width: 200px;
+    height: 35px;
+  }
+  
+  .table-wrapper {
+    font-size: 0.7rem;
+  }
+  
+  .table-header th,
+  .table-row td {
+    padding: 0.3rem 0.5rem;
+  }
+  
+  .user-avatar {
+    width: 1rem;
+    height: 1rem;
+  }
+  
+  .action-btn {
+    padding: 0.15rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .table-wrapper {
+    box-shadow: 0 0.5px 1.5px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .table-row,
+  .action-btn,
+  .retry-btn {
+    transition: none;
+  }
+  
+  .loading-spinner {
+    animation: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .admin-dashboard-layout {
+    display: block;
+  }
+  
+  .users-main {
+    padding: 0;
+  }
+  
+  .search-wrapper,
+  .action-cell {
+    display: none;
+  }
+  
+  .table-wrapper {
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+  
+  .table-row {
+    break-inside: avoid;
   }
 }
 </style>

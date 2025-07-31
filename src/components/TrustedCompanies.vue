@@ -39,7 +39,7 @@ export default {
   background-color: #F4F4F5;
 }
 .dark .trusted-section {
-  background-color: var(--grey-bg);
+  background-color: var(--primary-bg);
 }
 .trusted-header {
   padding-top: 40px;

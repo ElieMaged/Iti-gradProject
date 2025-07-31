@@ -354,6 +354,6 @@ export default {
 }
 
 .dark #profile-icon {
-  color: var(--white);
+  color: var(--grey-bg);
 }
 </style>
