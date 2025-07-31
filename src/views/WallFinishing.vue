@@ -102,7 +102,7 @@ import profile5 from '../assets/profile/5.jpg'
 import profile6 from '../assets/profile/6.png'
 import profile7 from '../assets/profile/7.png'
 import profile8 from '../assets/profile/8.png'
-import plumbingBg from '../assets/Professions/wall.jpg'
+import plumbingBg from '../assets/Professions/Wall.jpg'
 
 const router = useRouter()
 const loading = ref(true)
