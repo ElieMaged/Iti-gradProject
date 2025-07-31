@@ -362,4 +362,226 @@ export default {
 [dir="rtl"] .edit-profile-actions { justify-content: flex-start; }
 [dir="rtl"] .edit-profile-content { direction: rtl; }
 [dir="rtl"] .edit-profile-fields { direction: rtl; }
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .edit-profile-container {
+    padding: 1.5rem;
+  }
+  
+  .edit-profile-fields {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+  
+  .profile-image-container {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .profile-image-placeholder {
+    font-size: 3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .edit-profile-container {
+    padding: 1rem;
+    margin: 0.5rem;
+  }
+  
+  .edit-profile-header h2 {
+    font-size: 1.5rem;
+  }
+  
+  .edit-profile-content {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .edit-profile-fields {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .edit-profile-fields label {
+    font-size: 0.95rem;
+  }
+  
+  .edit-profile-fields input,
+  .edit-profile-fields select,
+  .edit-profile-fields textarea {
+    padding: 0.75rem;
+    font-size: 0.95rem;
+  }
+  
+  .profile-image-container {
+    width: 90px;
+    height: 90px;
+  }
+  
+  .profile-image-placeholder {
+    font-size: 2.5rem;
+  }
+  
+  .upload-btn {
+    padding: 0.6rem 1.25rem;
+    font-size: 0.9rem;
+  }
+  
+  .edit-profile-actions {
+    margin-top: 1.5rem;
+  }
+  
+  .save-btn {
+    padding: 0.6rem 2rem;
+    font-size: 1rem;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .edit-profile-container {
+    padding: 0.75rem;
+    margin: 0.25rem;
+  }
+  
+  .edit-profile-header h2 {
+    font-size: 1.25rem;
+  }
+  
+  .edit-profile-content {
+    gap: 1rem;
+  }
+  
+  .edit-profile-fields {
+    gap: 0.75rem;
+  }
+  
+  .edit-profile-fields label {
+    font-size: 0.9rem;
+  }
+  
+  .edit-profile-fields input,
+  .edit-profile-fields select,
+  .edit-profile-fields textarea {
+    padding: 0.6rem;
+    font-size: 0.9rem;
+  }
+  
+  .profile-image-container {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .profile-image-placeholder {
+    font-size: 2.25rem;
+  }
+  
+  .upload-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+  
+  .edit-profile-actions {
+    margin-top: 1rem;
+  }
+  
+  .save-btn {
+    padding: 0.5rem 1.5rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .edit-profile-container {
+    padding: 0.5rem;
+    margin: 0.125rem;
+  }
+  
+  .edit-profile-header h2 {
+    font-size: 1.1rem;
+  }
+  
+  .edit-profile-fields {
+    gap: 0.6rem;
+  }
+  
+  .edit-profile-fields label {
+    font-size: 0.85rem;
+  }
+  
+  .edit-profile-fields input,
+  .edit-profile-fields select,
+  .edit-profile-fields textarea {
+    padding: 0.5rem;
+    font-size: 0.85rem;
+  }
+  
+  .profile-image-container {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .profile-image-placeholder {
+    font-size: 2rem;
+  }
+  
+  .upload-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+  
+  .save-btn {
+    padding: 0.4rem 1.25rem;
+    font-size: 0.85rem;
+  }
+}
+
+/* Landscape orientation adjustments */
+@media (max-width: 768px) and (orientation: landscape) {
+  .edit-profile-container {
+    padding: 0.75rem;
+  }
+  
+  .edit-profile-content {
+    flex-direction: row;
+    gap: 1rem;
+  }
+  
+  .edit-profile-fields {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .profile-image-container {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .save-btn {
+    width: auto;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .profile-image {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .edit-profile-fields input,
+  .edit-profile-fields select,
+  .edit-profile-fields textarea {
+    transition: none;
+  }
+  
+  .upload-btn,
+  .save-btn {
+    transition: none;
+  }
+}
 </style> 

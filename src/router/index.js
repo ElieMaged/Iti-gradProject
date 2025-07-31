@@ -141,7 +141,7 @@ const router = createRouter({
 
 // Add global navigation guard for debugging
 router.beforeEach((to, from, next) => {
-  console.log('Navigation:', { from: from.path, to: to.path });
+  console.log('Navigation:', { from: from.path, to: to.path, params: to.params });
   
   // Check if trying to access admin routes
   if (to.path.startsWith('/admin-')) {

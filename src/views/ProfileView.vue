@@ -356,4 +356,186 @@ export default {
 .dark #profile-icon {
   color: var(--grey-bg);
 }
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  #admin-profile-container {
+    padding: 1.5rem;
+  }
+  
+  #admin-profile-info {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.25rem;
+  }
+  
+  #admin-profile-image {
+    width: 8rem;
+    height: 8rem;
+  }
+  
+  #profile-icon {
+    font-size: 3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  #admin-profile-container {
+    padding: 1rem;
+    margin: 0.5rem;
+  }
+  
+  #admin-profile-title {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  
+  #admin-profile-content {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  #admin-profile-info {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .info-block {
+    gap: 0.5rem;
+  }
+  
+  .info-label {
+    font-size: 1rem;
+  }
+  
+  .info-value {
+    font-size: 0.95rem;
+  }
+  
+  #admin-profile-image {
+    width: 6rem;
+    height: 6rem;
+  }
+  
+  #profile-icon {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  #admin-profile-container {
+    padding: 0.75rem;
+    margin: 0.25rem;
+  }
+  
+  #admin-profile-title {
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  #admin-profile-content {
+    gap: 1rem;
+  }
+  
+  #admin-profile-info {
+    gap: 0.75rem;
+  }
+  
+  .info-block {
+    gap: 0.4rem;
+  }
+  
+  .info-label {
+    font-size: 0.9rem;
+  }
+  
+  .info-value {
+    font-size: 0.85rem;
+  }
+  
+  #admin-profile-image {
+    width: 5rem;
+    height: 5rem;
+  }
+  
+  #profile-icon {
+    font-size: 2.25rem;
+  }
+}
+
+@media (max-width: 360px) {
+  #admin-profile-container {
+    padding: 0.5rem;
+    margin: 0.125rem;
+  }
+  
+  #admin-profile-title {
+    font-size: 1rem;
+    margin-bottom: 0.6rem;
+  }
+  
+  #admin-profile-content {
+    gap: 0.75rem;
+  }
+  
+  #admin-profile-info {
+    gap: 0.6rem;
+  }
+  
+  .info-block {
+    gap: 0.3rem;
+  }
+  
+  .info-label {
+    font-size: 0.85rem;
+  }
+  
+  .info-value {
+    font-size: 0.8rem;
+  }
+  
+  #admin-profile-image {
+    width: 4.5rem;
+    height: 4.5rem;
+  }
+  
+  #profile-icon {
+    font-size: 2rem;
+  }
+}
+
+/* Landscape orientation adjustments */
+@media (max-width: 768px) and (orientation: landscape) {
+  #admin-profile-container {
+    padding: 0.75rem;
+  }
+  
+  #admin-profile-content {
+    flex-direction: row;
+    gap: 1rem;
+  }
+  
+  #admin-profile-info {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  #admin-profile-image {
+    width: 5rem;
+    height: 5rem;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  #admin-profile-image img {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  #admin-profile-container {
+    transition: none;
+  }
+}
 </style>

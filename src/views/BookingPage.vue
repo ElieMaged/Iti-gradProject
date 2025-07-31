@@ -190,15 +190,7 @@
           {{ $t('confirmBooking') }}
         </button>
         
-        <!-- Debug Test Button -->
-        <button 
-          type="button" 
-          @click="testBookingData" 
-          class="debug-btn"
-          style="background: #ff6b6b; color: white; padding: 10px 20px; border: none; border-radius: 8px; margin-top: 20px; cursor: pointer;"
-        >
-          🐛 Test Booking Data
-        </button>
+
       </form>
     </div>
   </div>
@@ -1528,40 +1520,7 @@ async function createManualNotification() {
   }
 }
 
-// Function to test booking data
-function testBookingData() {
-  console.log('=== TESTING BOOKING DATA ===');
-  console.log('Current form data:', form.value);
-  console.log('Technician data:', technician.value);
-  console.log('Auth current user:', auth.currentUser);
-  
-  // Test address construction
-  const testAddress = constructAddress(form.value);
-  console.log('Test constructed address:', testAddress);
-  
-  // Test booking data object
-  const testBookingData = {
-    technicianId: technician.value.uid || technician.value.id,
-    technicianName: technician.value.name,
-    userId: auth.currentUser?.uid,
-    userName: form.value.fullName,
-    userEmail: form.value.email,
-    userPhone: form.value.phone,
-    date: form.value.date,
-    time: form.value.time,
-    address: testAddress,
-    price: technician.value.visitPrice || technician.value.basePrice || 'N/A',
-    note: form.value.note || '',
-    payment: form.value.payment,
-    status: 'pending',
-    createdAt: new Date()
-  };
-  
-  console.log('Test booking data object:', testBookingData);
-  console.log('=== END TESTING BOOKING DATA ===');
-  
-  alert(`Test completed! Check console for details.\n\nUser Email: ${form.value.email}\nAddress: ${testAddress}\nPrice: ${testBookingData.price}`);
-}
+
 
 function constructAddress(formData) {
   console.log('=== CONSTRUCTING ADDRESS ===');

@@ -404,4 +404,326 @@ onMounted(() => {
 .dark .hover\:bg-gray-50:hover {
   background-color: var(--hover-bg);
 }
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .services-container {
+    padding: 1.5rem;
+  }
+  
+  .service-card {
+    padding: 1.25rem;
+  }
+  
+  .service-header {
+    gap: 1rem;
+  }
+  
+  .service-image {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .service-title {
+    font-size: 1.1rem;
+  }
+  
+  .service-subtitle {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .services-container {
+    padding: 1rem;
+    margin-top: 1rem;
+  }
+  
+  .services-header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .services-title {
+    font-size: 1.5rem;
+  }
+  
+  .services-subtitle {
+    font-size: 0.9rem;
+  }
+  
+  .service-card {
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .service-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.75rem;
+  }
+  
+  .service-image {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .service-title {
+    font-size: 1rem;
+  }
+  
+  .service-subtitle {
+    font-size: 0.85rem;
+  }
+  
+  .service-details {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+  
+  .detail-item {
+    padding: 0.5rem;
+    font-size: 0.85rem;
+  }
+  
+  .service-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+  
+  .book-again-btn,
+  .view-details-btn {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+  
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .error-message {
+    padding: 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .empty-state {
+    padding: 2rem 1rem;
+  }
+  
+  .empty-state h3 {
+    font-size: 1.25rem;
+  }
+  
+  .empty-state p {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .services-container {
+    padding: 0.75rem;
+    margin-top: 0.5rem;
+  }
+  
+  .services-header {
+    gap: 0.75rem;
+  }
+  
+  .services-title {
+    font-size: 1.25rem;
+  }
+  
+  .services-subtitle {
+    font-size: 0.8rem;
+  }
+  
+  .service-card {
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .service-header {
+    gap: 0.5rem;
+  }
+  
+  .service-image {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .service-title {
+    font-size: 0.95rem;
+  }
+  
+  .service-subtitle {
+    font-size: 0.8rem;
+  }
+  
+  .service-details {
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+  
+  .detail-item {
+    padding: 0.4rem;
+    font-size: 0.8rem;
+  }
+  
+  .service-actions {
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+  
+  .book-again-btn,
+  .view-details-btn {
+    padding: 0.6rem;
+    font-size: 0.85rem;
+  }
+  
+  .loading-spinner {
+    width: 35px;
+    height: 35px;
+  }
+  
+  .error-message {
+    padding: 0.75rem;
+    font-size: 0.85rem;
+  }
+  
+  .empty-state {
+    padding: 1.5rem 0.75rem;
+  }
+  
+  .empty-state h3 {
+    font-size: 1.1rem;
+  }
+  
+  .empty-state p {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .services-container {
+    padding: 0.5rem;
+  }
+  
+  .services-title {
+    font-size: 1.1rem;
+  }
+  
+  .services-subtitle {
+    font-size: 0.75rem;
+  }
+  
+  .service-card {
+    padding: 0.6rem;
+    margin-bottom: 0.6rem;
+  }
+  
+  .service-image {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .service-title {
+    font-size: 0.9rem;
+  }
+  
+  .service-subtitle {
+    font-size: 0.75rem;
+  }
+  
+  .detail-item {
+    padding: 0.3rem;
+    font-size: 0.75rem;
+  }
+  
+  .book-again-btn,
+  .view-details-btn {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  .loading-spinner {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .error-message {
+    padding: 0.6rem;
+    font-size: 0.8rem;
+  }
+  
+  .empty-state {
+    padding: 1.25rem 0.5rem;
+  }
+  
+  .empty-state h3 {
+    font-size: 1rem;
+  }
+  
+  .empty-state p {
+    font-size: 0.8rem;
+  }
+}
+
+/* Landscape orientation adjustments */
+@media (max-width: 768px) and (orientation: landscape) {
+  .services-container {
+    padding: 0.75rem;
+  }
+  
+  .service-card {
+    padding: 0.75rem;
+  }
+  
+  .service-header {
+    flex-direction: row;
+    text-align: left;
+  }
+  
+  .service-details {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .service-actions {
+    flex-direction: row;
+  }
+  
+  .book-again-btn,
+  .view-details-btn {
+    width: auto;
+    flex: 1;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .service-image {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .service-card {
+    transition: none;
+  }
+  
+  .loading-spinner {
+    animation: none;
+  }
+  
+  .book-again-btn:hover,
+  .view-details-btn:hover {
+    transform: none;
+  }
+}
 </style> 

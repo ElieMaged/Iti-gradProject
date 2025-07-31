@@ -116,9 +116,14 @@ async function fetchTechnicians() {
   try {
     loading.value = true
     const querySnapshot = await getDocs(collection(db, 'technicians'))
-    firebaseTechnicians.value = querySnapshot.docs
+    const allTechnicians = querySnapshot.docs
       .map(doc => ({ id: doc.id, ...doc.data() }))
       .filter(tech => tech.specialization === 'Plumbing')
+    
+    console.log('All technicians from Firebase:', querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })))
+    console.log('Filtered plumbing technicians:', allTechnicians)
+    
+    firebaseTechnicians.value = allTechnicians
   } catch (error) {
     console.error('Error fetching technicians:', error)
   } finally {
@@ -129,23 +134,22 @@ async function fetchTechnicians() {
 onMounted(fetchTechnicians)
 
 const mergedTechnicians = computed(() => {
-  // Only include stock wall finishing technicians
-  const allTechs = [...stockTechnicians.filter(t => t.specialization === 'Plumbing')]
+  // Only include Firebase technicians, no stock technicians
+  const allTechs = []
   firebaseTechnicians.value.forEach(fbTech => {
-    if (!allTechs.some(t => t.name === fbTech.fullName && t.price == fbTech.basePrice)) {
-      // Use uploaded photo if available, fallback to placeholder
-      allTechs.push({
-        id: fbTech.id,
-        name: fbTech.fullName,
-        image: fbTech.profilePhotoUrl || fbTech.idPhotoUrl || profile1, // Use profile photo first, then ID photo as fallback
-        bgColor: '#E8E4F3', // or any default color
-        price: fbTech.basePrice,
-        description: fbTech.bio,
-        rating: 5, // or fbTech.rating if available
-        specialization: fbTech.specialization
-      })
-    }
+    // Use uploaded photo if available, fallback to placeholder
+    allTechs.push({
+      id: fbTech.id,
+      name: fbTech.fullName,
+      image: fbTech.profilePhotoUrl || fbTech.idPhotoUrl || profile1, // Use profile photo first, then ID photo as fallback
+      bgColor: '#E8E4F3', // or any default color
+      price: fbTech.basePrice,
+      description: fbTech.bio,
+      rating: 5, // or fbTech.rating if available
+      specialization: fbTech.specialization
+    })
   })
+  console.log('Firebase technicians:', allTechs)
   return allTechs
 })
 
@@ -194,6 +198,7 @@ function onSort(option) {
 }
 
 function viewProfile(id) {
+  console.log('Viewing profile for technician ID:', id)
   router.push({ name: 'TechnicianProfile', params: { id } })
 }
 
@@ -581,6 +586,319 @@ const heroBackgroundStyle = computed(() => {
     width: 35px;
     height: 35px;
     font-size: 0.9rem;
+  }
+}
+
+/* Enhanced Responsive Design */
+@media (max-width: 1200px) {
+  .hero-section {
+    padding: 2rem 1rem;
+  }
+  
+  .hero-title {
+    font-size: 3rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .technicians-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .technician-card {
+    padding: 1.25rem;
+  }
+  
+  .technician-image {
+    height: 250px;
+  }
+  
+  .technician-name {
+    font-size: 1.2rem;
+  }
+  
+  .technician-description {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 1.5rem 0.75rem;
+  }
+  
+  .hero-title {
+    font-size: 2.25rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .breadcrumbs {
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+  
+  .section-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .section-title {
+    font-size: 1.75rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .section-description {
+    font-size: 0.95rem;
+  }
+  
+  .technicians-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.25rem;
+  }
+  
+  .technician-card {
+    padding: 1rem;
+  }
+  
+  .technician-image {
+    height: 200px;
+  }
+  
+  .technician-info {
+    padding: 1rem;
+  }
+  
+  .technician-name {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .rating {
+    margin-bottom: 0.75rem;
+  }
+  
+  .rating i {
+    font-size: 0.9rem;
+  }
+  
+  .technician-description {
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+  
+  .view-profile-btn {
+    padding: 0.6rem 1.25rem;
+    font-size: 0.9rem;
+  }
+  
+  .container {
+    padding: 0 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-section {
+    padding: 1rem 0.5rem;
+  }
+  
+  .hero-title {
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 1.25rem;
+  }
+  
+  .breadcrumbs {
+    font-size: 0.8rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .section-header {
+    margin-bottom: 1.5rem;
+  }
+  
+  .section-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .section-description {
+    font-size: 0.9rem;
+  }
+  
+  .technicians-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .technician-card {
+    padding: 0.75rem;
+  }
+  
+  .technician-image {
+    height: 180px;
+  }
+  
+  .technician-info {
+    padding: 0.75rem;
+  }
+  
+  .technician-name {
+    font-size: 1rem;
+    margin-bottom: 0.4rem;
+  }
+  
+  .rating {
+    margin-bottom: 0.6rem;
+  }
+  
+  .rating i {
+    font-size: 0.8rem;
+  }
+  
+  .technician-description {
+    font-size: 0.8rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .view-profile-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+  
+  .container {
+    padding: 0 0.5rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .hero-section {
+    padding: 0.75rem 0.25rem;
+  }
+  
+  .hero-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.4rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+  
+  .breadcrumbs {
+    font-size: 0.75rem;
+    margin-bottom: 0.6rem;
+  }
+  
+  .section-header {
+    margin-bottom: 1.25rem;
+  }
+  
+  .section-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.4rem;
+  }
+  
+  .section-description {
+    font-size: 0.85rem;
+  }
+  
+  .technicians-grid {
+    gap: 0.75rem;
+  }
+  
+  .technician-card {
+    padding: 0.6rem;
+  }
+  
+  .technician-image {
+    height: 160px;
+  }
+  
+  .technician-info {
+    padding: 0.6rem;
+  }
+  
+  .technician-name {
+    font-size: 0.95rem;
+    margin-bottom: 0.3rem;
+  }
+  
+  .rating {
+    margin-bottom: 0.5rem;
+  }
+  
+  .rating i {
+    font-size: 0.75rem;
+  }
+  
+  .technician-description {
+    font-size: 0.75rem;
+    margin-bottom: 0.6rem;
+  }
+  
+  .view-profile-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+  
+  .container {
+    padding: 0 0.25rem;
+  }
+}
+
+/* Landscape orientation adjustments */
+@media (max-width: 768px) and (orientation: landscape) {
+  .hero-section {
+    padding: 1rem 0.5rem;
+  }
+  
+  .hero-title {
+    font-size: 2rem;
+  }
+  
+  .technicians-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  
+  .technician-image {
+    height: 150px;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .technician-image {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .technician-card,
+  .view-profile-btn {
+    transition: none;
+  }
+  
+  .skeleton-image,
+  .skeleton-name,
+  .skeleton-description,
+  .skeleton-button {
+    animation: none;
   }
 }
 

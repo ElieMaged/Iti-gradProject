@@ -6,7 +6,7 @@
       <div class="hero-overlay">
         <div class="hero-content">
           <h1 class="hero-title">{{ $t('electricityTitle') }}</h1>
-          <SearchBar  
+          <SearchBar
             :filterOptions="[
               { value: 'price', label: 'Select a price' },
               { value: 'area', label: 'Select an area' },
@@ -37,11 +37,27 @@
       <div class="container">
         <div class="section-header">
           <h2 class="section-title">{{ $t('meetTechniciansTeam') }}</h2>
-          <p class="section-description">{{ $t('wallFinishingTeamDescription') }}</p>
+          <p class="section-description">{{ $t('carpentryTeamDescription') }}</p>
         </div>
 
         <div class="technicians-grid">
-          <div v-for="technician in displayedTechnicians" :key="technician.id" class="technician-card">
+          <!-- Loading Skeleton Cards -->
+          <div v-if="loading" v-for="n in 8" :key="`skeleton-${n}`" class="technician-card skeleton-card">
+            <div class="skeleton-image"></div>
+            <div class="technician-info">
+              <div class="skeleton-name"></div>
+              <div class="skeleton-rating">
+                <div class="skeleton-star" v-for="star in 5" :key="star"></div>
+              </div>
+              <div class="skeleton-description"></div>
+              <div class="skeleton-description short"></div>
+              <div class="skeleton-button"></div>
+              <div class="skeleton-button"></div>
+            </div>
+          </div>
+
+          <!-- Actual Technician Cards -->
+          <div v-else v-for="technician in displayedTechnicians" :key="technician.id" class="technician-card">
             <div class="technician-image" :style="{ backgroundColor: technician.bgColor }">
               <img :src="technician.image" :alt="technician.name" />
             </div>
@@ -82,10 +98,11 @@ import profile8 from '../assets/profile/8.png'
 import plumbingBg from '../assets/Professions/Electricity.jpg'
 
 const router = useRouter()
+const loading = ref(true)
 const stockTechnicians = [
   // Example stock wall finishing technicians (update these as needed)
-  { id: 'stock-1', name: 'Ahmed Salah', image: profile1, bgColor: '#E8E4F3', price: 200, description: 'Experienced Electricity with 10+ years in the field.', rating: 5, specialization: 'Electricity' },
-  { id: 'stock-2', name: 'Mohammed Ali', image: profile2, bgColor: '#E3F2FD', price: 180, description: 'Expert in Electricity.', rating: 5, specialization: 'Electricity' },
+  { id: 'stock-1', name: 'Ahmed Salah', image: profile1, bgColor: '#E8E4F3', price: 200, description: 'Experienced electricity with 10+ years in the field.', rating: 5, specialization: 'electricity' },
+  { id: 'stock-2', name: 'Mohammed Ali', image: profile2, bgColor: '#E3F2FD', price: 180, description: 'Expert in residential electricity.', rating: 5, specialization: 'electricity' },
   // Add more stock wall finishing technicians as needed
 ]
 const firebaseTechnicians = ref([])
@@ -96,24 +113,31 @@ const techniciansPerPage = 8;
 const currentPage = ref(1);
 
 async function fetchTechnicians() {
-  const querySnapshot = await getDocs(collection(db, 'technicians'))
-  firebaseTechnicians.value = querySnapshot.docs
-    .map(doc => ({ id: doc.id, ...doc.data() }))
-    .filter(tech => tech.specialization === 'Electrical')
+  try {
+    loading.value = true
+    const querySnapshot = await getDocs(collection(db, 'technicians'))
+    firebaseTechnicians.value = querySnapshot.docs
+      .map(doc => ({ id: doc.id, ...doc.data() }))
+      .filter(tech => tech.specialization === 'electricity')
+  } catch (error) {
+    console.error('Error fetching technicians:', error)
+  } finally {
+    loading.value = false
+  }
 }
 
 onMounted(fetchTechnicians)
 
 const mergedTechnicians = computed(() => {
   // Only include stock wall finishing technicians
-  const allTechs = [...stockTechnicians.filter(t => t.specialization === 'Electricity')]
+  const allTechs = [...stockTechnicians.filter(t => t.specialization === 'electricity')]
   firebaseTechnicians.value.forEach(fbTech => {
     if (!allTechs.some(t => t.name === fbTech.fullName && t.price == fbTech.basePrice)) {
       // Use uploaded photo if available, fallback to placeholder
       allTechs.push({
         id: fbTech.id,
         name: fbTech.fullName,
-        image: fbTech.idPhotoUrl || profile1, // fallback to a default image if needed
+        image: fbTech.profilePhotoUrl || fbTech.idPhotoUrl || profile1, // Use profile photo first, then ID photo as fallback
         bgColor: '#E8E4F3', // or any default color
         price: fbTech.basePrice,
         description: fbTech.bio,
@@ -558,5 +582,414 @@ const heroBackgroundStyle = computed(() => {
     height: 35px;
     font-size: 0.9rem;
   }
+}
+
+/* Enhanced Responsive Design */
+@media (max-width: 1200px) {
+  .hero-section {
+    padding: 2rem 1rem;
+  }
+  
+  .hero-title {
+    font-size: 3rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .technicians-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .technician-card {
+    padding: 1.25rem;
+  }
+  
+  .technician-image {
+    height: 250px;
+  }
+  
+  .technician-name {
+    font-size: 1.2rem;
+  }
+  
+  .technician-description {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 1.5rem 0.75rem;
+  }
+  
+  .hero-title {
+    font-size: 2.25rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .breadcrumbs {
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+  
+  .section-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .section-title {
+    font-size: 1.75rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .section-description {
+    font-size: 0.95rem;
+  }
+  
+  .technicians-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.25rem;
+  }
+  
+  .technician-card {
+    padding: 1rem;
+  }
+  
+  .technician-image {
+    height: 200px;
+  }
+  
+  .technician-info {
+    padding: 1rem;
+  }
+  
+  .technician-name {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .rating {
+    margin-bottom: 0.75rem;
+  }
+  
+  .rating i {
+    font-size: 0.9rem;
+  }
+  
+  .technician-description {
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+  
+  .view-profile-btn {
+    padding: 0.6rem 1.25rem;
+    font-size: 0.9rem;
+  }
+  
+  .container {
+    padding: 0 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-section {
+    padding: 1rem 0.5rem;
+  }
+  
+  .hero-title {
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 1.25rem;
+  }
+  
+  .breadcrumbs {
+    font-size: 0.8rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .section-header {
+    margin-bottom: 1.5rem;
+  }
+  
+  .section-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .section-description {
+    font-size: 0.9rem;
+  }
+  
+  .technicians-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .technician-card {
+    padding: 0.75rem;
+  }
+  
+  .technician-image {
+    height: 180px;
+  }
+  
+  .technician-info {
+    padding: 0.75rem;
+  }
+  
+  .technician-name {
+    font-size: 1rem;
+    margin-bottom: 0.4rem;
+  }
+  
+  .rating {
+    margin-bottom: 0.6rem;
+  }
+  
+  .rating i {
+    font-size: 0.8rem;
+  }
+  
+  .technician-description {
+    font-size: 0.8rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .view-profile-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+  
+  .container {
+    padding: 0 0.5rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .hero-section {
+    padding: 0.75rem 0.25rem;
+  }
+  
+  .hero-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.4rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+  
+  .breadcrumbs {
+    font-size: 0.75rem;
+    margin-bottom: 0.6rem;
+  }
+  
+  .section-header {
+    margin-bottom: 1.25rem;
+  }
+  
+  .section-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.4rem;
+  }
+  
+  .section-description {
+    font-size: 0.85rem;
+  }
+  
+  .technicians-grid {
+    gap: 0.75rem;
+  }
+  
+  .technician-card {
+    padding: 0.6rem;
+  }
+  
+  .technician-image {
+    height: 160px;
+  }
+  
+  .technician-info {
+    padding: 0.6rem;
+  }
+  
+  .technician-name {
+    font-size: 0.95rem;
+    margin-bottom: 0.3rem;
+  }
+  
+  .rating {
+    margin-bottom: 0.5rem;
+  }
+  
+  .rating i {
+    font-size: 0.75rem;
+  }
+  
+  .technician-description {
+    font-size: 0.75rem;
+    margin-bottom: 0.6rem;
+  }
+  
+  .view-profile-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+  
+  .container {
+    padding: 0 0.25rem;
+  }
+}
+
+/* Landscape orientation adjustments */
+@media (max-width: 768px) and (orientation: landscape) {
+  .hero-section {
+    padding: 1rem 0.5rem;
+  }
+  
+  .hero-title {
+    font-size: 2rem;
+  }
+  
+  .technicians-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  
+  .technician-image {
+    height: 150px;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .technician-image {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .technician-card,
+  .view-profile-btn {
+    transition: none;
+  }
+  
+  .skeleton-image,
+  .skeleton-name,
+  .skeleton-description,
+  .skeleton-button {
+    animation: none;
+  }
+}
+
+/* Skeleton Loading Animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.skeleton-card {
+  pointer-events: none;
+}
+
+.skeleton-image {
+  height: 300px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+.dark .skeleton-image {
+  background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+  background-size: 200px 100%;
+}
+
+.skeleton-name {
+  height: 24px;
+  width: 70%;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.dark .skeleton-name {
+  background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+  background-size: 200px 100%;
+}
+
+.skeleton-rating {
+  display: flex;
+  gap: 0.2rem;
+  margin-bottom: 1rem;
+}
+
+.skeleton-star {
+  width: 16px;
+  height: 16px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 2px;
+}
+
+.dark .skeleton-star {
+  background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+  background-size: 200px 100%;
+}
+
+.skeleton-description {
+  height: 16px;
+  width: 100%;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.skeleton-description.short {
+  width: 60%;
+}
+
+.dark .skeleton-description {
+  background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+  background-size: 200px 100%;
+}
+
+.skeleton-button {
+  height: 44px;
+  width: 100%;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 25px;
+  margin-bottom: 0.5rem;
+}
+
+.dark .skeleton-button {
+  background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+  background-size: 200px 100%;
 }
 </style>

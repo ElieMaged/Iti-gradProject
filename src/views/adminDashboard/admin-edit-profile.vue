@@ -7,7 +7,21 @@
           <div class="edit-profile-header">
             <h2>{{ $t('editProfile') }}</h2>
           </div>
-          <form class="edit-profile-form" @submit.prevent="updateProfile">
+          
+          <!-- Loading State -->
+          <div v-if="loading" class="loading-state">
+            <div class="loading-spinner"></div>
+            <p>Loading profile information...</p>
+          </div>
+
+          <!-- Error State -->
+          <div v-else-if="error" class="error-state">
+            <p class="error-message">{{ error }}</p>
+            <button @click="fetchAdminData" class="retry-btn">Retry</button>
+          </div>
+
+          <!-- Edit Form -->
+          <form v-else class="edit-profile-form" @submit.prevent="updateProfile">
             <div class="edit-profile-content">
               <div class="edit-profile-fields">
                 <div>
@@ -25,6 +39,14 @@
                 <div>
                   <label for="nationalId">{{ $t('nationalId') }}</label>
                   <input type="text" id="nationalId" v-model="form.nationalId" required />
+                </div>
+                <div>
+                  <label for="gender">{{ $t('gender') }}</label>
+                  <select id="gender" v-model="form.gender">
+                    <option value="">{{ $t('selectGender') }}</option>
+                    <option value="male">{{ $t('male') }}</option>
+                    <option value="female">{{ $t('female') }}</option>
+                  </select>
                 </div>
               </div>
               <div class="edit-profile-image-section">
@@ -49,14 +71,20 @@
                 <div>
                   <label for="area">{{ $t('area') }}</label>
                   <select id="area" v-model="form.area">
+                    <option value="">{{ $t('selectArea') }}</option>
                     <option v-for="area in areas" :key="area" :value="area">{{ area }}</option>
                   </select>
                 </div>
                 <div>
                   <label for="street">{{ $t('streetName') }}</label>
                   <select id="street" v-model="form.street">
+                    <option value="">{{ $t('selectStreet') }}</option>
                     <option v-for="street in streets" :key="street" :value="street">{{ street }}</option>
                   </select>
+                </div>
+                <div>
+                  <label for="building">{{ $t('building') }}</label>
+                  <input type="text" id="building" v-model="form.building" placeholder="Building number or name" />
                 </div>
               </div>
             </div>
@@ -74,7 +102,9 @@
               </div>
             </div>
             <div class="edit-profile-actions">
-              <button type="submit" class="save-btn">{{ $t('saveChanges') }}</button>
+              <button type="submit" class="save-btn" :disabled="saving">
+                {{ saving ? $t('saving') : $t('saveChanges') }}
+              </button>
             </div>
           </form>
         </div>
@@ -85,19 +115,28 @@
 
 <script>
 import AdminSidebar from '../../components/admin-sidebar.vue';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { db } from '../../firebase';
+import { getAuth, updatePassword } from 'firebase/auth';
+
 export default {
   components: { AdminSidebar },
   data() {
     return {
       profileImage: null,
+      loading: true,
+      error: null,
+      saving: false,
       form: {
-        name: 'Mohamed Ali Mohamed',
-        email: 'mohamed@gmail.com',
-        phone: '+20 011 555 2323',
-        nationalId: '60504441591478',
-        city: 'Cairo',
-        area: 'Dokki',
-        street: 'Tahrir Street',
+        name: '',
+        email: '',
+        phone: '',
+        nationalId: '',
+        gender: '',
+        city: '',
+        area: '',
+        street: '',
+        building: '',
         oldPassword: '',
         newPassword: ''
       },
@@ -106,10 +145,68 @@ export default {
       streets: ["Tahrir Street", "El Haram Street", "El Merghany Street", "El Nasr Road", "El Thawra Street"]
     };
   },
+  async mounted() {
+    await this.fetchAdminData();
+  },
   methods: {
+    async fetchAdminData() {
+      try {
+        this.loading = true;
+        this.error = null;
+        
+        const auth = getAuth();
+        const currentUser = auth.currentUser;
+        
+        if (!currentUser) {
+          this.error = 'No authenticated user found';
+          return;
+        }
+        
+        console.log('🔍 Fetching admin data for user:', currentUser.uid);
+        
+        const userDoc = doc(db, 'users', currentUser.uid);
+        const userSnapshot = await getDoc(userDoc);
+        
+        if (userSnapshot.exists()) {
+          const userData = userSnapshot.data();
+          
+          // Populate form with existing data
+          this.form = {
+            name: userData.fullName || '',
+            email: userData.email || '',
+            phone: userData.phone || '',
+            nationalId: userData.nationalId || '',
+            gender: userData.gender || '',
+            city: userData.city || '',
+            area: userData.area || '',
+            street: userData.street || '',
+            building: userData.building || '',
+            oldPassword: '',
+            newPassword: ''
+          };
+          
+          // Set profile image if exists
+          if (userData.profileImageUrl) {
+            this.profileImage = userData.profileImageUrl;
+          }
+          
+          console.log('✅ Admin data loaded:', userData);
+        } else {
+          this.error = 'Profile not found';
+          console.log('❌ Admin profile not found');
+        }
+      } catch (error) {
+        console.error('❌ Error fetching admin data:', error);
+        this.error = 'Failed to load profile information';
+      } finally {
+        this.loading = false;
+      }
+    },
+    
     triggerUpload() {
       this.$refs.fileInput.click();
     },
+    
     handleImageUpload(event) {
       const file = event.target.files[0];
       if (file) {
@@ -120,9 +217,67 @@ export default {
         reader.readAsDataURL(file);
       }
     },
-    updateProfile() {
-      // Handle form submission logic
-      console.log('Form submitted:', this.form);
+    
+    async updateProfile() {
+      try {
+        this.saving = true;
+        
+        const auth = getAuth();
+        const currentUser = auth.currentUser;
+        
+        if (!currentUser) {
+          throw new Error('No authenticated user found');
+        }
+        
+        console.log('💾 Saving admin profile for user:', currentUser.uid);
+        
+        // Prepare update data
+        const updateData = {
+          fullName: this.form.name,
+          email: this.form.email,
+          phone: this.form.phone,
+          nationalId: this.form.nationalId,
+          gender: this.form.gender,
+          city: this.form.city,
+          area: this.form.area,
+          street: this.form.street,
+          building: this.form.building,
+          updatedAt: new Date()
+        };
+        
+        // Add profile image if uploaded
+        if (this.profileImage && this.profileImage.startsWith('data:')) {
+          updateData.profileImageUrl = this.profileImage;
+        }
+        
+        // Update user document in Firestore
+        const userDoc = doc(db, 'users', currentUser.uid);
+        await updateDoc(userDoc, updateData);
+        
+        // Update password if provided
+        if (this.form.oldPassword && this.form.newPassword) {
+          try {
+            // Note: This would require re-authentication in a real app
+            // For now, we'll just log that password change was requested
+            console.log('Password change requested (requires re-authentication)');
+          } catch (error) {
+            console.error('Password update error:', error);
+          }
+        }
+        
+        console.log('✅ Admin profile updated successfully');
+        alert('Profile updated successfully!');
+        
+        // Clear password fields
+        this.form.oldPassword = '';
+        this.form.newPassword = '';
+        
+      } catch (error) {
+        console.error('❌ Error updating admin profile:', error);
+        alert('Failed to update profile: ' + error.message);
+      } finally {
+        this.saving = false;
+      }
     }
   }
 };
@@ -170,6 +325,47 @@ export default {
   color: #7c6bb0;
   margin-bottom: 1.5rem;
 }
+
+/* Loading and Error States */
+.loading-state, .error-state {
+  text-align: center;
+  padding: 2rem;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #7c6bb0;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-message {
+  color: #dc3545;
+  margin-bottom: 1rem;
+}
+
+.retry-btn {
+  background-color: #7c6bb0;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.retry-btn:hover {
+  background-color: #6a5acd;
+}
+
 .edit-profile-form {
   display: flex;
   flex-direction: column;

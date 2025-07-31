@@ -113,4 +113,256 @@ textarea {
   background-color: var(--secondary-bg) !important;
   color: var(--primary-text) !important;
 }
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .flex.flex-col.lg\:flex-row {
+    gap: 2rem;
+  }
+  
+  .title {
+    font-size: 1.75rem;
+  }
+  
+  .text-large {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .flex.flex-col.lg\:flex-row {
+    margin: 1rem;
+    gap: 2rem;
+  }
+  
+  .title {
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .text-large {
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .flex.flex-col.md\:grid.md\:grid-cols-2 {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .flex.flex-col.gap-2 {
+    gap: 0.75rem;
+  }
+  
+  .flex.flex-row.items-center.gap-2 {
+    gap: 0.75rem;
+  }
+  
+  .text-2xl {
+    font-size: 1.5rem;
+  }
+  
+  h3, h4 {
+    font-size: 1rem;
+  }
+  
+  p, a {
+    font-size: 0.9rem;
+  }
+  
+  .text-lg {
+    font-size: 0.9rem;
+  }
+  
+  form {
+    gap: 1rem;
+  }
+  
+  .mb-3 {
+    margin-bottom: 1rem;
+  }
+  
+  .block.mb-2 {
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  input, textarea {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+  
+  button {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .flex.flex-col.lg\:flex-row {
+    margin: 0.75rem;
+    gap: 1.5rem;
+  }
+  
+  .title {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .text-large {
+    font-size: 0.9rem;
+    margin-bottom: 1.25rem;
+  }
+  
+  .flex.flex-col.md\:grid.md\:grid-cols-2 {
+    gap: 1.25rem;
+  }
+  
+  .flex.flex-col.gap-2 {
+    gap: 0.6rem;
+  }
+  
+  .flex.flex-row.items-center.gap-2 {
+    gap: 0.6rem;
+  }
+  
+  .text-2xl {
+    font-size: 1.25rem;
+  }
+  
+  h3, h4 {
+    font-size: 0.9rem;
+  }
+  
+  p, a {
+    font-size: 0.85rem;
+  }
+  
+  .text-lg {
+    font-size: 0.85rem;
+  }
+  
+  form {
+    gap: 0.75rem;
+  }
+  
+  .mb-3 {
+    margin-bottom: 0.75rem;
+  }
+  
+  .block.mb-2 {
+    margin-bottom: 0.4rem;
+    font-size: 0.85rem;
+  }
+  
+  input, textarea {
+    padding: 0.6rem;
+    font-size: 0.85rem;
+  }
+  
+  button {
+    padding: 0.6rem 1.25rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .flex.flex-col.lg\:flex-row {
+    margin: 0.5rem;
+    gap: 1.25rem;
+  }
+  
+  .title {
+    font-size: 1.1rem;
+    margin-bottom: 0.4rem;
+  }
+  
+  .text-large {
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+  
+  .flex.flex-col.md\:grid.md\:grid-cols-2 {
+    gap: 1rem;
+  }
+  
+  .flex.flex-col.gap-2 {
+    gap: 0.5rem;
+  }
+  
+  .flex.flex-row.items-center.gap-2 {
+    gap: 0.5rem;
+  }
+  
+  .text-2xl {
+    font-size: 1.1rem;
+  }
+  
+  h3, h4 {
+    font-size: 0.85rem;
+  }
+  
+  p, a {
+    font-size: 0.8rem;
+  }
+  
+  .text-lg {
+    font-size: 0.8rem;
+  }
+  
+  form {
+    gap: 0.6rem;
+  }
+  
+  .mb-3 {
+    margin-bottom: 0.6rem;
+  }
+  
+  .block.mb-2 {
+    margin-bottom: 0.3rem;
+    font-size: 0.8rem;
+  }
+  
+  input, textarea {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  button {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* Landscape orientation adjustments */
+@media (max-width: 768px) and (orientation: landscape) {
+  .flex.flex-col.lg\:flex-row {
+    flex-direction: row;
+    gap: 1.5rem;
+  }
+  
+  .flex.flex-col.md\:grid.md\:grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  form {
+    flex: 1;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  input, textarea {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  button {
+    transition: none;
+  }
+}
 </style>
