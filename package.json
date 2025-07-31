@@ -8,7 +8,15 @@
     "build": "vite build",
     "preview": "vite preview",
     "build:prod": "vite build --mode production",
-    "server": "vite preview --port 3000"
+    "server": "vite preview --port 3000",
+    "deploy": "bash deploy.sh",
+    "deploy:win": "deploy.bat",
+    "deploy:firebase": "npm run build && firebase deploy --only hosting",
+    "deploy:netlify": "npm run build && netlify deploy --prod --dir=dist",
+    "deploy:vercel": "npm run build && vercel --prod",
+    "build:analyze": "vite build --mode production && npx vite-bundle-analyzer dist",
+    "test:build": "npm run build && npm run preview",
+    "clean": "rm -rf dist node_modules package-lock.json && npm install"
   },
   "dependencies": {
     "@paypal/checkout-server-sdk": "^1.0.3",
@@ -40,6 +48,7 @@
     "vite": "^7.0.4"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   }
 }

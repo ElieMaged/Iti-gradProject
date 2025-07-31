@@ -155,34 +155,24 @@ export default {
            const usersSnapshot = await getDocs(usersCollection);
            console.log('👥 Users found:', usersSnapshot.docs.length);
            
-           const regularUsers = usersSnapshot.docs.map(doc => {
-             const data = doc.data();
-             console.log('📄 User data:', { id: doc.id, ...data });
-             
-             // Determine the correct role
-             let role = data.role || 'user';
-             
-             // Only elie1400674@gmail.com should be admin
-             if (data.email === 'elie1400674@gmail.com') {
-               role = 'admin';
-             } else {
-               // Ensure other users are not admin
-               role = data.role === 'admin' ? 'user' : (data.role || 'user');
-             }
-             
-             return {
-               id: doc.id,
-               ...data,
-               name: data.email || 'Unknown User',
-               avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
-               role: role,
-               specialization: 'N/A',
-               location: 'N/A',
-               contact: 'N/A'
-             };
-           });
+           const regularUsers = usersSnapshot.docs
+             .map(doc => {
+               const data = doc.data();
+               console.log('📄 User data:', { id: doc.id, ...data });
+               
+               return {
+                 id: doc.id,
+                 ...data,
+                 name: data.fullName || data.email || 'Unknown User',
+                 avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
+                 role: data.role || 'user',
+                 specialization: 'N/A',
+                 location: 'N/A',
+                 contact: 'N/A'
+               };
+             })
+             .filter(user => user.role === 'user'); // Only show users with 'user' role
 
-           // Only show regular users (no technicians)
            this.users = regularUsers;
            console.log('✅ Total users loaded:', this.users.length);
            console.log('📋 Final users array:', this.users);

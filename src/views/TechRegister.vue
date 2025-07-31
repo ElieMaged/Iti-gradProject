@@ -553,9 +553,9 @@ async function handleRegister() {
     console.log('Saving to users collection...');
     await Promise.race([
       setDoc(doc(db, 'users', userCredential.user.uid), {
-        email: formData.email,
-        role: 'pending',
-        createdAt: serverTimestamp()
+      email: formData.email,
+      role: 'pending',
+      createdAt: serverTimestamp()
       }),
       timeoutPromise
     ]);

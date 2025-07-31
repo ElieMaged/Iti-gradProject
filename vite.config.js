@@ -17,12 +17,27 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['vue', 'vue-router']
-        }
+          vendor: ['vue', 'vue-router', 'vue-i18n'],
+          firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/storage'],
+          ui: ['bootstrap', 'tailwindcss']
+        },
+        chunkFileNames: 'assets/js/[name]-[hash].js',
+        entryFileNames: 'assets/js/[name]-[hash].js',
+        assetFileNames: 'assets/[ext]/[name]-[hash].[ext]'
+      }
+    },
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true
       }
     }
   },
   server: {
+    port: 3000,
+    host: true
+  },
+  preview: {
     port: 3000,
     host: true
   }

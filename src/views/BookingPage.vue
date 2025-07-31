@@ -190,15 +190,7 @@
           {{ $t('confirmBooking') }}
         </button>
         
-        <!-- Debug Test Button -->
-        <button 
-          type="button" 
-          @click="testBookingData" 
-          class="debug-btn"
-          style="background: #ff6b6b; color: white; padding: 10px 20px; border: none; border-radius: 8px; margin-top: 20px; cursor: pointer;"
-        >
-          🐛 Test Booking Data
-        </button>
+
       </form>
     </div>
   </div>
@@ -572,7 +564,7 @@ function nextDates() {
 }
 
 onMounted(async () => {
-  const id = route.query.techId
+  const id = route.query.techId || route.query.technicianId
   if (!id) {
     errorMsg.value = 'Technician ID is missing. Please try again or contact support.';
     return;
@@ -665,10 +657,15 @@ function loadPayPalScript() {
 
   const clientId = import.meta.env.VITE_PAYPAL_CLIENT_ID;
   
-  // Use a test client ID if none is configured
-  const finalClientId = clientId && clientId !== 'YOUR_SANDBOX_CLIENT_ID' 
-    ? clientId 
-    : 'test'; // This will show the button for testing
+  // Use production client ID if configured, otherwise show error
+  const finalClientId = clientId && clientId !== 'YOUR_PAYPAL_CLIENT_ID'
+    ? clientId
+    : null;
+
+  if (!finalClientId) {
+    console.error('PayPal Client ID not configured. Please add VITE_PAYPAL_CLIENT_ID to your environment variables.');
+    return;
+  }
 
   const script = document.createElement('script');
   script.src = `https://www.paypal.com/sdk/js?client-id=${finalClientId}&currency=USD&intent=capture`;
@@ -1528,40 +1525,7 @@ async function createManualNotification() {
   }
 }
 
-// Function to test booking data
-function testBookingData() {
-  console.log('=== TESTING BOOKING DATA ===');
-  console.log('Current form data:', form.value);
-  console.log('Technician data:', technician.value);
-  console.log('Auth current user:', auth.currentUser);
-  
-  // Test address construction
-  const testAddress = constructAddress(form.value);
-  console.log('Test constructed address:', testAddress);
-  
-  // Test booking data object
-  const testBookingData = {
-    technicianId: technician.value.uid || technician.value.id,
-    technicianName: technician.value.name,
-    userId: auth.currentUser?.uid,
-    userName: form.value.fullName,
-    userEmail: form.value.email,
-    userPhone: form.value.phone,
-    date: form.value.date,
-    time: form.value.time,
-    address: testAddress,
-    price: technician.value.visitPrice || technician.value.basePrice || 'N/A',
-    note: form.value.note || '',
-    payment: form.value.payment,
-    status: 'pending',
-    createdAt: new Date()
-  };
-  
-  console.log('Test booking data object:', testBookingData);
-  console.log('=== END TESTING BOOKING DATA ===');
-  
-  alert(`Test completed! Check console for details.\n\nUser Email: ${form.value.email}\nAddress: ${testAddress}\nPrice: ${testBookingData.price}`);
-}
+
 
 function constructAddress(formData) {
   console.log('=== CONSTRUCTING ADDRESS ===');
@@ -1739,7 +1703,9 @@ function constructAddress(formData) {
 
 .date-navigation {
   display: flex;
+  flex-direction: row;
   align-items: center;
+  justify-content: space-between;
   gap: 1rem;
 }
 
@@ -1755,6 +1721,7 @@ function constructAddress(formData) {
   align-items: center;
   justify-content: center;
   transition: background 0.2s;
+  flex-shrink: 0;
 }
 
 .nav-arrow:hover {
@@ -1765,6 +1732,14 @@ function constructAddress(formData) {
   display: flex;
   gap: 1rem;
   flex: 1;
+  justify-content: center;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.date-slots::-webkit-scrollbar {
+  display: none;
 }
 
 .date-slot {
@@ -2033,13 +2008,20 @@ function constructAddress(formData) {
   }
   
   .date-navigation {
-    flex-direction: column;
-    gap: 1rem;
+    flex-direction: row;
+    gap: 0.5rem;
   }
   
   .date-slots {
-    flex-direction: column;
+    flex-direction: row;
     gap: 0.5rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .date-slots::-webkit-scrollbar {
+    display: none;
   }
   
   .date-slot {
@@ -2172,6 +2154,8 @@ function constructAddress(formData) {
   
   .date-slot {
     padding: 0.5rem;
+    min-width: 80px;
+    flex-shrink: 0;
   }
   
   .day-name {
@@ -2243,6 +2227,12 @@ function constructAddress(formData) {
     margin: 0;
     align-self: flex-start;
     margin-top: 15px;
+  }
+  
+  .date-slot {
+    padding: 0.4rem;
+    min-width: 70px;
+    flex-shrink: 0;
   }
   
   .day-name {

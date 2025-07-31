@@ -10,6 +10,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@paypal/paypal-server-sdk": "^1.1.0",
     "firebase-admin": "^13.4.0",
     "firebase-functions": "^6.4.0",
     "nodemailer": "^7.0.5"

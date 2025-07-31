@@ -174,18 +174,7 @@ const heroBackgroundStyle = computed(() => {
 .plumbing-page {
   width: 100%;
 }
-.bg-white , .bg-gray-50 {
-  background: var(--secondary-bg) !important;
-}
-.dark .bg-white , .dark .bg-gray-50 {
-  background: var(--secondary-bg) !important;
-}
-.text-gray-700 {
-  color: var(--primary-text) !important;
-}
-.dark .text-gray-700 {
-  color: var(--primary-text) !important;
-}
+
 /* Hero Section */
 .hero-section {
   position: relative;
@@ -198,15 +187,9 @@ const heroBackgroundStyle = computed(() => {
   text-align: center;
 }
 
-
 .hero-content {
   color: white;
 }
-.dark .hero-content {
-  color: var(--primary-text) !important;
-}
-
-
 
 .hero-title {
   font-size: 3.5rem;
@@ -230,9 +213,6 @@ const heroBackgroundStyle = computed(() => {
   padding: 4rem 0;
   background-color: #f8f9fa;
 }
-.dark .technicians-section {
-  background-color: var(--primary-bg) !important;
-}
 
 .container {
   max-width: 1200px;
@@ -251,9 +231,7 @@ const heroBackgroundStyle = computed(() => {
   color: #333;
   margin-bottom: 1rem;
 }
-.dark .section-title {
-  color: var(--primary-text) !important;
-}
+
 .section-description {
   font-size: 1.1rem;
   color: #666;
@@ -261,9 +239,7 @@ const heroBackgroundStyle = computed(() => {
   margin: 0 auto;
   line-height: 1.6;
 }
-.dark .section-description {
-  color: var(--primary-text) !important;
-}
+
 .technicians-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -285,10 +261,7 @@ const heroBackgroundStyle = computed(() => {
   display: flex;
   flex-direction: column;
 }
-.dark .technician-card {
-  background: var(--secondary-bg) !important;
-  color: var(--primary-text) !important;
-}
+
 .technician-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
@@ -300,9 +273,7 @@ const heroBackgroundStyle = computed(() => {
   align-items: center;
   justify-content: center;
 }
-.dark .technician-image {
-  background-color: var(--primary-bg) !important;
-}
+
 .technician-image img {
   width: 100%;
   height: 100%;
@@ -313,19 +284,14 @@ const heroBackgroundStyle = computed(() => {
 .technician-info {
   padding: 1.5rem;
 }
-.dark .technician-info {
-  background-color: var(--secondary-bg) !important;
-  color: var(--primary-text) !important;
-}
+
 .technician-name {
   font-size: 1.3rem;
   font-weight: bold;
   color: #333;
   margin-bottom: 0.5rem;
 }
-.dark .technician-name {
-  color: var(--primary-text) !important;
-}
+
 .rating {
   margin-bottom: 1rem;
 }
@@ -334,18 +300,14 @@ const heroBackgroundStyle = computed(() => {
   color: #FFC230;
   margin-right: 0.2rem;
 }
-.dark .rating {
-  color: var(--primary-text) !important;
-}
+
 .technician-description {
   color: #666;
   font-size: 0.95rem;
   line-height: 1.5;
   margin-bottom: 1.5rem;
 }
-.dark .technician-description {
-  color: var(--primary-text) !important;
-}
+
 .view-profile-btn {
   background-color: var(--primary-color);
   color: white;
@@ -357,10 +319,7 @@ const heroBackgroundStyle = computed(() => {
   transition: background-color 0.3s ease;
   width: 100%;
 }
-.dark .view-profile-btn {
-  background-color: var(--primary-color) !important;
-  color: var(--primary-text) !important;
-}
+
 .view-profile-btn:hover {
   background-color: #4a3f7a;
 }
@@ -372,9 +331,7 @@ const heroBackgroundStyle = computed(() => {
   align-items: center;
   gap: 0.5rem;
 }
-.dark .pagination {
-  background-color: var(--primary-bg) !important;
-}
+
 .pagination-btn {
   width: 40px;
   height: 40px;
@@ -388,9 +345,7 @@ const heroBackgroundStyle = computed(() => {
   transition: all 0.3s ease;
   font-weight: 600;
 }
-.dark .pagination-btn {
-  background-color: var(--primary-bg) !important;
-}
+
 .pagination-btn:hover {
   border-color: var(--primary-color);
   color: var(--primary-color);
@@ -401,16 +356,12 @@ const heroBackgroundStyle = computed(() => {
   color: white;
   border-color: var(--primary-color);
 }
-.dark .pagination-btn.active {
-  background-color: var(--primary-color) !important;
-}
+
 .pagination-dots {
   color: #666;
   font-weight: bold;
 }
-.dark .pagination-dots {
-  color: var(--primary-text) !important;
-}
+
 /* Call to Action Section */
 .cta-section {
   position: relative;
@@ -428,27 +379,21 @@ const heroBackgroundStyle = computed(() => {
   max-width: 600px;
   padding: 0 2rem;
 }
-.dark .cta-content {
-  color: var(--primary-text) !important;
-}
+
 .cta-title {
   font-size: 3rem;
   font-weight: bold;
   margin-bottom: 1rem;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
-.dark .cta-title {
-  color: var(--primary-text) !important;
-}
+
 .cta-description {
   font-size: 1.2rem;
   margin-bottom: 2rem;
   line-height: 1.6;
   opacity: 0.9;
 }
-.dark .cta-description {
-  color: var(--primary-text) !important;
-}
+
 .cta-btn {
   background-color: var(--primary-color);
   color: white;
@@ -463,9 +408,7 @@ const heroBackgroundStyle = computed(() => {
   align-items: center;
   gap: 0.5rem;
 }
-.dark .cta-btn {
-  background-color: var(--primary-color) !important;
-}
+
 .cta-btn:hover {
   background-color: #4a3f7a;
 }
@@ -473,15 +416,11 @@ const heroBackgroundStyle = computed(() => {
 .cta-btn i {
   transition: transform 0.3s ease;
 }
-.dark .cta-btn:hover i {
-  color: var(--primary-text) !important;
-}   
+
 .cta-btn:hover i {
   transform: translateX(5px);
 }
-.dark .cta-btn:hover i {
-  color: var(--primary-text) !important;
-}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .hero-title {
@@ -535,6 +474,312 @@ const heroBackgroundStyle = computed(() => {
     width: 35px;
     height: 35px;
     font-size: 0.9rem;
+  }
+}
+
+/* Enhanced Responsive Design */
+@media (max-width: 1200px) {
+  .hero-section {
+    padding: 2rem 1rem;
+  }
+  
+  .hero-title {
+    font-size: 3rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .technicians-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .technician-card {
+    padding: 1.25rem;
+  }
+  
+  .technician-image {
+    height: 250px;
+  }
+  
+  .technician-name {
+    font-size: 1.2rem;
+  }
+  
+  .technician-description {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 1.5rem 0.75rem;
+  }
+  
+  .hero-title {
+    font-size: 2.25rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .breadcrumbs {
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+  
+  .section-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .section-title {
+    font-size: 1.75rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .section-description {
+    font-size: 0.95rem;
+  }
+  
+  .technicians-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.25rem;
+  }
+  
+  .technician-card {
+    padding: 1rem;
+  }
+  
+  .technician-image {
+    height: 200px;
+  }
+  
+  .technician-info {
+    padding: 1rem;
+  }
+  
+  .technician-name {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .rating {
+    margin-bottom: 0.75rem;
+  }
+  
+  .rating i {
+    font-size: 0.9rem;
+  }
+  
+  .technician-description {
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+  
+  .view-profile-btn {
+    padding: 0.6rem 1.25rem;
+    font-size: 0.9rem;
+  }
+  
+  .container {
+    padding: 0 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-section {
+    padding: 1rem 0.5rem;
+  }
+  
+  .hero-title {
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 1.25rem;
+  }
+  
+  .breadcrumbs {
+    font-size: 0.8rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .section-header {
+    margin-bottom: 1.5rem;
+  }
+  
+  .section-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .section-description {
+    font-size: 0.9rem;
+  }
+  
+  .technicians-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .technician-card {
+    padding: 0.75rem;
+  }
+  
+  .technician-image {
+    height: 180px;
+  }
+  
+  .technician-info {
+    padding: 0.75rem;
+  }
+  
+  .technician-name {
+    font-size: 1rem;
+    margin-bottom: 0.4rem;
+  }
+  
+  .rating {
+    margin-bottom: 0.6rem;
+  }
+  
+  .rating i {
+    font-size: 0.8rem;
+  }
+  
+  .technician-description {
+    font-size: 0.8rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .view-profile-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+  
+  .container {
+    padding: 0 0.5rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .hero-section {
+    padding: 0.75rem 0.25rem;
+  }
+  
+  .hero-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.4rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+  
+  .breadcrumbs {
+    font-size: 0.75rem;
+    margin-bottom: 0.6rem;
+  }
+  
+  .section-header {
+    margin-bottom: 1.25rem;
+  }
+  
+  .section-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.4rem;
+  }
+  
+  .section-description {
+    font-size: 0.85rem;
+  }
+  
+  .technicians-grid {
+    gap: 0.75rem;
+  }
+  
+  .technician-card {
+    padding: 0.6rem;
+  }
+  
+  .technician-image {
+    height: 160px;
+  }
+  
+  .technician-info {
+    padding: 0.6rem;
+  }
+  
+  .technician-name {
+    font-size: 0.95rem;
+    margin-bottom: 0.3rem;
+  }
+  
+  .rating {
+    margin-bottom: 0.5rem;
+  }
+  
+  .rating i {
+    font-size: 0.75rem;
+  }
+  
+  .technician-description {
+    font-size: 0.75rem;
+    margin-bottom: 0.6rem;
+  }
+  
+  .view-profile-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+  
+  .container {
+    padding: 0 0.25rem;
+  }
+}
+
+/* Landscape orientation adjustments */
+@media (max-width: 768px) and (orientation: landscape) {
+  .hero-section {
+    padding: 1rem 0.5rem;
+  }
+  
+  .hero-title {
+    font-size: 2rem;
+  }
+  
+  .technicians-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  
+  .technician-image {
+    height: 150px;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .technician-image {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .technician-card,
+  .view-profile-btn {
+    transition: none;
   }
 }
 </style>
