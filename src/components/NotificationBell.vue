@@ -2,7 +2,7 @@
   <div class="notification-container">
     <!-- Notification Bell Icon -->
     <div class="notification-bell" @click="toggleNotifications">
-      <i class="fas fa-bell"></i>
+      <i class="fas fa-bell navbar-icon bell-icon"></i>
       <!-- Unread count badge -->
       <span v-if="unreadCount > 0" class="notification-badge">{{ unreadCount }}</span>
     </div>
@@ -263,8 +263,15 @@ onMounted(async () => {
           stack: error.stack
         });
         
+        // Handle permission denied errors
+        if (error.code === 'permission-denied') {
+          console.log('❌ Permission denied for notifications. User may not have access to notifications.');
+          notifications.value = [];
+          return;
+        }
+        
         // If index is still building, try a simpler query without orderBy
-        if (userError.code === 'failed-precondition' || userError.message.includes('index')) {
+        if (error.code === 'failed-precondition' || error.message.includes('index')) {
           console.log('🔄 Index still building, trying fallback query...');
           const fallbackUserQuery = query(
             collection(db, 'notifications'),
@@ -337,6 +344,9 @@ onMounted(async () => {
         message: error.message,
         stack: error.stack
       });
+      
+      // Set empty notifications array as fallback
+      notifications.value = [];
     }
   });
   
@@ -345,6 +355,43 @@ onMounted(async () => {
     unsubscribeAuth();
   };
 })
+
+// Test function to create a test notification
+async function createTestNotification() {
+  try {
+    console.log('=== CREATING TEST NOTIFICATION ===');
+    
+    if (!currentUser.value) {
+      console.error('❌ No user logged in');
+      alert('Please log in first');
+      return;
+    }
+    
+    const testNotification = {
+      type: 'test_notification',
+      title: 'Test Notification',
+      message: 'This is a test notification to verify the system works.',
+      recipientId: currentUser.value.uid,
+      recipientType: 'user',
+      status: 'unread',
+      createdAt: new Date(),
+      read: false
+    };
+    
+    console.log('Test notification data:', testNotification);
+    
+    const docRef = await addDoc(collection(db, 'notifications'), testNotification);
+    console.log('✅ Test notification created with ID:', docRef.id);
+    alert('✅ Test notification created successfully!');
+    
+  } catch (error) {
+    console.error('❌ Error creating test notification:', error);
+    alert('❌ Error creating test notification: ' + error.message);
+  }
+}
+
+// Make test function available globally
+window.createTestNotification = createTestNotification;
 </script>
 
 <style scoped>
@@ -358,11 +405,22 @@ onMounted(async () => {
   cursor: pointer;
   padding: 8px;
   border-radius: 50%;
-  transition: background-color 0.2s;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--primary-color);
 }
 
 .notification-bell:hover {
-  background-color: rgba(0, 0, 0, 0.1);
+  color: var(--gray-500);
+  transform: scale(1.1);
+}
+.notification-bell .navbar-icon {
+  width: 20px;
+  height: 20px;
 }
 
 .notification-badge {

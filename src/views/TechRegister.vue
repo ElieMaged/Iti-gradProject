@@ -1,19 +1,63 @@
 <template>
-  <div class="tech-register-bg min-h-screen flex items-center justify-content-center">
-    <div class="tech-register-card w-full max-w-6xl  rounded-3xl shadow-lg p-10 md:p-16">
-      <div class="flex flex-col items-center mb-8">
-        <img src="/logo/ace04d3b268cf810c91d002fdf7454a6ef778f27.png" alt="BoltFix Logo" class="h-12 mb-2" />
-        <h2 class="text-3xl md:text-4xl font-bold text-center text-[#6B4FA1] mb-1">{{ $t('technicianRegistration') }}</h2>
-        <p class="text-lg grey-color text-center">{{ $t('createAccount') }}</p>
+  <div class="signup-container">
+    <form class="signup-form" @submit.prevent="handleRegister">
+      <div class="form-header">
+        <img class="logo" src="/logo/ace04d3b268cf810c91d002fdf7454a6ef778f27.png" alt="BoltFix Logo">
+        <h1 class="title">{{ $t('technicianRegistration') }}</h1>
+        <p class="subtitle">{{ $t('createAccount') }}</p>
       </div>
-      <form @submit.prevent="handleRegister" class="grid grid-cols-1 md:grid-cols-4 gap-8">
+      
+      <div class="form-grid">
         <!-- Personal Information -->
-        <div class="flex flex-col gap-4 md:col-span-1">
-          <h3 class="font-bold text-[#6B4FA1] mb-2">{{ $t('personalInformation') }}</h3>
-          <input v-model="formData.fullName" type="text" :placeholder="$t('fullName')" class="input-field" required />
-          <input v-model="formData.email" type="email" :placeholder="$t('emailAddress')" class="input-field" required />
-          <div class="password-field-container">
-            <input v-model="formData.password" type="password" :placeholder="$t('password')" class="input-field" required />
+        <div class="form-section">
+          <h3 class="section-title">{{ $t('personalInformation') }}</h3>
+          
+          <div class="form-group">
+            <label for="fullName" class="form-label">{{ $t('fullName') }}</label>
+            <input 
+              type="text" 
+              id="fullName" 
+              v-model="formData.fullName" 
+              class="form-input" 
+              :placeholder="$t('fullName')" 
+              required 
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="email" class="form-label">{{ $t('emailAddress') }}</label>
+            <input 
+              type="email" 
+              id="email" 
+              v-model="formData.email" 
+              class="form-input" 
+              :placeholder="$t('emailAddress')" 
+              required 
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="phoneNumber" class="form-label">{{ $t('phoneNumber') }}</label>
+            <input 
+              type="tel" 
+              id="phoneNumber" 
+              v-model="formData.phoneNumber" 
+              class="form-input" 
+              :placeholder="$t('phoneNumber')" 
+              required 
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="password" class="form-label">{{ $t('password') }}</label>
+            <input 
+              type="password" 
+              id="password" 
+              v-model="formData.password" 
+              class="form-input" 
+              :placeholder="$t('password')" 
+              required 
+            />
             <!-- Password validation indicators -->
             <div class="password-validation" v-if="formData.password">
               <div class="validation-item" :class="{ 'valid': passwordValidation.length }">
@@ -38,127 +82,279 @@
               </div>
             </div>
           </div>
-          <div class="password-field-container">
-            <input v-model="formData.confirmPassword" type="password" :placeholder="$t('confirmPassword')" class="input-field" :class="{ 'error': formData.confirmPassword && !passwordValidation.match }" required />
-            <div v-if="formData.confirmPassword && !passwordValidation.match" class="password-error">
+
+          <div class="form-group">
+            <label for="confirmPassword" class="form-label">{{ $t('confirmPassword') }}</label>
+            <input 
+              type="password" 
+              id="confirmPassword" 
+              v-model="formData.confirmPassword" 
+              class="form-input" 
+              :class="{ 'error': formData.confirmPassword && !passwordValidation.match }" 
+              :placeholder="$t('confirmPassword')" 
+              required 
+            />
+            <p v-if="formData.confirmPassword && !passwordValidation.match" class="error-message">
               {{ $t('passwordsDoNotMatch') }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Professional Details -->
+        <div class="form-section">
+          <h3 class="section-title">{{ $t('professionalDetails') }}</h3>
+          
+          <div class="form-group">
+            <label for="specialization" class="form-label">{{ $t('specialization') }}</label>
+            <select 
+              id="specialization" 
+              v-model="formData.specialization" 
+              class="form-input" 
+              required
+            >
+              <option value="" disabled selected>{{ $t('specialization') }}</option>
+              <option value="Plumbing">{{ $t('plumbing') }}</option>
+              <option value="Electricity">{{ $t('electricity') }}</option>
+              <option value="Carpentry">{{ $t('carpentry') }}</option>
+              <option value="Wall Finishing">{{ $t('wallFinishing') }}</option>
+              <option value="Air Conditioning">{{ $t('airConditioning') }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="experience" class="form-label">{{ $t('yearsOfExperience') }}</label>
+            <select 
+              id="experience" 
+              v-model="formData.experience" 
+              class="form-input" 
+              required
+            >
+              <option value="" disabled selected>{{ $t('yearsOfExperience') }}</option>
+              <option value="1">{{ $t('oneYear') }}</option>
+              <option value="2">{{ $t('twoYears') }}</option>
+              <option value="3">{{ $t('threeYears') }}</option>
+              <option value="4+">{{ $t('fourPlusYears') }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="bio" class="form-label">{{ $t('briefDescriptionBio') }}</label>
+            <input 
+              type="text" 
+              id="bio" 
+              v-model="formData.bio" 
+              class="form-input" 
+              :placeholder="$t('briefDescriptionBio')" 
+              required 
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="basePrice" class="form-label">{{ $t('baseVisitPrice') }}</label>
+            <input 
+              type="text" 
+              id="basePrice" 
+              v-model="formData.basePrice" 
+              class="form-input" 
+              :placeholder="$t('baseVisitPrice')" 
+              required 
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="paypalEmail" class="form-label">{{ $t('paypalEmail') }}</label>
+            <input 
+              type="email" 
+              id="paypalEmail" 
+              v-model="formData.paypalEmail" 
+              class="form-input" 
+              :placeholder="$t('paypalEmail')" 
+              required 
+            />
+          </div>
+        </div>
+
+        <!-- Location -->
+        <div class="form-section">
+          <h3 class="section-title">{{ $t('location') }}</h3>
+          
+          <div class="form-group">
+            <label for="government" class="form-label">{{ $t('government') }}</label>
+            <select 
+              id="government" 
+              v-model="formData.government" 
+              class="form-input" 
+              required
+            >
+              <option value="" disabled selected>{{ $t('government') }}</option>
+              <option value="Cairo">{{ $t('cairo') }}</option>
+              <option value="Giza">{{ $t('giza') }}</option>
+              <option value="Alexandria">{{ $t('alexandria') }}</option>
+              <option value="Qalyubia">{{ $t('qalyubia') }}</option>
+              <option value="Sharqia">{{ $t('sharqia') }}</option>
+              <option value="Gharbia">{{ $t('gharbia') }}</option>
+              <option value="Monufia">{{ $t('monufia') }}</option>
+              <option value="Beheira">{{ $t('beheira') }}</option>
+              <option value="Ismailia">{{ $t('ismailia') }}</option>
+              <option value="Port Said">{{ $t('portSaid') }}</option>
+              <option value="Suez">{{ $t('suez') }}</option>
+              <option value="Dakahlia">{{ $t('dakahlia') }}</option>
+              <option value="Kafr El Sheikh">{{ $t('kafrElSheikh') }}</option>
+              <option value="Damietta">{{ $t('damietta') }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="district" class="form-label">{{ $t('districtArea') }}</label>
+            <select 
+              id="district" 
+              v-model="formData.district" 
+              class="form-input" 
+              required
+            >
+              <option value="" disabled selected>{{ $t('districtArea') }}</option>
+              <option value="Nasr City">{{ $t('nasrCity') }}</option>
+              <option value="Maadi">{{ $t('maadi') }}</option>
+              <option value="Dokki">{{ $t('dokki') }}</option>
+              <option value="Heliopolis">{{ $t('heliopolis') }}</option>
+              <option value="Zamalek">{{ $t('zamalek') }}</option>
+              <option value="Garden City">{{ $t('gardenCity') }}</option>
+              <option value="Mohandessin">{{ $t('mohandessin') }}</option>
+              <option value="Agouza">{{ $t('agouza') }}</option>
+              <option value="6th of October">{{ $t('sixthOfOctober') }}</option>
+              <option value="Sheikh Zayed">{{ $t('sheikhZayed') }}</option>
+              <option value="Smart Village">{{ $t('smartVillage') }}</option>
+              <option value="New Cairo">{{ $t('newCairo') }}</option>
+              <option value="Shoubra">{{ $t('shoubra') }}</option>
+              <option value="Ain Shams">{{ $t('ainShams') }}</option>
+              <option value="Matareya">{{ $t('matareya') }}</option>
+              <option value="El Marg">{{ $t('elMarg') }}</option>
+              <option value="El Salam">{{ $t('elSalam') }}</option>
+              <option value="El Nozha">{{ $t('elNozha') }}</option>
+              <option value="El Sharabiya">{{ $t('elSharabiya') }}</option>
+              <option value="El Basatin">{{ $t('elBasatin') }}</option>
+              <option value="El Mokattam">{{ $t('elMokattam') }}</option>
+              <option value="El Sayeda Zeinab">{{ $t('elSayedaZeinab') }}</option>
+              <option value="El Khalifa">{{ $t('elKhalifa') }}</option>
+              <option value="El Darb El Ahmar">{{ $t('elDarbElAhmar') }}</option>
+              <option value="El Gamaleya">{{ $t('elGamaleya') }}</option>
+              <option value="El Zeinhom">{{ $t('elZeinhom') }}</option>
+              <option value="El Maadi">{{ $t('elMaadi') }}</option>
+              <option value="El Tahrir">{{ $t('elTahrir') }}</option>
+              <option value="El Kasr El Aini">{{ $t('elKasrElAini') }}</option>
+              <option value="El Manial">{{ $t('elManial') }}</option>
+              <option value="El Giza">{{ $t('elGiza') }}</option>
+              <option value="El Haram">{{ $t('elHaram') }}</option>
+              <option value="El Omraniya">{{ $t('elOmraniya') }}</option>
+              <option value="El Warraq">{{ $t('elWarraq') }}</option>
+              <option value="El Imbaba">{{ $t('elImbaba') }}</option>
+              <option value="El Agouza">{{ $t('elAgouza') }}</option>
+              <option value="El Mohandessin">{{ $t('elMohandessin') }}</option>
+              <option value="El Dokki">{{ $t('elDokki') }}</option>
+              <option value="El Zamalek">{{ $t('elZamalek') }}</option>
+              <option value="El Garden City">{{ $t('elGardenCity') }}</option>
+              <option value="El Downtown">{{ $t('elDowntown') }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">{{ $t('willingToTravel') }}</label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input v-model="formData.willingToTravel" type="radio" name="travel" value="yes" />
+                <span>{{ $t('yes') }}</span>
+              </label>
+              <label class="radio-label">
+                <input v-model="formData.willingToTravel" type="radio" name="travel" value="no" />
+                <span>{{ $t('no') }}</span>
+              </label>
             </div>
           </div>
         </div>
-        <!-- Professional Details -->
-        <div class="flex flex-col gap-4 md:col-span-1">
-          <h3 class="font-bold text-[#6B4FA1] mb-2">{{ $t('professionalDetails') }}</h3>
-          <select v-model="formData.specialization" class="input-field" required>
-            <option value="" disabled selected>{{ $t('specialization') }}</option>
-            <option value="Plumbing">{{ $t('plumbing') }}</option>
-            <option value="Electricity">{{ $t('electricity') }}</option>
-            <option value="Carpentry">{{ $t('carpentry') }}</option>
-            <option value="Wall Finishing">{{ $t('wallFinishing') }}</option>
-            <option value="Air Conditioning">{{ $t('airConditioning') }}</option>
-          </select>
-          <select v-model="formData.experience" class="input-field" required>
-            <option value="" disabled selected>{{ $t('yearsOfExperience') }}</option>
-            <option value="1">{{ $t('oneYear') }}</option>
-            <option value="2">{{ $t('twoYears') }}</option>
-            <option value="3">{{ $t('threeYears') }}</option>
-            <option value="4+">{{ $t('fourPlusYears') }}</option>
-          </select>
-          <input v-model="formData.bio" type="text" :placeholder="$t('briefDescriptionBio')" class="input-field" required />
-          <input v-model="formData.basePrice" type="text" :placeholder="$t('baseVisitPrice')" class="input-field" required />
-          <input v-model="formData.paypalEmail" type="email" :placeholder="$t('paypalEmail')" class="input-field" required />
-        </div>
-        <!-- Location -->
-        <div class="flex flex-col gap-4 md:col-span-1">
-          <h3 class="font-bold text-[#6B4FA1] mb-2">{{ $t('location') }}</h3>
-          <select v-model="formData.government" class="input-field" required>
-            <option value="" disabled selected>{{ $t('government') }}</option>
-            <option value="Cairo">{{ $t('cairo') }}</option>
-            <option value="Giza">{{ $t('giza') }}</option>
-            <option value="Alexandria">{{ $t('alexandria') }}</option>
-          </select>
-          <select v-model="formData.district" class="input-field" required>
-            <option value="" disabled selected>{{ $t('districtArea') }}</option>
-            <option value="Nasr City">{{ $t('nasrCity') }}</option>
-            <option value="Maadi">{{ $t('maadi') }}</option>
-            <option value="Dokki">{{ $t('dokki') }}</option>
-          </select>
-          <div class="flex items-center gap-4 mt-2">
-            <span class="grey-color">{{ $t('willingToTravel') }}</span>
-            <label class="flex items-center gap-1">
-              <input v-model="formData.willingToTravel" type="radio" name="travel" value="yes" />
-              <span>{{ $t('yes') }}</span>
-            </label>
-            <label class="flex items-center gap-1">
-              <input v-model="formData.willingToTravel" type="radio" name="travel" value="no" />
-              <span>{{ $t('no') }}</span>
-            </label>
-          </div>
-        </div>
-        <!-- ID Upload & Checkboxes -->
-        <div class="flex flex-col gap-4 md:col-span-1">
-          <h3 class="font-bold text-[#6B4FA1] mb-2">{{ $t('pleaseUploadYourId') }}</h3>
-          <div class="upload-area" @click="triggerFileInput">
-            <div class="text-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto mb-2" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-              <span class="grey-color">
-                {{ $t('dragDropOrBrowse') }}
-                <span class="font-bold text-black cursor-pointer underline">{{ $t('browse') }}</span>
-              </span>
-              <input
-                ref="fileInput"
-                type="file"
-                accept="image/*"
-                class="hidden"
-                @change="handleFileChange"
-              />
-              <div v-if="previewUrl" class="mt-2">
+
+        <!-- Uploads & Agreements -->
+        <div class="form-section">
+          <h3 class="section-title">{{ $t('pleaseUploadYourId') }}</h3>
+          
+          <div class="form-group">
+            <label class="form-label">ID Photo</label>
+            <div class="upload-area" @click="triggerFileInput">
+              <div class="upload-content">
+                <svg xmlns="http://www.w3.org/2000/svg" class="upload-icon" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                <span class="upload-text">
+                  {{ $t('dragDropOrBrowse') }}
+                  <span class="browse-link">{{ $t('browse') }}</span>
+                </span>
+                <input
+                  ref="fileInput"
+                  type="file"
+                  accept="image/*"
+                  class="hidden"
+                  @change="handleFileChange"
+                />
+              </div>
+              <div v-if="previewUrl" class="preview-container">
                 <img :src="previewUrl" alt="Preview" class="preview-img" />
               </div>
             </div>
           </div>
           
-          <!-- Profile Picture Upload -->
-          <h3 class="font-bold text-[#6B4FA1] mb-2">Please upload a profile picture</h3>
-          <div class="upload-area" @click="triggerProfileFileInput">
-            <div class="text-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto mb-2" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-              <span class="grey-color">
-                {{ $t('dragDropOrBrowse') }}
-                <span class="font-bold text-black cursor-pointer underline">{{ $t('browse') }}</span>
-              </span>
-              <input
-                ref="profileFileInput"
-                type="file"
-                accept="image/*"
-                class="hidden"
-                @change="handleProfileFileChange"
-              />
-              <div v-if="profilePreviewUrl" class="mt-2">
+          <div class="form-group">
+            <label class="form-label">Profile Picture</label>
+            <div class="upload-area" @click="triggerProfileFileInput">
+              <div class="upload-content">
+                <svg xmlns="http://www.w3.org/2000/svg" class="upload-icon" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                <span class="upload-text">
+                  {{ $t('dragDropOrBrowse') }}
+                  <span class="browse-link">{{ $t('browse') }}</span>
+                </span>
+                <input
+                  ref="profileFileInput"
+                  type="file"
+                  accept="image/*"
+                  class="hidden"
+                  @change="handleProfileFileChange"
+                />
+              </div>
+              <div v-if="profilePreviewUrl" class="preview-container">
                 <img :src="profilePreviewUrl" alt="Profile Preview" class="preview-img" />
               </div>
             </div>
           </div>
-          <div class="flex flex-col gap-2 mt-2">
-            <label class="flex items-center gap-2">
-              <input v-model="formData.confirmInfo" type="checkbox" class="accent-[#6B4FA1]" required />
-              <span class="grey-color text-sm">{{ $t('confirmInformationAccurate') }}</span>
+
+          <div class="checkbox-group">
+            <input v-model="formData.confirmInfo" type="checkbox" class="form-checkbox" id="confirmInfo" required />
+            <label class="checkbox-label" for="confirmInfo">
+              {{ $t('confirmInformationAccurate') }}
             </label>
-            <label class="flex items-center gap-2">
-              <input v-model="formData.agreeTerms" type="checkbox" class="accent-[#6B4FA1]" required />
-              <span class="grey-color text-sm">{{ $t('agreeTermsPrivacyPolicy') }}</span>
+          </div>
+
+          <div class="checkbox-group">
+            <input v-model="formData.agreeTerms" type="checkbox" class="form-checkbox" id="agreeTerms" required />
+            <label class="checkbox-label" for="agreeTerms">
+              {{ $t('agreeTermsPrivacyPolicy') }}
             </label>
           </div>
         </div>
-      </form>
-      <div class="flex flex-col items-center mt-8">
-        <button type="submit" @click="handleRegister" class="register-btn" :disabled="loading">
-          {{ loading ? $t('registering') : $t('register') }}
-        </button>
-        <p v-if="error" class="mt-4 text-red-500">{{ error }}</p>
-        <p v-if="success" class="mt-4 text-green-500">{{ success }}</p>
-        <p class="mt-4 grey-color">{{ $t('haveAccount') }} <a href="/userlogin" class="text-[#6B4FA1] font-semibold hover:underline">{{ $t('signIn') }}</a></p>
       </div>
-    </div>
+
+      <div class="form-footer">
+        <button type="submit" class="submit-btn" :disabled="loading">
+          <span>{{ loading ? $t('registering') : $t('register') }}</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="arrow-icon" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M14 2.5a.5.5 0 0 0-.5-.5h-6a.5.5 0 0 0 0 1h4.793L2.146 13.146a.5.5 0 0 0 .708.708L13 3.707V8.5a.5.5 0 0 0 1 0z"/>
+          </svg>
+        </button>
+        
+        <p v-if="error" class="error-text">{{ error }}</p>
+        <p v-if="success" class="success-text">{{ success }}</p>
+        <p class="login-link">{{ $t('haveAccount') }} <a href="/userlogin">{{ $t('signIn') }}</a></p>
+      </div>
+    </form>
   </div>
 </template>
 
@@ -187,6 +383,7 @@ const success = ref('');
 const formData = reactive({
   fullName: '',
   email: '',
+  phoneNumber: '',
   password: '',
   confirmPassword: '',
   specialization: '',
@@ -327,6 +524,7 @@ async function handleRegister() {
       uid: userCredential.user.uid,
       fullName: formData.fullName,
       email: formData.email,
+      phoneNumber: formData.phoneNumber,
       specialization: formData.specialization,
       experience: formData.experience,
       bio: formData.bio,
@@ -638,206 +836,519 @@ function testRegistrationFlow() {
 </script>
 
 <style scoped>
-.tech-register-bg {
-  background-color: #d3cfe2;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.grey-color {
-  color: #6b7280;
-}
-.dark .grey-color {
-  color: var(--primary-text) !important;
-}
-.dark .tech-register-bg {
-  background-color: var(--primary-bg);
-  
+body {
+    background: #D3CFE2;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-.tech-register-card {
-  width: 100%;
-  max-width: 72rem;
-  background-color: white;
-  border-radius: 2rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  padding: 2.5rem;
-}
-.dark .tech-register-card {
-  background-color: var(--secondary-bg);
-  color: var(--primary-text) !important;
-}
-@media (min-width: 768px) {
-  .tech-register-card {
-    padding: 4rem;
-  }
+.dark body {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
 }
 
-.input-field {
-  background-color: #EAEAEA;
-  border: 1px solid #d1d5db;
-  color: #111827;
-  font-size: 0.875rem;
-  border-radius: 2rem;
-  display: block;
-  width: 100%;
-  padding: 0.75rem;
-  transition: all 0.3s ease;
+.signup-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    box-sizing: border-box;
+    background: #D3CFE2;
+
+}
+.dark .signup-container {
+  background: var(--primary-bg);
 }
 
-.input-field:focus {
-  outline: none;
-  border-color: #6B4FA1;
-  box-shadow: 0 0 0 3px rgba(107, 79, 161, 0.1);
+.signup-form {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    padding: 3rem;
+    width: 100%;
+    max-width: 1200px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.upload-area {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px dashed #9ca3af;
-  border-radius: 0.75rem;
-  background-color: #f9fafb;
-  min-height: 120px;
-  margin-bottom: 0.5rem;
-  cursor: pointer;
-  transition: border-color 0.3s ease;
+.dark .signup-form {
+  background: var(--secondary-bg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
 
-.upload-area:hover {
-  border-color: #6B4FA1;
+.form-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
 }
 
-.preview-img {
-  max-width: 120px;
-  max-height: 120px;
-  border-radius: 0.75rem;
-  margin: 0 auto;
-  display: block;
-  object-fit: cover;
-  border: 2px solid #6B4FA1;
+.logo {
+    width: 120px;
+    height: auto;
+    margin-bottom: 1.5rem;
+    display: inline;
 }
 
-.register-btn {
-  width: 15rem;
-  padding: 0.75rem 0;
-  border-radius: 9999px;
-  background-color: #6B4FA1;
-  color: white;
-  font-weight: 600;
-  font-size: 1.125rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: background-color 0.3s ease;
-  border: none;
-  cursor: pointer;
+.title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #625397;
+    margin: 0 0 0.5rem 0;
+    letter-spacing: -0.02em;
 }
 
-.register-btn:hover:not(:disabled) {
-  background-color: #5a3e8b;
+.dark .title {
+  color: var(--primary-color);
 }
 
-.register-btn:disabled {
-  background-color: #9ca3af;
-  cursor: not-allowed;
+.subtitle {
+    font-size: 1.1rem;
+    color: #6b7280;
+    margin: 0;
+    font-weight: 400;
 }
 
-/* Password validation styles */
-.password-field-container {
-  position: relative;
+.dark .subtitle {
+  color: #9ca3af;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.form-section {
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid rgba(107, 79, 161, 0.1);
+}
+
+.dark .form-section {
+  background: var(--secondary-bg);
+  border-color: rgba(107, 79, 161, 0.2);
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid rgba(107, 79, 161, 0.2);
+    color: var(--primary-text, #1f2937);
+}
+
+.dark .section-title {
+  color: var(--primary-text, var(--primary-color));
+  border-bottom-color: rgba(107, 79, 161, 0.3);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1.25rem;
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+.form-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.dark .form-label {
+  color: #d1d5db;
+}
+
+.form-input {
+    padding: 0.875rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    background: var(--input-bg, #ffffff);
+    color: #1f2937;
+    font-family: inherit;
+}
+
+.dark .form-input {
+  background: var(--input-bg, #374151);
+  border-color: #4b5563;
+  color: #f9fafb;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #625397;
+    box-shadow: 0 0 0 3px rgba(98, 83, 151, 0.1);
+}
+
+.dark .form-input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(98, 83, 151, 0.2);
+}
+
+.form-input::placeholder {
+    color: var(--text-muted);
+}
+
+.dark .form-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Style for select dropdowns to match placeholder color */
+.form-input option {
+    color: var(--text-muted);
+}
+
+.dark .form-input option {
+  color: var(--text-muted);
+}
+
+/* Style for select dropdown placeholder text */
+.form-input:invalid {
+    color: var(--text-muted);
+}
+
+.dark .form-input:invalid {
+  color: var(--text-muted);
+}
+
+.form-input.error {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.dark .form-input.error {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+}
+
+.error-message {
+    color: #ef4444;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    font-weight: 500;
 }
 
 .password-validation {
-  margin-top: 0.5rem;
-  padding: 0.75rem;
-  background-color: #f8f9fa;
-  border-radius: 0.5rem;
-  border: 1px solid #e9ecef;
-  font-size: 0.75rem;
+    margin-top: 0.75rem;
+    padding: 1rem;
+    background-color: var(--input-bg, #f8f9fa);
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    font-size: 0.75rem;
 }
 
 .dark .password-validation {
-  background-color: #374151;
+  background-color: var(--input-bg, #374151);
   border-color: #4b5563;
 }
 
 .validation-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.25rem;
-  color: #6b7280;
-  transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+    color: #6b7280;
+    transition: color 0.2s ease;
 }
 
 .validation-item:last-child {
-  margin-bottom: 0;
+    margin-bottom: 0;
 }
 
 .validation-item.valid {
-  color: #10b981;
+    color: #10b981;
 }
 
 .validation-icon {
-  font-weight: bold;
-  font-size: 0.875rem;
+    font-weight: bold;
+    font-size: 0.875rem;
 }
 
 .validation-text {
-  font-size: 0.75rem;
+    font-size: 0.75rem;
 }
 
-.password-error {
-  color: #ef4444;
-  font-size: 0.75rem;
-  margin-top: 0.25rem;
-  padding-left: 0.5rem;
+.radio-group {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.5rem;
 }
 
-.input-field.error {
-  border-color: #ef4444;
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: #374151;
+    transition: color 0.2s ease;
 }
 
-/* Grid layout */
-.grid {
-  display: grid;
-  gap: 2rem;
+.dark .radio-label {
+  color: #d1d5db;
 }
 
-@media (min-width: 768px) {
-  .grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
+.radio-label:hover {
+    color: #625397;
 }
 
-/* Utility classes */
-.flex { display: flex; }
-.flex-col { flex-direction: column; }
-.items-center { align-items: center; }
-.justify-center { justify-content: center; }
-.text-center { text-align: center; }
-.mb-2 { margin-bottom: 0.5rem; }
-.mb-8 { margin-bottom: 2rem; }
-.mt-2 { margin-top: 0.5rem; }
-.mt-4 { margin-top: 1rem; }
-.mt-8 { margin-top: 2rem; }
-.gap-1 { gap: 0.25rem; }
-.gap-2 { gap: 0.5rem; }
-.gap-4 { gap: 1rem; }
-.gap-8 { gap: 2rem; }
-.w-full { width: 100%; }
-.h-12 { height: 3rem; }
-.text-3xl { font-size: 1.875rem; }
-.text-lg { font-size: 1.125rem; }
-.font-bold { font-weight: 700; }
-.font-semibold { font-weight: 600; }
-.text-gray-500 { color: #6b7280; }
-.text-gray-700 { color: #374151; }
-.text-red-500 { color: #ef4444; }
-.text-green-500 { color: #10b981; }
-.cursor-pointer { cursor: pointer; }
-.hover\:underline:hover { text-decoration: underline; }
-.hidden { display: none; }
+.radio-label input[type="radio"] {
+    width: 1.125rem;
+    height: 1.125rem;
+    accent-color: #625397;
+}
+
+.upload-area {
+    border: 2px dashed #9ca3af;
+    border-radius: 12px;
+    background-color: var(--input-bg, #f9fafb);
+    min-height: 120px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dark .upload-area {
+  background-color: var(--input-bg, #374151);
+  border-color: #4b5563;
+}
+
+.upload-area:hover {
+    border-color: #625397;
+    background-color: #f3f4f6;
+}
+
+.dark .upload-area:hover {
+  background-color: #4b5563;
+}
+
+.upload-content {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem;
+}
+
+.upload-icon {
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+}
+
+.upload-text {
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.browse-link {
+    color: #625397;
+    text-decoration: underline;
+    cursor: pointer;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.browse-link:hover {
+    color: #7c3aed;
+}
+
+.preview-container {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+}
+
+.preview-img {
+    max-width: 120px;
+    max-height: 120px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 2px solid #625397;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.form-checkbox {
+    width: 1.25rem;
+    height: 1.25rem;
+    accent-color: #625397;
+}
+
+.checkbox-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+    cursor: pointer;
+    user-select: none;
+}
+
+.dark .checkbox-label {
+  color: #9ca3af;
+}
+
+.form-footer {
+    text-align: center;
+}
+
+.submit-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    width: 100%;
+    max-width: 300px;
+    justify-content: center;
+}
+
+.dark .submit-btn {
+  background: var(--primary-color);
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(98, 83, 151, 0.3);
+}
+
+.submit-btn:active {
+    transform: translateY(0);
+}
+
+.submit-btn:disabled {
+    background-color: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.arrow-icon {
+    transition: transform 0.2s ease;
+}
+
+.submit-btn:hover .arrow-icon {
+    transform: translateX(4px);
+}
+
+.error-text {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin: 0.5rem 0;
+    font-weight: 500;
+}
+
+.success-text {
+    color: #10b981;
+    font-size: 0.875rem;
+    margin: 0.5rem 0;
+    font-weight: 500;
+}
+
+.login-link {
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+.dark .login-link {
+  color: #9ca3af;
+}
+
+.login-link a {
+    color: #625397;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.dark .login-link a {
+  color: var(--primary-color);
+}
+
+.login-link a:hover {
+    color: #7c3aed;
+    text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .form-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .signup-container {
+        padding: 1rem;
+    }
+    
+    .signup-form {
+        padding: 2rem;
+        border-radius: 16px;
+    }
+    
+    .title {
+        font-size: 2rem;
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .form-section {
+        padding: 1rem;
+    }
+    
+    .submit-btn {
+        padding: 0.875rem 1.5rem;
+        font-size: 0.875rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .signup-form {
+        padding: 1.5rem;
+    }
+    
+    .title {
+        font-size: 1.75rem;
+    }
+    
+    .logo {
+        width: 100px;
+    }
+    
+    .form-section {
+        padding: 0.75rem;
+    }
+}
 </style> 

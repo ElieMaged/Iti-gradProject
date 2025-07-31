@@ -83,7 +83,7 @@ const routes = [
   { path: '/profile-edit', component: ProfileEdit },
   { path: '/techregister', component: TechRegister },
   { path: '/welcomepage', component: WelcomePage },
-  { path: '/profile-view', component: ProfileView },
+  { path: '/profile-view/:id', component: ProfileView },
   { path: '/previous-services', component: PreviousServices },
   { path: '/payment', component: Payment },
   { path: '/profile', component: Profile },

@@ -1,4 +1,5 @@
 <template>
+  <div class="admin-dashboard-layout">
     <!-- Sidebar -->
     <userSidebar :activeTab="activeTab" />
     <!-- Main Content -->
@@ -20,68 +21,73 @@
           
           <!-- Profile Content -->
           <div v-else>
-        <div id="admin-profile-card">
-          <h2 id="admin-profile-title">{{ $t('personalInformation') }}</h2>
-          <div id="admin-profile-content">
-            <div id="admin-profile-info">
-              <div class="info-block">
-                <span class="info-label">{{ $t('fullName') }}</span>
-                <span class="info-value">{{ form.fullName || 'Not provided' }}</span>
-              </div>
-              <div class="info-block">
-                <span class="info-label">{{ $t('emailAddress') }}</span>
-                <span class="info-value">{{ form.email || 'Not provided' }}</span>
-          </div>
-              <div class="info-block">
-                <span class="info-label">{{ $t('phoneNumber') }}</span>
-                <span class="info-value">{{ form.phone || 'Not provided' }}</span>
-              </div>
-              <div class="info-block">
-                <span class="info-label">{{ $t('gender') }}</span>
-                <span class="info-value">{{ form.gender || 'Not provided' }}</span>
-              </div>
-              <div class="info-block">
-                <span class="info-label">{{ $t('address') }}</span>
-                <span class="info-value">{{ form.address || 'Not provided' }}</span>
-              </div>
-              <div class="info-block">
-                <span class="info-label">{{ $t('city') }}</span>
-                <span class="info-value">{{ form.city || 'Not provided' }}</span>
-              </div>
-              <div class="info-block">
-                <span class="info-label">{{ $t('area') }}</span>
-                <span class="info-value">{{ form.area || 'Not provided' }}</span>
+            <div id="admin-profile-card">
+              <h2 id="admin-profile-title">{{ $t('personalInformation') }}</h2>
+              <div id="admin-profile-content">
+                <!-- Profile Image - Will be moved to top on mobile -->
+                <div id="admin-profile-image" class="profile-image-mobile">
+                  <img v-if="profileImageUrl" :src="profileImageUrl" alt="Profile" class="w-full h-full object-cover rounded" />
+                  <i v-else class="fas fa-user" id="profile-icon"></i>
+                </div>
+                <div id="admin-profile-info">
+                  <div class="info-block">
+                    <span class="info-label">{{ $t('fullName') }}</span>
+                    <span class="info-value">{{ form.fullName || 'Not provided' }}</span>
+                  </div>
+                  <div class="info-block">
+                    <span class="info-label">{{ $t('emailAddress') }}</span>
+                    <span class="info-value">{{ form.email || 'Not provided' }}</span>
+                  </div>
+                  <div class="info-block">
+                    <span class="info-label">{{ $t('phoneNumber') }}</span>
+                    <span class="info-value">{{ form.phone || 'Not provided' }}</span>
+                  </div>
+                  <div class="info-block">
+                    <span class="info-label">{{ $t('gender') }}</span>
+                    <span class="info-value">{{ form.gender || 'Not provided' }}</span>
+                  </div>
+                  <div class="info-block">
+                    <span class="info-label">{{ $t('address') }}</span>
+                    <span class="info-value">{{ form.address || 'Not provided' }}</span>
+                  </div>
+                  <div class="info-block">
+                    <span class="info-label">{{ $t('city') }}</span>
+                    <span class="info-value">{{ form.city || 'Not provided' }}</span>
+                  </div>
+                  <div class="info-block">
+                    <span class="info-label">{{ $t('area') }}</span>
+                    <span class="info-value">{{ form.area || 'Not provided' }}</span>
+                  </div>
+                </div>
               </div>
             </div>
-            <div id="admin-profile-image">
-              <img v-if="profileImageUrl" :src="profileImageUrl" alt="Profile" class="w-full h-full object-cover rounded" />
-              <i v-else class="fas fa-user" id="profile-icon"></i>
-            </div>
           </div>
-        </div>
-      </div>
+    </div>
     </div>
   </div>
 </template>
 
-<script>
+<script setup>
 import userSidebar from '../components/userSidebar.vue';
 import { auth, db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+
 const router = useRouter();
 const activeTab = ref('profile');
-const profileImageUrl = ref(null);
+const profileImageUrl = ref('https://randomuser.me/api/portraits/men/32.jpg');
 const loading = ref(true);
 const error = ref(null);
-const profileData = ref({
+const form = ref({
   fullName: '',
   email: '',
   phone: '',
   gender: '',
-  address: ''
+  address: '',
+  city: '',
+  area: ''
 });
 
 async function fetchUserProfile() {
@@ -109,12 +115,14 @@ async function fetchUserProfile() {
       console.log('User data from Firestore:', userData);
       
       // Set profile data from Firebase
-      profileData.value = {
+      form.value = {
         fullName: userData.fullName || `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || 'N/A',
         email: userData.email || user.email || 'N/A',
         phone: userData.phone || 'N/A',
         gender: userData.gender || 'N/A',
-        address: userData.address || `${userData.district || ''}${userData.district && userData.government ? ', ' : ''}${userData.government || ''}`.trim() || 'N/A'
+        address: userData.address || `${userData.district || ''}${userData.district && userData.government ? ', ' : ''}${userData.government || ''}`.trim() || 'N/A',
+        city: userData.city || 'N/A',
+        area: userData.area || 'N/A'
       };
       
       // Set profile image if exists
@@ -122,16 +130,18 @@ async function fetchUserProfile() {
         profileImageUrl.value = userData.profileImageUrl;
       }
       
-      console.log('Profile data set:', profileData.value);
+      console.log('Profile data set:', form.value);
     } else {
       console.log('No user document found, using auth data');
       // Fallback to auth data if no Firestore document
-      profileData.value = {
-        fullName: 'N/A',
+      form.value = {
+        fullName: user.displayName || 'N/A',
         email: user.email || 'N/A',
-        phone: 'N/A',
-        gender: 'N/A',
-        address: 'N/A'
+        phone: user.phoneNumber || 'N/A',
+        gender: user.gender || 'N/A',
+        address: user.address || 'N/A',
+        city: user.city || 'N/A',
+        area: user.area || 'N/A'
       };
     }
     
@@ -140,6 +150,26 @@ async function fetchUserProfile() {
     error.value = 'Failed to load profile data: ' + err.message;
   } finally {
     loading.value = false;
+  }
+}
+
+function handleSidebarNavigate(route) {
+  router.push(route);
+}
+
+function triggerFileInput() {
+  // This would need a ref to the file input element
+  // For now, we'll implement this when needed
+}
+
+function onFileChange(e) {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      profileImageUrl.value = e.target.result;
+    };
+    reader.readAsDataURL(file);
   }
 }
 
@@ -155,74 +185,6 @@ onMounted(() => {
     }
   });
 });
-
-export default {
-  components: { userSidebar },
-  data() {
-    return {
-      activeTab: 'profile',
-      profileImageUrl: 'https://randomuser.me/api/portraits/men/32.jpg',
-      loading: true,
-      error: '',
-      form: {
-  fullName: '',
-  email: '',
-  phone: '',
-  gender: '',
-        address: '',
-        city: '',
-        area: '',
-      }
-    }
-  },
-  async mounted() {
-    try {
-      const user = auth.currentUser;
-      if (!user) {
-        this.error = 'Not logged in.';
-        this.loading = false;
-        return;
-      }
-      const docRef = doc(db, 'users', user.uid);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        this.form.fullName = data.fullName || '';
-        this.form.email = data.email || '';
-        this.form.phone = data.phone || '';
-        this.form.gender = data.gender || '';
-        this.form.address = data.address || '';
-        this.form.city = data.city || '';
-        this.form.area = data.area || '';
-        this.profileImageUrl = data.profileImageUrl || this.profileImageUrl;
-      } else {
-        this.error = 'User profile not found.';
-      }
-    } catch (e) {
-      this.error = 'Error loading profile.';
-    } finally {
-      this.loading = false;
-    }
-  },
-  methods: {
-    handleSidebarNavigate(route) {
-      this.$router.push(route);
-    },
-    triggerFileInput() {
-      this.$refs.fileInput.click();
-    },
-    onFileChange(e) {
-      const file = e.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-        reader.onload = (e) => {
-          this.profileImageUrl = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  }
-}
-  }
-}
 </script>
 
 <style scoped>
@@ -266,12 +228,12 @@ export default {
 #admin-profile-title {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #7c6bb0;
+  color: var(--primary-color);
   margin-bottom: 1.5rem;
 }
 
 .dark #admin-profile-title {
-  color: var(--white);
+  color: var(--primary-color);
 }
 
 /* RTL Support for Arabic */
@@ -297,6 +259,116 @@ export default {
   #admin-profile-content {
     flex-direction: row;
     align-items: flex-start;
+  }
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+    min-height: auto;
+  }
+  .admin-dashboard-layout {
+    flex-direction: column;
+  }
+  
+  #admin-profile-container {
+    margin-top: 80px;
+    padding: 1rem;
+    margin-right: 0;
+  }
+  
+  #admin-profile-wrapper {
+    max-width: 100%;
+  }
+  
+  #admin-profile-card {
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+  }
+  
+  #admin-profile-title {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  
+  /* Mobile: Image at top, info below */
+  #admin-profile-content {
+    flex-direction: column;
+  }
+  
+  .profile-image-mobile {
+    order: -1;
+    margin-bottom: 1.5rem;
+  }
+  
+  #admin-profile-image {
+    width: 8rem;
+    height: 8rem;
+    margin: 0 auto;
+  }
+  
+  #admin-profile-info {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .info-block {
+    padding: 0.75rem;
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+  }
+  
+  .dark .info-block {
+    background-color: var(--secondary-bg);
+  }
+  
+  .info-label {
+    font-size: 1rem;
+  }
+  
+  .info-value {
+    font-size: 0.875rem;
+  }
+  
+  #profile-icon {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  #admin-profile-container {
+    margin-top: 60px;
+    padding: 0.75rem;
+  }
+  
+  #admin-profile-card {
+    padding: 1rem;
+  }
+  
+  #admin-profile-title {
+    font-size: 1.125rem;
+  }
+  
+  .info-block {
+    padding: 0.5rem;
+  }
+  
+  .info-label {
+    font-size: 0.875rem;
+  }
+  
+  .info-value {
+    font-size: 0.75rem;
+  }
+  
+  #admin-profile-image {
+    width: 6rem;
+    height: 6rem;
+  }
+  
+  #profile-icon {
+    font-size: 2rem;
   }
 }
 
@@ -329,7 +401,7 @@ export default {
 }
 
 .dark .info-value {
-  color: var(--primary-text-dark);
+  color: var(--muted-text);
 }
 
 #admin-profile-image {

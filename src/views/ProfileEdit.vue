@@ -9,14 +9,16 @@
           </div>
           <form class="edit-profile-form" @submit.prevent="saveProfile">
             <div class="edit-profile-content">
-                <div class="edit-profile-fields">
-                  <div class="flex flex-col items-center">
-                  <div class="profile-img-wrapper w-40 h-40 rounded-full overflow-hidden shadow-md mb-4">
-                    <img :src="profileImageUrl" alt="Technician Photo" class="w-full h-full object-cover" />
+                <!-- Profile Image Section - Will be moved to top on mobile -->
+                <div class="edit-profile-image-section profile-image-mobile">
+                  <div class="profile-image-container">
+                    <img v-if="profileImageUrl" :src="profileImageUrl" alt="Profile" class="profile-image" />
+                    <i v-else class="fas fa-user profile-image-placeholder"></i>
                   </div>
-                  <input ref="fileInput" type="file" class="hidden" @change="onFileChange" />
-                  <button class="upload-btn bg-secondary text-white rounded px-4 py-2 mb-2" @click="triggerFileInput">{{ $t('uploadPhotoButton') }}</button>
+                  <button type="button" class="upload-btn" @click="triggerFileInput">{{ $t('uploadPhotoButton') }}</button>
+                  <input ref="fileInput" type="file" accept="image/*" class="hidden-input" @change="onFileChange" />
                 </div>
+                <div class="edit-profile-fields">
                 <div>
                   <label for="fullName">{{ $t('fullNameLabel') }}</label>
                   <input type="text" id="fullName" v-model="form.fullName" required />
@@ -54,14 +56,6 @@
                   <label for="city">{{ $t('city') }}</label>
                   <input type="text" id="city" v-model="form.city" required />
               </div>
-              </div>
-              <div class="edit-profile-image-section">
-                <div class="profile-image-container">
-                  <img v-if="profileImageUrl" :src="profileImageUrl" alt="Profile" class="profile-image" />
-                  <i v-else class="fas fa-user profile-image-placeholder"></i>
-                </div>
-                <button type="button" class="upload-btn" @click="triggerFileInput">{{ $t('uploadPhotoButton') }}</button>
-                <input ref="fileInput" type="file" accept="image/*" class="hidden-input" @change="onFileChange" />
               </div>
             </div>
             <div class="edit-profile-actions">
@@ -198,7 +192,7 @@ export default {
   padding: 2rem;
 }
 .dark .edit-profile-header h2 {
-  color: var(--primary-text);
+  color: var(--primary-color);
 }
 .dark .edit-profile-card {
   background: var(--grey-bg);
@@ -238,7 +232,7 @@ export default {
   margin-bottom: 0.25rem;
 }
 .dark .edit-profile-fields label {
-  color: var(--primary-text-dark);
+  color: var(--primary-text);
 }
 .edit-profile-fields input,
 .edit-profile-fields select,
@@ -256,7 +250,7 @@ export default {
 .dark .edit-profile-fields select,
 .dark .edit-profile-fields textarea {
   background: var(--input-bg);
-  color: var(--text-muted);
+  color: var(--text-muted );
 }
 .edit-profile-fields input:focus,
 .edit-profile-fields select:focus,
@@ -362,4 +356,130 @@ export default {
 [dir="rtl"] .edit-profile-actions { justify-content: flex-start; }
 [dir="rtl"] .edit-profile-content { direction: rtl; }
 [dir="rtl"] .edit-profile-fields { direction: rtl; }
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+    min-height: auto;
+  }
+  .admin-dashboard-layout {
+    flex-direction: column;
+  }
+  
+  .edit-profile-main {
+    margin-top: 80px;
+    padding: 1rem;
+    margin-right: 0;
+  }
+  
+  .edit-profile-wrapper {
+    max-width: 100%;
+  }
+  
+  .edit-profile-card {
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+  }
+  
+  .edit-profile-header h2 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  
+  /* Mobile: Image at top, form fields below */
+  .edit-profile-content {
+    flex-direction: column;
+  }
+  
+  .profile-image-mobile {
+    order: -1;
+    margin-bottom: 1.5rem;
+  }
+  
+  .edit-profile-image-section {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+  }
+  
+  .edit-profile-fields {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .edit-profile-fields > div {
+    padding: 0.75rem;
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+  }
+  
+  .dark .edit-profile-fields > div {
+    background-color: var(--secondary-bg);
+  }
+  
+  .edit-profile-fields label {
+    font-size: 1rem;
+  }
+  
+  .edit-profile-fields input,
+  .edit-profile-fields select {
+    font-size: 0.875rem;
+  }
+  
+  .profile-image-container {
+    width: 8rem;
+    height: 8rem;
+  }
+  
+  .profile-image-placeholder {
+    font-size: 2.5rem;
+  }
+  
+  .upload-btn {
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .edit-profile-main {
+    margin-top: 60px;
+    padding: 0.75rem;
+  }
+  
+  .edit-profile-card {
+    padding: 1rem;
+  }
+  
+  .edit-profile-header h2 {
+    font-size: 1.125rem;
+  }
+  
+  .edit-profile-fields > div {
+    padding: 0.5rem;
+  }
+  
+  .edit-profile-fields label {
+    font-size: 0.875rem;
+  }
+  
+  .edit-profile-fields input,
+  .edit-profile-fields select {
+    font-size: 0.75rem;
+  }
+  
+  .profile-image-container {
+    width: 6rem;
+    height: 6rem;
+  }
+  
+  .profile-image-placeholder {
+    font-size: 2rem;
+  }
+  
+  .upload-btn {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+  }
+}
 </style> 

@@ -636,15 +636,15 @@ body {
     border-radius: 12px;
     font-size: 1rem;
     transition: all 0.2s ease;
-    background: #ffffff;
-    color: #1f2937;
+    background: var(--input-bg, #ffffff);
+    color: var(--primary-text, #1f2937);
     font-family: inherit;
 }
 
 .dark .form-input {
-  background: #374151;
+  background: var(--input-bg, #374151);
   border-color: #4b5563;
-  color: #f9fafb;
+  color: var(--primary-text, #f9fafb);
 }
 
 .form-input:focus {
@@ -659,11 +659,29 @@ body {
 }
 
 .form-input::placeholder {
-    color: #9ca3af;
+    color: var(--text-muted, #9ca3af);
 }
 
 .dark .form-input::placeholder {
-  color: #6b7280;
+  color: var(--text-muted, #6b7280);
+}
+
+/* Style for select dropdowns to match placeholder color */
+.form-input option {
+    color: var(--text-muted, #9ca3af);
+}
+
+.dark .form-input option {
+  color: var(--text-muted, #6b7280);
+}
+
+/* Style for select dropdown placeholder text */
+.form-input:invalid {
+    color: var(--text-muted, #9ca3af);
+}
+
+.dark .form-input:invalid {
+  color: var(--text-muted, #6b7280);
 }
 
 .form-input.error {
@@ -747,7 +765,7 @@ body {
 }
 
 .dark .submit-btn {
-  background: linear-gradient(135deg, var(--primary-color) 0%, #7c3aed 100%);
+  background: var(--primary-color);
 }
 
 .submit-btn:hover {

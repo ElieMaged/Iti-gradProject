@@ -65,11 +65,7 @@
         <i class="fa-regular fa-star"></i>
         <span>{{ $t('myReviews') }}</span>
       </a>
-
-      <button @click="handleLogout" class="sidebar-item logout-btn">
-        <i class="fa-solid fa-right-from-bracket"></i>
-        <span>{{ $t('logout') }}</span>
-      </button>
+     
     </div>
   </div>
 </template>

@@ -1,11 +1,11 @@
 <template>  
-  <div class="flex min-h-screen">
+  <div class="admin-dashboard-layout">
     <userSidebar :activeTab="activeTab" />
-    <div class="flex-1 p-8">
+    <div class="previous-services-main mr-20 p-4">
       <div class="max-w-6xl mx-auto">
         <div class="mb-8">
-          <h1 class="text-3xl font-bold text-text-main dark:text-white">{{ $t('previousServicesTitle') }}</h1>
-          <p class="text-gray-600 dark:text-gray-300">{{ $t('previousServicesDescription') }}</p>
+          <h1 class="text-3xl font-bold text-text-main ">{{ $t('previousServicesTitle') }}</h1>
+          <p class=" dark:text-gray-300">{{ $t('previousServicesDescription') }}</p>
         </div>
         
         <!-- Loading State -->
@@ -207,16 +207,6 @@ function getStatusTranslation(status) {
 }
 
 // Helper function to get status badge class
-function getStatusBadgeClass(status) {
-  const classMap = {
-    'pending': 'bg-yellow-100 text-yellow-800',
-    'upcoming': 'bg-blue-100 text-blue-800',
-    'completed': 'bg-green-100 text-green-800',
-    'cancelled': 'bg-red-100 text-red-800',
-    'expired': 'bg-gray-100 text-gray-800'
-  };
-  return classMap[status] || 'bg-gray-100 text-gray-800';
-}
 
 function goToPage(page) {
   if (page >= 1 && page <= totalPages.value) currentPage.value = page;
@@ -307,6 +297,9 @@ onMounted(() => {
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
+.text-text-main{
+  color: var(--primary-color);
+}
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
@@ -327,7 +320,7 @@ onMounted(() => {
   color: #7c6bb0;
 }
 .text-text-main {
-  color: #333333;
+  color: var(--primary-color);
 }
 .text-muted {
   color: #aaaaaa;
@@ -350,7 +343,7 @@ onMounted(() => {
   color: var(--sidebar) !important;
 }
 .dark .text-text-main {
-  color: var(--primary-text) !important;
+  color: var(--primary-color) !important;
 }
 .dark .text-muted {
   color: var(--primary-text) !important;
@@ -401,7 +394,131 @@ onMounted(() => {
   border-color: var(--border-color);
 }
 
+/* Page Title and Description Styles */
+.text-3xl.font-bold.text-text-main {
+  color: var(--primary-color) !important;
+  font-weight: 600 !important;
+}
+
+.dark .text-3xl.font-bold.text-text-main {
+  color: var(--primary-color) !important;
+}
+
+/* Description color */
+p.dark\\:text-gray-300 {
+  color: var(--primary-color) !important;
+}
+
+.dark p.dark\\:text-gray-300 {
+  color: var(--primary-color) !important;
+}
+
 .dark .hover\:bg-gray-50:hover {
   background-color: var(--hover-bg);
+}
+
+/* Responsive Layout Styles */
+.admin-dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+  font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
+  background: #faf8fd;
+}
+
+.dark .admin-dashboard-layout {
+  background-color: var(--primary-bg);
+}
+
+.previous-services-main {
+  background-color: #f9fafb;
+  min-height: 100vh;
+  font-family: sans-serif;
+  flex: 1;
+}
+
+.dark .previous-services-main {
+  background-color: var(--primary-bg);
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+    min-height: auto;
+  }
+  .admin-dashboard-layout {
+    flex-direction: column;
+  }
+  
+  .previous-services-main {
+    margin-top: 80px;
+    padding: 1rem;
+    margin-right: 0;
+  }
+  
+  .max-w-6xl {
+    max-width: 100%;
+  }
+  
+  .mb-8 {
+    margin-bottom: 1.5rem;
+  }
+  
+  .text-3xl {
+    font-size: 1.5rem;
+  }
+  
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .service-card {
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .flex.space-x-3 {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .space-y-3 {
+    gap: 0.75rem;
+  }
+  
+  .flex.justify-between {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .book-again-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .previous-services-main {
+    margin-top: 60px;
+    padding: 0.75rem;
+  }
+  
+  .service-card {
+    padding: 0.75rem;
+  }
+  
+  .text-3xl {
+    font-size: 1.25rem;
+  }
+  
+  .text-lg {
+    font-size: 1rem;
+  }
+  
+  .text-sm {
+    font-size: 0.875rem;
+  }
 }
 </style> 

@@ -70,7 +70,7 @@ export default {
         router.push({ path: '/pending-application' });
       } else {
         console.log('Navigating to profile view');
-        router.push(getRoute('profile-view'));
+        router.push(getRoute(`profile-view/${user.value.uid}`));
       }
     }
 
@@ -200,7 +200,7 @@ export default {
       handleProfileClick,
       getRoute,
       signUpOptions,
-      userButtonClass: " text-gray-600 p-2 rounded-full ",
+      userButtonClass: " ",
       loginButtonClass: "",
       mobileMenuOpen,
       navAccordionOpen,
@@ -262,7 +262,7 @@ export default {
     </div>
     <!-- Hamburger for mobile -->
     <button class="md:hidden block text-2xl z-50" @click="mobileMenuOpen = !mobileMenuOpen" aria-label="Open menu">
-      <i class="fa fa-bars"></i>
+      <i class="fa fa-bars navbar-icon"></i>
     </button>
     <!-- Nav Links (Desktop) -->
     <ul class="hidden md:flex gap-8 font-medium m-0">
@@ -302,36 +302,33 @@ export default {
         <span class="text-gray-500">{{ $t('loading') }}</span>
       </template>
       <template v-else>
-        <template v-if="user">
-          <span class="flex items-center gap-2 rounded bg-gray-100 cursor-pointer" @click="handleProfileClick">
-              <span class="text-gray-700 font-semibold px-3 py-1">
-              {{ user.email || user.uid }}
-              <span class="text-xs text-gray-500 ml-2">({{ getRoleDisplayText() }})</span>
-            </span>
-            <i class="fas fa-user-circle text-secondary text-2xl px-3"></i>
-          </span>
-          <button :class="loginButtonClass" id="login-btn" @click="logout">
-            {{ $t('logout') }}
-          </button>
-        </template>
-        <template v-else>
-          <button :class="userButtonClass" @click="goToUserAccount" aria-label="User account">
-            <i class="fas fa-user text-secondary text-xl"></i>
-          </button>
-          <button :class="loginButtonClass" id="login-btn" @click="goToUserAccount">
-            <span class="">{{ $t('loginRegister') }}</span>
-          </button>
-        </template>
-      </template>
       <LanguageToggle />
       <button 
         @click="toggleDarkMode" 
         class="ml-2 darkmode-btn"
         :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
         type="button">
-        <i :class="iconClass"></i>
+        <i :class="iconClass + ' navbar-icon'"></i>
       </button>
-      <NotificationBell />
+      <NotificationBell v-if="user" />
+        <template v-if="user">
+          <span class="flex items-center gap-2 rounded bg-gray-100 cursor-pointer" @click="handleProfileClick">
+              <span class="text-gray-700 font-semibold px-3 py-1">
+              {{ user.email || user.uid }}
+              <span class="text-xs text-gray-500 ml-2">({{ getRoleDisplayText() }})</span>
+            </span>
+            <i class="fas fa-user-circle  text-2xl px-3 navbar-icon"></i>
+          </span>
+          <button :class="loginButtonClass" id="login-btn" @click="logout">
+            {{ $t('logout') }}
+          </button>
+        </template>
+        <template v-else>
+          <button :class="loginButtonClass" id="login-btn" @click="goToUserAccount">
+            <span class="">{{ $t('loginRegister') }}</span>
+          </button>
+        </template>
+      </template>
     </div>
     <!-- Mobile Menu & Overlay -->
     <transition name="fade">
@@ -342,13 +339,13 @@ export default {
           <div class="flex justify-between items-center mb-4">
             <img src="/logo/ace04d3b268cf810c91d002fdf7454a6ef778f27.png" alt="Logo" class="h-8" />
             <button class="text-2xl" @click="closeMobileMenu" aria-label="Close menu">
-              <i class="fa fa-times"></i>
+              <i class="fa fa-times navbar-icon"></i>
             </button>
           </div>
           <button class="w-full text-left font-bold py-2 flex items-center justify-between"
             @click="navAccordionOpen = !navAccordionOpen">
             <span>{{ $t('Menu') }}</span>
-            <i :class="navAccordionOpen ? 'fa fa-chevron-up' : 'fa fa-chevron-down'"></i>
+            <i :class="(navAccordionOpen ? 'fa fa-chevron-up' : 'fa fa-chevron-down') + ' navbar-icon'"></i>
           </button>
           <div v-if="navAccordionOpen" class="pl-2 pb-2">
             <router-link :to="locale === 'ar' ? getRoute('') : '/'" class="block py-2 no-underline"
@@ -361,7 +358,7 @@ export default {
             <div class="relative group" @mouseenter="!isMobile && showDropdown" @mouseleave="!isMobile && hideDropdown">
               <span class="no-underline services-color cursor-pointer flex items-center" @click="toggleDropdownMobile">
                 {{ $t('navServices') }}
-                <i class="fa fa-chevron-down services-dropdown-arrow ml-1"></i>
+                <i class="fa fa-chevron-down services-dropdown-arrow ml-1 navbar-icon"></i>
               </span>
               <div
                 :class="['services-dropdown', isMobile ? 'static mt-2 relative w-full' : 'absolute left-0 mt-2 shadow-lg rounded z-50']"
@@ -379,38 +376,33 @@ export default {
             <template v-if="loading">
               <span class="text-gray-500">{{ $t('loading') }}</span>
             </template>
-            <template v-else>
-              <template v-if="user">
-                <span class="flex items-center gap-2">
-                  <span class="text-gray-700 font-semibold px-3 py-1 rounded bg-gray-100 cursor-pointer"
-                    @click="handleProfileClick">
-                    {{ user.email || user.uid }}
-                    <span class="text-xs text-gray-500 ml-2">({{ getRoleDisplayText() }})</span>
-                  </span>
-                  <i class="fas fa-user-circle text-2xl text-secondary cursor-pointer" @click="handleProfileClick"></i>
-                </span>
-                <button :class="loginButtonClass" id="login-btn" @click="logout">
-                  {{ $t('logout') }}
-                </button>
-              </template>
-              <template v-else>
-                <button :class="userButtonClass" @click="goToUserAccount" aria-label="User account">
-                  <i class="fas fa-user text-secondary text-xl"></i>
-                </button>
-                <button :class="loginButtonClass" id="login-btn" @click="goToUserAccount">
-                  {{ $t('loginRegister') }}
-                </button>
-              </template>
-            </template>
             <LanguageToggle />
             <button 
               @click="toggleDarkMode" 
               class="ml-2 darkmode-btn"
               :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
               type="button">
-              <i :class="iconClass"></i>
+              <i :class="iconClass + ' navbar-icon'"></i>
             </button>
-            <NotificationBell />
+            <NotificationBell v-if="user" />
+            <template v-if="user">
+              <span class="flex items-center gap-2">
+                <span class="text-gray-700 font-semibold px-3 py-1 rounded bg-gray-100 cursor-pointer"
+                  @click="handleProfileClick">
+                  {{ user.email || user.uid }}
+                  <span class="text-xs text-gray-500 ml-2">({{ getRoleDisplayText() }})</span>
+                </span>
+                <i class="fas fa-user-circle text-2xl  cursor-pointer navbar-icon" @click="handleProfileClick"></i>
+              </span>
+              <button :class="loginButtonClass" id="login-btn" @click="logout">
+                {{ $t('logout') }}
+              </button>
+            </template>
+            <template v-else>
+              <button :class="loginButtonClass" id="login-btn" @click="goToUserAccount">
+                {{ $t('loginRegister') }}
+              </button>
+            </template>
           </div>
         </div>
       </div>
@@ -463,21 +455,15 @@ export default {
   box-shadow: 0 2px 8px rgba(98, 84, 152, 0.08);
   margin-left: 0.5rem;
 }
-
+#login-btn:hover {
+  background-color: var(--gray-500);
+  color: var(--primary-color);
+}
 .dark #login-btn {
   background-color: var(--primary-color);
   color: var(--primary-text);
 }
 
-.dark #login-btn:hover {
-  background-color: white;
-  color: #6B4FA1;
-}
-
-#login-btn:hover {
-  background-color: white;
-  color: #6B4FA1;
-}
 
 .user-btn,
 .darkmode-btn {
@@ -487,40 +473,48 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
   background: none;
   border: none;
-  color: #6B4FA1;
-  transition: color 0.3s, background 0.3s;
+  color: var(--primary-color);
+  transition: all 0.3s ease;
+  padding: 8px;
 }
 
 .user-btn:hover,
 .darkmode-btn:hover {
-  color: var(--primary-color);
+  color: var(--gray-500);
+}
+.navbar-icon {
+  color: var(--primary-color) !important;
+  transition: all 0.3s ease;
+  font-size: 1.2rem;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: none;
 }
 
 /* User button specific styling */
 .user-btn {
   margin-right: 0.5rem;
-  background: #f3f0fa;
-  border: 1px solid #e0d5f0;
+  width: 44px;
+  height: 44px; 
+  color: var(--primary-color) !important;
+}
+.navbar-icon:hover {
+  transform: scale(1.1);
+  color: var(--gray-500) !important;
 }
 
-.user-btn:hover {
-  background: #e8e0f5;
+
+.dark .user-btn {
   color: var(--primary-color);
 }
 
-.dark .user-btn {
-  background: var(--secondary-bg);
-  border-color: var(--border-color);
-  color: var(--primary-text);
-}
 
-.dark .user-btn:hover {
-  background: var(--primary-color);
-  color: white;
-}
 
 .services-color {
   color: #8C8E90;
@@ -613,13 +607,12 @@ export default {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1.7rem;
-  color: #6B4FA1;
-  transition: color 0.3s;
+  color: var(--primary-color);
+  transition: all 0.3s ease;
 }
 
 .darkmode-btn:hover {
-  color: var(--text-muted);
+  color: var(--gray-500) !important;
 }
 
 /* Responsive Styles */
