@@ -5,11 +5,25 @@
       <div class="user-container">
         <h2 class="user-title">User Management</h2>
         <div class="user-subtitle">Personal Information</div>
-        <div class="user-content-row">
+        
+        <!-- Loading State -->
+        <div v-if="loading" class="loading-state">
+          <div class="loading-spinner"></div>
+          <p>Loading user information...</p>
+        </div>
+
+        <!-- Error State -->
+        <div v-else-if="error" class="error-state">
+          <p class="error-message">{{ error }}</p>
+          <button @click="fetchUser" class="retry-btn">Retry</button>
+        </div>
+
+        <!-- User Content -->
+        <div v-else-if="user" class="user-content-row">
           <div class="user-info">
             <div class="user-info-block">
               <div class="user-label">Full Name</div>
-              <div class="user-value">{{ user.fullName }}</div>
+              <div class="user-value">{{ user.fullName || 'N/A' }}</div>
             </div>
             <div class="user-info-block">
               <div class="user-label">Email Address</div>
@@ -17,26 +31,42 @@
             </div>
             <div class="user-info-block">
               <div class="user-label">Phone Number</div>
-              <div class="user-value">{{ user.phone }}</div>
+              <div class="user-value">{{ user.phone || 'N/A' }}</div>
             </div>
             <div class="user-info-block">
               <div class="user-label">Gender</div>
-              <div class="user-value">{{ user.gender }}</div>
+              <div class="user-value">{{ user.gender || 'N/A' }}</div>
             </div>
             <div class="user-info-block">
               <div class="user-label">Address</div>
-              <div class="user-value">{{ user.address }}</div>
+              <div class="user-value">{{ user.address || 'N/A' }}</div>
             </div>
-            <button class="delete-btn" @click="handleDelete">Delete Account</button>
+            <div class="user-info-block">
+              <div class="user-label">Role</div>
+              <div class="user-value">{{ user.role || 'user' }}</div>
+            </div>
+            <button 
+              class="delete-btn" 
+              @click="handleDelete"
+              :disabled="deleting"
+            >
+              {{ deleting ? 'Deleting...' : 'Delete Account' }}
+            </button>
           </div>
           <div class="user-photo-col">
-            <div v-if="user.photo" class="user-photo">
-              <img :src="user.photo" alt="User Photo" class="user-photo-img" />
+            <div v-if="user.profileImageUrl" class="user-photo">
+              <img :src="user.profileImageUrl" alt="User Photo" class="user-photo-img" />
             </div>
             <div v-else class="user-photo-placeholder">
               <i class="fas fa-user"></i>
             </div>
           </div>
+        </div>
+
+        <!-- User Not Found -->
+        <div v-else class="not-found-state">
+          <p>User not found</p>
+          <button @click="goBack" class="back-btn">Go Back</button>
         </div>
       </div>
     </div>
@@ -45,27 +75,85 @@
 
 <script>
 import AdminSidebar from '../../components/admin-sidebar.vue';
+import { doc, getDoc, deleteDoc } from 'firebase/firestore';
+import { db } from '../../firebase';
+import { useRouter } from 'vue-router';
 
 export default {
   components: { AdminSidebar },
-  props: {
-    user: {
-      type: Object,
-      default: () => ({
-        fullName: 'Omar Yasser',
-        email: 'omar@gmail.com',
-        phone: '+20 011 555 2323',
-        gender: 'Male',
-        address: '15 El-Tahrir Street, Dokki, Giza, Egypt, 12611',
-        photo: null
-      })
-    }
+  data() {
+    return {
+      user: null,
+      loading: true,
+      error: null,
+      deleting: false
+    };
+  },
+  async mounted() {
+    await this.fetchUser();
   },
   methods: {
-    handleDelete() {
-      if (confirm('Are you sure you want to delete this account? This action cannot be undone.')) {
-        this.$emit('delete', this.user);
+    async fetchUser() {
+      try {
+        this.loading = true;
+        this.error = null;
+        
+        const userId = this.$route.params.id;
+        console.log('🔍 Fetching user with ID:', userId);
+        
+        const userDoc = doc(db, 'users', userId);
+        const userSnapshot = await getDoc(userDoc);
+        
+        if (userSnapshot.exists()) {
+          this.user = {
+            id: userSnapshot.id,
+            ...userSnapshot.data()
+          };
+          console.log('✅ User data loaded:', this.user);
+        } else {
+          this.error = 'User not found';
+          console.log('❌ User not found');
+        }
+      } catch (error) {
+        console.error('❌ Error fetching user:', error);
+        this.error = 'Failed to load user information';
+      } finally {
+        this.loading = false;
       }
+    },
+
+    async handleDelete() {
+      if (!this.user) return;
+      
+      if (!confirm('Are you sure you want to delete this user account? This action cannot be undone.')) {
+        return;
+      }
+
+      try {
+        this.deleting = true;
+        console.log('🗑️ Deleting user:', this.user.fullName || this.user.email, 'with ID:', this.user.id);
+        
+        // Delete from users collection
+        const userDoc = doc(db, 'users', this.user.id);
+        await deleteDoc(userDoc);
+        console.log('✅ User document deleted from Firestore');
+
+        // Show success message
+        alert('User account deleted successfully!');
+        
+        // Redirect to previous page
+        this.goBack();
+        
+      } catch (error) {
+        console.error('❌ Error deleting user:', error);
+        alert('Failed to delete user account. Please try again.');
+      } finally {
+        this.deleting = false;
+      }
+    },
+
+    goBack() {
+      this.$router.go(-1);
     }
   }
 };
@@ -144,8 +232,12 @@ export default {
   transition: background 0.2s;
   width: 200px;
 }
-.delete-btn:hover {
+.delete-btn:hover:not(:disabled) {
   background: #b91c1c;
+}
+.delete-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
 }
 .user-photo-col {
   flex: 1;
@@ -184,6 +276,52 @@ export default {
   font-size: 5rem;
   color: #9ca3af;
 }
+
+/* Loading and Error States */
+.loading-state, .error-state, .not-found-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #7c6bb0;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-message {
+  color: #dc2626;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.retry-btn, .back-btn {
+  background: #7c6bb0;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.retry-btn:hover, .back-btn:hover {
+  background: #5a4a8c;
+}
+
 @media (max-width: 768px) {
   .user-main {
     padding: 1.5rem;
