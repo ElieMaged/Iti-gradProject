@@ -9,50 +9,6 @@
   </div>
   
   <div v-else-if="technician" class="technician-profile-page">
-    <!-- Header with contact info and social media -->
-    <div class="header-contact-bar">
-      <div class="contact-info">
-        <span class="contact-item">
-          <i class="fas fa-phone"></i>
-          925-465-3762
-        </span>
-        <span class="contact-item">
-          <i class="fas fa-envelope"></i>
-          boltfix@gmail.com
-        </span>
-        <span class="contact-item">
-          <i class="fas fa-map-marker-alt"></i>
-          4096 Modesto, CA 95350, USA
-        </span>
-    </div>
-      <div class="social-media">
-        <a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>
-        <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
-        <a href="#" class="social-icon"><i class="fab fa-linkedin"></i></a>
-        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
-          </div>
-            </div>
-
-    <!-- Navigation bar -->
-    <nav class="main-nav">
-      <div class="nav-container">
-        <div class="nav-logo">
-          <div class="logo-icon">B</div>
-          <span class="logo-text">BoltFix</span>
-            </div>
-        <div class="nav-links">
-          <a href="#" class="nav-link">Home</a>
-          <a href="#" class="nav-link">About us</a>
-          <a href="#" class="nav-link">Services</a>
-          <a href="#" class="nav-link">Contact Us</a>
-            </div>
-        <div class="nav-actions">
-          <i class="fas fa-bell nav-icon"></i>
-          <i class="fas fa-user nav-icon"></i>
-          </div>
-      </div>
-    </nav>
-
     <!-- Main content area -->
     <div class="main-content">
       <!-- Page title -->
@@ -965,8 +921,8 @@ onMounted(async () => {
 }
 
 .profile-picture {
-  width: 120px;
-  height: 120px;
+  width: 200px;
+  height: 200px;
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
