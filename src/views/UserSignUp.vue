@@ -7,6 +7,9 @@ import { doc, setDoc } from 'firebase/firestore';
 import { ensureUserRole, fetchUserRole } from '../utils/userRole';
 import emailjs from 'emailjs-com';
 
+// Initialize EmailJS
+emailjs.init('kGW9e5lc8iBvIT3Qw');
+
 const email = ref('');
 const password = ref('');
 const confirmPass = ref('');
@@ -142,8 +145,9 @@ async function sendWelcomeEmail(userEmail, firstName, lastName) {
     const templateParams = {
       to_email: userEmail,
       to_name: fullName || 'Valued Customer',
-      subject: 'Welcome to BoltFix! Your Account is Ready',
-      message: `Dear ${fullName || 'Valued Customer'},
+      user_name: fullName || 'Valued Customer',
+      user_email: userEmail,
+      welcome_message: `Dear ${fullName || 'Valued Customer'},
 
 Welcome to BoltFix! Your account has been successfully created and you're now ready to connect with skilled technicians for all your home service needs.
 
@@ -175,7 +179,7 @@ This is an automated email. Please do not reply to this message.`
     };
 
     // Use the provided EmailJS credentials
-    const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'default_service'; // You need to add your service ID
+    const serviceId = '123321'; // Your provided Service ID
     const templateId = 'template_rn9r37x'; // Your provided template ID
     const publicKey = 'kGW9e5lc8iBvIT3Qw'; // Your provided public key
 
@@ -183,8 +187,13 @@ This is an automated email. Please do not reply to this message.`
     console.log('Service ID:', serviceId);
     console.log('Template ID:', templateId);
     console.log('Public Key:', publicKey);
+    console.log('Template Params:', templateParams);
 
-    await emailjs.send(
+    // Test EmailJS initialization
+    console.log('EmailJS initialized:', emailjs.init);
+    console.log('EmailJS send method:', emailjs.send);
+
+    const result = await emailjs.send(
       serviceId,
       templateId,
       templateParams,
@@ -192,13 +201,14 @@ This is an automated email. Please do not reply to this message.`
     );
     
     console.log('Welcome email sent successfully!');
-    alert(`Welcome email sent successfully to ${userEmail}!`);
+    console.log('EmailJS result:', result);
     return true;
   } catch (error) {
     console.error('=== ERROR SENDING WELCOME EMAIL ===');
     console.error('Error details:', error);
     console.error('Error message:', error.message);
     console.error('Error code:', error.code);
+    console.error('Error stack:', error.stack);
     
     // Log additional error information for debugging
     if (error.response) {
@@ -206,7 +216,16 @@ This is an automated email. Please do not reply to this message.`
       console.error('Response data:', error.response.data);
     }
     
-    alert(`Email sending failed: ${error.message}\n\nPlease check EmailJS configuration.`);
+    // More specific error messages
+    if (error.message.includes('Service ID')) {
+      alert('EmailJS Service ID is invalid. Please check your EmailJS configuration.');
+    } else if (error.message.includes('Template ID')) {
+      alert('EmailJS Template ID is invalid. Please check your EmailJS configuration.');
+    } else if (error.message.includes('Public Key')) {
+      alert('EmailJS Public Key is invalid. Please check your EmailJS configuration.');
+    } else {
+      alert(`Email sending failed: ${error.message}\n\nPlease check EmailJS configuration.`);
+    }
     return false;
   }
 }
@@ -274,6 +293,32 @@ const openTermsModal = () => {
 
 const closeTermsModal = () => {
   showTermsModal.value = false;
+};
+
+// Test EmailJS function for debugging
+const testEmailJS = async () => {
+  try {
+    console.log('Testing EmailJS...');
+    const testParams = {
+      to_email: 'test@example.com',
+      to_name: 'Test User',
+      subject: 'Test Email',
+      message: 'This is a test email from BoltFix.'
+    };
+    
+    const result = await emailjs.send(
+      '123321',
+      'template_rn9r37x',
+      testParams,
+      'kGW9e5lc8iBvIT3Qw'
+    );
+    
+    console.log('Test email sent successfully:', result);
+    alert('Test email sent successfully!');
+  } catch (error) {
+    console.error('Test email failed:', error);
+    alert(`Test email failed: ${error.message}`);
+  }
 };
 </script>
 
@@ -461,6 +506,11 @@ const closeTermsModal = () => {
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="arrow-icon" viewBox="0 0 16 16">
   <path fill-rule="evenodd" d="M14 2.5a.5.5 0 0 0-.5-.5h-6a.5.5 0 0 0 0 1h4.793L2.146 13.146a.5.5 0 0 0 .708.708L13 3.707V8.5a.5.5 0 0 0 1 0z"/>
         </svg>
+      </button>
+
+      <!-- Test EmailJS button (remove in production) -->
+      <button type="button" @click="testEmailJS" class="test-btn" style="margin-top: 1rem; background: #10b981; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer;">
+        🧪 Test EmailJS
       </button>
 
       <p v-if="error" class="error-text">{{ error }}</p>

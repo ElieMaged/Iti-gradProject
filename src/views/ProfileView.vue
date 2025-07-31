@@ -1,69 +1,144 @@
 <template>
-    <!-- Sidebar -->
+  <div class="admin-dashboard-layout">
     <userSidebar :activeTab="activeTab" />
-    <!-- Main Content -->
-    <div id="admin-profile-container" class="p-4 mr-20">
-      <div id="admin-profile-wrapper">
-        <!-- Debug info -->
-        <div style="background: #f0f0f0; padding: 10px; margin-bottom: 20px; border-radius: 5px;">
-          <p><strong>Debug Info:</strong></p>
-          <p>Loading: {{ loading }}</p>
-          <p>Error: {{ error || 'None' }}</p>
-          <p>User Data: {{ form.fullName || 'Not loaded' }}</p>
-        </div>
+    <div class="profile-main p-4">
+      <div class="profile-wrapper">
         
         <!-- Loading State -->
         <div v-if="loading" class="text-center py-12">
-            <div class="loading-spinner mx-auto mb-4"></div>
-            <p class="text-lg text-gray-600">{{ $t('loadingProfileData') }}</p>
-          </div>
-          
-          <!-- Error State -->
-          <div v-else-if="error" class="text-center py-12">
-            <p class="text-lg text-red-600 mb-4">{{ error }}</p>
-            <button @click="fetchUserProfile" class="bg-secondary text-white px-4 py-2 rounded-lg">
-              {{ $t('retry') }}
+          <div class="loading-spinner mx-auto mb-4"></div>
+          <p class="text-lg text-gray-600">{{ $t('loadingProfileData') }}</p>
+        </div>
+        
+        <!-- Error State -->
+        <div v-else-if="error" class="text-center py-12">
+          <p class="text-lg text-red-600 mb-4">{{ error }}</p>
+          <button @click="fetchUserProfile" class="bg-secondary text-white px-4 py-2 rounded-lg">
+            {{ $t('retry') }}
+          </button>
+        </div>
+        
+        <!-- Incomplete Profile State -->
+        <div v-else-if="!isProfileComplete" class="text-center py-12">
+          <div class="incomplete-profile-card">
+            <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+            <h2 class="text-xl font-bold text-red-600 mb-2">{{ $t('incompleteProfile') }}</h2>
+            <p class="text-gray-600 mb-6">{{ $t('pleaseFillOutSettings') }}</p>
+            <button @click="goToSettings" class="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600 transition-colors">
+              {{ $t('goToSettings') }}
             </button>
           </div>
-          
+        </div>
+        
           <!-- Profile Content -->
-          <div v-else>
-        <div id="admin-profile-card">
-          <h2 id="admin-profile-title">{{ $t('personalInformation') }}</h2>
-          <div id="admin-profile-content">
-            <div id="admin-profile-info">
-              <div class="info-block">
-                <span class="info-label">{{ $t('fullName') }}</span>
-                <span class="info-value">{{ form.fullName || 'Not provided' }}</span>
+        <div v-else class="profile-card">
+          <div class="profile-header">
+            <h2 class="profile-title">{{ $t('personalInformation') }}</h2>
               </div>
-              <div class="info-block">
-                <span class="info-label">{{ $t('emailAddress') }}</span>
-                <span class="info-value">{{ form.email || 'Not provided' }}</span>
-          </div>
-              <div class="info-block">
-                <span class="info-label">{{ $t('phoneNumber') }}</span>
-                <span class="info-value">{{ form.phone || 'Not provided' }}</span>
+          
+          <div class="profile-content">
+            <!-- Profile Image Section -->
+            <div class="profile-image-section">
+              <div class="profile-image-container">
+                <img 
+                  v-if="profileImageUrl && profileImageUrl !== ''" 
+                  :src="profileImageUrl" 
+                  alt="Profile Photo" 
+                  class="profile-image" 
+                />
+                <div v-else class="profile-image-placeholder">
+                  <i class="fas fa-user"></i>
               </div>
-              <div class="info-block">
-                <span class="info-label">{{ $t('gender') }}</span>
-                <span class="info-value">{{ form.gender || 'Not provided' }}</span>
               </div>
-              <div class="info-block">
-                <span class="info-label">{{ $t('address') }}</span>
-                <span class="info-value">{{ form.address || 'Not provided' }}</span>
-              </div>
-              <div class="info-block">
-                <span class="info-label">{{ $t('city') }}</span>
-                <span class="info-value">{{ form.city || 'Not provided' }}</span>
-              </div>
-              <div class="info-block">
-                <span class="info-label">{{ $t('area') }}</span>
-                <span class="info-value">{{ form.area || 'Not provided' }}</span>
+              <div class="profile-image-info">
+                <h3 class="profile-name">{{ form.fullName || $t('fullName') }}</h3>
+                <p class="profile-role">{{ $t('user') }}</p>
               </div>
             </div>
-            <div id="admin-profile-image">
-              <img v-if="profileImageUrl" :src="profileImageUrl" alt="Profile" class="w-full h-full object-cover rounded" />
-              <i v-else class="fas fa-user" id="profile-icon"></i>
+            
+            <!-- Profile Information Section -->
+            <div class="profile-info-section">
+              <div class="info-grid">
+                <div class="info-item">
+                  <div class="info-icon">
+                    <i class="fas fa-user"></i>
+                  </div>
+                  <div class="info-content">
+                    <label class="info-label">{{ $t('fullName') }}</label>
+                    <span class="info-value">{{ form.fullName || $t('notProvided') }}</span>
+                  </div>
+                </div>
+                
+                <div class="info-item">
+                  <div class="info-icon">
+                    <i class="fas fa-envelope"></i>
+                  </div>
+                  <div class="info-content">
+                    <label class="info-label">{{ $t('emailAddress') }}</label>
+                    <span class="info-value">{{ form.email || $t('notProvided') }}</span>
+                  </div>
+                </div>
+                
+                <div class="info-item">
+                  <div class="info-icon">
+                    <i class="fas fa-phone"></i>
+                  </div>
+                  <div class="info-content">
+                    <label class="info-label">{{ $t('phoneNumber') }}</label>
+                    <span class="info-value">{{ form.phone || $t('notProvided') }}</span>
+                  </div>
+                </div>
+                
+                <div class="info-item">
+                  <div class="info-icon">
+                    <i class="fas fa-venus-mars"></i>
+                  </div>
+                  <div class="info-content">
+                    <label class="info-label">{{ $t('gender') }}</label>
+                    <span class="info-value">{{ form.gender || $t('notProvided') }}</span>
+                  </div>
+                </div>
+                
+                <div class="info-item">
+                  <div class="info-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                  </div>
+                  <div class="info-content">
+                    <label class="info-label">{{ $t('address') }}</label>
+                    <span class="info-value">{{ form.address || $t('notProvided') }}</span>
+                  </div>
+                </div>
+                
+                <div class="info-item">
+                  <div class="info-icon">
+                    <i class="fas fa-city"></i>
+                  </div>
+                  <div class="info-content">
+                    <label class="info-label">{{ $t('city') }}</label>
+                    <span class="info-value">{{ form.city || $t('notProvided') }}</span>
+                  </div>
+                </div>
+                
+                <div class="info-item">
+                  <div class="info-icon">
+                    <i class="fas fa-map"></i>
+                  </div>
+                  <div class="info-content">
+                    <label class="info-label">{{ $t('area') }}</label>
+                    <span class="info-value">{{ form.area || $t('notProvided') }}</span>
+                  </div>
+                </div>
+                
+                <div class="info-item">
+                  <div class="info-icon">
+                    <i class="fas fa-birthday-cake"></i>
+                  </div>
+                  <div class="info-content">
+                    <label class="info-label">{{ $t('age') }}</label>
+                    <span class="info-value">{{ form.age || $t('notProvided') }}</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -77,12 +152,14 @@ import userSidebar from '../components/userSidebar.vue';
 import { auth, db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
 const router = useRouter();
+const { t } = useI18n();
 const activeTab = ref('profile');
-const profileImageUrl = ref('https://randomuser.me/api/portraits/men/32.jpg');
+const profileImageUrl = ref('');
 const loading = ref(true);
 const error = ref(null);
 const form = ref({
@@ -90,10 +167,24 @@ const form = ref({
   email: '',
   phone: '',
   gender: '',
+  age: '',
   address: '',
   city: '',
   area: ''
 });
+
+// Check if profile is complete
+const isProfileComplete = computed(() => {
+  const requiredFields = ['fullName', 'email', 'phone', 'gender', 'address', 'city', 'area'];
+  return requiredFields.every(field => {
+    const value = form.value[field];
+    return value && value.trim() !== '' && value !== 'N/A' && value !== 'Not provided' && value !== t('notProvided');
+  });
+});
+
+const goToSettings = () => {
+  router.push('/profile-edit');
+};
 
 async function fetchUserProfile() {
   try {
@@ -103,95 +194,65 @@ async function fetchUserProfile() {
     const auth = getAuth();
     const user = auth.currentUser;
     
-    console.log('Current user:', user);
-    
     if (!user) {
       error.value = 'User not authenticated';
-      console.log('No user, redirecting to login');
       router.push('/userlogin');
       return;
     }
 
-    console.log('Fetching profile for user:', user.uid);
-    
     // Fetch user data from Firestore
     const userRef = doc(db, 'users', user.uid);
     const userSnap = await getDoc(userRef);
     
     if (userSnap.exists()) {
       const userData = userSnap.data();
-      console.log('User data from Firestore:', userData);
       
       // Set profile data from Firebase
       form.value = {
-        fullName: userData.fullName || `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || 'N/A',
-        email: userData.email || user.email || 'N/A',
-        phone: userData.phone || 'N/A',
-        gender: userData.gender || 'N/A',
-        address: userData.address || 'N/A',
-        city: userData.city || 'N/A',
-        area: userData.area || 'N/A'
+        fullName: userData.fullName || `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || '',
+        email: userData.email || user.email || '',
+        phone: userData.phone || '',
+        gender: userData.gender || '',
+        age: userData.age || '',
+        address: userData.address || '',
+        city: userData.city || '',
+        area: userData.area || ''
       };
       
       // Set profile image if exists
       if (userData.profileImageUrl) {
         profileImageUrl.value = userData.profileImageUrl;
       }
-      
-      console.log('Profile data set:', form.value);
     } else {
-      console.log('No user document found, using auth data');
       // Fallback to auth data if no Firestore document
       form.value = {
-        fullName: 'N/A',
-        email: user.email || 'N/A',
-        phone: 'N/A',
-        gender: 'N/A',
-        address: 'N/A',
-        city: 'N/A',
-        area: 'N/A'
+        fullName: '',
+        email: user.email || '',
+        phone: '',
+        gender: '',
+        age: '',
+        address: '',
+        city: '',
+        area: ''
       };
     }
     
   } catch (err) {
     console.error('Error fetching user profile:', err);
-    console.error('Error details:', {
-      message: err.message,
-      code: err.code,
-      stack: err.stack
-    });
     error.value = 'Failed to load profile data: ' + err.message;
   } finally {
     loading.value = false;
-    console.log('Loading set to false, error:', error.value);
   }
 }
 
 onMounted(() => {
-  console.log('ProfileView onMounted called');
-  
-  // Add a timeout to prevent infinite loading
-  setTimeout(() => {
-    if (loading.value) {
-      console.log('Loading timeout reached, setting loading to false');
-      loading.value = false;
-      if (!error.value) {
-        error.value = 'Failed to load profile data. Please try again.';
-      }
-    }
-  }, 10000); // 10 second timeout
-  
   const auth = getAuth();
   onAuthStateChanged(auth, (user) => {
-    console.log('Auth state changed:', user);
     if (user) {
-      console.log('User authenticated:', user.uid);
       fetchUserProfile();
     } else {
-      console.log('No user authenticated');
       loading.value = false;
       error.value = 'Please log in to view your profile.';
-      // Don't redirect immediately, let user see the error
       setTimeout(() => {
         router.push('/userlogin');
       }, 2000);
@@ -208,300 +269,481 @@ onMounted(() => {
   background: #faf8fd;
 }
 
-.dark .admin-dashboard-layout {
-  background-color: var(--primary-bg);
-}
-
-#admin-profile-container {
+.profile-main {
   background-color: #f9fafb;
   min-height: 100vh;
   font-family: sans-serif;
   flex: 1;
+  margin-left: 0;
+  transition: margin-left 0.3s ease;
 }
 
-.dark #admin-profile-container {
-  background-color: var(--primary-bg);
-}
-
-#admin-profile-wrapper {
-  max-width: 1000px;
-}
-
-#admin-profile-card {
-  background-color: white;
-  border-radius: 1rem;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-  padding: 2rem;
-}
-
-.dark #admin-profile-card {
-  background-color: var(--grey-bg);
-}
-
-#admin-profile-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #7c6bb0;
-  margin-bottom: 1.5rem;
-}
-
-.dark #admin-profile-title {
-  color: var(--white);
-}
-
-/* RTL Support for Arabic */
-[dir="rtl"] #admin-profile-title {
-  text-align: right;
-}
-
-[dir="rtl"] .info-label {
-  text-align: right;
-}
-
-[dir="rtl"] .info-value {
-  text-align: right;
-}
-
-#admin-profile-content {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-@media (min-width: 768px) {
-  #admin-profile-content {
-    flex-direction: row;
-    align-items: flex-start;
+@media (min-width: 769px) {
+  .profile-main {
+    margin-left: 20rem;
   }
 }
 
-#admin-profile-info {
+.dark .admin-dashboard-layout {
+  background-color: var(--primary-bg);
+}
+
+.dark .profile-main {
+  background-color: var(--primary-bg);
+}
+
+.profile-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.profile-card {
+  background-color: white;
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 2.5rem;
+  margin-top: 1rem;
+}
+
+.dark .profile-card {
+  background-color: var(--grey-bg);
+}
+
+.profile-header {
+  margin-bottom: 2rem;
+}
+
+.profile-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #7c6bb0;
+  margin: 0;
+}
+
+.dark .profile-title {
+  color: var(--white);
+}
+
+.profile-content {
+  display: flex;
+  gap: 3rem;
+  align-items: flex-start;
+}
+
+/* Profile Image Section */
+.profile-image-section {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.profile-image-container {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.profile-image-placeholder i {
+  font-size: 4rem;
+  color: white;
+}
+
+.profile-image-info {
+  text-align: center;
+}
+
+.profile-name {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+  margin: 0 0 0.5rem 0;
+}
+
+.dark .profile-name {
+  color: var(--white);
+}
+
+.profile-role {
+  font-size: 1rem;
+  color: #7c6bb0;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Profile Information Section */
+.profile-info-section {
   flex: 1;
+}
+
+.info-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 1.5rem;
 }
 
-.info-block {
+.info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 1rem;
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.dark .info-item {
+  background: var(--input-bg);
+  border-color: #4a5568;
+}
+
+.info-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.info-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7c6bb0 0%, #625397 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.info-icon i {
+  font-size: 1.2rem;
+  color: white;
+}
+
+.info-content {
+  flex: 1;
   display: flex;
   flex-direction: column;
+  gap: 0.5rem;
 }
 
 .info-label {
-  font-size: 1.125rem;
-  font-weight: bold;
-  color: #333;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .dark .info-label {
-  color: var(--white);
+  color: var(--text-muted);
 }
 
 .info-value {
-  font-size: 1rem;
-  color: #4b5563;
-  margin-top: 0.25rem;
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: #374151;
+  word-break: break-word;
 }
 
 .dark .info-value {
   color: var(--primary-text-dark);
 }
 
-#admin-profile-image {
-  flex-shrink: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 10rem;
-  height: 10rem;
-  background-color: #e5e7eb;
-  border-radius: 0.5rem;
+/* Incomplete Profile Styles */
+.incomplete-profile-card {
+  background-color: white;
+  border-radius: 1rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  padding: 3rem 2rem;
+  max-width: 500px;
   margin: 0 auto;
 }
 
-.dark #admin-profile-image {
-  background-color: var(--primary-bg);
+.dark .incomplete-profile-card {
+  background-color: var(--grey-bg);
 }
 
-#profile-icon {
-  font-size: 3.5rem;
-  color: #9ca3af;
+/* Loading Spinner */
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #7c6bb0;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
-.dark #profile-icon {
-  color: var(--grey-bg);
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* RTL Support for Arabic */
+[dir="rtl"] .profile-title {
+  text-align: right;
+}
+
+[dir="rtl"] .profile-image-info {
+  text-align: center;
+}
+
+[dir="rtl"] .info-item {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .info-content {
+  text-align: right;
 }
 
 /* Responsive Design */
 @media (max-width: 1200px) {
-  #admin-profile-container {
-    padding: 1.5rem;
+  .profile-wrapper {
+    max-width: 1000px;
   }
   
-  #admin-profile-info {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  .profile-card {
+    padding: 2rem;
+  }
+  
+  .profile-content {
+    gap: 2rem;
+  }
+  
+  .profile-image-container {
+    width: 180px;
+    height: 180px;
+  }
+  
+  .info-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.25rem;
-  }
-  
-  #admin-profile-image {
-    width: 8rem;
-    height: 8rem;
-  }
-  
-  #profile-icon {
-    font-size: 3rem;
   }
 }
 
 @media (max-width: 768px) {
-  #admin-profile-container {
+  .profile-main {
     padding: 1rem;
-    margin: 0.5rem;
   }
   
-  #admin-profile-title {
-    font-size: 1.25rem;
-    margin-bottom: 1rem;
+  .profile-card {
+    padding: 1.5rem;
+    margin-top: 0.5rem;
   }
   
-  #admin-profile-content {
+  .profile-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .profile-content {
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 2rem;
+    align-items: center;
   }
   
-  #admin-profile-info {
+  .profile-image-container {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .profile-image-placeholder i {
+    font-size: 3rem;
+  }
+  
+  .profile-name {
+    font-size: 1.25rem;
+  }
+  
+  .info-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
   
-  .info-block {
-    gap: 0.5rem;
+  .info-item {
+    padding: 1.25rem;
+  }
+  
+  .info-icon {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .info-icon i {
+    font-size: 1.1rem;
   }
   
   .info-label {
-    font-size: 1rem;
+    font-size: 0.8rem;
   }
   
   .info-value {
-    font-size: 0.95rem;
-  }
-  
-  #admin-profile-image {
-    width: 6rem;
-    height: 6rem;
-  }
-  
-  #profile-icon {
-    font-size: 2.5rem;
+    font-size: 1rem;
   }
 }
 
 @media (max-width: 480px) {
-  #admin-profile-container {
+  .profile-main {
     padding: 0.75rem;
-    margin: 0.25rem;
   }
   
-  #admin-profile-title {
+  .profile-card {
+    padding: 1rem;
+    margin-top: 0.25rem;
+  }
+  
+  .profile-title {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  
+  .profile-content {
+    gap: 1.5rem;
+  }
+  
+  .profile-image-container {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .profile-image-placeholder i {
+    font-size: 2.5rem;
+  }
+  
+  .profile-name {
+    font-size: 1.1rem;
+  }
+  
+  .profile-role {
+    font-size: 0.85rem;
+  }
+  
+  .info-grid {
+    gap: 0.75rem;
+  }
+  
+  .info-item {
+    padding: 1rem;
+  }
+  
+  .info-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .info-icon i {
+    font-size: 1rem;
+  }
+  
+  .info-label {
+    font-size: 0.75rem;
+  }
+  
+  .info-value {
+    font-size: 0.9rem;
+  }
+}
+
+
+
+@media (max-width: 360px) {
+  .profile-main {
+    padding: 0.5rem;
+  }
+  
+  .profile-card {
+    padding: 0.75rem;
+  }
+  
+  .profile-title {
     font-size: 1.1rem;
     margin-bottom: 0.75rem;
   }
   
-  #admin-profile-content {
+  .profile-content {
     gap: 1rem;
   }
   
-  #admin-profile-info {
-    gap: 0.75rem;
+  .profile-image-container {
+    width: 100px;
+    height: 100px;
   }
   
-  .info-block {
-    gap: 0.4rem;
+  .profile-image-placeholder i {
+    font-size: 2rem;
   }
   
-  .info-label {
+  .profile-name {
+    font-size: 1rem;
+  }
+  
+  .info-grid {
+    gap: 0.5rem;
+  }
+  
+  .info-item {
+    padding: 0.75rem;
+  }
+  
+  .info-icon {
+    width: 35px;
+    height: 35px;
+  }
+  
+  .info-icon i {
     font-size: 0.9rem;
   }
   
-  .info-value {
-    font-size: 0.85rem;
-  }
-  
-  #admin-profile-image {
-    width: 5rem;
-    height: 5rem;
-  }
-  
-  #profile-icon {
-    font-size: 2.25rem;
-  }
-}
-
-@media (max-width: 360px) {
-  #admin-profile-container {
-    padding: 0.5rem;
-    margin: 0.125rem;
-  }
-  
-  #admin-profile-title {
-    font-size: 1rem;
-    margin-bottom: 0.6rem;
-  }
-  
-  #admin-profile-content {
-    gap: 0.75rem;
-  }
-  
-  #admin-profile-info {
-    gap: 0.6rem;
-  }
-  
-  .info-block {
-    gap: 0.3rem;
-  }
-  
   .info-label {
-    font-size: 0.85rem;
+    font-size: 0.7rem;
   }
   
   .info-value {
-    font-size: 0.8rem;
-  }
-  
-  #admin-profile-image {
-    width: 4.5rem;
-    height: 4.5rem;
-  }
-  
-  #profile-icon {
-    font-size: 2rem;
+    font-size: 0.85rem;
   }
 }
 
 /* Landscape orientation adjustments */
 @media (max-width: 768px) and (orientation: landscape) {
-  #admin-profile-container {
-    padding: 0.75rem;
-  }
-  
-  #admin-profile-content {
+  .profile-content {
     flex-direction: row;
-    gap: 1rem;
+    gap: 1.5rem;
   }
   
-  #admin-profile-info {
+  .profile-image-container {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .info-grid {
     grid-template-columns: repeat(2, 1fr);
-  }
-  
-  #admin-profile-image {
-    width: 5rem;
-    height: 5rem;
   }
 }
 
 /* High DPI displays */
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-  #admin-profile-image img {
+  .profile-image {
     image-rendering: -webkit-optimize-contrast;
     image-rendering: crisp-edges;
   }
@@ -509,8 +751,81 @@ onMounted(() => {
 
 /* Reduced motion preferences */
 @media (prefers-reduced-motion: reduce) {
-  #admin-profile-container {
+  .info-item {
     transition: none;
+  }
+  
+  .loading-spinner {
+    animation: none;
+  }
+}
+
+/* Additional mobile optimizations */
+@media (max-width: 320px) {
+  .profile-main {
+    padding: 0.5rem;
+  }
+  
+  .profile-card {
+    padding: 0.75rem;
+  }
+  
+  .profile-title {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .profile-content {
+    gap: 1rem;
+  }
+  
+  .profile-image-container {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .profile-image-placeholder i {
+    font-size: 1.75rem;
+  }
+  
+  .profile-name {
+    font-size: 0.9rem;
+  }
+  
+  .profile-role {
+    font-size: 0.75rem;
+  }
+  
+  .info-grid {
+    gap: 0.5rem;
+  }
+  
+  .info-item {
+    padding: 0.75rem;
+  }
+  
+  .info-icon {
+    width: 35px;
+    height: 35px;
+  }
+  
+  .info-icon i {
+    font-size: 0.9rem;
+  }
+  
+  .info-label {
+    font-size: 0.7rem;
+  }
+  
+  .info-value {
+    font-size: 0.8rem;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .info-item {
+    min-height: 44px;
   }
 }
 </style>

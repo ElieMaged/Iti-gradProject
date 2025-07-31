@@ -1698,7 +1698,9 @@ function constructAddress(formData) {
 
 .date-navigation {
   display: flex;
+  flex-direction: row;
   align-items: center;
+  justify-content: space-between;
   gap: 1rem;
 }
 
@@ -1714,6 +1716,7 @@ function constructAddress(formData) {
   align-items: center;
   justify-content: center;
   transition: background 0.2s;
+  flex-shrink: 0;
 }
 
 .nav-arrow:hover {
@@ -1724,6 +1727,14 @@ function constructAddress(formData) {
   display: flex;
   gap: 1rem;
   flex: 1;
+  justify-content: center;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.date-slots::-webkit-scrollbar {
+  display: none;
 }
 
 .date-slot {
@@ -1992,13 +2003,20 @@ function constructAddress(formData) {
   }
   
   .date-navigation {
-    flex-direction: column;
-    gap: 1rem;
+    flex-direction: row;
+    gap: 0.5rem;
   }
   
   .date-slots {
-    flex-direction: column;
+    flex-direction: row;
     gap: 0.5rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .date-slots::-webkit-scrollbar {
+    display: none;
   }
   
   .date-slot {
@@ -2131,6 +2149,8 @@ function constructAddress(formData) {
   
   .date-slot {
     padding: 0.5rem;
+    min-width: 80px;
+    flex-shrink: 0;
   }
   
   .day-name {
@@ -2202,6 +2222,12 @@ function constructAddress(formData) {
     margin: 0;
     align-self: flex-start;
     margin-top: 15px;
+  }
+  
+  .date-slot {
+    padding: 0.4rem;
+    min-width: 70px;
+    flex-shrink: 0;
   }
   
   .day-name {

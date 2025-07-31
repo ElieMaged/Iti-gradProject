@@ -726,4 +726,103 @@ onMounted(() => {
     transform: none;
   }
 }
+
+/* Additional mobile optimizations */
+@media (max-width: 320px) {
+  .services-container {
+    padding: 0.5rem;
+  }
+  
+  .services-title {
+    font-size: 1rem;
+  }
+  
+  .services-subtitle {
+    font-size: 0.75rem;
+  }
+  
+  .service-card {
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .service-header {
+    gap: 0.4rem;
+  }
+  
+  .service-image {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .service-title {
+    font-size: 0.9rem;
+  }
+  
+  .service-subtitle {
+    font-size: 0.75rem;
+  }
+  
+  .service-details {
+    gap: 0.4rem;
+  }
+  
+  .detail-item {
+    padding: 0.3rem;
+    font-size: 0.75rem;
+  }
+  
+  .service-actions {
+    gap: 0.4rem;
+  }
+  
+  .book-again-btn,
+  .view-details-btn {
+    padding: 0.4rem;
+    font-size: 0.75rem;
+  }
+  
+  .loading-spinner {
+    width: 25px;
+    height: 25px;
+  }
+  
+  .error-message {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+  
+  .empty-state {
+    padding: 1rem 0.5rem;
+  }
+  
+  .empty-icon {
+    font-size: 2.5rem;
+  }
+  
+  .empty-state h3 {
+    font-size: 1rem;
+  }
+  
+  .empty-state p {
+    font-size: 0.75rem;
+  }
+  
+  .browse-services-btn {
+    padding: 0.5rem 1.25rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .service-card {
+    min-height: 44px;
+  }
+  
+  .book-again-btn,
+  .view-details-btn {
+    min-height: 44px;
+  }
+}
 </style> 
