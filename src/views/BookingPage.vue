@@ -832,10 +832,7 @@ function initializePayPalButton() {
       // Create PayPal button with enhanced error handling
       const paypalButton = window.paypal.Buttons({
         // Enable multiple funding sources including cards
-        fundingSource: [
-          window.paypal.FUNDING.PAYPAL,
-          window.paypal.FUNDING.CARD
-        ],
+        fundingSource: window.paypal.FUNDING.PAYPAL,
         
         createOrder: function(data, actions) {
           try {
@@ -1126,7 +1123,12 @@ function initializePayPalButton() {
       });
 
       // Render the button with error handling
+      console.log('Checking PayPal button eligibility...');
+      console.log('PayPal button object:', paypalButton);
+      console.log('isEligible method:', paypalButton.isEligible);
+      
       if (paypalButton.isEligible()) {
+        console.log('PayPal button is eligible, rendering...');
         paypalButton.render('#paypal-button-container')
           .then(() => {
             console.log('PayPal button rendered successfully');
@@ -1137,6 +1139,13 @@ function initializePayPalButton() {
           });
       } else {
         console.log('PayPal is not eligible for this transaction');
+        console.log('Eligibility check failed - this could be due to:');
+        console.log('- Invalid Client ID');
+        console.log('- Account restrictions');
+        console.log('- Geographic restrictions');
+        console.log('- Currency/amount issues');
+        console.log('- PayPal account status');
+        
         const container = document.getElementById('paypal-button-container');
         if (container) {
           container.innerHTML = '<div class="text-center p-4 text-red-500">PayPal is not available for this transaction. Please choose a different payment method.</div>';

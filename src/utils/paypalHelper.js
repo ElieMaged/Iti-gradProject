@@ -54,7 +54,7 @@ class PayPalHelper {
       this.removeExistingScripts();
 
       // Debug the PayPal SDK URL
-      const paypalUrl = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD&intent=capture&components=buttons,funding-eligibility&enable-funding=card&merchant-id=narutossj23@yahoo.com`;
+      const paypalUrl = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD&intent=capture&components=buttons&enable-funding=card&merchant-id=narutossj23@yahoo.com`;
       console.log('🔗 PayPal SDK URL:', paypalUrl);
       console.log('📏 URL length:', paypalUrl.length);
 
