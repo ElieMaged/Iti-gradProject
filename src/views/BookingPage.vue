@@ -26,7 +26,7 @@
       <div class="technician-section">
         <div class="technician-info">
           <img 
-            :src="technician.image || '/images/Avatar.png'" 
+            :src="technician.profilePhotoUrl || '/images/Avatar.png'" 
             alt="Technician" 
             class="technician-photo"
             @error="$event.target.src = '/images/Avatar.png'"
@@ -228,6 +228,7 @@ const errorMsg = ref('')
 const paypalLoaded = ref(false)
 const technicianAvailability = ref(null)
 const dateAvailability = ref({})
+const isProcessingPayment = ref(false)
 
 // Date and time management
 const currentDateOffset = ref(0)
@@ -603,7 +604,7 @@ onMounted(async () => {
         ...techData,
         uid: id, // Ensure uid is set for consistency
         name: techData.fullName || techData.name, // Map fullName to name for consistency
-        image: techData.idPhotoUrl || techData.profileImage || techData.image || '/images/Avatar.png' // Map image field
+        image: techData.profileImage || techData.image || techData.idPhotoUrl || '/images/Avatar.png' // Map image field - prioritize profile picture
       };
       console.log('Technician data loaded:', technician.value);
       console.log('Technician image:', technician.value.image);
@@ -780,6 +781,12 @@ function loadPayPalScript() {
 }
 
 function initializePayPalButton() {
+  // Prevent initialization if payment is in progress
+  if (isProcessingPayment.value) {
+    console.log('Payment in progress, skipping PayPal button initialization');
+    return;
+  }
+  
   console.log('Initializing PayPal button...');
   
   // Multiple validation checks
@@ -825,17 +832,64 @@ function initializePayPalButton() {
       return;
     }
 
-    // Clear existing content
+    // Clear existing content and destroy any existing PayPal buttons
     container.innerHTML = '';
+    
+    // Destroy any existing PayPal buttons to prevent conflicts
+    if (window.paypal && window.paypal.Buttons) {
+      try {
+        // Remove any existing PayPal elements
+        const existingButtons = container.querySelectorAll('[data-paypal-button]');
+        existingButtons.forEach(button => button.remove());
+      } catch (error) {
+        console.log('Error cleaning up existing PayPal buttons:', error);
+      }
+    }
 
     try {
+      console.log('🔧 Creating PayPal button...');
+      console.log('Window PayPal object:', window.paypal);
+      console.log('PayPal FUNDING object:', window.paypal?.FUNDING);
+      console.log('PayPal FUNDING.PAYPAL:', window.paypal?.FUNDING?.PAYPAL);
+      console.log('PayPal FUNDING.CARD:', window.paypal?.FUNDING?.CARD);
+      
+      // Test button eligibility before creating
+      try {
+        const testButton = window.paypal.Buttons({
+          fundingSource: window.paypal.FUNDING.PAYPAL,
+          createOrder: () => Promise.resolve('test'),
+          onApprove: () => Promise.resolve()
+        });
+        
+        testButton.isEligible().then(isEligible => {
+          console.log('🔍 PayPal button eligibility test:', isEligible);
+          
+          if (!isEligible) {
+            console.error('❌ PayPal button is not eligible - this may cause the "not available" error');
+          }
+        }).catch(error => {
+          console.error('❌ Error testing PayPal button eligibility:', error);
+        });
+      } catch (error) {
+        console.error('❌ Error creating test PayPal button:', error);
+      }
+      
       // Create PayPal button with enhanced error handling
       const paypalButton = window.paypal.Buttons({
-        // Enable multiple funding sources including cards
+        // Use PayPal funding source only for now to resolve availability issues
         fundingSource: window.paypal.FUNDING.PAYPAL,
+        
+        // Add render method for additional debugging
+        render: function(container) {
+          console.log('🎨 PayPal button render method called');
+          console.log('Container element:', container);
+          return true;
+        },
         
         createOrder: function(data, actions) {
           try {
+            console.log('🔄 Starting PayPal order creation...');
+            
             // Validate form data
             if (!form.value.date || !form.value.time) {
               throw new Error('Please select a date and time before proceeding with payment.');
@@ -843,7 +897,9 @@ function initializePayPalButton() {
 
             // Convert price to number with better parsing
             const priceString = technician.value.visitPrice || technician.value.basePrice;
+            console.log('Original price string:', priceString);
             const amount = parseFloat(priceString.replace(/[^\d.]/g, ''));
+            console.log('Parsed amount (EGP):', amount);
             
             if (isNaN(amount) || amount <= 0) {
               throw new Error('Invalid technician pricing. Please contact support.');
@@ -851,6 +907,17 @@ function initializePayPalButton() {
 
             // Convert EGP to USD (approximate rate: 1 USD = 31 EGP)
             const usdAmount = (amount / 31).toFixed(2);
+            console.log('Converted USD amount:', usdAmount);
+            
+            // Check if amount meets PayPal requirements
+            const amountNum = parseFloat(usdAmount);
+            if (amountNum < 0.01) {
+              console.warn('⚠️ Amount is too low for PayPal (minimum $0.01)');
+            } else if (amountNum > 10000) {
+              console.warn('⚠️ Amount is very high for PayPal (maximum $10,000)');
+            } else {
+              console.log('✅ Amount is within PayPal limits');
+            }
             
             console.log('Creating PayPal order:', {
               amount: usdAmount,
@@ -859,14 +926,11 @@ function initializePayPalButton() {
               time: form.value.time
             });
 
-            return actions.order.create({
+            const orderData = {
               purchase_units: [{
                 amount: {
                   value: usdAmount,
                   currency_code: 'USD'
-                },
-                payee: {
-                  email_address: 'narutossj23@yahoo.com'
                 },
                 description: `Booking with ${technician.value.name} - ${form.value.date} at ${form.value.time}`,
                 custom_id: `booking_${Date.now()}`,
@@ -878,6 +942,21 @@ function initializePayPalButton() {
                 return_url: window.location.origin + '/bookingconfirmation',
                 cancel_url: window.location.origin + '/bookingpage'
               }
+            };
+            
+            console.log('PayPal order data:', orderData);
+            console.log('Actions object:', actions);
+            console.log('Actions.order object:', actions.order);
+            
+            const orderPromise = actions.order.create(orderData);
+            console.log('Order creation promise:', orderPromise);
+            
+            return orderPromise.then(orderId => {
+              console.log('✅ PayPal order created successfully:', orderId);
+              return orderId;
+            }).catch(error => {
+              console.error('❌ PayPal order creation failed:', error);
+              throw error;
             });
           } catch (error) {
             console.error('Error creating PayPal order:', error);
@@ -887,6 +966,14 @@ function initializePayPalButton() {
         },
 
         onApprove: async (data, actions) => {
+          // Prevent multiple payment attempts
+          if (isProcessingPayment.value) {
+            console.log('Payment already in progress, ignoring duplicate request');
+            return;
+          }
+          
+          isProcessingPayment.value = true;
+          
           try {
             console.log('PayPal payment approved, capturing order...');
             const captureStartTime = Date.now();
@@ -897,32 +984,55 @@ function initializePayPalButton() {
               container.innerHTML = '<div class="text-center p-4"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div><p class="mt-2">Processing payment...</p></div>';
             }
 
-            // Set a timeout to prevent infinite loading
+            // Single timeout mechanism to prevent infinite loading
+            let captureCompleted = false;
             const captureTimeout = setTimeout(() => {
-              console.error('Payment capture timeout');
-              if (container) {
-                container.innerHTML = '<div class="text-center p-4 text-red-500">Payment processing timed out. Please try again.</div>';
+              if (!captureCompleted) {
+                console.error('Payment capture timeout - clearing loading state');
+                captureCompleted = true;
+                if (container) {
+                  container.innerHTML = '<div class="text-center p-4 text-red-500">Payment processing timed out. Please try again.</div>';
+                }
+                errorMsg.value = 'Payment processing timed out. Please try again.';
               }
-              errorMsg.value = 'Payment processing timed out. Please try again.';
-            }, 6000); // 6 second timeout
+            }, 8000); // 8 second timeout
 
-            // Wrap the capture call with a timeout
+            // Wrap the capture call with better error handling
             let order;
             try {
+              console.log('Starting PayPal capture...');
               order = await Promise.race([
                 actions.order.capture(),
                 new Promise((_, reject) => 
-                  setTimeout(() => reject(new Error('PayPal capture timeout')), 5000)
+                  setTimeout(() => reject(new Error('PayPal capture timeout')), 7000)
                 )
               ]);
-              clearTimeout(captureTimeout); // Clear timeout on success
-              const captureEndTime = Date.now();
-              console.log(`Payment captured successfully in ${captureEndTime - captureStartTime}ms:`, order);
+              
+              if (!captureCompleted) {
+                captureCompleted = true;
+                clearTimeout(captureTimeout);
+                const captureEndTime = Date.now();
+                console.log(`Payment captured successfully in ${captureEndTime - captureStartTime}ms:`, order);
+              }
             } catch (captureError) {
-              clearTimeout(captureTimeout);
-              console.error('PayPal capture failed:', captureError);
-              throw new Error(`Payment capture failed: ${captureError.message}`);
+              if (!captureCompleted) {
+                captureCompleted = true;
+                clearTimeout(captureTimeout);
+                console.error('PayPal capture failed:', captureError);
+                
+                // Handle specific PayPal errors
+                if (captureError.message.includes('Target window is closed')) {
+                  throw new Error('Payment window was closed. Please try again.');
+                } else if (captureError.message.includes('postrobot_method')) {
+                  throw new Error('Payment was interrupted. Please refresh the page and try again.');
+                } else {
+                  throw new Error(`Payment capture failed: ${captureError.message}`);
+                }
+              }
             }
+            
+            // Reset payment processing flag
+            isProcessingPayment.value = false;
             
             // Validate payment response
             if (!order || !order.id || order.status !== 'COMPLETED') {
@@ -1056,6 +1166,9 @@ function initializePayPalButton() {
               container.innerHTML = '<div class="text-center p-4 text-green-500">Payment successful! Redirecting...</div>';
             }
             
+            // Reset payment processing flag
+            isProcessingPayment.value = false;
+            
             // Redirect to confirmation page immediately
             const redirectStartTime = Date.now();
             router.push('/bookingconfirmation');
@@ -1081,6 +1194,9 @@ function initializePayPalButton() {
             if (container) {
               container.innerHTML = '<div class="text-center p-4 text-red-500">Payment failed. Please try again.</div>';
             }
+            
+            // Reset payment processing flag
+            isProcessingPayment.value = false;
             
             // Re-initialize PayPal button for retry
             setTimeout(() => {
@@ -1110,6 +1226,9 @@ function initializePayPalButton() {
           
           errorMsg.value = errorMessage;
           
+          // Reset payment processing flag
+          isProcessingPayment.value = false;
+          
           // Re-initialize PayPal button for retry
           setTimeout(() => {
             initializePayPalButton();
@@ -1118,33 +1237,79 @@ function initializePayPalButton() {
 
         onCancel: function(data) {
           console.log('PayPal payment cancelled by user');
+          isProcessingPayment.value = false;
           errorMsg.value = 'Payment was cancelled. You can try again or choose a different payment method.';
         }
       });
 
       // Render the button with error handling
-      console.log('Checking PayPal button eligibility...');
+      console.log('🔍 Checking PayPal button eligibility...');
       console.log('PayPal button object:', paypalButton);
       console.log('isEligible method:', paypalButton.isEligible);
+      console.log('Button methods:', Object.getOwnPropertyNames(paypalButton));
       
-      if (paypalButton.isEligible()) {
-        console.log('PayPal button is eligible, rendering...');
+      // Test if the button is properly initialized
+      try {
+        console.log('Checking PayPal button eligibility...');
+        console.log('Button object:', paypalButton);
+        console.log('Button methods:', Object.getOwnPropertyNames(paypalButton));
+        console.log('isEligible method:', typeof paypalButton.isEligible);
+        
+        const eligibilityResult = paypalButton.isEligible();
+        console.log('Eligibility check result:', eligibilityResult);
+        
+        // Additional debugging for eligibility
+        if (typeof eligibilityResult === 'object') {
+          console.log('Eligibility object details:', eligibilityResult);
+        }
+      } catch (eligibilityError) {
+        console.error('Error checking eligibility:', eligibilityError);
+        console.error('Eligibility error details:', {
+          name: eligibilityError.name,
+          message: eligibilityError.message,
+          stack: eligibilityError.stack
+        });
+      }
+      
+      // Test eligibility with more detailed logging
+      console.log('🔍 Testing PayPal button eligibility...');
+      const eligibilityResult = paypalButton.isEligible();
+      console.log('Eligibility result:', eligibilityResult);
+      
+      if (eligibilityResult) {
+        console.log('✅ PayPal button is eligible, rendering...');
         paypalButton.render('#paypal-button-container')
           .then(() => {
-            console.log('PayPal button rendered successfully');
+            console.log('✅ PayPal button rendered successfully');
+            console.log('✅ PayPal button is ready for transactions');
           })
           .catch((error) => {
-            console.error('Error rendering PayPal button:', error);
+            console.error('❌ Error rendering PayPal button:', error);
             errorMsg.value = 'Payment button failed to load. Please refresh the page and try again.';
+            
+            const container = document.getElementById('paypal-button-container');
+            if (container) {
+              container.innerHTML = '<div class="text-center p-4 text-red-500">Payment button failed to load. Please refresh the page and try again.</div>';
+            }
           });
       } else {
-        console.log('PayPal is not eligible for this transaction');
-        console.log('Eligibility check failed - this could be due to:');
+        console.log('❌ PayPal is not eligible for this transaction');
+        console.log('🔍 Eligibility check failed - this could be due to:');
         console.log('- Invalid Client ID');
         console.log('- Account restrictions');
         console.log('- Geographic restrictions');
         console.log('- Currency/amount issues');
         console.log('- PayPal account status');
+        console.log('- Funding source restrictions');
+        console.log('- Transaction amount too low/high');
+        console.log('- PayPal SDK configuration issues');
+        
+        // Log additional debugging information
+        console.log('🔍 Current configuration:');
+        console.log('- Client ID:', import.meta.env.VITE_PAYPAL_CLIENT_ID ? 'Set' : 'Not set');
+        console.log('- Funding source:', window.paypal.FUNDING.PAYPAL);
+        console.log('- Currency: USD');
+        console.log('- Intent: capture');
         
         const container = document.getElementById('paypal-button-container');
         if (container) {
