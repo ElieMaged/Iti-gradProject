@@ -1028,12 +1028,22 @@ function initializePayPalButton() {
           } catch (err) {
             console.error('Error capturing PayPal payment:', err);
             
+            // Clear timeout if it exists
+            if (typeof captureTimeout !== 'undefined') {
+              clearTimeout(captureTimeout);
+            }
+            
             // Record failed transaction
             recordFailedTransaction(err);
             
             // Show user-friendly error message
             const errorMessage = err.message || 'Payment failed. Please try again.';
             errorMsg.value = errorMessage;
+            
+            // Clear loading state and show error
+            if (container) {
+              container.innerHTML = '<div class="text-center p-4 text-red-500">Payment failed. Please try again.</div>';
+            }
             
             // Re-initialize PayPal button for retry
             setTimeout(() => {
