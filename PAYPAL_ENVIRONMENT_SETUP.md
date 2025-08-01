@@ -13,10 +13,7 @@ Create a new file called `.env` in your project root directory (same level as `p
 # Replace YOUR_PAYPAL_CLIENT_ID with your actual PayPal Client ID
 VITE_PAYPAL_CLIENT_ID=YOUR_PAYPAL_CLIENT_ID
 
-# EmailJS Configuration
-VITE_EMAILJS_SERVICE_ID=123321
-VITE_EMAILJS_PUBLIC_KEY=kGW9e5lc8iBvIT3Qw
-VITE_EMAILJS_TEMPLATE_ID=template_rn9r37x
+
 ```
 
 ### Step 2: Get Your PayPal Client ID

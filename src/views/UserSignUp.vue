@@ -5,10 +5,8 @@ import { auth, db } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { ensureUserRole, fetchUserRole } from '../utils/userRole';
-import emailjs from 'emailjs-com';
+import emailjs from '@emailjs/browser';
 
-// Initialize EmailJS
-emailjs.init('kGW9e5lc8iBvIT3Qw');
 
 const email = ref('');
 const password = ref('');
@@ -133,102 +131,7 @@ const validateForm = () => {
   return Object.keys(errors.value).length === 0;
 };
 
-// Function to send welcome email to the user
-async function sendWelcomeEmail(userEmail, firstName, lastName) {
-  try {
-    console.log('=== SENDING WELCOME EMAIL TO USER ===');
-    console.log('Email:', userEmail);
-    console.log('Name:', firstName, lastName);
 
-    const fullName = `${firstName} ${lastName}`.trim();
-    
-    const templateParams = {
-      to_email: userEmail,
-      to_name: fullName || 'Valued Customer',
-      user_name: fullName || 'Valued Customer',
-      user_email: userEmail,
-      welcome_message: `Dear ${fullName || 'Valued Customer'},
-
-Welcome to BoltFix! Your account has been successfully created and you're now ready to connect with skilled technicians for all your home service needs.
-
-Your account details:
-Email: ${userEmail}
-
-What you can do now:
-✅ Browse available technicians in your area
-✅ Book appointments for home services
-✅ Track your booking status
-✅ Leave reviews for technicians
-✅ Manage your profile and settings
-
-Getting Started:
-1. Browse our services (Plumbing, Electricity, Carpentry, etc.)
-2. Find a technician that matches your needs
-3. Book an appointment with your preferred date and time
-4. Track your booking status in real-time
-
-Need help? Contact our support team or check our FAQ section.
-
-Thank you for choosing BoltFix!
-
-Best regards,
-The BoltFix Team
-
----
-This is an automated email. Please do not reply to this message.`
-    };
-
-    // Use the provided EmailJS credentials
-    const serviceId = '123321'; // Your provided Service ID
-    const templateId = 'template_rn9r37x'; // Your provided template ID
-    const publicKey = 'kGW9e5lc8iBvIT3Qw'; // Your provided public key
-
-    console.log('EmailJS configuration found, sending email...');
-    console.log('Service ID:', serviceId);
-    console.log('Template ID:', templateId);
-    console.log('Public Key:', publicKey);
-    console.log('Template Params:', templateParams);
-
-    // Test EmailJS initialization
-    console.log('EmailJS initialized:', emailjs.init);
-    console.log('EmailJS send method:', emailjs.send);
-
-    const result = await emailjs.send(
-      serviceId,
-      templateId,
-      templateParams,
-      publicKey
-    );
-    
-    console.log('Welcome email sent successfully!');
-    console.log('EmailJS result:', result);
-    return true;
-  } catch (error) {
-    console.error('=== ERROR SENDING WELCOME EMAIL ===');
-    console.error('Error details:', error);
-    console.error('Error message:', error.message);
-    console.error('Error code:', error.code);
-    console.error('Error stack:', error.stack);
-    
-    // Log additional error information for debugging
-    if (error.response) {
-      console.error('Response status:', error.response.status);
-      console.error('Response data:', error.response.data);
-    }
-    
-    // More specific error messages
-    if (error.message.includes('Service ID')) {
-      alert('EmailJS Service ID is invalid. Please check your EmailJS configuration.');
-    } else if (error.message.includes('Template ID')) {
-      alert('EmailJS Template ID is invalid. Please check your EmailJS configuration.');
-    } else if (error.message.includes('Public Key')) {
-      alert('EmailJS Public Key is invalid. Please check your EmailJS configuration.');
-    } else {
-      alert(`Email sending failed: ${error.message}\n\nPlease check EmailJS configuration.`);
-    }
-    return false;
-  }
-}
 
 const handleRegister = async () => {
   error.value = '';
@@ -263,17 +166,6 @@ const handleRegister = async () => {
 
     await setDoc(doc(db, 'users', userCredential.user.uid), userDoc);
     console.log('User document created in Firestore');
-    
-    // Send welcome email (non-blocking)
-    console.log('Attempting to send welcome email...');
-    const emailSent = await sendWelcomeEmail(email.value, firstName.value, lastName.value);
-    
-    if (emailSent) {
-      console.log('Welcome email sent successfully');
-    } else {
-      console.log('Welcome email failed to send, but registration completed');
-      // Don't fail the registration if email fails - just log it
-    }
     
     // Enforce persistent admin role for elie1400674@gmail.com
     await ensureUserRole(userCredential.user);
@@ -477,12 +369,14 @@ const closeTermsModal = () => {
         </label>
       </div>
 
-      <button type="submit" class="submit-btn">
-        <span>{{ $t('register') }}</span>
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="arrow-icon" viewBox="0 0 16 16">
-  <path fill-rule="evenodd" d="M14 2.5a.5.5 0 0 0-.5-.5h-6a.5.5 0 0 0 0 1h4.793L2.146 13.146a.5.5 0 0 0 .708.708L13 3.707V8.5a.5.5 0 0 0 1 0z"/>
-        </svg>
-      </button>
+             <button type="submit" class="submit-btn">
+         <span>{{ $t('register') }}</span>
+         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="arrow-icon" viewBox="0 0 16 16">
+   <path fill-rule="evenodd" d="M14 2.5a.5.5 0 0 0-.5-.5h-6a.5.5 0 0 0 0 1h4.793L2.146 13.146a.5.5 0 0 0 .708.708L13 3.707V8.5a.5.5 0 0 0 1 0z"/>
+         </svg>
+       </button>
+
+       
 
       
 
@@ -871,6 +765,8 @@ body {
 .submit-btn:hover .arrow-icon {
     transform: translateX(4px);
 }
+
+
 
 .error-text {
     color: #ef4444;

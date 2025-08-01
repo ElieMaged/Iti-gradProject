@@ -22,7 +22,7 @@
 - **Application Status Updates**: Notifications to technician dashboard and email, admin dashboard
 - **Booking Status Updates**: Notifications to user dashboard and email, admin dashboard
 - Real-time notification bell component with unread count
-- Email notifications via EmailJS integration
+
 
 ## **✅ TASK 4: Filter Bar Functionality**
 **Status: COMPLETED**

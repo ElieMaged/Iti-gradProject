@@ -149,16 +149,11 @@ export class PayPalTester {
 
     try {
       const clientId = import.meta.env.VITE_PAYPAL_CLIENT_ID;
-      const emailjsServiceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
 
       const issues = [];
 
       if (!clientId || clientId === 'YOUR_PAYPAL_CLIENT_ID') {
         issues.push('PayPal Client ID not configured');
-      }
-
-      if (!emailjsServiceId || emailjsServiceId === 'YOUR_EMAILJS_SERVICE_ID') {
-        issues.push('EmailJS Service ID not configured');
       }
 
       if (issues.length === 0) {

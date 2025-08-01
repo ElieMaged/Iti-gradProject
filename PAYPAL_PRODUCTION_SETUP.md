@@ -27,7 +27,7 @@ This guide will help you configure PayPal for real payments instead of sandbox m
 ### For Local Development:
 Create or update your `.env` file:
 ```env
-VITE_EMAILJS_SERVICE_ID=123321
+
 VITE_PAYPAL_CLIENT_ID=YOUR_LIVE_PAYPAL_CLIENT_ID_HERE
 ```
 

@@ -1,38 +1,44 @@
 <template>
-  <section class="testimonials">
-    <div class="testimonials-container">
+  <section class="testimonials pt-14">
+    <div class="testimonials-container custom-container">
       <!-- Header Section -->
       <div class="testimonials-header">
         <div class="header-left">
-          <h2 class="testimonials-title">{{ $t('testimonialsTitle') }}</h2>
+          <h2 class="testimonials-title">{{ $t("testimonialsTitle") }}</h2>
         </div>
-        
       </div>
-      
+
       <!-- Testimonial Card -->
       <div class="testimonial-card">
+        <img src="../assets/home/quotes.png" alt="quote" class="quote-icon" />
         <div class="testimonial-content">
           <div class="testimonial-image">
-            <img src="/images/AhmedSabry.png" alt="Ahmed Sabry" class="client-photo" />
+            <img
+              src="/images/AhmedSabry.png"
+              alt="Ahmed Sabry"
+              class="client-photo"
+            />
           </div>
-          
+
           <div class="testimonial-text">
             <div class="quote-marks">"</div>
-            <h3 class="testimonial-heading">{{ $t('testimonialHeading') }}</h3>
-            
+            <h3 class="testimonial-heading">{{ $t("testimonialHeading") }}</h3>
+
             <div class="testimonial-rating">
               <i v-for="star in 5" :key="star" class="fas fa-star"></i>
             </div>
-            
-            <p class="testimonial-text-content">{{ $t('testimonialTextContent') }}</p>
-            
+
+            <p class="testimonial-text-content">
+              {{ $t("testimonialTextContent") }}
+            </p>
+
             <div class="client-info">
-              <h4 class="client-name">{{ $t('clientName') }}</h4>
-              <p class="client-title">{{ $t('clientTitle') }}</p>
+              <h4 class="client-name">{{ $t("clientName") }}</h4>
+              <p class="client-title">{{ $t("clientTitle") }}</p>
             </div>
           </div>
         </div>
-        
+
         <!-- Navigation Buttons -->
         <div class="testimonial-nav">
           <button class="nav-btn prev-btn" :title="$t('testimonialPrev')">
@@ -49,27 +55,19 @@
 
 <script>
 export default {
-  name: 'Testimonials'
+  name: "Testimonials",
 };
 </script>
 
 <style scoped>
 .testimonials {
-  background-color: #F4F4F5;
-  padding: 80px 0;
+  background-color: #f4f4f5;
   width: 100%;
 }
 .dark .testimonials {
-  background-color: var(--secondary-bg);
+  background-color: var(--color-black);
   color: var(--primary-text);
 }
-
-.testimonials-container {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
 .testimonials-header {
   display: flex;
   justify-content: space-between;
@@ -83,13 +81,13 @@ export default {
 }
 
 .testimonials-title {
-  color: #333;
-  text-align: center; 
+  color: var(--black-text);
+  text-align: center;
   justify-content: center;
   font-family: Outfit, sans-serif;
   border-radius: 12px;
-  font-size: 2.5rem;
-  font-weight: 700;
+  font-size: 48px;
+  font-weight: 600;
   font-family: Outfit, sans-serif;
   display: flex;
   margin-bottom: 8px;
@@ -119,8 +117,14 @@ export default {
   margin: 0 auto;
 }
 .dark .testimonial-card {
-  background: var(--secondary-bg);
-  color: var(--primary-text);
+  background-color: transparent;
+  box-shadow: none;
+}
+.quote-icon {
+  width: 104px;
+  position: absolute;
+  top: 2px;
+  left: 271px;
 }
 .testimonial-content {
   display: flex;
@@ -145,11 +149,11 @@ export default {
   position: relative;
 }
 
-
 .testimonial-heading {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #333;
+  font-size: 31px;
+  font-weight: 600;
+  max-width: 406px;
+  color: var(--black-text);
   margin-bottom: 16px;
   font-family: Outfit, sans-serif;
 }
@@ -158,33 +162,33 @@ export default {
 }
 .testimonial-rating {
   margin-bottom: 20px;
-  color: #625397;
+  color: var(--primary-color);
 }
 
-.testimonial-rating i {
-  color: #625397;
-  font-size: 1.2rem;
-  margin-right: 4px;
-}
-
-.testimonial-text-content {
+.testimonial-rating svg {
+  color: var(--primary-color);
   font-size: 1rem;
-  color: #666;
+  margin-right: 6px;
+}
+.dark .testimonial-rating svg {
+  color: var(--surface-color-surface-brand, #7b6fa8);
+}
+.testimonial-text-content {
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--text-gray);
   line-height: 1.6;
-  margin-bottom: 24px;
+  margin-bottom: 80px;
   font-family: Outfit, sans-serif;
 }
 .dark .testimonial-text-content {
-  color: var(--text-muted);
-}
-.client-info {
-  margin-top: 20px;
+  color: var(--card-text-gray);
 }
 
 .client-name {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #333;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--black-text);
   margin-bottom: 4px;
   font-family: Outfit, sans-serif;
 }
@@ -192,12 +196,12 @@ export default {
   color: var(--primary-text);
 }
 .client-title {
-  font-size: 0.9rem;
-  color: #888;
+  font-size: 16px;
+  color: var(--text-gray);
   font-family: Outfit, sans-serif;
 }
 .dark .client-title {
-  color: var(--text-muted);
+  color: var(--card-text-gray);
 }
 .testimonial-nav {
   position: absolute;
@@ -223,7 +227,7 @@ export default {
 .dark .nav-btn {
   background: var(--primary-color);
   color: var(--primary-text);
-} 
+}
 .nav-btn:hover {
   background: #4e3b7a;
 }
@@ -237,11 +241,15 @@ export default {
   .testimonials-header {
     gap: 40px;
   }
-  
+  .header-left {
+    width: 100%;
+  }
   .testimonials-title {
     font-size: 2rem;
+    width: 100%;
+    text-align: center;
   }
-  
+
   .testimonial-heading {
     font-size: 2.2rem;
   }
@@ -251,39 +259,45 @@ export default {
   .testimonials {
     padding: 60px 0;
   }
-  
+
   .testimonials-header {
     flex-direction: column;
     gap: 30px;
   }
-  
+  .header-left {
+    width: 100%;
+  }
   .testimonials-title {
     font-size: 1.5rem;
-    padding: 15px 20px;
+    width: 100%;
+    text-align: center;
   }
-  
+
   .testimonial-content {
     flex-direction: column;
     text-align: center;
   }
-  
+
   .client-photo {
     width: 150px;
     height: 150px;
   }
-  
+
   .testimonial-heading {
     font-size: 1.5rem;
   }
-  
+
   .testimonial-text-content {
     font-size: 0.9rem;
   }
-  
+
   .testimonial-nav {
     position: static;
     justify-content: center;
     margin-top: 30px;
+  }
+  .quote-icon {
+    display: none;
   }
 }
 
@@ -291,44 +305,43 @@ export default {
   .testimonials {
     padding: 40px 0;
   }
-  
+
   .testimonials-header {
     gap: 20px;
   }
-  
+
   .testimonials-title {
     font-size: 1.3rem;
-    padding: 12px 16px;
   }
-  
+
   .testimonial-heading {
     font-size: 1.3rem;
   }
-  
+
   .testimonial-text-content {
     font-size: 0.85rem;
   }
-  
+
   .client-photo {
     width: 120px;
     height: 120px;
   }
-  
+
   .client-name {
     font-size: 1.1rem;
   }
-  
+
   .client-title {
     font-size: 0.8rem;
   }
-  
+
   .nav-btn {
     width: 40px;
     height: 40px;
   }
-  
+
   .nav-btn i {
     font-size: 0.9rem;
   }
 }
-</style> 
+</style>

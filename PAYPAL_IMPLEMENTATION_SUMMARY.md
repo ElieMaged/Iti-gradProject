@@ -89,7 +89,7 @@ const loadingTimeout = setTimeout(() => {
 ### Environment Variables Required:
 ```bash
 VITE_PAYPAL_CLIENT_ID=YOUR_LIVE_PAYPAL_CLIENT_ID
-VITE_EMAILJS_SERVICE_ID=YOUR_EMAILJS_SERVICE_ID
+
 ```
 
 ### Browser Support:

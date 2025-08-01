@@ -8,31 +8,41 @@
       role="button"
       aria-label="Open chatbot"
     >
-      <img src="/images/Avatar.png" alt="AI" class="full-width sm:w-8 sm:h-8 rounded-full">
+      <img
+        src="/images/Avatar.png"
+        alt="AI"
+        class="full-width sm:w-8 sm:h-8 rounded-full"
+      />
     </div>
     <div v-if="showChatbot" class="fixed-chatbot-popup">
       <chatbot @close="showChatbot = false" />
-      <button class="close-btn" @click="showChatbot = false" aria-label="Close chatbot">&times;</button>
+      <button
+        class="close-btn"
+        @click="showChatbot = false"
+        aria-label="Close chatbot"
+      >
+        &times;
+      </button>
     </div>
   </div>
 </template>
 
 <script>
-import chatbot from './chatbot.vue'
+import chatbot from "./chatbot.vue";
 export default {
-  name: 'chatbotIcon',
+  name: "chatbotIcon",
   components: { chatbot },
   props: {
     icon: {
       type: String,
-      default: 'chatbot',
+      default: "chatbot",
     },
   },
   data() {
     return {
-      showChatbot: false
-    }
-  }
+      showChatbot: false,
+    };
+  },
 };
 </script>
 
@@ -54,12 +64,13 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   cursor: pointer;
   font-size: 2rem;
   transition: background 0.2s;
 }
-.fixed-chatbot-icon:hover, .fixed-chatbot-icon:focus {
+.fixed-chatbot-icon:hover,
+.fixed-chatbot-icon:focus {
   background: #5a4a8c;
   outline: none;
 }
@@ -71,7 +82,7 @@ export default {
   width: 500px;
   height: 500px;
   max-width: 95vw;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
   border-radius: 1.5rem;
   overflow: scroll;
   background: #fff;

@@ -77,7 +77,7 @@ import { db } from '../firebase';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'vue-router';
 import Sidebar from '../components/Sidebar.vue';
-import emailjs from 'emailjs-com';
+
 
 const router = useRouter();
 const searchQuery = ref('');
@@ -583,15 +583,8 @@ async function sendBookingStatusEmail(booking, status, technicianName) {
     
     console.log('Email data:', emailData);
     
-    // Send email using EmailJS
-    const response = await emailjs.send(
-      import.meta.env.VITE_EMAILJS_SERVICE_ID || '123321',
-      import.meta.env.VITE_EMAILJS_BOOKING_STATUS_TEMPLATE_ID || 'template_booking_status',
-      emailData,
-      import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'kGW9e5lc8iBvIT3Qw'
-    );
-    
-    console.log('✅ Email sent successfully:', response.status, response.text);
+    // Email functionality removed
+    console.log('✅ Email template prepared:', emailData);
     return true;
     
   } catch (error) {

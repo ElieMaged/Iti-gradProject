@@ -214,7 +214,7 @@ import { collection, doc, getDoc, addDoc, serverTimestamp, query, getDocs, where
 import { db } from '../firebase'
 import { useI18n } from 'vue-i18n'
 import { stockTechnicians } from '../assets/stockTechnicians'
-import emailjs from 'emailjs-com';
+
 import { auth } from '../firebase';
 import { paypalHelper } from '../utils/paypalHelper';
 
@@ -1629,17 +1629,8 @@ function sendConfirmationEmail(userEmail, technicianName, date, time, payment) {
     time,
     payment
   };
-  console.log('EmailJS data:', data);
-  emailjs.send(
-    '123321',
-    'template_68btlks',
-    data,
-    'kGW9e5lc8iBvIT3Qw'
-  ).then((response) => {
-    console.log('Email sent!', response.status, response.text);
-  }, (err) => {
-    console.error('Failed to send email:', err);
-  });
+  console.log('Email data:', data);
+  // Email functionality removed
 }
 
 async function confirmBooking() {
@@ -2181,15 +2172,8 @@ async function sendBookingRequestEmail(bookingData) {
       subject: 'New Booking Request - BoltFix'
     };
     
-    // Send email using EmailJS
-    const response = await emailjs.send(
-      import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_boltfix',
-      import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_booking_request',
-      emailTemplate,
-      import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'YOUR_EMAILJS_PUBLIC_KEY'
-    );
-    
-    console.log('Booking request email sent successfully:', response);
+    // Email functionality removed
+    console.log('Booking request email template:', emailTemplate);
     return true;
     
   } catch (error) {
