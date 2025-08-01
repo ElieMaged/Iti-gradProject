@@ -179,8 +179,15 @@
         
         <!-- PayPal Button Container -->
         <div v-show="form.payment === 'PayPal'" class="paypal-container">
-          <div v-if="!paypalLoaded" class="paypal-loading">
-            Loading payment system...
+          <div v-if="!paypalLoaded && !errorMsg" class="paypal-loading">
+            <div class="loading-spinner"></div>
+            <p>Loading payment system...</p>
+            <p class="loading-note">This may take a few seconds</p>
+          </div>
+          <div v-if="errorMsg && form.payment === 'PayPal'" class="paypal-error">
+            <div class="error-icon">⚠️</div>
+            <p>{{ errorMsg }}</p>
+            <button @click="retryPayPalLoading" class="retry-btn">Retry Payment System</button>
           </div>
           <div id="paypal-button-container"></div>
         </div>
@@ -188,6 +195,11 @@
         <!-- Confirm Booking Button -->
         <button v-if="form.payment === 'Cash on Visit'" class="confirm-btn" type="submit">
           {{ $t('confirmBooking') }}
+        </button>
+
+        <!-- PayPal Test Button (Development Only) -->
+        <button v-if="form.payment === 'PayPal'" @click="runPayPalTests" class="test-btn" type="button">
+          Test PayPal Implementation
         </button>
         
 
@@ -197,7 +209,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, watch, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { collection, doc, getDoc, addDoc, serverTimestamp, query, getDocs, where, orderBy, limit } from 'firebase/firestore'
 import { db } from '../firebase'
@@ -205,6 +217,8 @@ import { useI18n } from 'vue-i18n'
 import { stockTechnicians } from '../assets/stockTechnicians'
 import emailjs from 'emailjs-com';
 import { auth } from '../firebase';
+import { paypalHelper } from '../utils/paypalHelper';
+import { paypalTester } from '../utils/paypalTest';
 
 const { t } = useI18n();
 const route = useRoute()
@@ -615,9 +629,24 @@ onMounted(async () => {
     errorMsg.value = 'This technician has not set their availability yet. Please contact them directly or try again later.';
   }
   
-  // Load PayPal script
-  loadPayPalScript();
+  // Load PayPal script with delay to ensure page is ready
+  setTimeout(() => {
+    loadPayPalScript();
+  }, 500);
+  
   populateFormWithUserData(); // Call the new function here
+})
+
+// Cleanup function to prevent memory leaks
+onUnmounted(() => {
+  // Clear any timeouts
+  if (window.paypalLoadingTimeout) {
+    clearTimeout(window.paypalLoadingTimeout);
+  }
+  
+  // Reset PayPal state
+  paypalLoaded.value = false;
+  errorMsg.value = '';
 })
 
 // Watch for technician data changes to initialize PayPal when data is available
@@ -645,7 +674,11 @@ watch(() => form.value.payment, (newPayment) => {
 });
 
 function loadPayPalScript() {
+  console.log('🔄 Starting PayPal script loading...');
+  
+  // Check if PayPal is already loaded
   if (window.paypal) {
+    console.log('✅ PayPal already loaded');
     paypalLoaded.value = true;
     if (form.value.payment === 'PayPal') {
       setTimeout(() => {
@@ -657,47 +690,108 @@ function loadPayPalScript() {
 
   const clientId = import.meta.env.VITE_PAYPAL_CLIENT_ID;
   
-  // Use production client ID if configured, otherwise show error
-  const finalClientId = clientId && clientId !== 'YOUR_PAYPAL_CLIENT_ID'
-    ? clientId
-    : null;
-
-  if (!finalClientId) {
-    console.error('PayPal Client ID not configured. Please add VITE_PAYPAL_CLIENT_ID to your environment variables.');
+  // Validate client ID
+  if (!clientId || clientId === 'YOUR_PAYPAL_CLIENT_ID' || clientId.trim() === '') {
+    console.error('❌ PayPal Client ID not configured');
+    errorMsg.value = 'Payment system not configured. Please contact support.';
+    paypalLoaded.value = false; // Ensure loading state is cleared
     return;
   }
 
+  console.log('🔧 PayPal Client ID found, loading script...');
+
+  // Remove any existing PayPal scripts to prevent conflicts
+  const existingScripts = document.querySelectorAll('script[src*="paypal.com"]');
+  existingScripts.forEach(script => {
+    console.log('🗑️ Removing existing PayPal script:', script.src);
+    script.remove();
+  });
+
+  // Create new script element with better error handling
   const script = document.createElement('script');
-  script.src = `https://www.paypal.com/sdk/js?client-id=${finalClientId}&currency=USD&intent=capture`;
+  script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD&intent=capture&components=buttons,funding-eligibility`;
   script.async = true;
+  script.defer = true;
+  
+  // Add loading timeout with better error handling
+  window.paypalLoadingTimeout = setTimeout(() => {
+    if (!paypalLoaded.value) {
+      console.error('⏰ PayPal script loading timeout after 10 seconds');
+      errorMsg.value = 'Payment system failed to load. Please refresh the page and try again.';
+      paypalLoaded.value = false; // Ensure loading state is cleared
+      
+      // Show error in the container
+      const container = document.getElementById('paypal-button-container');
+      if (container) {
+        container.innerHTML = '<div class="text-red-500 text-center p-4">Payment system failed to load. Please refresh the page and try again.</div>';
+      }
+    }
+  }, 10000); // 10 second timeout
+
   script.onload = () => {
-    paypalLoaded.value = true;
-    if (form.value.payment === 'PayPal') {
-      // Add a small delay to ensure DOM is ready
-      setTimeout(() => {
-        initializePayPalButton();
-      }, 100);
+    if (window.paypalLoadingTimeout) {
+      clearTimeout(window.paypalLoadingTimeout);
+    }
+    console.log('📦 PayPal script loaded successfully');
+    
+    // Add a small delay to ensure PayPal object is available
+    setTimeout(() => {
+      // Verify PayPal object is available
+      if (window.paypal) {
+        console.log('✅ PayPal object available');
+        paypalLoaded.value = true;
+        if (form.value.payment === 'PayPal') {
+          setTimeout(() => {
+            initializePayPalButton();
+          }, 200);
+        }
+      } else {
+        console.error('❌ PayPal object not available after script load');
+        errorMsg.value = 'Payment system error. Please try again.';
+        paypalLoaded.value = false; // Ensure loading state is cleared
+        
+        // Show error in the container
+        const container = document.getElementById('paypal-button-container');
+        if (container) {
+          container.innerHTML = '<div class="text-red-500 text-center p-4">Payment system error. Please try again.</div>';
+        }
+      }
+    }, 500); // Wait 500ms for PayPal object to be available
+  };
+
+  script.onerror = (error) => {
+    if (window.paypalLoadingTimeout) {
+      clearTimeout(window.paypalLoadingTimeout);
+    }
+    console.error('❌ Failed to load PayPal script:', error);
+    errorMsg.value = 'Failed to load payment system. Please check your internet connection and try again.';
+    paypalLoaded.value = false; // Ensure loading state is cleared
+    
+    // Show error in the container
+    const container = document.getElementById('paypal-button-container');
+    if (container) {
+      container.innerHTML = '<div class="text-red-500 text-center p-4">Failed to load payment system. Please check your internet connection and try again.</div>';
     }
   };
-  script.onerror = () => {
-    console.error('Failed to load PayPal script');
-    errorMsg.value = 'Failed to load payment system. Please try again.';
-  };
+
+  // Add script to document
+  console.log('📎 Adding PayPal script to document');
   document.head.appendChild(script);
 }
 
 function initializePayPalButton() {
   console.log('Initializing PayPal button...');
-  console.log('PayPal available:', !!window.paypal);
-  console.log('Technician base price:', technician.value.basePrice);
   
+  // Multiple validation checks
   if (!window.paypal) {
-    console.log('PayPal not loaded yet, waiting...');
+    console.error('PayPal SDK not available');
+    errorMsg.value = 'Payment system not available. Please refresh the page.';
     return;
   }
-  
+
   if (!technician.value.visitPrice && !technician.value.basePrice) {
-    console.log('No technician price available');
+    console.error('No technician price available');
+    errorMsg.value = 'Technician pricing not available. Please try again later.';
     return;
   }
 
@@ -711,64 +805,119 @@ function initializePayPalButton() {
     return;
   }
 
-  // Wait for next tick to ensure DOM is updated
+  // Wait for DOM to be ready
   setTimeout(() => {
-    // Clear existing buttons
     const container = document.getElementById('paypal-button-container');
-    console.log('PayPal container found:', !!container);
     
     if (!container) {
       console.error('PayPal container not found');
       errorMsg.value = 'Payment system error. Please refresh the page and try again.';
       return;
     }
-    
+
     // Check if container is visible
     const containerParent = container.closest('.paypal-container');
     if (containerParent && containerParent.style.display === 'none') {
-      console.log('PayPal container is hidden, waiting...');
+      console.log('PayPal container is hidden, retrying...');
       setTimeout(() => {
         initializePayPalButton();
-      }, 100);
+      }, 200);
       return;
     }
-    
+
+    // Clear existing content
     container.innerHTML = '';
 
     try {
-      window.paypal.Buttons({
+      // Create PayPal button with enhanced error handling
+      const paypalButton = window.paypal.Buttons({
+        fundingSource: window.paypal.FUNDING.PAYPAL,
+        
         createOrder: function(data, actions) {
-          // Convert visitPrice or basePrice to number (remove any currency symbols)
-          const priceString = technician.value.visitPrice || technician.value.basePrice;
-          const amount = parseFloat(priceString.replace(/[^\d.]/g, ''));
-          
-          // Convert EGP to USD (approximate rate: 1 USD = 31 EGP)
-          const usdAmount = (amount / 31).toFixed(2);
-          
-          return actions.order.create({
-            purchase_units: [{
-              amount: {
-                value: usdAmount,
-                currency_code: 'USD'
-              },
-              payee: {
-                email_address: 'elie1400674@gmail.com'
-              },
-              description: `Booking with ${technician.value.name} - ${form.value.date} at ${form.value.time}`
-            }]
-          });
+          try {
+            // Validate form data
+            if (!form.value.date || !form.value.time) {
+              throw new Error('Please select a date and time before proceeding with payment.');
+            }
+
+            // Convert price to number with better parsing
+            const priceString = technician.value.visitPrice || technician.value.basePrice;
+            const amount = parseFloat(priceString.replace(/[^\d.]/g, ''));
+            
+            if (isNaN(amount) || amount <= 0) {
+              throw new Error('Invalid technician pricing. Please contact support.');
+            }
+
+            // Convert EGP to USD (approximate rate: 1 USD = 31 EGP)
+            const usdAmount = (amount / 31).toFixed(2);
+            
+            console.log('Creating PayPal order:', {
+              amount: usdAmount,
+              technician: technician.value.name,
+              date: form.value.date,
+              time: form.value.time
+            });
+
+            return actions.order.create({
+              purchase_units: [{
+                amount: {
+                  value: usdAmount,
+                  currency_code: 'USD'
+                },
+                payee: {
+                  email_address: 'elie1400674@gmail.com'
+                },
+                description: `Booking with ${technician.value.name} - ${form.value.date} at ${form.value.time}`,
+                custom_id: `booking_${Date.now()}`,
+                invoice_id: `INV_${Date.now()}`
+              }],
+              application_context: {
+                shipping_preference: 'NO_SHIPPING',
+                user_action: 'PAY_NOW',
+                return_url: window.location.origin + '/bookingconfirmation',
+                cancel_url: window.location.origin + '/bookingpage'
+              }
+            });
+          } catch (error) {
+            console.error('Error creating PayPal order:', error);
+            errorMsg.value = error.message || 'Error creating payment. Please try again.';
+            throw error;
+          }
         },
+
         onApprove: async (data, actions) => {
           try {
             console.log('PayPal payment approved, capturing order...');
             
+            // Show loading state
+            const container = document.getElementById('paypal-button-container');
+            if (container) {
+              container.innerHTML = '<div class="text-center p-4"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div><p class="mt-2">Processing payment...</p></div>';
+            }
+
             const order = await actions.order.capture();
             console.log('Payment captured successfully:', order);
             
+            // Validate payment response
+            if (!order || !order.id || order.status !== 'COMPLETED') {
+              throw new Error('Payment was not completed successfully.');
+            }
+
             // Extract payment details
             const paymentAmount = parseFloat(order.purchase_units[0].amount.value);
             const paypalOrderId = order.id;
             
+            // Validate payment amount
+            if (isNaN(paymentAmount) || paymentAmount <= 0) {
+              throw new Error('Invalid payment amount received.');
+            }
+
+            console.log('Payment details:', {
+              amount: paymentAmount,
+              orderId: paypalOrderId,
+              status: order.status
+            });
+
             // Split the payment between accounts
             const splitSuccess = await splitPaymentToAccounts(paypalOrderId, paymentAmount, technician.value.uid);
             
@@ -778,11 +927,11 @@ function initializePayPalButton() {
               console.warn('Payment split failed, but payment was successful');
             }
             
-            // Continue with existing booking logic
+            // Create booking data with enhanced validation
             const bookingData = {
               technicianId: technician.value.uid || technician.value.id,
               technicianName: technician.value.name,
-              userId: auth.currentUser?.uid, // Add current user's UID
+              userId: auth.currentUser?.uid,
               userName: form.value.fullName,
               userEmail: form.value.email,
               userPhone: form.value.phone,
@@ -799,7 +948,8 @@ function initializePayPalButton() {
                 currency: order.purchase_units[0].amount.currency_code,
                 status: order.status,
                 captureId: order.purchase_units[0].payments.captures[0]?.id,
-                paymentMethod: 'PayPal'
+                paymentMethod: 'PayPal',
+                transactionTime: new Date().toISOString()
               },
               status: 'pending',
               createdAt: serverTimestamp(),
@@ -807,77 +957,192 @@ function initializePayPalButton() {
             };
             
             console.log('Creating PayPal booking with data:', bookingData);
-            console.log('Complete form data:', form.value);
-            console.log('User email being saved:', bookingData.userEmail);
-            console.log('Form email value:', form.value.email);
-            console.log('Technician ID being saved:', bookingData.technicianId);
-            console.log('Technician UID:', technician.value.uid);
-            console.log('Technician ID:', technician.value.id);
-            console.log('Technician name:', technician.value.name);
-            console.log('Address being saved:', bookingData.address);
-            console.log('Address type:', typeof bookingData.address);
-            console.log('Address length:', bookingData.address ? bookingData.address.length : 'undefined');
             
-            // Save booking to Firestore
-            const bookingRef = await addDoc(collection(db, 'bookings'), bookingData);
-            console.log('PayPal booking saved with ID:', bookingRef.id);
+            // Save booking to Firestore with retry logic
+            let bookingRef;
+            try {
+              bookingRef = await addDoc(collection(db, 'bookings'), bookingData);
+              console.log('PayPal booking saved with ID:', bookingRef.id);
+            } catch (firestoreError) {
+              console.error('Error saving booking to Firestore:', firestoreError);
+              // Record failed transaction but don't fail the payment
+              recordFailedTransaction({
+                message: 'Payment successful but booking save failed',
+                error: firestoreError,
+                orderId: paypalOrderId
+              });
+            }
             
             // Update booking data with the Firestore ID
-            bookingData.id = bookingRef.id;
+            if (bookingRef) {
+              bookingData.id = bookingRef.id;
+            }
             
-            // Send payment notifications
-            console.log('Sending payment notifications...');
-            await sendPaymentNotifications(
-              bookingData.paymentDetails,
-              technician.value.uid || technician.value.id,
-              technician.value.name
-            );
+            // Send notifications (non-blocking)
+            try {
+              await sendPaymentNotifications(
+                bookingData.paymentDetails,
+                technician.value.uid || technician.value.id,
+                technician.value.name
+              );
+            } catch (notificationError) {
+              console.error('Error sending payment notifications:', notificationError);
+            }
 
-            // Send booking request notifications to technician
-            console.log('Sending booking request notifications...');
-            await sendBookingRequestNotification(bookingData);
+            try {
+              await sendBookingRequestNotification(bookingData);
+            } catch (notificationError) {
+              console.error('Error sending booking request notification:', notificationError);
+            }
             
-            // Send booking request email to technician
-            console.log('Sending booking request email...');
-            await sendBookingRequestEmail(bookingData);
+            try {
+              await sendBookingRequestEmail(bookingData);
+            } catch (emailError) {
+              console.error('Error sending booking request email:', emailError);
+            }
             
             // Store booking data and redirect
             localStorage.setItem('bookingData', JSON.stringify(bookingData));
             console.log('PayPal booking completed successfully');
+            
+            // Redirect to confirmation page
             router.push('/bookingconfirmation');
             
           } catch (err) {
             console.error('Error capturing PayPal payment:', err);
+            
+            // Record failed transaction
             recordFailedTransaction(err);
-            alert('Payment failed. Please try again.');
+            
+            // Show user-friendly error message
+            const errorMessage = err.message || 'Payment failed. Please try again.';
+            errorMsg.value = errorMessage;
+            
+            // Re-initialize PayPal button for retry
+            setTimeout(() => {
+              initializePayPalButton();
+            }, 1000);
           }
         },
+
         onError: function(err) {
           console.error('PayPal error:', err);
-          errorMsg.value = t('paypalPaymentFailed');
           
-          // Record failed transaction for admin review
+          // Record failed transaction
           recordFailedTransaction(err);
+          
+          // Show user-friendly error message
+          let errorMessage = 'Payment failed. Please try again.';
+          
+          if (err.message) {
+            if (err.message.includes('popup')) {
+              errorMessage = 'Payment popup was blocked. Please allow popups and try again.';
+            } else if (err.message.includes('network')) {
+              errorMessage = 'Network error. Please check your connection and try again.';
+            } else if (err.message.includes('timeout')) {
+              errorMessage = 'Payment timed out. Please try again.';
+            }
+          }
+          
+          errorMsg.value = errorMessage;
+          
+          // Re-initialize PayPal button for retry
+          setTimeout(() => {
+            initializePayPalButton();
+          }, 2000);
+        },
+
+        onCancel: function(data) {
+          console.log('PayPal payment cancelled by user');
+          errorMsg.value = 'Payment was cancelled. You can try again or choose a different payment method.';
         }
-      }).render('#paypal-button-container');
+      });
+
+      // Render the button with error handling
+      if (paypalButton.isEligible()) {
+        paypalButton.render('#paypal-button-container')
+          .then(() => {
+            console.log('PayPal button rendered successfully');
+          })
+          .catch((error) => {
+            console.error('Error rendering PayPal button:', error);
+            errorMsg.value = 'Payment button failed to load. Please refresh the page and try again.';
+          });
+      } else {
+        console.log('PayPal is not eligible for this transaction');
+        const container = document.getElementById('paypal-button-container');
+        if (container) {
+          container.innerHTML = '<div class="text-center p-4 text-red-500">PayPal is not available for this transaction. Please choose a different payment method.</div>';
+        }
+      }
       
-      console.log('PayPal button rendered successfully');
     } catch (error) {
       console.error('Error initializing PayPal button:', error);
       errorMsg.value = 'Payment system error. Please try again.';
+      
+      const container = document.getElementById('paypal-button-container');
+      if (container) {
+        container.innerHTML = '<div class="text-center p-4 text-red-500">Payment system error. Please refresh the page and try again.</div>';
+      }
     }
-  }, 100);
+  }, 300); // Increased delay for better reliability
 }
 
 function handlePaymentMethodChange() {
   if (form.value.payment === 'PayPal') {
+    // Clear any existing error messages
+    errorMsg.value = '';
+    
     // Add a longer delay to ensure DOM is fully updated
     setTimeout(() => {
       if (paypalLoaded.value) {
         initializePayPalButton();
+      } else {
+        // If PayPal is not loaded yet, try loading it
+        loadPayPalScript();
       }
-    }, 200);
+    }, 300);
   }
+}
+
+// Test PayPal implementation
+async function runPayPalTests() {
+  try {
+    console.log('🧪 Running PayPal tests...');
+    const results = await paypalTester.runAllTests();
+    
+    // Show results in alert for now
+    const summary = results.summary;
+    const message = `PayPal Test Results:\n\n` +
+                   `✅ Passed: ${summary.passed}\n` +
+                   `⚠️ Warnings: ${summary.warnings}\n` +
+                   `❌ Failed: ${summary.failed}\n\n` +
+                   `Check browser console for detailed results.`;
+    
+    alert(message);
+    
+  } catch (error) {
+    console.error('Error running PayPal tests:', error);
+    alert('Error running PayPal tests. Check console for details.');
+  }
+}
+
+// Retry PayPal loading
+function retryPayPalLoading() {
+  console.log('🔄 Retrying PayPal loading...');
+  errorMsg.value = ''; // Clear error message
+  paypalLoaded.value = false; // Reset loading state
+  
+  // Clear the container
+  const container = document.getElementById('paypal-button-container');
+  if (container) {
+    container.innerHTML = '';
+  }
+  
+  // Reload PayPal script
+  setTimeout(() => {
+    loadPayPalScript();
+  }, 100);
 }
 
 async function createBookingWithPayment(paymentDetails) {
@@ -1913,9 +2178,61 @@ function constructAddress(formData) {
 
 .paypal-loading {
   text-align: center;
-  padding: 1rem;
+  padding: 2rem;
   color: #6b7280;
-  font-style: italic;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f4f6;
+  border-top: 4px solid #7c6bb1;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-note {
+  font-size: 0.875rem;
+  color: #9ca3af;
+  margin-top: 0.5rem;
+}
+
+.paypal-error {
+  text-align: center;
+  padding: 2rem;
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.error-icon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.retry-btn {
+  background: #dc2626;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 1rem;
+}
+
+.retry-btn:hover {
+  background: #b91c1c;
 }
 
 /* Confirm Button */
@@ -1935,6 +2252,26 @@ function constructAddress(formData) {
 
 .confirm-btn:hover {
   background: #6b5fa7;
+}
+
+/* Test Button */
+.test-btn {
+  background: #f59e0b;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  align-self: flex-end;
+  margin-top: 1rem;
+  margin-left: 1rem;
+}
+
+.test-btn:hover {
+  background: #d97706;
 }
 
 /* Responsive Design */
