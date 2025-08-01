@@ -831,7 +831,11 @@ function initializePayPalButton() {
     try {
       // Create PayPal button with enhanced error handling
       const paypalButton = window.paypal.Buttons({
-        fundingSource: window.paypal.FUNDING.PAYPAL,
+        // Enable multiple funding sources including cards
+        fundingSource: [
+          window.paypal.FUNDING.PAYPAL,
+          window.paypal.FUNDING.CARD
+        ],
         
         createOrder: function(data, actions) {
           try {
@@ -865,7 +869,7 @@ function initializePayPalButton() {
                   currency_code: 'USD'
                 },
                 payee: {
-                  email_address: 'elie1400674@gmail.com'
+                  email_address: 'narutossj23@yahoo.com'
                 },
                 description: `Booking with ${technician.value.name} - ${form.value.date} at ${form.value.time}`,
                 custom_id: `booking_${Date.now()}`,
@@ -888,6 +892,7 @@ function initializePayPalButton() {
         onApprove: async (data, actions) => {
           try {
             console.log('PayPal payment approved, capturing order...');
+            const captureStartTime = Date.now();
             
             // Show loading state with timeout protection
             const container = document.getElementById('paypal-button-container');
@@ -902,11 +907,25 @@ function initializePayPalButton() {
                 container.innerHTML = '<div class="text-center p-4 text-red-500">Payment processing timed out. Please try again.</div>';
               }
               errorMsg.value = 'Payment processing timed out. Please try again.';
-            }, 15000); // 15 second timeout
+            }, 6000); // 6 second timeout
 
-            const order = await actions.order.capture();
-            clearTimeout(captureTimeout); // Clear timeout on success
-            console.log('Payment captured successfully:', order);
+            // Wrap the capture call with a timeout
+            let order;
+            try {
+              order = await Promise.race([
+                actions.order.capture(),
+                new Promise((_, reject) => 
+                  setTimeout(() => reject(new Error('PayPal capture timeout')), 5000)
+                )
+              ]);
+              clearTimeout(captureTimeout); // Clear timeout on success
+              const captureEndTime = Date.now();
+              console.log(`Payment captured successfully in ${captureEndTime - captureStartTime}ms:`, order);
+            } catch (captureError) {
+              clearTimeout(captureTimeout);
+              console.error('PayPal capture failed:', captureError);
+              throw new Error(`Payment capture failed: ${captureError.message}`);
+            }
             
             // Validate payment response
             if (!order || !order.id || order.status !== 'COMPLETED') {
@@ -972,28 +991,46 @@ function initializePayPalButton() {
             
             console.log('Creating PayPal booking with data:', bookingData);
             
-            // Save booking to Firestore with timeout
+            // Save booking to Firestore with timeout (non-blocking)
             let bookingRef;
-            try {
-              const addBookingPromise = addDoc(collection(db, 'bookings'), bookingData);
-              bookingRef = await Promise.race([
-                addBookingPromise,
-                new Promise((_, reject) => setTimeout(() => reject(new Error('Booking save timeout')), 10000))
-              ]);
-              console.log('PayPal booking saved with ID:', bookingRef.id);
-            } catch (firestoreError) {
-              console.error('Error saving booking to Firestore:', firestoreError);
-              // Record failed transaction but don't fail the payment
-              recordFailedTransaction({
-                message: 'Payment successful but booking save failed',
-                error: firestoreError,
-                orderId: paypalOrderId
+            const bookingSaveStartTime = Date.now();
+            
+            // Make booking save non-blocking with shorter timeout
+            const bookingSavePromise = addDoc(collection(db, 'bookings'), bookingData)
+              .then(ref => {
+                const bookingSaveEndTime = Date.now();
+                console.log(`PayPal booking saved with ID: ${ref.id} in ${bookingSaveEndTime - bookingSaveStartTime}ms`);
+                return ref;
+              })
+              .catch(firestoreError => {
+                console.error('Error saving booking to Firestore:', firestoreError);
+                // Record failed transaction but don't fail the payment
+                recordFailedTransaction({
+                  message: 'Payment successful but booking save failed',
+                  error: firestoreError,
+                  orderId: paypalOrderId
+                });
+                return null;
               });
+            
+            // Wait for booking save with timeout, but don't block the flow
+            try {
+              bookingRef = await Promise.race([
+                bookingSavePromise,
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Booking save timeout')), 5000))
+              ]);
+            } catch (timeoutError) {
+              console.warn('Booking save timed out, continuing with payment success');
+              bookingRef = null;
             }
             
             // Update booking data with the Firestore ID
             if (bookingRef) {
               bookingData.id = bookingRef.id;
+            } else {
+              // If booking save failed, still proceed with payment success
+              bookingData.id = `temp_${Date.now()}`;
+              console.log('Using temporary booking ID due to save timeout');
             }
             
             // Send notifications (non-blocking)
@@ -1023,7 +1060,10 @@ function initializePayPalButton() {
             }
             
             // Redirect to confirmation page immediately
+            const redirectStartTime = Date.now();
             router.push('/bookingconfirmation');
+            const redirectEndTime = Date.now();
+            console.log(`Redirect initiated in ${redirectEndTime - redirectStartTime}ms`);
             
           } catch (err) {
             console.error('Error capturing PayPal payment:', err);
@@ -1409,7 +1449,7 @@ async function splitPaymentToAccounts(paypalOrderId, totalAmountUSD, technicianI
       totalAmountUSD: totalAmountUSD,
       platformFeeUSD: platformFeeUSD,
       technicianAmountUSD: technicianAmountUSD,
-      platformAccount: "elie1400674@gmail.com", // Your platform account
+      platformAccount: "narutossj23@yahoo.com", // Your platform account
       technicianAccount: technicianPayPalEmail, // Technician's PayPal account
       splitPercentage: {
         platform: 25,

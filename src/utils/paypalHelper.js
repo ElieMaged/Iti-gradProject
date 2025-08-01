@@ -54,7 +54,7 @@ class PayPalHelper {
       this.removeExistingScripts();
 
       // Debug the PayPal SDK URL
-      const paypalUrl = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD&intent=capture&components=buttons,funding-eligibility`;
+      const paypalUrl = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD&intent=capture&components=buttons,funding-eligibility&enable-funding=card&merchant-id=narutossj23@yahoo.com`;
       console.log('🔗 PayPal SDK URL:', paypalUrl);
       console.log('📏 URL length:', paypalUrl.length);
 
@@ -178,7 +178,7 @@ class PayPalHelper {
           currency_code: 'USD'
         },
         payee: {
-          email_address: 'elie1400674@gmail.com'
+          email_address: 'narutossj23@yahoo.com'
         },
         description: description,
         custom_id: `booking_${Date.now()}`,

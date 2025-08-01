@@ -120,7 +120,7 @@ For now, you can test the system using:
 
 ## PayPal Account Setup
 
-1. **Platform Account**: `elie1400674@gmail.com` (your account)
+1. **Platform Account**: `narutossj23@yahoo.com` (your account)
 2. **Technician Accounts**: Each technician provides their PayPal email during registration
 
 ## Security Considerations
