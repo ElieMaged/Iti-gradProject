@@ -79,6 +79,7 @@ export default {
   },
   data() {
     return {
+      activeTab: 'pending',
       searchQuery: '',
       bookings: [],
       loading: true,

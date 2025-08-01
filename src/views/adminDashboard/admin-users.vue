@@ -276,6 +276,7 @@ export default {
   font-weight: bold;
   color: #7c6bb0;
   margin-bottom: 0;
+  text-align: left;
   word-wrap: break-word;
 }
 .dark .users-title {
@@ -305,11 +306,12 @@ export default {
   display: flex;
   align-items: center;
   width: 411px;
-  height: 50px;
+  height: 100%;
   padding: 10px;
   gap: 8px;
   flex-shrink: 0;
   margin-bottom: 16px;
+  min-width: none;
   position: relative;
 }
 
@@ -547,10 +549,14 @@ export default {
     padding: 1rem 1.5rem;
   }
 }
-
 @media (min-width: 768px) and (max-width: 1199px) {
+  .admin-dashboard-layout{
+    min-height: auto  ;
+  }
   .search-wrapper {
-    width: 350px;
+    width: 100%;
+    height: 100%;
+    min-width: 100%;
   }
   
   .table-header th,
@@ -581,8 +587,8 @@ export default {
   }
   
   .users-title {
-    font-size: 1.75rem;
-    text-align: center;
+    text-align: left;
+
   }
   
   .subtitle-search-row {
@@ -590,22 +596,16 @@ export default {
     align-items: flex-start;
     gap: 1rem;
   }
-  
-  .users-subtitle {
-    font-size: 1.1rem;
-    text-align: center;
-    width: 100%;
-  }
-  
   .search-wrapper {
     width: 100%;
-    max-width: none;
-    height: 45px;
+    height: 100%;
+    min-width: 100%;
   }
   
   .search-input {
     font-size: 0.95rem;
     padding: 0 16px 0 40px;
+    width: 100%;
   }
   
   .table-wrapper {
@@ -652,78 +652,6 @@ export default {
   }
 }
 
-@media (max-width: 480px) {
-  .users-main {
-    padding: 0.75rem;
-    overflow-y: auto;
-    height: auto;
-    min-height: calc(100vh - 50px);
-  }
-  
-  .users-title {
-    font-size: 1.5rem;
-  }
-  
-  .users-subtitle {
-    font-size: 1rem;
-  }
-  
-  .search-wrapper {
-    height: 40px;
-  }
-  
-  .search-input {
-    font-size: 0.9rem;
-    padding: 0 12px 0 35px;
-  }
-  
-  .search-icon {
-    left: 12px;
-    font-size: 1rem;
-  }
-  
-  .table-wrapper {
-    font-size: 0.75rem;
-  }
-  
-  .table-header th,
-  .table-row td {
-    padding: 0.4rem 0.5rem;
-  }
-  
-  .user-avatar {
-    width: 1.25rem;
-    height: 1.25rem;
-  }
-  
-  .action-btn {
-    padding: 0.2rem;
-    font-size: 0.8rem;
-  }
-  
-  .role-badge {
-    padding: 0.15rem 0.4rem;
-    font-size: 0.65rem;
-  }
-  
-  .loading-spinner {
-    width: 30px;
-    height: 30px;
-  }
-  
-  .error-message {
-    font-size: 0.9rem;
-  }
-  
-  .retry-btn {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.9rem;
-  }
-  
-  .debug-info {
-    font-size: 0.8rem;
-  }
-}
 
 /* Landscape orientation for mobile */
 @media (max-width: 767px) and (orientation: landscape) {
@@ -734,25 +662,13 @@ export default {
     min-height: calc(100vh - 40px);
   }
   
-  .users-title {
-    font-size: 1.25rem;
-    margin-bottom: 0.5rem;
-  }
-  
-  .users-subtitle {
-    font-size: 0.9rem;
-  }
-  
+
   .subtitle-search-row {
     flex-direction: row;
     align-items: center;
     gap: 0.75rem;
   }
-  
-  .search-wrapper {
-    width: 200px;
-    height: 35px;
-  }
+
   
   .table-wrapper {
     font-size: 0.7rem;
@@ -818,4 +734,5 @@ export default {
     break-inside: avoid;
   }
 }
+
 </style>

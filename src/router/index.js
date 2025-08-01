@@ -36,7 +36,6 @@ import TechnicianBookingPending from '../views/TechnicianBookingPending.vue'
 import TechnicianBookingUpcoming from '../views/TechnicianBookingUpcoming.vue'
 import TechnicianBookingCompleted from '../views/TechnicianBookingCompleted.vue'
 import TechnicianReviews from '../views/TechnicianReviews.vue'
-import TexhView from '../views/texhView.vue'
 
 // User booking views
 import UserBookingPending from '../views/UserBookingPending.vue'
@@ -96,7 +95,6 @@ const routes = [
   {path: '/technician-edit-profile', component: TechnicianEditProfile },
   {path: '/technicianavailbility', component: TechnicianAvailability },
   { path: '/technician/:id', name: 'TechnicianProfile', component: () => import('../views/TechnicianProfile.vue') },
-  { path: '/texhView/:id', name: 'TexhView', component: TexhView },
   { path: '/bookingpage', component: BookingPage },
   { path: '/bookingconfirmation', component: BookingConfirmation },
   { path: '/techpayment', component: TechPayment },
