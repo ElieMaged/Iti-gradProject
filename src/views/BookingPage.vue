@@ -902,7 +902,7 @@ function initializePayPalButton() {
                 container.innerHTML = '<div class="text-center p-4 text-red-500">Payment processing timed out. Please try again.</div>';
               }
               errorMsg.value = 'Payment processing timed out. Please try again.';
-            }, 30000); // 30 second timeout
+            }, 15000); // 15 second timeout
 
             const order = await actions.order.capture();
             clearTimeout(captureTimeout); // Clear timeout on success
@@ -928,14 +928,18 @@ function initializePayPalButton() {
               status: order.status
             });
 
-            // Split the payment between accounts
-            const splitSuccess = await splitPaymentToAccounts(paypalOrderId, paymentAmount, technician.value.uid);
-            
-            if (splitSuccess) {
-              console.log('Payment split successfully between accounts');
-            } else {
-              console.warn('Payment split failed, but payment was successful');
-            }
+            // Split the payment between accounts (non-blocking)
+            splitPaymentToAccounts(paypalOrderId, paymentAmount, technician.value.uid)
+              .then(splitSuccess => {
+                if (splitSuccess) {
+                  console.log('Payment split successfully between accounts');
+                } else {
+                  console.warn('Payment split failed, but payment was successful');
+                }
+              })
+              .catch(error => {
+                console.error('Error in payment split:', error);
+              });
             
             // Create booking data with enhanced validation
             const bookingData = {
@@ -968,10 +972,14 @@ function initializePayPalButton() {
             
             console.log('Creating PayPal booking with data:', bookingData);
             
-            // Save booking to Firestore with retry logic
+            // Save booking to Firestore with timeout
             let bookingRef;
             try {
-              bookingRef = await addDoc(collection(db, 'bookings'), bookingData);
+              const addBookingPromise = addDoc(collection(db, 'bookings'), bookingData);
+              bookingRef = await Promise.race([
+                addBookingPromise,
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Booking save timeout')), 10000))
+              ]);
               console.log('PayPal booking saved with ID:', bookingRef.id);
             } catch (firestoreError) {
               console.error('Error saving booking to Firestore:', firestoreError);
@@ -989,41 +997,33 @@ function initializePayPalButton() {
             }
             
             // Send notifications (non-blocking)
-            try {
-              await sendPaymentNotifications(
-                bookingData.paymentDetails,
-                technician.value.uid || technician.value.id,
-                technician.value.name
-              );
-            } catch (notificationError) {
+            sendPaymentNotifications(
+              bookingData.paymentDetails,
+              technician.value.uid || technician.value.id,
+              technician.value.name
+            ).catch(notificationError => {
               console.error('Error sending payment notifications:', notificationError);
-            }
+            });
 
-            try {
-              await sendBookingRequestNotification(bookingData);
-            } catch (notificationError) {
+            sendBookingRequestNotification(bookingData).catch(notificationError => {
               console.error('Error sending booking request notification:', notificationError);
-            }
+            });
             
-            try {
-              await sendBookingRequestEmail(bookingData);
-            } catch (emailError) {
+            sendBookingRequestEmail(bookingData).catch(emailError => {
               console.error('Error sending booking request email:', emailError);
-            }
+            });
             
-            // Store booking data and redirect
+            // Store booking data and redirect immediately
             localStorage.setItem('bookingData', JSON.stringify(bookingData));
             console.log('PayPal booking completed successfully');
             
-            // Clear any loading states
+            // Clear any loading states and show success immediately
             if (container) {
               container.innerHTML = '<div class="text-center p-4 text-green-500">Payment successful! Redirecting...</div>';
             }
             
-            // Redirect to confirmation page with a small delay
-            setTimeout(() => {
-              router.push('/bookingconfirmation');
-            }, 1000);
+            // Redirect to confirmation page immediately
+            router.push('/bookingconfirmation');
             
           } catch (err) {
             console.error('Error capturing PayPal payment:', err);
@@ -1371,10 +1371,15 @@ async function splitPaymentToAccounts(paypalOrderId, totalAmountUSD, technicianI
   try {
     console.log('Splitting payment:', totalAmountUSD, 'USD between accounts');
     
-    // Get technician's PayPal email from their profile
+    // Get technician's PayPal email from their profile (with timeout)
     let technicianPayPalEmail = '';
     try {
-      const technicianDoc = await getDoc(doc(db, 'technicians', technicianId));
+      const technicianDocPromise = getDoc(doc(db, 'technicians', technicianId));
+      const technicianDoc = await Promise.race([
+        technicianDocPromise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+      ]);
+      
       if (technicianDoc.exists()) {
         const technicianData = technicianDoc.data();
         technicianPayPalEmail = technicianData.paypalEmail || technicianData.email || '';
@@ -1382,6 +1387,8 @@ async function splitPaymentToAccounts(paypalOrderId, totalAmountUSD, technicianI
       }
     } catch (error) {
       console.error('Error fetching technician PayPal email:', error);
+      // Use a default email if we can't fetch the technician's email
+      technicianPayPalEmail = 'technician@default.com';
     }
     
     if (!technicianPayPalEmail) {
@@ -1413,8 +1420,12 @@ async function splitPaymentToAccounts(paypalOrderId, totalAmountUSD, technicianI
       transactionType: 'payment_split'
     };
     
-    // Add to paymentSplits collection
-    await addDoc(collection(db, 'paymentSplits'), splitRecord);
+    // Add to paymentSplits collection with timeout
+    const addDocPromise = addDoc(collection(db, 'paymentSplits'), splitRecord);
+    await Promise.race([
+      addDocPromise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+    ]);
     
     console.log('Payment split recorded successfully:', splitRecord);
     return true;
