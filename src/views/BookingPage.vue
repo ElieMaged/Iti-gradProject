@@ -889,13 +889,23 @@ function initializePayPalButton() {
           try {
             console.log('PayPal payment approved, capturing order...');
             
-            // Show loading state
+            // Show loading state with timeout protection
             const container = document.getElementById('paypal-button-container');
             if (container) {
               container.innerHTML = '<div class="text-center p-4"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div><p class="mt-2">Processing payment...</p></div>';
             }
 
+            // Set a timeout to prevent infinite loading
+            const captureTimeout = setTimeout(() => {
+              console.error('Payment capture timeout');
+              if (container) {
+                container.innerHTML = '<div class="text-center p-4 text-red-500">Payment processing timed out. Please try again.</div>';
+              }
+              errorMsg.value = 'Payment processing timed out. Please try again.';
+            }, 30000); // 30 second timeout
+
             const order = await actions.order.capture();
+            clearTimeout(captureTimeout); // Clear timeout on success
             console.log('Payment captured successfully:', order);
             
             // Validate payment response
@@ -1005,8 +1015,15 @@ function initializePayPalButton() {
             localStorage.setItem('bookingData', JSON.stringify(bookingData));
             console.log('PayPal booking completed successfully');
             
-            // Redirect to confirmation page
-            router.push('/bookingconfirmation');
+            // Clear any loading states
+            if (container) {
+              container.innerHTML = '<div class="text-center p-4 text-green-500">Payment successful! Redirecting...</div>';
+            }
+            
+            // Redirect to confirmation page with a small delay
+            setTimeout(() => {
+              router.push('/bookingconfirmation');
+            }, 1000);
             
           } catch (err) {
             console.error('Error capturing PayPal payment:', err);

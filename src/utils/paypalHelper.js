@@ -31,17 +31,23 @@ class PayPalHelper {
     try {
       const clientId = import.meta.env.VITE_PAYPAL_CLIENT_ID;
       
-      // Debug logging
-      console.log('PayPal Client ID check:');
+      // Enhanced debug logging
+      console.log('🔍 PayPal Client ID Debug:');
       console.log('- Client ID exists:', !!clientId);
       console.log('- Client ID length:', clientId?.length);
       console.log('- Client ID starts with "YOUR":', clientId?.startsWith('YOUR'));
       console.log('- Client ID is empty string:', clientId === '');
       console.log('- Client ID is placeholder:', clientId === 'YOUR_PAYPAL_CLIENT_ID');
+      console.log('- Client ID format check:', this.validateClientIdFormat(clientId));
       
       // Validate client ID
       if (!clientId || clientId === 'YOUR_PAYPAL_CLIENT_ID' || clientId.trim() === '') {
         throw new Error('PayPal Client ID not configured');
+      }
+
+      // Additional validation for Client ID format
+      if (!this.validateClientIdFormat(clientId)) {
+        throw new Error('Invalid PayPal Client ID format');
       }
 
       // Remove existing scripts to prevent conflicts
@@ -49,8 +55,8 @@ class PayPalHelper {
 
       // Debug the PayPal SDK URL
       const paypalUrl = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD&intent=capture&components=buttons,funding-eligibility`;
-      console.log('PayPal SDK URL:', paypalUrl);
-      console.log('URL length:', paypalUrl.length);
+      console.log('🔗 PayPal SDK URL:', paypalUrl);
+      console.log('📏 URL length:', paypalUrl.length);
 
       return new Promise((resolve, reject) => {
         const script = document.createElement('script');
@@ -71,7 +77,7 @@ class PayPalHelper {
           if (window.paypal) {
             this.isLoaded = true;
             this.isInitializing = false;
-            console.log('PayPal SDK loaded successfully');
+            console.log('✅ PayPal SDK loaded successfully');
             resolve(true);
           } else {
             this.isInitializing = false;
@@ -82,6 +88,7 @@ class PayPalHelper {
         script.onerror = (error) => {
           clearTimeout(this.loadingTimeout);
           this.isInitializing = false;
+          console.error('❌ PayPal SDK loading error:', error);
           reject(new Error('Failed to load PayPal SDK'));
         };
 
@@ -92,6 +99,21 @@ class PayPalHelper {
       this.isInitializing = false;
       throw error;
     }
+  }
+
+  // Validate PayPal Client ID format
+  validateClientIdFormat(clientId) {
+    if (!clientId) return false;
+    
+    // PayPal Client IDs are typically long strings with specific patterns
+    // They should not be placeholder values and should be at least 20 characters
+    if (clientId.length < 20) return false;
+    if (clientId.includes('YOUR_') || clientId.includes('PLACEHOLDER')) return false;
+    
+    // Check for common PayPal Client ID patterns
+    // They usually contain alphanumeric characters and hyphens
+    const validPattern = /^[A-Za-z0-9_-]+$/;
+    return validPattern.test(clientId);
   }
 
   // Remove existing PayPal scripts to prevent conflicts
@@ -126,14 +148,14 @@ class PayPalHelper {
 
       if (button.isEligible()) {
         await button.render(`#${containerId}`);
-        console.log('PayPal button rendered successfully');
+        console.log('✅ PayPal button rendered successfully');
         return true;
       } else {
         container.innerHTML = '<div class="text-center p-4 text-red-500">PayPal is not available for this transaction. Please choose a different payment method.</div>';
         return false;
       }
     } catch (error) {
-      console.error('Error rendering PayPal button:', error);
+      console.error('❌ Error rendering PayPal button:', error);
       container.innerHTML = '<div class="text-center p-4 text-red-500">Payment system error. Please refresh the page and try again.</div>';
       throw error;
     }
