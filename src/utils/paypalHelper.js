@@ -31,6 +31,14 @@ class PayPalHelper {
     try {
       const clientId = import.meta.env.VITE_PAYPAL_CLIENT_ID;
       
+      // Debug logging
+      console.log('PayPal Client ID check:');
+      console.log('- Client ID exists:', !!clientId);
+      console.log('- Client ID length:', clientId?.length);
+      console.log('- Client ID starts with "YOUR":', clientId?.startsWith('YOUR'));
+      console.log('- Client ID is empty string:', clientId === '');
+      console.log('- Client ID is placeholder:', clientId === 'YOUR_PAYPAL_CLIENT_ID');
+      
       // Validate client ID
       if (!clientId || clientId === 'YOUR_PAYPAL_CLIENT_ID' || clientId.trim() === '') {
         throw new Error('PayPal Client ID not configured');
