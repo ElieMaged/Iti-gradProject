@@ -4,7 +4,7 @@
             :activeMenu="activeMenu"
             @navigate="handleSidebarNavigate"
         />
-    <div class="payment-content">
+    <div class="payment-content p-4 mr-20">
       <h1 class="payment-title">{{ $t('payment') }}</h1>  
       <div class="payment-balance-card">
         <div class="balance-labels">
@@ -85,7 +85,7 @@ export default {
   background: var(--primary-bg);
 }
 .payment-title {
-  color: #625397;
+  color: var(--primary-color);
   font-size: 2rem;
   font-weight: 700;
   margin-bottom: 2rem;
@@ -93,7 +93,7 @@ export default {
   margin-left: 48px;
 }
 .dark .payment-title {
-  color: var(--primary-text);
+  color: var(--primary-color);
 }
 .payment-balance-card {
   background: #fff;
@@ -306,10 +306,32 @@ export default {
 .dark .withdraw-btn:hover {
   background: var(--primary-text) !important;
 }
+
+
+@media (max-width: 1024px) {
+  .payment-content {
+    padding: 1.5rem 0 0 0;
+  }
+
+  
+  .payment-balance-card,
+  .payment-method-card,
+  .withdraw-card {
+    padding: 1.5rem;
+    margin: 0 0 1.5rem 0;
+  }
+  
+  .withdraw-fields {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
+
 @media (max-width: 900px) {
   .main-content {
     flex-direction: column;
   }
+  
   .sidebar {
     width: 100% !important;
     max-height: 220px;
@@ -318,9 +340,11 @@ export default {
     padding: 1rem 0 !important;
     margin-bottom: 1rem;
   }
+  
   .payment-content {
     padding: 16px 0 0 0;
   }
+  
   .payment-balance-card,
   .payment-method-card,
   .withdraw-card {
@@ -328,76 +352,214 @@ export default {
     max-width: 100%;
     padding: 24px 16px 18px 16px;
   }
+  
   .payment-title {
     margin-left: 0;
+    text-align: center;
+  }
+  
+  .balance-labels {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+  
+  .balance-amounts {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
   }
 }
+
 @media (max-width: 768px) {
   .payment-content {
     padding: 1rem 0 0 0;
   }
+  
   .payment-title {
-    font-size: 1.2rem;
     margin-left: 0;
+    font-size: 1.5rem;
     margin-bottom: 1rem;
+    margin-top: 1rem;
+    text-align: left;
   }
+  
   .payment-balance-card,
   .payment-method-card,
   .withdraw-card {
     padding: 12px 6px 10px 6px;
     border-radius: 12px;
   }
+  
   .withdraw-btn {
     padding: 8px 18px;
     font-size: 1rem;
+    width: 100%;
   }
+  
   .edit-btn {
     padding: 4px 12px;
     font-size: 0.95rem;
   }
+  
   .current-balance-label,
   .pending-label {
     font-size: 1.1rem;
     padding-right: 8px;
   }
+  
   .current-balance-amount,
   .pending-amount {
     font-size: 1.1rem;
     padding-right: 8px;
   }
+  
+  .payment-method-header {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
 }
+
 @media (max-width: 600px) {
   .payment-content {
     padding: 8px 0 0 0;
   }
+  
   .payment-title {
     font-size: 1rem;
     margin-left: 0;
+    margin-top: 1rem;
     margin-bottom: 0.5rem;
   }
+  
   .payment-balance-card,
   .payment-method-card,
   .withdraw-card {
     padding: 8px 2px 6px 2px;
     border-radius: 10px;
   }
+  
   .withdraw-btn {
     padding: 6px 12px;
     font-size: 0.95rem;
   }
+  
   .edit-btn {
     padding: 3px 8px;
     font-size: 0.9rem;
   }
+  
   .current-balance-label,
   .pending-label {
     font-size: 1rem;
     padding-right: 4px;
   }
+  
   .current-balance-amount,
   .pending-amount {
     font-size: 1rem;
     padding-right: 4px;
+  }
+}
+
+@media (max-width: 480px) {
+  .payment-content {
+    padding: 0.5rem 0 0 0;
+  }
+  
+  .payment-title {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .payment-balance-card,
+  .payment-method-card,
+  .withdraw-card {
+    padding: 6px 1px 4px 1px;
+    border-radius: 8px;
+  }
+  
+  .withdraw-btn {
+    padding: 4px 8px;
+    font-size: 0.85rem;
+  }
+  
+  .edit-btn {
+    padding: 2px 6px;
+    font-size: 0.8rem;
+  }
+  
+  .current-balance-label,
+  .pending-label {
+    font-size: 0.9rem;
+    padding-right: 2px;
+  }
+  
+  .current-balance-amount,
+  .pending-amount {
+    font-size: 0.9rem;
+    padding-right: 2px;
+  }
+  
+  .payment-method-title,
+  .withdraw-title {
+    font-size: 1rem;
+  }
+  
+  .payment-method-type,
+  .payment-method-email {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .payment-content {
+    padding: 0.25rem 0 0 0;
+  }
+  
+  .payment-title {
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .payment-balance-card,
+  .payment-method-card,
+  .withdraw-card {
+    padding: 4px 0.5px 2px 0.5px;
+    border-radius: 6px;
+  }
+  
+  .withdraw-btn {
+    padding: 3px 6px;
+    font-size: 0.8rem;
+  }
+  
+  .edit-btn {
+    padding: 1px 4px;
+    font-size: 0.75rem;
+  }
+  
+  .current-balance-label,
+  .pending-label {
+    font-size: 0.8rem;
+    padding-right: 1px;
+  }
+  
+  .current-balance-amount,
+  .pending-amount {
+    font-size: 0.8rem;
+    padding-right: 1px;
+  }
+  
+  .payment-method-title,
+  .withdraw-title {
+    font-size: 0.9rem;
+  }
+  
+  .payment-method-type,
+  .payment-method-email {
+    font-size: 0.8rem;
   }
 }
 .payment-balance-card,

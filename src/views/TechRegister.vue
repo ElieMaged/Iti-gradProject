@@ -336,7 +336,9 @@
           <div class="checkbox-group">
             <input v-model="formData.agreeTerms" type="checkbox" class="form-checkbox" id="agreeTerms" required />
             <label class="checkbox-label" for="agreeTerms">
-              {{ $t('agreeTermsPrivacyPolicy') }}
+              I agree to the 
+              <span class="terms-link" @click="openTermsModal">Terms & Conditions</span> 
+              and Privacy policy
             </label>
           </div>
         </div>
@@ -355,6 +357,124 @@
         <p class="login-link">{{ $t('haveAccount') }} <a href="/userlogin">{{ $t('signIn') }}</a></p>
       </div>
     </form>
+
+    <!-- Terms and Conditions Modal -->
+    <div v-if="showTermsModal" class="modal-overlay" @click="closeTermsModal">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h2 class="modal-title">Terms and Conditions</h2>
+          <button class="modal-close" @click="closeTermsModal">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="terms-content">
+            <h3>1. General Terms</h3>
+            
+            <h4>1.1 Definitions</h4>
+            <ul>
+              <li><strong>Platform:</strong> Refers to the Bolt Fix website.</li>
+              <li><strong>User:</strong> A person who books maintenance services through the platform.</li>
+              <li><strong>Technician:</strong> A service provider registered on the platform.</li>
+              <li><strong>Booking:</strong> A confirmed request for a maintenance service.</li>
+            </ul>
+
+            <h4>1.2 Account Creation</h4>
+            <ul>
+              <li>All users and technicians must register with accurate and complete information.</li>
+              <li>Each individual may only have one account.</li>
+              <li>By registering, you agree to these terms and all platform policies.</li>
+            </ul>
+
+            <h4>1.3 Privacy</h4>
+            <ul>
+              <li>All personal data is securely stored and protected.</li>
+              <li>Data will not be shared with third parties without user consent.</li>
+            </ul>
+
+            <h4>1.4 Prohibited Conduct</h4>
+            <ul>
+              <li>Providing false information or impersonating others is not allowed.</li>
+              <li>Completing services or payments outside the platform is strictly prohibited.</li>
+              <li>Abusive or inappropriate behavior may lead to account suspension or termination.</li>
+            </ul>
+
+            <h4>1.5 Account Termination</h4>
+            <ul>
+              <li>The platform reserves the right to suspend or delete any account that violates the terms.</li>
+            </ul>
+
+            <h3>2. User Terms</h3>
+
+            <h4>2.1 Booking a Service</h4>
+            <ul>
+              <li>Users can select technicians based on location, availability, and service type.</li>
+              <li>All bookings must be confirmed and completed through the platform.</li>
+            </ul>
+
+            <h4>2.2 Payment</h4>
+            <ul>
+              <li>Users can pay in cash after the service is delivered or online via PayPal before the service.</li>
+              <li>A booking is considered confirmed only after payment or explicit confirmation.</li>
+            </ul>
+
+            <h4>2.3 Cancellation and Refunds</h4>
+            <ul>
+              <li>Users may cancel bookings within a specific time frame before the scheduled appointment.</li>
+              <li>No refunds are available after the service has been completed.</li>
+              <li>Complaints can be submitted through the platform for review.</li>
+            </ul>
+
+            <h4>2.4 Ratings and Feedback</h4>
+            <ul>
+              <li>Users may rate and review technicians after each service.</li>
+              <li>Feedback contributes to service quality monitoring and technician performance.</li>
+            </ul>
+
+            <h3>3. Technician Terms</h3>
+
+            <h4>3.1 Commission Policy</h4>
+            <ul>
+              <li>The platform charges a 25% commission on each completed booking.</li>
+              <li>The remaining 75% is transferred to the technician.</li>
+            </ul>
+
+            <h4>3.2 Payment Methods</h4>
+            <ul>
+              <li>Technicians must add a valid PayPal account to receive online payments.</li>
+              <li>If the user pays in cash, the technician collects the full amount directly, and the platform will deduct its 25% commission later from future settlements.</li>
+            </ul>
+
+            <h4>3.3 Earnings Transfer</h4>
+            <ul>
+              <li>For PayPal payments, the technician's 75% share will be transferred within 24–48 hours after the service is confirmed.</li>
+              <li>For cash payments, the platform will deduct the commission later from upcoming earnings.</li>
+            </ul>
+
+            <h4>3.4 Service Expectations</h4>
+            <ul>
+              <li>Technicians are expected to arrive on time and complete the job professionally.</li>
+              <li>Multiple negative reviews may result in account review or suspension.</li>
+            </ul>
+
+            <h4>3.5 Responsibility</h4>
+            <ul>
+              <li>Technicians are responsible for the quality and completeness of their work.</li>
+              <li>Any misconduct or violation may result in penalties or account removal.</li>
+            </ul>
+
+            <p class="terms-footer">
+              By using the Bolt Fix platform, all users and technicians agree to the terms and conditions listed above.
+            </p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="modal-btn" @click="closeTermsModal">I Understand</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -379,6 +499,7 @@ const profilePreviewUrl = ref(null);
 const loading = ref(false);
 const error = ref('');
 const success = ref('');
+const showTermsModal = ref(false);
 
 const formData = reactive({
   fullName: '',
@@ -717,6 +838,15 @@ async function sendWelcomeEmail(email, fullName) {
     return false;
   }
 }
+
+// Terms and Conditions Modal Functions
+const openTermsModal = () => {
+  showTermsModal.value = true;
+};
+
+const closeTermsModal = () => {
+  showTermsModal.value = false;
+};
 
 // TEMPORARY ADMIN UTILITY: Promote a user by email to technician
 async function promoteUserToTechnician(email) {
@@ -1206,6 +1336,201 @@ body {
   color: #9ca3af;
 }
 
+.terms-link {
+  color: #625397;
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.terms-link:hover {
+  color: #7c3aed;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    max-width: 800px;
+    width: 100%;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.dark .modal-content {
+  background: #1f2937;
+  color: #f9fafb;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f9fafb;
+}
+
+.dark .modal-header {
+  background: #374151;
+  border-bottom-color: #4b5563;
+}
+
+.modal-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+}
+
+.dark .modal-title {
+  color: #f9fafb;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 8px;
+    color: #6b7280;
+    transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.dark .modal-close:hover {
+  background: #4b5563;
+  color: #f9fafb;
+}
+
+.modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+}
+
+.terms-content {
+    line-height: 1.6;
+}
+
+.terms-content h3 {
+    color: #625397;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 2rem 0 1rem 0;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 0.5rem;
+}
+
+.dark .terms-content h3 {
+  color: var(--primary-color);
+  border-bottom-color: #4b5563;
+}
+
+.terms-content h4 {
+    color: #374151;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 1.5rem 0 0.75rem 0;
+}
+
+.dark .terms-content h4 {
+  color: #d1d5db;
+}
+
+.terms-content ul {
+    margin: 0.75rem 0;
+    padding-left: 1.5rem;
+}
+
+.terms-content li {
+    margin-bottom: 0.5rem;
+    color: #4b5563;
+}
+
+.dark .terms-content li {
+  color: #9ca3af;
+}
+
+.terms-content strong {
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.dark .terms-content strong {
+  color: #f9fafb;
+}
+
+.terms-footer {
+    margin-top: 2rem;
+    padding: 1rem;
+    background: #f3f4f6;
+    border-radius: 8px;
+    font-weight: 600;
+    color: #374151;
+    text-align: center;
+}
+
+.dark .terms-footer {
+  background: #374151;
+  color: #f9fafb;
+}
+
+.modal-footer {
+    padding: 1.5rem 2rem;
+    border-top: 1px solid #e5e7eb;
+    background: #f9fafb;
+    text-align: center;
+}
+
+.dark .modal-footer {
+  background: #374151;
+  border-top-color: #4b5563;
+}
+
+.modal-btn {
+    background: #625397;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dark .modal-btn {
+  background: var(--primary-color);
+}
+
+.modal-btn:hover {
+    background: #7c3aed;
+    transform: translateY(-1px);
+}
+
 .form-footer {
     text-align: center;
 }
@@ -1332,6 +1657,17 @@ body {
         padding: 0.875rem 1.5rem;
         font-size: 0.875rem;
     }
+
+    .modal-content {
+        margin: 1rem;
+        max-height: 95vh;
+    }
+
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: 1rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1349,6 +1685,10 @@ body {
     
     .form-section {
         padding: 0.75rem;
+    }
+
+    .modal-content {
+        margin: 0.5rem;
     }
 }
 </style> 

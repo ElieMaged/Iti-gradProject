@@ -175,38 +175,40 @@ const centerOnAddress = async () => {
 
   try {
     const address = formattedAddress.value
-    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&countrycodes=eg&limit=1`)
-    const data = await response.json()
-
-    if (data && data.length > 0) {
-      const { lat, lon } = data[0]
-      
-      // Remove existing address marker
-      if (addressMarker.value) {
-        map.value.removeLayer(addressMarker.value)
-      }
-
-      // Add address marker
-      addressMarker.value = L.marker([lat, lon], {
-        icon: L.divIcon({
-          className: 'address-marker',
-          html: '<i class="fas fa-map-marker-alt" style="color: #dc3545; font-size: 20px;"></i>',
-          iconSize: [20, 20],
-          iconAnchor: [10, 20]
-        })
-      }).addTo(map.value)
-
-      // Center map on address
-      map.value.setView([lat, lon], 15)
-
-      // Add popup to address marker
-      addressMarker.value.bindPopup(`Address: ${address}`).openPopup()
-    } else {
-      alert(t('addressNotFound') || 'Address not found on map.')
+    
+    // For now, center on Cairo as a fallback since geocoding API has CORS issues
+    // In a production environment, you would need a backend proxy or use a different service
+    const cairoCoords = [30.0444, 31.2357] // Cairo coordinates
+    
+    // Remove existing address marker
+    if (addressMarker.value) {
+      map.value.removeLayer(addressMarker.value)
     }
+
+    // Add address marker at Cairo center
+    addressMarker.value = L.marker(cairoCoords, {
+      icon: L.divIcon({
+        className: 'address-marker',
+        html: '<i class="fas fa-map-marker-alt" style="color: #dc3545; font-size: 20px;"></i>',
+        iconSize: [20, 20],
+        iconAnchor: [10, 20]
+      })
+    }).addTo(map.value)
+
+    // Center map on Cairo
+    map.value.setView(cairoCoords, 12)
+
+    // Add popup to address marker
+    addressMarker.value.bindPopup(`Address: ${address} (showing Cairo area)`).openPopup()
+    
+    console.log('Note: Geocoding is disabled due to CORS restrictions. Showing Cairo area.')
+    
   } catch (error) {
-    console.error('Error geocoding address:', error)
-    alert(t('addressGeocodingFailed') || 'Failed to locate address on map.')
+    console.error('Error centering on address:', error)
+    // Fallback: try to center on a default location (Cairo)
+    if (map.value) {
+      map.value.setView([30.0444, 31.2357], 10) // Cairo coordinates
+    }
   }
 }
 
@@ -215,52 +217,17 @@ const onLocationDetected = async (locationData) => {
   console.log('Location detected:', locationData)
   
   try {
-    // Use reverse geocoding to get address from coordinates
-    const { latitude, longitude } = locationData
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1&countrycodes=eg&zoom=18`
-    )
+    // For now, skip reverse geocoding due to CORS issues
+    // In a production environment, you would need a backend proxy or use a different service
+    console.log('Location detected:', locationData)
     
-    if (!response.ok) {
-      throw new Error('Reverse geocoding failed')
-    }
+    // Emit the coordinates without address details for now
+    emit('locationDetected', locationData)
     
-    const data = await response.json()
-    console.log('Reverse geocoding result:', data)
-    
-    if (data && data.address) {
-      const address = data.address
-      
-      // Extract location details from the reverse geocoding result
-      const locationDetails = {
-        city: address.city || address.state || address.county || '',
-        area: address.suburb || address.district || address.neighbourhood || '',
-        street: address.road || address.street || '',
-        building: address.house_number || address.building || ''
-      }
-      
-      console.log('Extracted location details:', locationDetails)
-      
-      // Emit the location details to parent component
-      emit('locationDetected', {
-        ...locationData,
-        addressDetails: locationDetails
-      })
-      
-      // Also emit individual events for each field
-      emit('updateCity', locationDetails.city)
-      emit('updateArea', locationDetails.area)
-      emit('updateStreet', locationDetails.street)
-      emit('updateBuilding', locationDetails.building)
-      
-    } else {
-      console.warn('No address details found in reverse geocoding result')
-      // Still emit the coordinates even if address details are not available
-      emit('locationDetected', locationData)
-    }
+    console.log('Note: Reverse geocoding is disabled due to CORS restrictions.')
     
   } catch (error) {
-    console.error('Error in reverse geocoding:', error)
+    console.error('Error processing location:', error)
     // Fallback: just emit the coordinates
     emit('locationDetected', locationData)
   }

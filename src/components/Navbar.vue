@@ -155,6 +155,20 @@ export default {
     });
 
     const isDark = ref(false);
+    const isScrolled = ref(false);
+
+    // Handle scroll event to make navbar fixed
+    function handleScroll() {
+      const scrolled = window.scrollY > 50;
+      isScrolled.value = scrolled;
+      
+      // Add/remove body class to prevent content jump
+      if (scrolled) {
+        document.body.classList.add('navbar-fixed');
+      } else {
+        document.body.classList.remove('navbar-fixed');
+      }
+    }
 
     function toggleDarkMode() {
       try {
@@ -187,6 +201,14 @@ export default {
         console.error('Error initializing dark mode:', error);
         isDark.value = false;
       }
+      
+      // Add scroll event listener
+      window.addEventListener('scroll', handleScroll);
+    });
+
+    onBeforeUnmount(() => {
+      // Remove scroll event listener
+      window.removeEventListener('scroll', handleScroll);
     });
 
     const iconClass = computed(() => isDark.value ? 'fas fa-moon' : 'fas fa-sun');
@@ -196,6 +218,7 @@ export default {
       loading,
       locale,
       isDark,
+      isScrolled,
       logout,
       handleProfileClick,
       getRoute,
@@ -255,7 +278,7 @@ export default {
     </div>
   </div>
   <!-- Navbar -->
-  <nav class="mx-20 navbar py-3 flex justify-between items-center relative">
+  <nav :class="['mx-20 navbar py-3 flex justify-between items-center relative transition-all duration-300', isScrolled ? 'fixed-navbar' : '']">
     <!-- Logo -->
     <div class="flex items-center gap-2 text-2xl font-bold">
       <img src="/logo/ace04d3b268cf810c91d002fdf7454a6ef778f27.png" alt="Logo" class="h-8" id="logo" />
@@ -331,77 +354,122 @@ export default {
       </template>
     </div>
     <!-- Mobile Menu & Overlay -->
-    <transition name="fade">
-      <div v-if="mobileMenuOpen" class="fixed inset-0 z-40" @mouseenter="!isMobile && showDropdown"
-        @mouseleave="!isMobile && hideDropdown">
-        <div class="absolute inset-0  bg-opacity-40" @click="closeMobileMenu"></div>
-        <div class="fixed top-0 left-0 w-4/5 max-w-xs h-full  shadow-lg z-50 p-4 overflow-y-auto flex flex-col">
-          <div class="flex justify-between items-center mb-4">
-            <img src="/logo/ace04d3b268cf810c91d002fdf7454a6ef778f27.png" alt="Logo" class="h-8" />
-            <button class="text-2xl" @click="closeMobileMenu" aria-label="Close menu">
-              <i class="fa fa-times navbar-icon"></i>
+    <transition name="slide">
+      <div v-if="mobileMenuOpen" class="mobile-menu-overlay" @click="closeMobileMenu">
+        <div class="mobile-menu-panel" @click.stop>
+          <!-- Header with logo and close button -->
+          <div class="mobile-menu-header">
+            <img src="/logo/ace04d3b268cf810c91d002fdf7454a6ef778f27.png" alt="Logo" class="mobile-logo" />
+            <button class="mobile-close-btn" @click="closeMobileMenu" aria-label="Close menu">
+              <i class="fa fa-times"></i>
             </button>
           </div>
-          <button class="w-full text-left font-bold py-2 flex items-center justify-between"
-            @click="navAccordionOpen = !navAccordionOpen">
-            <span>{{ $t('Menu') }}</span>
-            <i :class="(navAccordionOpen ? 'fa fa-chevron-up' : 'fa fa-chevron-down') + ' navbar-icon'"></i>
-          </button>
-          <div v-if="navAccordionOpen" class="pl-2 pb-2">
-            <router-link :to="locale === 'ar' ? getRoute('') : '/'" class="block py-2 no-underline"
-              @click="closeMobileMenu">{{ $t('navHome') }}</router-link>
-            <router-link :to="locale === 'ar' ? getRoute('about') : '/about'" class="block py-2 no-underline"
-              @click="closeMobileMenu">{{ $t('navAbout') }}</router-link>
-            <router-link :to="locale === 'ar' ? getRoute('contact') : '/contact'" class="block py-2 no-underline"
-              @click="closeMobileMenu">{{ $t('navContact') }}</router-link>
-            <!-- Mobile Services Dropdown -->
-            <div class="relative group" @mouseenter="!isMobile && showDropdown" @mouseleave="!isMobile && hideDropdown">
-              <span class="no-underline services-color cursor-pointer flex items-center" @click="toggleDropdownMobile">
-                {{ $t('navServices') }}
-                <i class="fa fa-chevron-down services-dropdown-arrow ml-1 navbar-icon"></i>
-              </span>
-              <div
-                :class="['services-dropdown', isMobile ? 'static mt-2 relative w-full' : 'absolute left-0 mt-2 shadow-lg rounded z-50']"
-                v-show="servicesDropdownOpen" @mouseenter="!isMobile && showDropdown"> <router-link to="/allservices">{{ $t('allServices') }}</router-link>
-                <router-link to="/plumbing">{{ $t('navPlumbing') }}</router-link>
-                <router-link to="/aircondition">{{ $t('navAirConditioner') }}</router-link>
-                <router-link to="/electricity">{{ $t('navElectricity') }}</router-link>
-                <router-link to="/wallfinishing">{{ $t('navWallFinishing') }}</router-link>
-                <router-link to="/carpentry">{{ $t('navCarpentry') }}</router-link>
-                <router-link to="/elecTechnicians">{{ $t('navElectricityTechnicians') }}</router-link>
+          
+          <!-- Menu section -->
+          <div class="mobile-menu-section">
+            <button class="mobile-menu-toggle" @click="navAccordionOpen = !navAccordionOpen">
+              <span>{{ $t('Menu') }}</span>
+              <i :class="(navAccordionOpen ? 'fa fa-chevron-up' : 'fa fa-chevron-down') + ' toggle-icon'"></i>
+            </button>
+            
+            <div v-if="navAccordionOpen" class="mobile-menu-links">
+              <router-link :to="locale === 'ar' ? getRoute('') : '/'" class="mobile-menu-link"
+                @click="closeMobileMenu">
+                <i class="fa fa-home mobile-link-icon"></i>
+                {{ $t('navHome') }}
+              </router-link>
+              <router-link :to="locale === 'ar' ? getRoute('about') : '/about'" class="mobile-menu-link"
+                @click="closeMobileMenu">
+                <i class="fa fa-info-circle mobile-link-icon"></i>
+                {{ $t('navAbout') }}
+              </router-link>
+              <router-link :to="locale === 'ar' ? getRoute('contact') : '/contact'" class="mobile-menu-link"
+                @click="closeMobileMenu">
+                <i class="fa fa-envelope mobile-link-icon"></i>
+                {{ $t('navContact') }}
+              </router-link>
+              
+              <!-- Mobile Services Dropdown -->
+              <div class="mobile-services-section">
+                <button class="mobile-menu-link mobile-services-toggle" @click="toggleDropdownMobile">
+                  <i class="fa fa-tools mobile-link-icon"></i>
+                  {{ $t('navServices') }}
+                  <i :class="(servicesDropdownOpen ? 'fa fa-chevron-up' : 'fa fa-chevron-down') + ' toggle-icon'"></i>
+                </button>
+                <div v-show="servicesDropdownOpen" class="mobile-services-dropdown">
+                  <router-link to="/allservices" class="mobile-submenu-link" @click="closeMobileMenu">
+                    <i class="fa fa-list mobile-link-icon"></i>
+                    {{ $t('allServices') }}
+                  </router-link>
+                  <router-link to="/plumbing" class="mobile-submenu-link" @click="closeMobileMenu">
+                    <i class="fa fa-wrench mobile-link-icon"></i>
+                    {{ $t('navPlumbing') }}
+                  </router-link>
+                  <router-link to="/aircondition" class="mobile-submenu-link" @click="closeMobileMenu">
+                    <i class="fa fa-snowflake mobile-link-icon"></i>
+                    {{ $t('navAirConditioner') }}
+                  </router-link>
+                  <router-link to="/electricity" class="mobile-submenu-link" @click="closeMobileMenu">
+                    <i class="fa fa-bolt mobile-link-icon"></i>
+                    {{ $t('navElectricity') }}
+                  </router-link>
+                  <router-link to="/wallfinishing" class="mobile-submenu-link" @click="closeMobileMenu">
+                    <i class="fa fa-paint-brush mobile-link-icon"></i>
+                    {{ $t('navWallFinishing') }}
+                  </router-link>
+                  <router-link to="/carpentry" class="mobile-submenu-link" @click="closeMobileMenu">
+                    <i class="fa fa-hammer mobile-link-icon"></i>
+                    {{ $t('navCarpentry') }}
+                  </router-link>
+                  <router-link to="/elecTechnicians" class="mobile-submenu-link" @click="closeMobileMenu">
+                    <i class="fa fa-user-cog mobile-link-icon"></i>
+                    {{ $t('navElectricityTechnicians') }}
+                  </router-link>
+                </div>
               </div>
             </div>
           </div>
-          <div class="mt-4 flex flex-col gap-2">
+          
+          <!-- User section -->
+          <div class="mobile-user-section">
             <template v-if="loading">
-              <span class="text-gray-500">{{ $t('loading') }}</span>
-            </template>
-            <LanguageToggle />
-            <button 
-              @click="toggleDarkMode" 
-              class="ml-2 darkmode-btn"
-              :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
-              type="button">
-              <i :class="iconClass + ' navbar-icon'"></i>
-            </button>
-            <NotificationBell v-if="user" />
-            <template v-if="user">
-              <span class="flex items-center gap-2">
-                <span class="text-gray-700 font-semibold px-3 py-1 rounded bg-gray-100 cursor-pointer"
-                  @click="handleProfileClick">
-                  {{ user.email || user.uid }}
-                  <span class="text-xs text-gray-500 ml-2">({{ getRoleDisplayText() }})</span>
-                </span>
-                <i class="fas fa-user-circle text-2xl  cursor-pointer navbar-icon" @click="handleProfileClick"></i>
-              </span>
-              <button :class="loginButtonClass" id="login-btn" @click="logout">
-                {{ $t('logout') }}
-              </button>
+              <div class="mobile-loading">
+                <i class="fa fa-spinner fa-spin"></i>
+                <span>{{ $t('loading') }}</span>
+              </div>
             </template>
             <template v-else>
-              <button :class="loginButtonClass" id="login-btn" @click="goToUserAccount">
-                {{ $t('loginRegister') }}
-              </button>
+              <div class="mobile-actions">
+                <LanguageToggle />
+                <button 
+                  @click="toggleDarkMode" 
+                  class="mobile-action-btn"
+                  :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+                  type="button">
+                  <i :class="iconClass"></i>
+                </button>
+                <NotificationBell v-if="user" />
+              </div>
+              
+              <template v-if="user">
+                <div class="mobile-user-info" @click="handleProfileClick">
+                  <i class="fas fa-user-circle mobile-user-avatar"></i>
+                  <div class="mobile-user-details">
+                    <span class="mobile-user-name">{{ user.email || user.uid }}</span>
+                    <span class="mobile-user-role">({{ getRoleDisplayText() }})</span>
+                  </div>
+                </div>
+                <button class="mobile-logout-btn" @click="logout">
+                  <i class="fa fa-sign-out-alt"></i>
+                  {{ $t('logout') }}
+                </button>
+              </template>
+              <template v-else>
+                <button class="mobile-login-btn" @click="goToUserAccount">
+                  <i class="fa fa-sign-in-alt"></i>
+                  {{ $t('loginRegister') }}
+                </button>
+              </template>
             </template>
           </div>
         </div>
@@ -415,6 +483,37 @@ export default {
   background-color: var(--secondary-color);
   width: 100%;
   padding: 0;
+}
+
+/* Fixed navbar styles */
+.fixed-navbar {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  margin: 0 !important;
+  padding: 0.75rem 5rem !important;
+}
+
+.dark .fixed-navbar {
+  background-color: rgba(28, 28, 28, 0.95) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Add padding to body when navbar is fixed to prevent content jump */
+body {
+  padding-top: 0;
+  transition: padding-top 0.3s ease;
+}
+
+body.navbar-fixed {
+  padding-top: 80px;
 }
 .contact-links {
   color: white;
@@ -653,6 +752,10 @@ export default {
     padding: 0.75rem 1rem;
   }
 
+  .fixed-navbar {
+    padding: 0.5rem 1rem !important;
+  }
+
   .hidden.md\:flex {
     display: none !important;
   }
@@ -687,6 +790,10 @@ export default {
     padding: 0.15rem 0.3rem;
   }
 
+  .fixed-navbar {
+    padding: 0.4rem 0.8rem !important;
+  }
+
   .services-color {
     font-size: 0.95rem;
     padding: 0.4rem 0.3rem;
@@ -717,70 +824,503 @@ export default {
     padding: 0.5rem 0.5rem;
   }
 
+  .fixed-navbar {
+    padding: 0.3rem 0.5rem !important;
+  }
+
   .services-color {
     font-size: 0.9rem;
     padding: 0.3rem 0.2rem;
   }
 }
 
-// Mobile menu overlay and panel
-.fixed.inset-0 {
-  z-index: 40;
+/* Slide transition for mobile menu */
+.slide-enter-active,
+.slide-leave-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.dark .fixed.inset-0 {
-  background: var(--secondary-bg);
-  color: var(--primary-text);
+.slide-enter-from {
+  transform: translateX(-100%);
+  opacity: 0;
 }
 
-.fixed.top-0.left-0 {
-  z-index: 50;
-  border-top-right-radius: 1.25rem;
-  border-bottom-right-radius: 1.25rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
-  background: #fff;
-  padding-top: 1.5rem;
+.slide-leave-to {
+  transform: translateX(-100%);
+  opacity: 0;
 }
 
-.dark .fixed.top-0.left-0 {
-  background: var(--secondary-bg);
-  color: var(--primary-text);
-
+.slide-enter-to,
+.slide-leave-from {
+  transform: translateX(0);
+  opacity: 1;
 }
 
-.dark .fixed.top-0.left-0 .fa-times {
-  background: var(--secondary-bg);
-  color: var(--primary-text);
+/* Dropdown entrance animation */
+.mobile-services-dropdown {
+  animation: dropdownSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.fixed.top-0.left-0 .fa-times {
-  font-size: 2.2rem;
-  color: #6B4FA1;
-  padding: 0.5rem;
+@keyframes dropdownSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Mobile menu overlay and panel */
+.mobile-menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.mobile-menu-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 85%;
+  max-width: 320px;
+  height: 100vh;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  z-index: 1001;
+}
+
+.dark .mobile-menu-panel {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Mobile menu header */
+.mobile-menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 1.25rem 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, var(--primary-color) 0%, #8b5cf6 100%);
+}
+
+.dark .mobile-menu-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+}
+
+.mobile-logo {
+  height: 40px;
+  width: auto;
+  filter: brightness(0) invert(1);
+}
+
+.mobile-close-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
   border-radius: 50%;
-  background: #f3f0fa;
-  transition: background 0.2s, color 0.2s;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.fixed.top-0.left-0 .fa-times:hover {
-  color: #4b357a;
+.mobile-close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
 }
 
-.fixed.top-0.left-0 .flex.flex-col.gap-2>* {
-  margin-bottom: 0.5rem;
+/* Mobile menu sections */
+.mobile-menu-section {
+  flex: 1;
+  padding: 1rem 0;
 }
 
-.fixed.top-0.left-0 .block.py-2,
-.fixed.top-0.left-0 .services-dropdown a {
-  border-radius: 0.5rem;
-  margin-bottom: 0.2rem;
-  font-size: 1.05rem;
-  padding: 0.7rem 1rem;
+.mobile-menu-toggle {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.fixed.top-0.left-0 .block.py-2:active,
-.fixed.top-0.left-0 .services-dropdown a:active {
-  background: var(--primary-color);
-  color: #fff;
+.dark .mobile-menu-toggle {
+  color: var(--primary-text);
+}
+
+.mobile-menu-toggle:hover {
+  background: rgba(107, 79, 161, 0.1);
+}
+
+.toggle-icon {
+  transition: transform 0.3s ease;
+}
+
+/* Mobile menu links */
+.mobile-menu-links {
+  padding: 0.5rem 0;
+}
+
+.mobile-menu-link {
+  display: flex;
+  align-items: center;
+  padding: 0.875rem 1.25rem;
+  color: #374151;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border-radius: 0;
+  border-left: 3px solid transparent;
+}
+
+.dark .mobile-menu-link {
+  color: var(--primary-text);
+}
+
+.mobile-menu-link:hover,
+.mobile-menu-link.router-link-active {
+  background: linear-gradient(90deg, rgba(107, 79, 161, 0.1) 0%, transparent 100%);
+  border-left-color: var(--primary-color);
+  color: var(--primary-color);
+  transform: translateX(8px);
+}
+
+.mobile-link-icon {
+  width: 20px;
+  margin-right: 12px;
+  font-size: 1.1rem;
+  opacity: 0.8;
+}
+
+/* Mobile services section */
+.mobile-services-section {
+  margin-top: 0.5rem;
+  position: relative;
+}
+
+.mobile-services-toggle {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.mobile-services-toggle::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(107, 79, 161, 0.2) 50%, transparent 100%);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.mobile-services-toggle:hover::after {
+  transform: scaleX(1);
+}
+
+.mobile-services-dropdown {
+  background: linear-gradient(135deg, rgba(107, 79, 161, 0.08) 0%, rgba(139, 92, 246, 0.05) 100%);
+  margin: 0.5rem 0;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(107, 79, 161, 0.1);
+  box-shadow: 0 2px 8px rgba(107, 79, 161, 0.1);
+  transform: translateY(-2px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.mobile-services-dropdown::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(107, 79, 161, 0.2) 50%, transparent 100%);
+}
+
+.dark .mobile-services-dropdown {
+  background: linear-gradient(135deg, rgba(107, 79, 161, 0.15) 0%, rgba(139, 92, 246, 0.1) 100%);
+  border: 1px solid rgba(107, 79, 161, 0.2);
+  box-shadow: 0 2px 8px rgba(107, 79, 161, 0.2);
+}
+
+.mobile-submenu-link {
+  padding: 0.875rem 1.25rem 0.875rem 3.5rem;
+  font-size: 0.95rem;
+  color: #6b7280;
+  border-left: 3px solid transparent;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin: 0.25rem 0.75rem;
+  border-radius: 8px;
+  font-weight: 500;
+  display: block;
+  width: calc(100% - 1.5rem);
+  border-bottom: 1px solid rgba(107, 79, 161, 0.1);
+}
+
+.mobile-submenu-link:first-child {
+  margin-top: 0.75rem;
+}
+
+.mobile-submenu-link:last-child {
+  margin-bottom: 0.75rem;
+  border-bottom: none;
+}
+
+.mobile-submenu-link:not(:last-child) {
+  margin-bottom: 0.125rem;
+}
+
+.dark .mobile-submenu-link {
+  color: #d1d5db;
+  border-bottom-color: rgba(107, 79, 161, 0.2);
+}
+
+.mobile-submenu-link:hover {
+  background: linear-gradient(135deg, rgba(107, 79, 161, 0.15) 0%, rgba(139, 92, 246, 0.1) 100%);
+  border-left-color: var(--primary-color);
+  color: var(--primary-color);
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px rgba(107, 79, 161, 0.15);
+  border-bottom-color: rgba(107, 79, 161, 0.2);
+}
+
+.mobile-submenu-link.router-link-active {
+  background: linear-gradient(135deg, rgba(107, 79, 161, 0.2) 0%, rgba(139, 92, 246, 0.15) 100%);
+  border-left-color: var(--primary-color);
+  color: var(--primary-color);
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(107, 79, 161, 0.2);
+  border-bottom-color: var(--primary-color);
+}
+
+.mobile-submenu-link .mobile-link-icon {
+  position: absolute;
+  left: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  opacity: 0.7;
+  transition: all 0.3s ease;
+}
+
+.mobile-submenu-link:hover .mobile-link-icon,
+.mobile-submenu-link.router-link-active .mobile-link-icon {
+  opacity: 1;
+  transform: translateY(-50%) scale(1.1);
+  color: var(--primary-color);
+}
+
+/* Mobile user section */
+.mobile-user-section {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(249, 250, 251, 0.5);
+}
+
+.dark .mobile-user-section {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(31, 41, 55, 0.5);
+}
+
+.mobile-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.mobile-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.mobile-action-btn {
+  background: rgba(107, 79, 161, 0.1);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-color);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.mobile-action-btn:hover {
+  background: rgba(107, 79, 161, 0.2);
+  transform: scale(1.1);
+}
+
+/* Mobile user info */
+.mobile-user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: rgba(107, 79, 161, 0.1);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 1rem;
+}
+
+.mobile-user-info:hover {
+  background: rgba(107, 79, 161, 0.15);
+  transform: translateY(-2px);
+}
+
+.mobile-user-avatar {
+  font-size: 2.5rem;
+  color: var(--primary-color);
+}
+
+.mobile-user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.mobile-user-name {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.95rem;
+}
+
+.dark .mobile-user-name {
+  color: var(--primary-text);
+}
+
+.mobile-user-role {
+  font-size: 0.8rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* Mobile buttons */
+.mobile-login-btn,
+.mobile-logout-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.mobile-login-btn {
+  background: linear-gradient(135deg, var(--primary-color) 0%, #8b5cf6 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(107, 79, 161, 0.3);
+}
+
+.mobile-login-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(107, 79, 161, 0.4);
+}
+
+.mobile-logout-btn {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.mobile-logout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+}
+
+/* Responsive adjustments for mobile menu */
+@media (max-width: 480px) {
+  .mobile-menu-panel {
+    width: 90%;
+    max-width: 280px;
+  }
+  
+  .mobile-menu-header {
+    padding: 1.25rem 1rem 0.75rem;
+  }
+  
+  .mobile-logo {
+    height: 32px;
+  }
+  
+  .mobile-close-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+  
+  .mobile-menu-toggle {
+    padding: 0.875rem 1rem;
+    font-size: 1rem;
+  }
+  
+  .mobile-menu-link {
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+  }
+  
+  .mobile-submenu-link {
+    padding: 0.625rem 1rem 0.625rem 2.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .mobile-user-section {
+    padding: 0.875rem 1rem;
+  }
+  
+  .mobile-user-info {
+    padding: 0.625rem;
+  }
+  
+  .mobile-user-avatar {
+    font-size: 2rem;
+  }
+  
+  .mobile-user-name {
+    font-size: 0.9rem;
+  }
+  
+  .mobile-user-role {
+    font-size: 0.75rem;
+  }
 }
 </style>

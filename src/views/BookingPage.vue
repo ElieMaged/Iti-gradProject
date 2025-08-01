@@ -124,16 +124,18 @@
           <div class="form-row">
             <div class="form-group">
               <label>{{ $t('city') }}</label>
-              <select v-model="form.city" class="form-input">
-                <option value="Cairo">{{ $t('cairo') }}</option>
-                <option value="Giza">{{ $t('giza') }}</option>
+              <select v-model="form.city" class="form-input" @change="updateCities">
+                <option value="">{{ $t('selectCity') || 'Select City' }}</option>
+                <option v-for="governorate in availableGovernorates" :key="governorate" :value="governorate">
+                  {{ governorate }}
+                </option>
               </select>
             </div>
             <div class="form-group">
               <label>{{ $t('area') }}</label>
               <select v-model="form.area" class="form-input">
-                <option value="Giza">{{ $t('giza') }}</option>
-                <option value="Maadi">{{ $t('maadi') }}</option>
+                <option value="">{{ $t('selectArea') || 'Select Area' }}</option>
+                <option v-for="city in availableCities" :key="city" :value="city">{{ city }}</option>
               </select>
             </div>
           </div>
@@ -147,6 +149,19 @@
               <input v-model="form.building" :placeholder="$t('building5')" class="form-input" />
             </div>
           </div>
+          
+          <!-- Location Map Component -->
+          <LocationMap 
+            :city="form.city"
+            :area="form.area"
+            :street="form.street"
+            :building="form.building"
+            @locationDetected="handleLocationDetected"
+            @updateCity="form.city = $event"
+            @updateArea="form.area = $event"
+            @updateStreet="form.street = $event"
+            @updateBuilding="form.building = $event"
+          />
         </div>
 
         <!-- Payment Method Section -->
@@ -219,6 +234,8 @@ import emailjs from 'emailjs-com';
 import { auth } from '../firebase';
 import { paypalHelper } from '../utils/paypalHelper';
 import { paypalTester } from '../utils/paypalTest';
+import LocationMap from '../components/LocationMap.vue'
+import { getGovernmentNames, getDistrictsForGovernment } from '../data/egyptianLocations.js'
 
 const { t } = useI18n();
 const route = useRoute()
@@ -228,6 +245,41 @@ const errorMsg = ref('')
 const paypalLoaded = ref(false)
 const technicianAvailability = ref(null)
 const dateAvailability = ref({})
+
+// Form data - moved before watch functions
+const form = ref({
+  date: '', // will be set on mount
+  time: '',
+  fullName: '',
+  phone: '',
+  email: '', // <-- Add email field
+  note: '',
+  city: 'Cairo',
+  area: 'Giza',
+  street: '',
+  building: '',
+  payment: 'PayPal'
+})
+
+// Location data management
+const availableGovernorates = ref(getGovernmentNames())
+const availableCities = ref([])
+
+// Function to update available districts based on selected government
+function updateCities() {
+  if (form.value.city) {
+    availableCities.value = getDistrictsForGovernment(form.value.city);
+  } else {
+    availableCities.value = [];
+  }
+}
+
+// Watch for governorate changes to update cities
+watch(() => form.value.city, () => {
+  updateCities();
+  // Reset area when governorate changes
+  form.value.area = '';
+});
 
 // Date and time management
 const currentDateOffset = ref(0)
@@ -280,21 +332,6 @@ const visibleDates = computed(() => {
 // Dynamic available times based on technician availability
 const availableTimes = ref([])
 const selectedTimeIndex = ref(0)
-
-// Form data - moved before watch functions
-const form = ref({
-  date: '', // will be set on mount
-  time: '',
-  fullName: '',
-  phone: '',
-  email: '', // <-- Add email field
-  note: '',
-  city: 'Cairo',
-  area: 'Giza',
-  street: '',
-  building: '',
-  payment: 'PayPal'
-})
 
 // Function to pre-populate form with user data
 function populateFormWithUserData() {
@@ -635,6 +672,9 @@ onMounted(async () => {
   }, 500);
   
   populateFormWithUserData(); // Call the new function here
+  
+  // Initialize available cities for default governorate
+  updateCities();
 })
 
 // Cleanup function to prevent memory leaks
@@ -1908,6 +1948,37 @@ function constructAddress(formData) {
   console.log('=== END ADDRESS CONSTRUCTION ===');
   
   return finalAddress;
+}
+
+// Handle location detection from LocationMap component
+function handleLocationDetected(locationData) {
+  console.log('Location detected in BookingPage:', locationData);
+  
+  if (locationData.addressDetails) {
+    // Auto-fill form fields with detected location details
+    const { city, area, street, building } = locationData.addressDetails;
+    
+    if (city) form.value.city = city;
+    if (area) form.value.area = area;
+    if (street) form.value.street = street;
+    if (building) form.value.building = building;
+    
+    console.log('Form auto-filled with detected location:', {
+      city: form.value.city,
+      area: form.value.area,
+      street: form.value.street,
+      building: form.value.building
+    });
+  }
+  
+  // Store coordinates for potential future use
+  if (locationData.latitude && locationData.longitude) {
+    console.log('Coordinates stored:', {
+      latitude: locationData.latitude,
+      longitude: locationData.longitude,
+      accuracy: locationData.accuracy
+    });
+  }
 }
 </script>
 

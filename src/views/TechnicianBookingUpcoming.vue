@@ -434,7 +434,7 @@ onMounted(() => {
 .booking-title {
   font-size: 2rem;
   font-weight: bold;
-  color: #7c6bb0;
+  color: var(--primary-color);
   margin-bottom: 0;
 }
 
@@ -702,6 +702,357 @@ onMounted(() => {
   .table-header th,
   .table-row td {
     padding: 0.5rem 0.5rem;
+  }
+}
+
+/* Enhanced Responsive Design */
+@media (max-width: 1200px) {
+  .booking-container {
+    max-width: 95%;
+  }
+  
+  .booking-title {
+    font-size: 1.75rem;
+  }
+  
+  .search-wrapper {
+    width: 350px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .booking-main {
+    padding: 1.5rem;
+  }
+  
+  .booking-title {
+    font-size: 1.5rem;
+  }
+  
+  .search-wrapper {
+    width: 300px;
+    height: 45px;
+  }
+  
+  .table-header th,
+  .table-row td {
+    padding: 0.625rem 0.75rem;
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .flex {
+    flex-direction: column;
+  }
+  
+  .flex-1.p-8 {
+    padding: 1rem;
+  }
+  
+  .technician-dashboard-layout {
+    margin-right: 0;
+    padding: 0.75rem;
+  }
+  
+  .booking-main {
+    padding: 1rem;
+  }
+  
+  .booking-container {
+    max-width: 100%;
+  }
+  
+  .title-search-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .search-wrapper {
+    width: 100%;
+  }
+  
+  .booking-title {
+    margin: 1rem 0;
+    text-align: left;
+    width: 100%;
+  }
+  
+  .action-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .flex-1.p-8 {
+    padding: 0.75rem;
+  }
+  
+  .technician-dashboard-layout {
+    padding: 0.5rem;
+  }
+  
+  .booking-main {
+    padding: 0.75rem;
+  }
+  
+  .booking-title {
+    font-size: 1.25rem;
+    text-align: left;
+  }
+  
+  .search-wrapper {
+    width: 100%;
+    height: 50px;
+  }
+  
+  .search-input {
+    font-size: 0.875rem;
+    padding: 0 12px 0 45px;
+  }
+  
+  .search-icon {
+    font-size: 1rem;
+    padding: 20px;
+  }
+  
+  .table-wrapper {
+    border-radius: 0.5rem;
+    overflow-x: auto;
+  }
+  
+  .booking-table {
+    min-width: 800px;
+    font-size: 0.75rem;
+  }
+  
+  .table-header th,
+  .table-row td {
+    padding: 0.5rem 0.5rem;
+    font-size: 0.75rem;
+  }
+  
+  .booking-status {
+    padding: 0.125rem 0.5rem;
+    font-size: 0.6875rem;
+  }
+  
+  .check-expired-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .flex-1.p-8 {
+    padding: 0.5rem;
+  }
+  
+  .technician-dashboard-layout {
+    padding: 0.375rem;
+  }
+  
+  .booking-main {
+    padding: 0.5rem;
+  }
+  
+  .booking-title {
+    font-size: 1.125rem;
+    margin-bottom: 0.75rem;
+    text-align: left;
+  }
+  
+  .title-search-row {
+    gap: 0.75rem;
+  }
+  
+  .search-wrapper {
+    width: 100%;
+    height: 50px;
+  }
+  
+  .search-input {
+    font-size: 0.8125rem;
+    padding: 0 10px 0 40px;
+  }
+  
+  .search-icon {
+    font-size: 0.875rem;
+    padding: 20px;
+  }
+  
+  .booking-table {
+    min-width: 700px;
+    font-size: 0.6875rem;
+  }
+  
+  .table-header th,
+  .table-row td {
+    padding: 0.375rem 0.375rem;
+    font-size: 0.6875rem;
+  }
+  
+  .booking-status {
+    padding: 0.125rem 0.375rem;
+    font-size: 0.625rem;
+  }
+  
+  .check-expired-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8125rem;
+  }
+  
+  .loading-state,
+  .error-state,
+  .empty-state {
+    padding: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .flex-1.p-8 {
+    padding: 0.375rem;
+  }
+  
+  .technician-dashboard-layout {
+    padding: 0.25rem;
+  }
+  
+  .booking-main {
+    padding: 0.375rem;
+  }
+  
+  .booking-title {
+    font-size: 1rem;
+    margin-bottom: 0.625rem;
+    text-align: left;
+  }
+  
+  .title-search-row {
+    gap: 0.625rem;
+  }
+  
+  .search-wrapper {
+    width: 100%;
+    height: 50px;
+  }
+  
+  .search-input {
+    font-size: 0.75rem;
+    padding: 0 8px 0 38px;
+  }
+  
+  .search-icon {
+    left: 4px;
+    font-size: 0.8125rem;
+    padding: 4px;
+  }
+  
+  .booking-table {
+    min-width: 600px;
+    font-size: 0.625rem;
+  }
+  
+  .table-header th,
+  .table-row td {
+    padding: 0.25rem 0.25rem;
+    font-size: 0.625rem;
+  }
+  
+  .booking-status {
+    padding: 0.125rem 0.25rem;
+    font-size: 0.5625rem;
+  }
+  
+  .check-expired-btn {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.75rem;
+  }
+  
+  .loading-state,
+  .error-state,
+  .empty-state {
+    padding: 1.5rem;
+  }
+  
+  .loading-spinner {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+@media (max-width: 360px) {
+  .flex-1.p-8 {
+    padding: 0.25rem;
+  }
+  
+  .technician-dashboard-layout {
+    padding: 0.125rem;
+  }
+  
+  .booking-main {
+    padding: 0.25rem;
+  }
+  
+  .booking-title {
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    text-align: left;
+  }
+  
+  .title-search-row {
+    gap: 0.5rem;
+  }
+  
+  .search-wrapper {
+    width: 100%;
+    height: 50px;
+  }
+  
+  .search-input {
+    font-size: 0.6875rem;
+    padding: 0 6px 0 36px;
+  }
+  
+  .search-icon {
+    left: 2px;
+    font-size: 0.75rem;
+    padding: 3px;
+  }
+  
+  .booking-table {
+    min-width: 550px;
+    font-size: 0.5625rem;
+  }
+  
+  .table-header th,
+  .table-row td {
+    padding: 0.125rem 0.125rem;
+    font-size: 0.5625rem;
+  }
+  
+  .booking-status {
+    padding: 0.125rem 0.125rem;
+    font-size: 0.5rem;
+  }
+  
+  .check-expired-btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.6875rem;
+  }
+  
+  .loading-state,
+  .error-state,
+  .empty-state {
+    padding: 1rem;
+  }
+  
+  .loading-spinner {
+    width: 28px;
+    height: 28px;
   }
 }
 </style> 

@@ -9,8 +9,8 @@
             />
             <!-- Main Content -->
             <div class="flex-1 p-8">
-                <div class="max-w-5xl mx-auto">
-                    <h2 class="text-2xl font-bold text-secondary mb-8">{{ $t('availabilityTitle') }}</h2>
+                <div class=" mr-20 p-4">
+                    <h2 class="text-2xl font-bold text-primary mb-8">{{ $t('availabilityTitle') }}</h2>
                     
                     <!-- Success/Error Messages -->
                     <div v-if="message" :class="['message', messageType]" class="mb-4 p-4 rounded-lg">
@@ -458,57 +458,23 @@ export default {
   border: 1px solid #fecaca;
 }
 
-@media (max-width: 900px) {
-  .flex {
-    flex-direction: column !important;
-  }
-  .sidebar {
-    width: 100% !important;
-    max-height: 220px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding: 1rem 0 !important;
-    margin-bottom: 1rem;
-  }
-  .flex-1.p-8 {
-    padding: 1.5rem !important;
-  }
-  .max-w-5xl.mx-auto {
-    max-width: 100% !important;
-    margin: 0 !important;
-  }
-  .bg-secondary.bg-opacity-20.rounded-2xl.p-8.max-w-4xl.mx-auto {
-    padding: 1.5rem !important;
-  }
+/* Title Styles */
+.text-2xl.font-bold.text-primary {
+  color: #7c6bb0 !important;
+  margin: 1rem 0 !important;
+  text-align: left !important;
 }
-@media (max-width: 768px) {
-  .flex-1.p-8 {
-    padding: 1rem !important;
-  }
-  .bg-secondary.bg-opacity-20.rounded-2xl.p-8.max-w-4xl.mx-auto {
-    padding: 1rem !important;
-  }
-  .text-2xl {
-    font-size: 1.2rem !important;
-  }
-  .text-lg {
-    font-size: 1rem !important;
-  }
-  .input-field {
-    font-size: 0.95rem !important;
-    padding: 0.5rem 0.75rem !important;
-  }
-  .px-8.py-2 {
-    padding: 0.5rem 1.2rem !important;
-    font-size: 1rem !important;
-  }
-  table.min-w-full {
-    font-size: 0.95rem !important;
-  }
-  .p-8 {
-    padding: 1rem !important;
-  }
+
+.dark .text-2xl.font-bold.text-primary {
+  color: var(--primary-color) !important;
 }
+
+/* Override text-primary to use CSS variable */
+.text-primary {
+  color: var(--primary-color) !important;
+}
+
+/* Responsive Design */
 @media (max-width: 600px) {
   .flex-1.p-8 {
     padding: 0.5rem !important;
@@ -536,6 +502,335 @@ export default {
   }
   .p-8 {
     padding: 0.5rem !important;
+  }
+}
+
+/* Enhanced Responsive Design */
+@media (max-width: 1200px) {
+  .max-w-5xl {
+    max-width: 95% !important;
+  }
+  
+  
+  .max-w-4xl {
+    max-width: 100% !important;
+  }
+  
+  table.min-w-full {
+    font-size: 0.875rem !important;
+  }
+  
+  .px-6.py-3 {
+    padding: 0.75rem 1rem !important;
+  }
+  
+  .px-6.py-4 {
+    padding: 1rem !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  form {
+    flex-direction: column !important;
+    gap: 1rem !important;
+  }
+  
+  .flex.flex-col {
+    width: 100% !important;
+  }
+  
+  .flex.items-end {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+  
+  .gap-2 {
+    gap: 0.5rem !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .flex {
+    flex-direction: column !important;
+  }
+  
+  .sidebar {
+    width: 100% !important;
+    max-height: 220px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 1rem 0 !important;
+    margin-bottom: 1rem;
+  }
+  
+  .flex-1.p-8 {
+    padding: 1.5rem !important;
+  }
+  
+  .max-w-5xl.mx-auto {
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+  
+  .bg-secondary.bg-opacity-20.rounded-2xl.p-8.max-w-4xl.mx-auto {
+    padding: 1.5rem !important;
+  }
+  
+  /* Table Responsive */
+  .overflow-x-auto {
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  table.min-w-full {
+    min-width: 600px !important;
+  }
+  
+  .px-6.py-3 {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.75rem !important;
+  }
+  
+  .px-6.py-4 {
+    padding: 0.75rem !important;
+    font-size: 0.75rem !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .flex-1.p-8 {
+    padding: 1rem !important;
+  }
+  .mr-20 {
+    margin-right: 0 !important;
+  }
+  .bg-secondary.bg-opacity-20.rounded-2xl.p-8.max-w-4xl.mx-auto {
+    padding: 1rem !important;
+  }
+  
+  .text-2xl {
+    font-size: 1.25rem !important;
+    text-align: left !important;
+    margin: 1rem 0 !important;
+  }
+  
+  .text-xl {
+    font-size: 1.125rem !important;
+  }
+  
+  .input-field {
+    font-size: 0.875rem !important;
+    padding: 0.75rem !important;
+  }
+  
+  .px-8.py-2 {
+    padding: 0.75rem 1.5rem !important;
+    font-size: 0.875rem !important;
+  }
+  
+  table.min-w-full {
+    font-size: 0.75rem !important;
+  }
+  
+  .px-6.py-3 {
+    padding: 0.5rem !important;
+    font-size: 0.7rem !important;
+  }
+  
+  .px-6.py-4 {
+    padding: 0.5rem !important;
+    font-size: 0.7rem !important;
+  }
+  
+  /* Form Layout */
+  form {
+    gap: 1.5rem !important;
+  }
+  
+  .flex.flex-col {
+    margin-bottom: 1rem !important;
+  }
+  
+  .flex.items-end {
+    flex-direction: row !important;
+    justify-content: center !important;
+    gap: 1rem !important;
+  }
+  
+  .mt-6.md\\:mt-0 {
+    margin-top: 0 !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .flex-1.p-8 {
+    padding: 0.75rem !important;
+  }
+  
+  .bg-secondary.bg-opacity-20.rounded-2xl.p-8.max-w-4xl.mx-auto {
+    padding: 0.75rem !important;
+  }
+  
+  .text-2xl {
+    font-size: 1.125rem !important;
+    margin: 1rem 0 !important;
+    text-align: left !important;
+  }
+  
+  .text-xl {
+    font-size: 1rem !important;
+  }
+  
+  .input-field {
+    font-size: 0.8125rem !important;
+    padding: 0.625rem !important;
+  }
+  
+  .px-8.py-2 {
+    padding: 0.625rem 1.25rem !important;
+    font-size: 0.8125rem !important;
+  }
+  
+  table.min-w-full {
+    font-size: 0.7rem !important;
+  }
+  
+  .px-6.py-3 {
+    padding: 0.375rem !important;
+    font-size: 0.65rem !important;
+  }
+  
+  .px-6.py-4 {
+    padding: 0.375rem !important;
+    font-size: 0.65rem !important;
+  }
+  
+  /* Compact Form */
+  form {
+    gap: 1rem !important;
+  }
+  
+  .flex.items-end {
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+  }
+  
+  .px-8.py-2,
+  .px-6.py-2 {
+    width: 100% !important;
+    text-align: center !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .flex-1.p-8 {
+    padding: 0.5rem !important;
+  }
+  
+  .bg-secondary.bg-opacity-20.rounded-2xl.p-8.max-w-4xl.mx-auto {
+    padding: 0.5rem !important;
+  }
+  
+  .text-2xl {
+    font-size: 1rem !important;
+    margin: 1rem 0 !important;
+    text-align: left !important;
+  }
+  
+  .text-xl {
+    font-size: 0.875rem !important;
+  }
+  
+  .input-field {
+    font-size: 0.75rem !important;
+    padding: 0.5rem !important;
+  }
+  
+  .px-8.py-2 {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.75rem !important;
+  }
+  
+  /* Table Scroll */
+  .overflow-x-auto {
+    margin: 1rem 0 !important;
+  }
+  
+  table.min-w-full {
+    min-width: 500px !important;
+    font-size: 0.65rem !important;
+  }
+  
+  .px-6.py-3 {
+    padding: 0.25rem !important;
+    font-size: 0.6rem !important;
+  }
+  
+  .px-6.py-4 {
+    padding: 0.25rem !important;
+    font-size: 0.6rem !important;
+  }
+  
+  /* Form Stack */
+  form {
+    gap: 0.75rem !important;
+  }
+  
+  .flex.items-end {
+    gap: 0.5rem !important;
+  }
+  
+  .px-8.py-2,
+  .px-6.py-2 {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.7rem !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .flex-1.p-8 {
+    padding: 0.25rem !important;
+  }
+  
+  .bg-secondary.bg-opacity-20.rounded-2xl.p-8.max-w-4xl.mx-auto {
+    padding: 0.25rem !important;
+  }
+  
+  .text-2xl {
+    font-size: 0.875rem !important;
+    margin: 1rem 0 !important;
+    text-align: left !important;
+  }
+  
+  .text-xl {
+    font-size: 0.75rem !important;
+  }
+  
+  .input-field {
+    font-size: 0.6875rem !important;
+    padding: 0.375rem !important;
+  }
+  
+  .px-8.py-2 {
+    padding: 0.375rem 0.75rem !important;
+    font-size: 0.6875rem !important;
+  }
+  
+  table.min-w-full {
+    min-width: 450px !important;
+    font-size: 0.6rem !important;
+  }
+  
+  .px-6.py-3,
+  .px-6.py-4 {
+    padding: 0.125rem !important;
+    font-size: 0.55rem !important;
+  }
+  
+  .px-8.py-2,
+  .px-6.py-2 {
+    padding: 0.375rem 0.5rem !important;
+    font-size: 0.65rem !important;
   }
 }
 </style>

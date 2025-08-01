@@ -13,8 +13,8 @@
     <div class="main-content">
       <!-- Page title -->
       <div class="page-title">
-        <h1>{{ $t('bookNowWithBestTechnicians') }}</h1>
-    </div>
+        <h1>Book Now With The Best Technicians !</h1>
+      </div>
 
       <!-- Main content grid -->
       <div class="content-grid">
@@ -23,35 +23,35 @@
           <div class="profile-section">
             <div class="profile-picture">
               <img :src="technician.profilePhotoUrl || technician.idPhotoUrl || '/images/Avatar.png'" :alt="technician.name" />
-          </div>
+            </div>
             <div class="profile-details">
               <h2 class="technician-name">{{ technician.name || technician.fullName }}</h2>
               <p class="technician-specialization">{{ getSpecializationTranslation(technician.specialization) }}</p>
-            </div>
-            </div>
+              
+              <div class="technician-details">
+                <div class="detail-item">
+                  <span class="detail-label">{{ $t('location') }}:</span>
+                  <span class="detail-value">{{ technician.government && technician.district ? `${technician.government}, ${technician.district}` : (technician.location || 'Cairo, Giza') }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">{{ $t('gender') }}:</span>
+                  <span class="detail-value">{{ technician.gender || 'Male' }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">{{ $t('nationality') }}:</span>
+                  <span class="detail-value">{{ technician.nationality || 'Egyptian' }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">{{ $t('yearsOfExperience') }}:</span>
+                  <span class="detail-value">{{ technician.experience || technician.yearsOfExperience || '5' }} {{ $t('years') }}</span>
+                </div>
+              </div>
 
-          <div class="technician-details">
-            <div class="detail-item">
-              <span class="detail-label">{{ $t('location') }}:</span>
-              <span class="detail-value">{{ technician.government && technician.district ? `${technician.government}, ${technician.district}` : (technician.location || 'Cairo, Giza') }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">{{ $t('gender') }}:</span>
-              <span class="detail-value">{{ technician.gender || 'Male' }}</span>
-          </div>
-            <div class="detail-item">
-              <span class="detail-label">{{ $t('nationality') }}:</span>
-              <span class="detail-value">{{ technician.nationality || 'Egyptian' }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">{{ $t('yearsOfExperience') }}:</span>
-              <span class="detail-value">{{ technician.experience || technician.yearsOfExperience || '5' }} {{ $t('years') }}</span>
-            </div>
-          </div>
-
-          <div class="rating-section">
-            <div class="rating-stars">
-              <i v-for="n in 5" :key="n" class="fas fa-star star-filled"></i>
+              <div class="rating-section">
+                <div class="rating-stars">
+                  <i v-for="n in 5" :key="n" class="fas fa-star star-filled"></i>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -80,10 +80,10 @@
 
         <!-- Right section - Booking Information -->
         <div class="booking-info-card">
-          <h3 class="booking-title">{{ $t('bookingInformation') }}</h3>
+                     <h3 class="booking-title">Booking Information</h3>
           
           <div class="appointment-section">
-            <h4 class="section-subtitle">{{ $t('availableAppointment') }}</h4>
+                         <h4 class="section-subtitle">Available Appointment</h4>
             <div class="date-selector">
               <button class="date-nav-btn" @click="previousDates">
                 <i class="fas fa-chevron-left"></i>
@@ -128,14 +128,7 @@
             <span class="price-value">{{ technician.basePrice || technician.visitPrice || '300' }} EGP</span>
           </div>
 
-          <button 
-            @click="bookNow" 
-            class="book-now-btn"
-            :class="{ 'disabled': !isAuthenticated }"
-            :disabled="!isAuthenticated"
-          >
-            {{ isAuthenticated ? $t('bookNow') : $t('loginToBook') }}
-          </button>
+          <button @click="bookNow" class="book-now-btn">{{ $t('bookNow') }}</button>
         </div>
       </div>
       
@@ -266,7 +259,6 @@
         </div>
       </div>
 
-    <!-- Footer -->
 
   </div>
 </template>
@@ -275,9 +267,8 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { doc, getDoc, collection, query, where, getDocs, orderBy, addDoc } from 'firebase/firestore' 
+import { doc, getDoc, collection, query, where, getDocs, orderBy, addDoc } from 'firebase/firestore'
 import { db, auth } from '../firebase.js'
-import { onAuthStateChanged } from 'firebase/auth'
 
 const route = useRoute()
 const router = useRouter()
@@ -293,10 +284,6 @@ const reviewsError = ref(null)
 const userBookings = ref([])
 const userBookingsLoading = ref(false)
 const selectedDate = ref('')
-
-// Authentication state
-const currentUser = ref(null)
-const isAuthenticated = ref(false)
 const technicianAvailability = ref(null)
 const availableDates = ref([])
 const visibleDates = ref([])
@@ -614,17 +601,9 @@ const nextDates = () => {
 }
 
 const bookNow = () => {
-  if (!isAuthenticated.value) {
-    // Show login prompt
-    if (confirm(t('loginRequiredToBook'))) {
-      router.push('/userlogin')
-    }
-    return
-  }
-  
   router.push({
     path: '/bookingpage',
-    query: {
+    query: { 
       technicianId: route.params.id,
       technicianName: technician.value?.name || technician.value?.fullName
     }
@@ -679,18 +658,12 @@ const formatDate = (date) => {
 
 // Lifecycle
 onMounted(async () => {
-  // Set up authentication listener
-  onAuthStateChanged(auth, (user) => {
-    currentUser.value = user
-    isAuthenticated.value = !!user
-  })
-
   await fetchTechnician()
   await fetchReviews()
   await fetchUserBookings()
   await fetchTechnicianAvailability(route.params.id)
   updateVisibleDates()
-
+  
   // Set initial selected date and fetch time slots
   if (visibleDates.value.length > 0) {
     await selectDate(visibleDates.value[0])
@@ -846,14 +819,14 @@ onMounted(async () => {
 }
 
 .page-title {
-  text-align: center;
+  text-align: left;
   margin-bottom: 3rem;
 }
 
 .page-title h1 {
   font-size: 2.5rem;
   font-weight: bold;
-  color: #1f2937;
+  color: #929394;
   margin: 0;
 }
 
@@ -912,12 +885,13 @@ onMounted(async () => {
 }
 
 .technician-details {
-  margin-bottom: 2rem;
+  margin: 1.5rem 0;
 }
 
 .detail-item {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 0.5rem;
   padding: 0.5rem 0;
   border-bottom: 1px solid #f3f4f6;
 }
@@ -936,7 +910,7 @@ onMounted(async () => {
 }
 
 .rating-section {
-  margin-bottom: 2rem;
+  margin-top: 1rem;
 }
 
 .rating-stars {
@@ -995,6 +969,7 @@ onMounted(async () => {
   font-weight: 600;
   color: #374151;
   margin: 0 0 1rem 0;
+  text-align: center;
 }
 
 .date-selector {
@@ -1123,16 +1098,6 @@ onMounted(async () => {
 
 .book-now-btn:hover {
   background: #52467f;
-}
-
-.book-now-btn.disabled {
-  background: #cccccc;
-  color: #666666;
-  cursor: not-allowed;
-}
-
-.book-now-btn.disabled:hover {
-  background: #cccccc;
 }
 
 /* Reviews Section */
@@ -1484,202 +1449,728 @@ onMounted(async () => {
   margin-bottom: 1rem;
 }
 
-/* Footer */
-.main-footer {
-  background: #1f2937;
-  color: white;
-  margin-top: 4rem;
-}
 
-.footer-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 3rem 2rem 2rem;
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: 2rem;
-}
-
-.footer-logo {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
-}
-
-.footer-description {
-  color: #d1d5db;
-  line-height: 1.6;
-  margin-bottom: 1.5rem;
-}
-
-.social-links h4 {
-  margin-bottom: 1rem;
-}
-
-.social-icons {
-  display: flex;
-  gap: 1rem;
-}
-
-.social-icons i {
-  font-size: 1.2rem;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.social-icons i:hover {
-  opacity: 0.8;
-}
-
-.footer-section h4 {
-  margin-bottom: 1rem;
-  font-size: 1.1rem;
-}
-
-.footer-links {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.footer-links li {
-  margin-bottom: 0.5rem;
-}
-
-.footer-links a {
-  color: #d1d5db;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-.footer-links a:hover {
-  color: white;
-}
-
-.contact-details {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.contact-details .contact-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #d1d5db;
-}
-
-.footer-bottom {
-  border-top: 1px solid #374151;
-  padding: 1.5rem 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.copyright {
-  color: #9ca3af;
-  font-size: 0.875rem;
-}
-
-.footer-legal {
-  display: flex;
-  gap: 1rem;
-}
-
-.footer-legal a {
-  color: #d1d5db;
-  text-decoration: none;
-  font-size: 0.875rem;
-  transition: color 0.2s;
-}
-
-.footer-legal a:hover {
-  color: white;
-}
 
 /* Responsive Design */
 @media (max-width: 1200px) {
-  .content-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-  
-  .footer-content {
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .header-contact-bar {
-    flex-direction: column;
-    gap: 0.5rem;
-    padding: 0.75rem 1rem;
-  }
-  
-  .contact-info {
-    gap: 1rem;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  
-  .nav-container {
-    flex-direction: column;
-    gap: 1rem;
-  }
-  
-  .nav-links {
-    gap: 1rem;
-  }
-  
   .main-content {
-    padding: 1rem;
+    max-width: 95%;
+    padding: 1.5rem;
+  }
+  
+  .content-grid {
+    grid-template-columns: 1.5fr 1fr;
+    gap: 1.5rem;
   }
   
   .page-title h1 {
     font-size: 2rem;
   }
+}
+
+@media (max-width: 1024px) {
+  .main-content {
+    padding: 1rem;
+  }
   
-  .technician-info-card,
+  .content-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .technician-info-card {
+    padding: 1.5rem;
+    width: 100%;
+  }
+  
   .booking-info-card {
     padding: 1.5rem;
+    width: 100%;
   }
   
   .profile-section {
     flex-direction: column;
     text-align: center;
-  }
-  
-  .footer-content {
-    grid-template-columns: 1fr;
-    text-align: center;
-  }
-  
-  .footer-bottom {
-    flex-direction: column;
     gap: 1rem;
-    text-align: center;
+    width: 100%;
   }
-}
-
-@media (max-width: 480px) {
-  .page-title h1 {
-    font-size: 1.5rem;
+  
+  .profile-picture {
+    width: 150px;
+    height: 150px;
   }
   
   .technician-name {
     font-size: 1.5rem;
   }
   
-  .date-options {
+  .technician-specialization {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 0.75rem;
+    width: 100%;
+  }
+  
+  .page-title {
+    margin-bottom: 2rem;
+    width: 100%;
+  }
+  
+  .page-title h1 {
+    font-size: 1.75rem;
+  }
+  
+  .technician-info-card {
+    padding: 1rem;
+    border-radius: 8px;
+    width: 100%;
+  }
+  
+  .booking-info-card {
+    padding: 1rem;
+    border-radius: 8px;
+    width: 100%;
+  }
+  
+  .profile-section {
+    width: 100%;
     flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .profile-picture {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .profile-details {
+    width: 100%;
+  }
+  
+  .technician-name {
+    font-size: 1.25rem;
+  }
+  
+  .technician-specialization {
+    font-size: 0.9rem;
+  }
+  
+  .technician-details {
+    margin: 1rem 0;
+    width: 100%;
+  }
+  
+  .detail-item {
+    padding: 0.375rem 0;
+    font-size: 0.9rem;
+    width: 100%;
+  }
+  
+  .skills-title {
+    font-size: 1.1rem;
+  }
+  
+  .skills-list {
+    gap: 0.5rem;
+    width: 100%;
+  }
+  
+  .skill-item {
+    padding: 0.5rem;
+    font-size: 0.85rem;
+    width: 100%;
+  }
+  
+  .booking-title {
+    font-size: 1.25rem;
+  }
+  
+  .section-subtitle {
+    font-size: 1rem;
+  }
+  
+  .date-options {
+    gap: 0.5rem;
+    width: 100%;
   }
   
   .date-option {
-    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    font-size: 0.8rem;
   }
+  
+  .time-slot {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  .visit-price {
+    padding: 0.75rem;
+    width: 100%;
+  }
+  
+  .price-label {
+    font-size: 0.9rem;
+  }
+  
+  .price-value {
+    font-size: 1rem;
+  }
+  
+  .book-now-btn {
+    padding: 0.75rem;
+    font-size: 1rem;
+    width: 100%;
+  }
+  
+  .date-nav-btn {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .main-content {
+    padding: 0.5rem;
+    width: 100%;
+  }
+  
+  .page-title h1 {
+    font-size: 1.5rem;
+  }
+  
+  .technician-info-card {
+    padding: 0.75rem;
+    width: 100%;
+  }
+  
+  .booking-info-card {
+    padding: 0.75rem;
+    width: 100%;
+  }
+  
+  .profile-section {
+    width: 100%;
+  }
+  
+  .profile-picture {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .profile-details {
+    width: 100%;
+  }
+  
+  .technician-name {
+    font-size: 1.1rem;
+  }
+  
+  .technician-specialization {
+    font-size: 0.8rem;
+  }
+  
+  .detail-item {
+    padding: 0.25rem 0;
+    font-size: 0.8rem;
+    width: 100%;
+  }
+  
+  .skills-title {
+    font-size: 1rem;
+  }
+  
+  .skill-item {
+    padding: 0.375rem;
+    font-size: 0.75rem;
+    width: 100%;
+  }
+  
+  .booking-title {
+    font-size: 1.1rem;
+  }
+  
+  .section-subtitle {
+    font-size: 0.9rem;
+  }
+  
+  .date-options {
+    gap: 0.25rem;
+    width: 100%;
+  }
+  
+  .date-option {
+    padding: 0.375rem;
+    font-size: 0.75rem;
+  }
+  
+  .time-slot {
+    padding: 0.375rem;
+    font-size: 0.75rem;
+  }
+  
+  .visit-price {
+    padding: 0.5rem;
+    width: 100%;
+  }
+  
+  .price-label {
+    font-size: 0.8rem;
+  }
+  
+  .price-value {
+    font-size: 0.9rem;
+  }
+  
+  .book-now-btn {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    width: 100%;
+  }
+  
+  .date-nav-btn {
+    padding: 0.375rem;
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 0.25rem;
+    width: 100%;
+  }
+  
+  .page-title {
+    margin-bottom: 1.5rem;
+    width: 100%;
+  }
+  
+  .page-title h1 {
+    font-size: 1.25rem;
+  }
+  
+  .technician-info-card {
+    padding: 0.5rem;
+    width: 100%;
+  }
+  
+  .booking-info-card {
+    padding: 0.5rem;
+    width: 100%;
+  }
+  
+  .profile-section {
+    width: 100%;
+  }
+  
+  .profile-picture {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .profile-details {
+    width: 100%;
+  }
+  
+  .technician-name {
+    font-size: 1rem;
+  }
+  
+  .technician-specialization {
+    font-size: 0.75rem;
+  }
+  
+  .detail-item {
+    padding: 0.125rem 0;
+    font-size: 0.75rem;
+    width: 100%;
+  }
+  
+  .skills-title {
+    font-size: 0.9rem;
+  }
+  
+  .skill-item {
+    padding: 0.25rem;
+    font-size: 0.7rem;
+    width: 100%;
+  }
+  
+  .booking-title {
+    font-size: 1rem;
+  }
+  
+  .section-subtitle {
+    font-size: 0.8rem;
+  }
+  
+  .date-options {
+    gap: 0.125rem;
+    width: 100%;
+  }
+  
+  .date-option {
+    padding: 0.25rem;
+    font-size: 0.7rem;
+  }
+  
+  .time-slot {
+    padding: 0.25rem;
+    font-size: 0.7rem;
+  }
+  
+  .visit-price {
+    padding: 0.375rem;
+    width: 100%;
+  }
+  
+  .price-label {
+    font-size: 0.75rem;
+  }
+  
+  .price-value {
+    font-size: 0.8rem;
+  }
+  
+  .book-now-btn {
+    padding: 0.375rem;
+    font-size: 0.8rem;
+    width: 100%;
+  }
+  
+  .date-nav-btn {
+    padding: 0.25rem;
+    font-size: 0.6rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .main-content {
+    padding: 0.125rem;
+    width: 100%;
+  }
+  
+  .page-title h1 {
+    font-size: 1.1rem;
+  }
+  
+  .technician-info-card {
+    padding: 0.375rem;
+    width: 100%;
+  }
+  
+  .booking-info-card {
+    padding: 0.375rem;
+    width: 100%;
+  }
+  
+  .profile-section {
+    width: 100%;
+  }
+  
+  .profile-picture {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .profile-details {
+    width: 100%;
+  }
+  
+  .technician-name {
+    font-size: 0.9rem;
+  }
+  
+  .technician-specialization {
+    font-size: 0.7rem;
+  }
+  
+  .detail-item {
+    padding: 0.1rem 0;
+    font-size: 0.7rem;
+    width: 100%;
+  }
+  
+  .skills-title {
+    font-size: 0.8rem;
+  }
+  
+  .skill-item {
+    padding: 0.2rem;
+    font-size: 0.65rem;
+    width: 100%;
+  }
+  
+  .booking-title {
+    font-size: 0.9rem;
+  }
+  
+  .section-subtitle {
+    font-size: 0.75rem;
+  }
+  
+  .date-option {
+    padding: 0.2rem;
+    font-size: 0.65rem;
+  }
+  
+  .time-slot {
+    padding: 0.2rem;
+    font-size: 0.65rem;
+  }
+  
+  .visit-price {
+    padding: 0.25rem;
+    width: 100%;
+  }
+  
+  .price-label {
+    font-size: 0.7rem;
+  }
+  
+  .price-value {
+    font-size: 0.75rem;
+  }
+  
+  .book-now-btn {
+    padding: 0.25rem;
+    font-size: 0.75rem;
+    width: 100%;
+  }
+  
+  .date-nav-btn {
+    padding: 0.2rem;
+    font-size: 0.55rem;
+  }
+}
+
+/* Dark Mode Styles */
+.dark .technician-profile-page {
+  background-color: var(--primary-bg);
+  color: var(--primary-text);
+}
+
+.dark .loading-container,
+.dark .error-container {
+  background-color: var(--primary-bg);
+  color: var(--primary-text);
+}
+
+.dark .loading-spinner {
+  border-color: var(--border-color);
+  border-top-color: var(--primary);
+}
+
+.dark .error-message {
+  color: #f87171;
+}
+
+.dark .header-contact-bar {
+  background: linear-gradient(135deg, #f59e0b, #f97316);
+}
+
+.dark .review-card{
+  background: var(--input-bg);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+.dark .main-nav {
+  background: var(--secondary-bg);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.dark .logo-text {
+  color: var(--primary-text);
+}
+
+.dark .nav-link {
+  color: var(--text-muted);
+}
+
+.dark .nav-link:hover {
+  color: var(--primary);
+}
+
+.dark .nav-icon {
+  color: var(--text-muted);
+}
+
+.dark .nav-icon:hover {
+  color: var(--primary);
+}
+
+.dark .main-content {
+  background-color: var(--primary-bg);
+}
+
+.dark .page-title h1 {
+  color: var(--primary-color);
+}
+
+.dark .technician-info-card {
+  background: var(--secondary-bg);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+
+.dark .technician-name {
+  color: var(--primary-text);
+}
+
+.dark .technician-specialization {
+  color: var(--text-muted);
+}
+
+.dark .detail-item {
+  border-bottom-color: var(--border-color);
+}
+
+.dark .detail-label {
+  color: var(--text-muted);
+}
+
+.dark .detail-value {
+  color: var(--primary-text);
+}
+
+.dark .skills-title {
+  color: var(--primary-text);
+}
+
+.dark .skill-item {
+  color: var(--primary-text);
+}
+
+.dark .booking-info-card {
+  background: var(--secondary-bg);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+
+.dark .booking-title {
+  color: var(--primary-text);
+}
+
+.dark .section-subtitle {
+  color: var(--primary-text);
+}
+
+.dark .date-option {
+  background: var(--input-bg);
+  color: var(--primary-text-dark);
+}
+
+.dark .date-option:hover {
+  background: var(--border-color);
+}
+
+.dark .date-option.selected {
+  background: var(--primary);
+  color: var(--primary-text);
+}
+
+.dark .date-option.unavailable {
+  background: #7f1d1d;
+  color: #fecaca;
+  border-color: #ef4444;
+}
+
+.dark .date-option.loading {
+  background: var(--input-bg);
+  color: var(--text-muted);
+  border-color: var(--border-color);
+}
+
+.dark .time-slot {
+  background: var(--input-bg);
+  color: var(--text-muted);
+}
+
+.dark .time-slot.unavailable {
+  background-color: #7f1d1d;
+  color: #fecaca;
+  border-color: #ef4444;
+}
+
+.dark .time-slot.loading {
+  background-color: var(--input-bg);
+  color: var(--text-muted);
+  border-color: var(--border-color);
+}
+.dark .review-actions{
+  background: var(--icon-color);
+  color: var(--primary-text-dark);
+}
+.dark .visit-price {
+  background: var(--input-bg);
+  color: var(--text-muted);
+}
+
+.dark .price-label {
+  color: var(--primary-text-dark);
+}
+
+.dark .price-value {
+  color: var(--primary);
+}
+
+.dark .book-now-btn {
+  background: var(--primary);
+  color: var(--primary-text);
+}
+
+.dark .book-now-btn:hover {
+  background: var(--secondary);
+}
+
+.dark .date-nav-btn {
+  background: var(--input-bg);
+  color: var(--primary-text-dark);
+  border-color: var(--border-color);
+}
+
+.dark .date-nav-btn:hover {
+  background: var(--icon-color);
+}
+
+.dark .reviews-section {
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+
+.dark .reviews-title {
+  color: var(--primary-text);
+}
+
+.dark .review-item {
+  background: var(--input-bg);
+  border-color: var(--border-color);
+  color: var(--primary-text-dark);
+}
+
+.dark .review-header {
+  border-bottom-color: var(--border-color);
+  color: var(--primary-text-dark);
+}
+
+.dark .reviewer-name {
+  color: var(--primary-text);
+}
+
+.dark .review-date {
+  color: var(--text-muted);
+}
+
+.dark .review-text {
+  color: var(--primary-text-dark);
+}
+
+.dark .fa-star {
+  color: #fbbf24 !important;
+}
+
+.dark .star-empty {
+  color: var(--border-color);
 }
 </style> 

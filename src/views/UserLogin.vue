@@ -247,10 +247,6 @@ const handleForgotPassword = async () => {
           >
             <i :class="showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
           </button>
-          <!-- Debug info - remove this later -->
-          <small style="position: absolute; top: -20px; right: 0; font-size: 10px; color: #666;">
-            Debug: {{ showPassword ? 'SHOW' : 'HIDE' }}
-          </small>
           <p v-if="errors.password" class="field-error">{{ errors.password }}</p>
         </div>
 

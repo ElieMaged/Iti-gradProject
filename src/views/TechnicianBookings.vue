@@ -172,8 +172,12 @@ watch(() => route.query.status, (newStatus) => {
 .booking-title {
   font-size: 2rem;
   font-weight: bold;
-  color: #7c6bb0;
+  color: var(--primary-color);
   margin-bottom: 0;
+}
+
+.dark .booking-title {
+  color: var(--primary-color);
 }
 
 .search-wrapper {
