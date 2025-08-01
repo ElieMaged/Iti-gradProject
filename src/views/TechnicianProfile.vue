@@ -267,73 +267,7 @@
       </div>
 
     <!-- Footer -->
-    <footer class="main-footer">
-      <div class="footer-content">
-        <div class="footer-section">
-          <div class="footer-logo">BoltFix</div>
-          <p class="footer-description">
-            BoltFix exists to simplify home maintenance for every household in Egypt by connecting users with skilled, verified technicians.
-          </p>
-          <div class="social-links">
-            <h4>{{ $t('socialLinks') }}</h4>
-            <div class="social-icons">
-              <i class="fab fa-facebook"></i>
-              <i class="fab fa-twitter"></i>
-              <i class="fab fa-linkedin"></i>
-              <i class="fab fa-instagram"></i>
-          </div>
-        </div>
-      </div>
 
-        <div class="footer-section">
-          <h4>{{ $t('quickLink') }}</h4>
-          <ul class="footer-links">
-            <li><a href="#">{{ $t('home') }}</a></li>
-            <li><a href="#">{{ $t('aboutUs') }}</a></li>
-            <li><a href="#">{{ $t('services') }}</a></li>
-            <li><a href="#">{{ $t('contactUs') }}</a></li>
-            <li><a href="#">{{ $t('faqs') }}</a></li>
-          </ul>
-        </div>
-        
-        <div class="footer-section">
-          <h4>{{ $t('service') }}</h4>
-          <ul class="footer-links">
-            <li><a href="#">{{ $t('plumping') }}</a></li>
-            <li><a href="#">{{ $t('airConditionerTechnicians') }}</a></li>
-            <li><a href="#">{{ $t('electricity') }}</a></li>
-            <li><a href="#">{{ $t('wallFinishing') }}</a></li>
-            <li><a href="#">{{ $t('carpentry') }}</a></li>
-          </ul>
-          </div>
-          
-        <div class="footer-section">
-          <h4>{{ $t('contactUs') }}</h4>
-          <div class="contact-details">
-            <div class="contact-item">
-              <i class="fas fa-phone"></i>
-              925-465-3762
-            </div>
-            <div class="contact-item">
-              <i class="fas fa-envelope"></i>
-              boltfix@gmail.com
-            </div>
-            <div class="contact-item">
-              <i class="fas fa-map-marker-alt"></i>
-              4096 Modesto, CA 95350, USA
-          </div>
-        </div>
-      </div>
-    </div>
-      
-      <div class="footer-bottom">
-        <div class="copyright">{{ $t('copyright') }} 2025 {{ $t('designAndDevelopedBy') }} ITI {{ $t('students') }}</div>
-        <div class="footer-legal">
-          <a href="#">{{ $t('privacyPolicy') }}</a>
-          <a href="#">{{ $t('termsOfService') }}</a>
-  </div>
-      </div>
-    </footer>
   </div>
 </template>
 
