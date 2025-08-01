@@ -124,16 +124,20 @@
           <div class="form-row">
             <div class="form-group">
               <label>{{ $t('city') }}</label>
-              <select v-model="form.city" class="form-input">
-                <option value="Cairo">{{ $t('cairo') }}</option>
-                <option value="Giza">{{ $t('giza') }}</option>
+              <select v-model="form.city" class="form-input" @change="onCityChange">
+                <option value="">{{ $t('selectCity') || 'Select City' }}</option>
+                <option v-for="city in availableCities" :key="city" :value="city">
+                  {{ city }}
+                </option>
               </select>
             </div>
             <div class="form-group">
               <label>{{ $t('area') }}</label>
-              <select v-model="form.area" class="form-input">
-                <option value="Giza">{{ $t('giza') }}</option>
-                <option value="Maadi">{{ $t('maadi') }}</option>
+              <select v-model="form.area" class="form-input" :disabled="!form.city">
+                <option value="">{{ $t('selectArea') || 'Select Area' }}</option>
+                <option v-for="area in availableAreas" :key="area" :value="area">
+                  {{ area }}
+                </option>
               </select>
             </div>
           </div>
@@ -147,6 +151,14 @@
               <input v-model="form.building" :placeholder="$t('building5')" class="form-input" />
             </div>
           </div>
+          
+          <!-- Location Map Component -->
+          <LocationMap 
+            :city="form.city"
+            :area="form.area"
+            :street="form.street"
+            :building="form.building"
+          />
         </div>
 
         <!-- Payment Method Section -->
@@ -205,6 +217,8 @@ import { useI18n } from 'vue-i18n'
 import { stockTechnicians } from '../assets/stockTechnicians'
 import emailjs from 'emailjs-com';
 import { auth } from '../firebase';
+import LocationMap from '../components/LocationMap.vue';
+import { getGovernmentNames, getDistrictsForGovernment } from '../data/egyptianLocations';
 
 const { t } = useI18n();
 const route = useRoute()
@@ -275,12 +289,31 @@ const form = ref({
   phone: '',
   email: '', // <-- Add email field
   note: '',
-  city: 'Cairo',
-  area: 'Giza',
+  city: '',
+  area: '',
   street: '',
   building: '',
   payment: 'PayPal'
 })
+
+// Location dropdown data
+const availableCities = ref([])
+const availableAreas = ref([])
+
+// Initialize location data
+const initializeLocationData = () => {
+  availableCities.value = getGovernmentNames()
+}
+
+// Handle city change
+const onCityChange = () => {
+  form.value.area = '' // Reset area when city changes
+  if (form.value.city) {
+    availableAreas.value = getDistrictsForGovernment(form.value.city)
+  } else {
+    availableAreas.value = []
+  }
+}
 
 // Function to pre-populate form with user data
 function populateFormWithUserData() {
@@ -618,6 +651,9 @@ onMounted(async () => {
   // Load PayPal script
   loadPayPalScript();
   populateFormWithUserData(); // Call the new function here
+  
+  // Initialize location data
+  initializeLocationData();
 })
 
 // Watch for technician data changes to initialize PayPal when data is available

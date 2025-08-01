@@ -65,14 +65,29 @@
   </div>
 </template>
 
-<script setup>
+<script>
 import { ref, onMounted, computed } from 'vue';
 import { collection, getDocs, query, where, doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useRouter } from 'vue-router';
 import AdminSidebar from '../../components/admin-sidebar.vue';
 import Pagination from '../../components/pagination.vue';
-
+export default {
+  name: 'UpcomingBooking',
+  components: {
+    AdminSidebar,
+    Pagination
+  },
+  data() {
+    return {
+      searchQuery: '',
+      bookings: [],
+      actionLoading: null,
+      query: { edit: 'true' },
+      activeTab: 'upcoming',
+    }
+  }
+}
 const bookings = ref([]);
 const searchQuery = ref('');
 const actionLoading = ref(null);
@@ -290,6 +305,19 @@ const filteredBookings = computed(() => {
   font-size: 0.8rem;
   font-weight: 600;
   text-transform: capitalize;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  border: 1px solid #6b7280;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.booking-status:hover {
+  background: var(--primary-color);
+  color: white !important;
+  border-color: var(--primary-color);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .action-buttons {
