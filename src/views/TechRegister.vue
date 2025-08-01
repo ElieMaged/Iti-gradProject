@@ -487,7 +487,7 @@ import { collection, serverTimestamp, doc, setDoc, addDoc, getDocs, query, where
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useI18n } from 'vue-i18n';
 
-import emailjs from 'emailjs-com';
+
 
 const { t } = useI18n();
 
@@ -791,13 +791,8 @@ async function sendAdminEmailNotification(technicianData) {
       message: `Dear Admin,\n\nA new technician has applied to join BoltFix:\n\nTechnician Details:\n- Name: ${technicianData.fullName}\n- Email: ${technicianData.email}\n- Specialization: ${technicianData.specialization}\n- Experience: ${technicianData.experience} years\n- Location: ${technicianData.government}, ${technicianData.district}\n- Base Price: ${technicianData.basePrice}\n- PayPal Email: ${technicianData.paypalEmail || 'Not provided'}\n\nPlease review this application in your admin dashboard.\n\nBest regards,\nBoltFix System`
     };
 
-    await emailjs.send(
-      import.meta.env.VITE_EMAILJS_SERVICE_ID,
-      import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
-      templateParams,
-      import.meta.env.VITE_EMAILJS_PUBLIC_KEY
-    );
-    console.log('Admin email notification sent successfully!');
+    // Email functionality removed
+    console.log('Admin email template:', templateParams);
     return true;
   } catch (error) {
     console.error('=== ERROR SENDING ADMIN EMAIL NOTIFICATION ===');
@@ -822,13 +817,8 @@ async function sendWelcomeEmail(email, fullName) {
       message: `Dear ${fullName},\n\nCongratulations! Your BoltFix technician account has been successfully created. You are now part of our community of skilled professionals.\n\nYour account details:\nEmail: ${email}\n\nPlease keep your password secure and do not share it with anyone.\n\nBest regards,\nThe BoltFix Team`
     };
 
-    await emailjs.send(
-      import.meta.env.VITE_EMAILJS_SERVICE_ID,
-      import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
-      templateParams,
-      import.meta.env.VITE_EMAILJS_PUBLIC_KEY
-    );
-    console.log('Welcome email sent successfully!');
+    // Email functionality removed
+    console.log('Welcome email template:', templateParams);
     return true;
   } catch (error) {
     console.error('=== ERROR SENDING WELCOME EMAIL ===');

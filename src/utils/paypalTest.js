@@ -149,16 +149,11 @@ export class PayPalTester {
 
     try {
       const clientId = import.meta.env.VITE_PAYPAL_CLIENT_ID;
-      const emailjsServiceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
 
       const issues = [];
 
       if (!clientId || clientId === 'YOUR_PAYPAL_CLIENT_ID') {
         issues.push('PayPal Client ID not configured');
-      }
-
-      if (!emailjsServiceId || emailjsServiceId === 'YOUR_EMAILJS_SERVICE_ID') {
-        issues.push('EmailJS Service ID not configured');
       }
 
       if (issues.length === 0) {
@@ -188,19 +183,41 @@ export class PayPalTester {
     };
 
     try {
-      // Test PayPal domain accessibility
-      const paypalTest = await fetch('https://www.paypal.com/sdk/js', {
-        method: 'HEAD',
-        mode: 'no-cors'
-      }).catch(() => null);
+      const clientId = import.meta.env.VITE_PAYPAL_CLIENT_ID;
+      
+      if (!clientId || clientId === 'YOUR_PAYPAL_CLIENT_ID') {
+        test.status = 'failed';
+        test.details.message = 'PayPal Client ID not configured';
+        return test;
+      }
 
-      if (paypalTest !== null) {
+      // Test PayPal domain accessibility with proper URL
+      const paypalUrl = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD&intent=capture`;
+      
+      try {
+        const paypalTest = await fetch(paypalUrl, {
+          method: 'HEAD',
+          mode: 'no-cors'
+        });
+        
         test.status = 'passed';
         test.details.message = 'PayPal servers accessible';
-      } else {
-        test.status = 'warning';
-        test.details.message = 'PayPal servers may not be accessible';
-        test.details.recommendation = 'Check internet connection and firewall settings';
+      } catch (fetchError) {
+        // If HEAD request fails, try a simple domain check
+        try {
+          const domainTest = await fetch('https://www.paypal.com', {
+            method: 'HEAD',
+            mode: 'no-cors'
+          });
+          
+          test.status = 'warning';
+          test.details.message = 'PayPal domain accessible, but SDK URL may have issues';
+          test.details.recommendation = 'Check Client ID validity and PayPal account status';
+        } catch (domainError) {
+          test.status = 'failed';
+          test.details.message = 'PayPal servers not accessible';
+          test.details.recommendation = 'Check internet connection and firewall settings';
+        }
       }
 
     } catch (error) {

@@ -105,8 +105,21 @@ const initMap = () => {
 
 const detectUserLocation = async () => {
   if (!navigator.geolocation) {
-    alert(t('geolocationNotSupported') || 'Geolocation is not supported by this browser.')
+    console.log('Geolocation is not supported by this browser.')
     return
+  }
+
+  // Check if geolocation permission is granted
+  if (navigator.permissions) {
+    try {
+      const permission = await navigator.permissions.query({ name: 'geolocation' })
+      if (permission.state === 'denied') {
+        console.log('Geolocation permission denied by user')
+        return
+      }
+    } catch (error) {
+      console.log('Could not check geolocation permission:', error)
+    }
   }
 
   isDetecting.value = true
@@ -114,7 +127,7 @@ const detectUserLocation = async () => {
   try {
     const position = await new Promise((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(resolve, reject, {
-        enableHighAccuracy: true,
+        enableHighAccuracy: false, // Changed to false to reduce permission requirements
         timeout: 10000,
         maximumAge: 60000
       })
@@ -136,7 +149,17 @@ const detectUserLocation = async () => {
     
   } catch (error) {
     console.error('Error detecting location:', error)
-    alert(t('locationDetectionFailed') || 'Failed to detect your location. Please check your browser permissions.')
+    
+    // Handle specific geolocation errors
+    if (error.code === 1) {
+      console.log('Geolocation permission denied')
+    } else if (error.code === 2) {
+      console.log('Geolocation position unavailable')
+    } else if (error.code === 3) {
+      console.log('Geolocation timeout')
+    } else {
+      console.log('Geolocation error:', error.message)
+    }
   } finally {
     isDetecting.value = false
   }

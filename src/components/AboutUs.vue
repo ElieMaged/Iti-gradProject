@@ -1,61 +1,49 @@
 <template>
-  <section class="about-us ">
-    <div class="about-container mx-20">
+  <section class="about-us">
+    <div class="about-container custom-container">
       <div class="about-content">
         <div class="about-text">
-          <h2 class="aboutus-title">{{ $t('aboutUsSectionTitle') }}</h2>
+          <h2 class="aboutus-title">{{ $t("aboutUsSectionTitle") }}</h2>
           <p class="about-description">
-            {{ $t('aboutUsSectionDesc') }}
+            {{ $t("aboutUsSectionDesc") }}
           </p>
-          
+
           <div class="about-features">
             <div class="feature-item">
               <div class="feature-icon">
-                <img src="/images/About-Us images/Frame 18596.png" alt="Qualified team" />
+                <img
+                  src="/images/About-Us images/Frame 18596.png"
+                  alt="Qualified team"
+                />
               </div>
               <div class="feature-content">
-                <h3 class="feature-title">{{ $t('aboutFeature1Title') }}</h3>
-                <p class="feature-description">{{ $t('aboutFeature1Desc') }}</p>
+                <h3 class="feature-title">{{ $t("aboutFeature1Title") }}</h3>
+                <p class="feature-description">{{ $t("aboutFeature1Desc") }}</p>
               </div>
             </div>
-            
+
             <div class="feature-item">
               <div class="feature-icon">
-                <img src="/images/About-Us images/Frame 18596.png" alt="Qualified team" />
+                <img
+                  src="../../public/images/About-Us images/Frame 18596.png"
+                  alt="Qualified team"
+                />
               </div>
               <div class="feature-content">
-                <h3 class="feature-title">{{ $t('aboutFeature2Title') }}</h3>
-                <p class="feature-description">{{ $t('aboutFeature2Desc') }}</p>
+                <h3 class="feature-title">{{ $t("aboutFeature2Title") }}</h3>
+                <p class="feature-description">{{ $t("aboutFeature2Desc") }}</p>
               </div>
             </div>
           </div>
-          
 
           <button class="about-btn" @click="$router.push('/about')">
-            {{ $t('aboutMoreBtn') }}
+            {{ $t("aboutMoreBtn") }}
           </button>
         </div>
       </div>
-      
-      <div class="about-images">
-        <div class="image-container">
-          <div class="circular-image top-right">
-            <img src="/images/About-Us images/Rectangle 34624196.png" alt="Network cables work" />
-          </div>
-          <div class="circular-image middle">
-            <img src="/images/About-Us images/Rectangle 34624197.png" alt="Carpentry work" />
-          </div>
-          <div class="circular-image bottom-right">
-            <img src="/images/About-Us images/Rectangle 34624198.png" alt="Plumbing work" />
-          </div>
-          
-          <!-- Decorative stars -->
-          <div class="star star-1"></div>
-          <div class="star star-2"></div>
-          <div class="star star-3"></div>
-          <div class="star star-4"></div>
-          <div class="star star-5"></div>
-        </div>
+
+      <div class="image-container">
+        <img src="../assets/home/about.png" alt="About Us" />
       </div>
     </div>
   </section>
@@ -63,7 +51,7 @@
 
 <script>
 export default {
-  name: 'AboutUs'
+  name: "AboutUs",
 };
 </script>
 
@@ -76,9 +64,6 @@ export default {
 }
 
 .about-container {
-  width: 90%;
-  max-width: 1200px;
-  margin: 0 auto;
   display: flex;
   align-items: center;
   gap: 60px;
@@ -111,8 +96,7 @@ export default {
 
 .about-features {
   display: flex;
-    flex-direction: row;
-  gap: 50px;
+  flex-direction: row;
 }
 
 .feature-item {
@@ -137,7 +121,9 @@ export default {
   color: #fff;
   font-size: 0.8rem;
 }
-
+.dark .feature-icon {
+  color: var(--opacity-gray);
+}
 .feature-content {
   flex: 1;
 }
@@ -174,23 +160,10 @@ export default {
   background: #4e3b7a;
 }
 
-.about-images {
-  flex: 1;
-  position: relative;
-  height: 600px;
-}
-
 .image-container {
   position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-.circular-image {
-  position: absolute;
-  overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  border-radius: 240px;
+  width: 517px;
+  height: 649px;
 }
 
 .circular-image img {
@@ -198,68 +171,12 @@ export default {
   height: 100%;
   object-fit: cover;
 }
-
-.top-right {
-  width: 232px;
-  height: 300px;
-  top: -50px;
-  right: 60px;
-}
-
-.middle {
-  width: 295px;
-  height: 400px;
-  top: 60%;
-  left: 25%;
-  transform: translate(-50%, -50%);
-}
-
-.bottom-right {
-  width: 217px;
-  height: 271px;
-  bottom: -30px;
-  right: 30px;
-}
-
-/* Decorative stars */
-.star {
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  background: #333;
-  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
-}
-
-.star-1 {
-  top: 10%;
-  left: 20%;
-}
-
-.star-2 {
-  top: 30%;
-  right: 15%;
-}
-
-.star-3 {
-  bottom: 20%;
-  left: 10%;
-}
-
-.star-4 {
-  top: 60%;
-  left: 30%;
-}
-
-.star-5 {
-  bottom: 40%;
-  right: 25%;
-}
 .dark .about-us {
   background-color: var(--secondary);
 }
 @media (max-width: 1000px) {
   .about-container {
-    display:flex;
+    display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -267,9 +184,6 @@ export default {
 }
 
 .about-container {
-  width: 90%;
-  max-width: 1200px;
-  margin: 0 auto;
   display: flex;
   align-items: center;
   gap: 60px;
@@ -283,7 +197,7 @@ export default {
   max-width: 500px;
 }
 
-.about-title {  
+.about-title {
   font-size: 3.5rem;
   font-weight: 700;
   color: #333;
@@ -308,7 +222,6 @@ export default {
 .about-features {
   display: flex;
   flex-direction: row;
-  gap: 50px;
 }
 
 .feature-item {
@@ -379,204 +292,42 @@ export default {
   background: #4e3b7a;
 }
 
-.about-images {
-  flex: 1;
-  position: relative;
-  height: 600px;
-}
-
-.image-container {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-.circular-image {
-  position: absolute;
-  overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  border-radius: 240px;
-}
-
-.about-images{
-  background-color: var(--secondary);
-}
-.circular-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.top-right {
-  width: 232px;
-  height: 300px;
-  top: -50px;
-  right: 60px;
-}
-
-.middle {
-  width: 295px;
-  height: 400px;
-  top: 60%;
-  left: 25%;
-  transform: translate(-50%, -50%);
-}
-
-.bottom-right {
-  width: 217px;
-  height: 271px;
-  bottom: -30px;
-  right: 30px;
-}
-
-/* Decorative stars */
-.star {
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  background: #333;
-  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
-}
-
-.star-1 {
-  top: 10%;
-  left: 20%;
-}
-
-.star-2 {
-  top: 30%;
-  right: 15%;
-}
-
-.star-3 {
-  bottom: 20%;
-  left: 10%;
-}
-
-.star-4 {
-  top: 60%;
-  left: 30%;
-}
-
-.star-5 {
-  bottom: 40%;
-  right: 25%;
-}
-
 /* Responsive design */
+@media (max-width: 1160px) {
+  .about-container {
+    flex-direction: column;
+    gap: 40px;
+  }
+  .about-images {
+    height: 350px;
+    order: 2;
+  }
+}
 @media (max-width: 1024px) {
   .about-container {
     gap: 40px;
   }
-  
+
   .about-title {
     font-size: 2.2rem;
-  }
-  
-  .about-images {
-    height: 450px;
-  }
-  
-  .top-right {
-    width: 200px;
-    height: 260px;
-    top: -40px;
-    right: 50px;
-  }
-  
-  .middle {
-    width: 260px;
-    height: 350px;
-    top: 55%;
-    left: 30%;
-  }
-  
-  .bottom-right {
-    width: 190px;
-    height: 240px;
-    bottom: -25px;
-    right: 25px;
   }
 }
 
 @media (max-width: 768px) {
-  .about-us {
-    min-height: 300vh;
-  }
-  .about-container {
-    flex-direction: column;
-    gap: 40px;
-    
-  }
-  
   .about-title {
     font-size: 2rem;
   }
-  
+
   .about-description {
     font-size: 1rem;
   }
-  
-  .about-images {
-    height: 500px;
-    position: relative;
-    order: 2; /* Move images below content */
-  }
-  
+
   .about-content {
     order: 1; /* Move content above images */
   }
-  
-  .circular-image {
-    width: 50px;
-    height: 50px;
-  }
-  
-  .top-right {
-    width: 140px;
-    height: 180px;
-    top: -20px;
-    right: 30px;
-  }
-  
-  .middle {
-    width: 180px;
-    height: 240px;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-  }
-  
-  .bottom-right {
-    width: 120px;
-    height: 160px;
-    bottom: -10px;
-    right: 15px;
-  }
-  
-  .star-1 {
-    top: 5%;
-    left: 15%;
-  }
-  
-  .star-2 {
-    top: 25%;
-    right: 10%;
-  }
-  
-  .star-3 {
-    bottom: 15%;
-    left: 5%;
-  }
-  
-  .star-4 {
-    top: 55%;
-    left: 25%;
-  }
-  
-  .star-5 {
-    bottom: 35%;
-    right: 20%;
+  .image-container {
+    width: 100%;
+    height: 100%;
   }
 }
 
@@ -584,99 +335,37 @@ export default {
   .about-us {
     padding: 60px 0;
   }
-  
+
   .about-container {
     gap: 30px;
   }
-  
+
   .about-title {
     font-size: 1.8rem;
     text-align: center;
   }
-  
+
   .about-description {
     font-size: 0.9rem;
     text-align: center;
   }
-  
+
   .about-text {
     text-align: center;
   }
-  
+
   .about-features {
     display: flex;
     flex-direction: column;
     align-items: center;
   }
-  
+
   .feature-item {
     text-align: center;
   }
-  
+
   .feature-content {
     text-align: center;
   }
-  
-  .about-images {
-    height: 250px;
-    order: 2;
-  }
-  
-  .circular-image {
-    width: 80px;
-    height: 80px;
-  }
-  
-  .top-right {
-    width: 100px;
-    height: 130px;
-    top: -4px;
-    left: -10px;
-  }
-  
-  .middle {
-    width: 120px;
-    height: 160px;
-    top: 200px;
-    left: -35px;
-    transform: translate(-50%, -50%);
-  }
-  
-  .bottom-right {
-    width: 90px;
-    height: 120px;
-    top: 130px;
-    left: 35px;
-  }
-  
-  .star {
-    width: 6px;
-    height: 6px;
-  }
-  
-  .star-1 {
-    top: 5%;
-    left: 10%;
-  }
-  
-  .star-2 {
-    top: 20%;
-    right: 5%;
-  }
-  
-  .star-3 {
-    bottom: 10%;
-    left: 5%;
-  }
-  
-  .star-4 {
-    top: 50%;
-    left: 20%;
-  }
-  
-  .star-5 {
-    bottom: 30%;
-    right: 15%;
-  }
 }
-</style> 
+</style>

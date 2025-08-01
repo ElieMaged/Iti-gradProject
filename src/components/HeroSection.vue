@@ -2,17 +2,21 @@
   <section class="hero-section">
     <div class="hero-banner">
       <div class="hero-background">
-        <img src="/images/WhatsApp Image 2025-07-20 at 15.30.04_8395c57a.jpg" alt="Handyman working" class="background-image" />
+        <img
+          src="/images/WhatsApp Image 2025-07-20 at 15.30.04_8395c57a.jpg"
+          alt="Handyman working"
+          class="background-image"
+        />
         <div class="overlay"></div>
       </div>
       <div class="hero-content">
         <div class="hero-text">
-          <h1 class="hero-title">{{ $t('heroSectionTitle') }}</h1>
+          <h1 class="hero-title">{{ $t("heroSectionTitle") }}</h1>
           <p class="hero-description">
-            {{ $t('heroSectionDescription') }}
+            {{ $t("heroSectionDescription") }}
           </p>
           <button class="hero-btn">
-            {{ $t('heroSectionBookBtn') }}
+            {{ $t("heroSectionBookBtn") }}
             <span class="arrow">→</span>
           </button>
         </div>
@@ -23,7 +27,7 @@
 
 <script>
 export default {
-  name: 'HeroSection'
+  name: "HeroSection",
 };
 </script>
 
@@ -73,7 +77,7 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.3);
   z-index: 2;
 }
 
@@ -101,9 +105,9 @@ export default {
 }
 
 .hero-title {
-  color: var(--text-color-text-white, #FFF);
+  color: var(--text-color-text-white, #fff);
   font-family: Outfit, sans-serif;
-  font-size: 55px;
+  font-size: 48px;
   font-style: normal;
   font-weight: 600;
   line-height: 72px; /* 118.033% */
@@ -151,7 +155,7 @@ export default {
     font-size: 48px;
     line-height: 60px;
   }
-  
+
   .hero-description {
     font-size: 0.95rem;
   }
@@ -161,26 +165,26 @@ export default {
   .hero-section {
     min-height: 500px;
   }
-  
+
   .hero-banner {
     min-height: 300px;
   }
-  
+
   .hero-content {
     padding: 0 20px;
     min-height: 300px;
   }
-  
+
   .hero-title {
     font-size: 36px;
     line-height: 44px;
   }
-  
+
   .hero-description {
     font-size: 0.9rem;
     margin-bottom: 20px;
   }
-  
+
   .hero-btn {
     padding: 12px 24px;
     font-size: 1rem;
@@ -191,30 +195,30 @@ export default {
   .hero-section {
     min-height: 400px;
   }
-  
+
   .hero-banner {
     min-height: 250px;
     border-radius: 12px;
   }
-  
+
   .hero-content {
     padding: 0 16px;
     min-height: 250px;
   }
-  
+
   .hero-title {
     font-size: 28px;
     line-height: 36px;
   }
-  
+
   .hero-description {
     font-size: 0.85rem;
     margin-bottom: 16px;
   }
-  
+
   .hero-btn {
     padding: 10px 20px;
     font-size: 0.9rem;
   }
 }
-</style> 
+</style>

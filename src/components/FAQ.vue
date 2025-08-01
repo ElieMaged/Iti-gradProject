@@ -1,28 +1,34 @@
 <template>
   <section class="faq">
     <!-- FAQ Content at the top -->
-    <div class="faq-content m-20">
+    <div class="faq-content my-14">
       <div class="faq-header">
         <div class="faq-title-box">
-          <h2 class="faq-title">{{ $t('faqTitle') }}</h2>
+          <h2 class="faq-title">{{ $t("faqTitle") }}</h2>
         </div>
         <div class="faq-intro">
-          <p>{{ $t('faqIntro') }}</p>
+          <p>{{ $t("faqIntro") }}</p>
         </div>
       </div>
     </div>
     <!-- Image and Accordion below -->
-    <div class="faq-container flex flex-col md:flex-row align-items-center justify-center">
+    <div
+      class="faq-container flex flex-col md:flex-row align-items-center justify-center"
+    >
       <div class="faq-image">
-        <img src="/images/questions image.png" alt="Plumbers working in kitchen" class="plumbers-photo" />
+        <img
+          src="/images/questions image.png"
+          alt="Plumbers working in kitchen"
+          class="plumbers-photo"
+        />
       </div>
       <!-- Left Side - FAQ Accordion -->
-      <div class="faq-accordion">
-        <div 
-          v-for="(item, index) in faqItems" 
-          :key="index" 
+      <div class="faq-accordion custom-container">
+        <div
+          v-for="(item, index) in faqItems"
+          :key="index"
           class="faq-item"
-          :class="{ 'active': item.isExpanded }"
+          :class="{ active: item.isExpanded }"
           @click="toggleFAQ(index)"
         >
           <div class="faq-question">
@@ -31,7 +37,7 @@
               <i :class="item.isExpanded ? 'fas fa-minus' : 'fas fa-plus'"></i>
             </div>
           </div>
-          <div class="faq-answer" :class="{ 'expanded': item.isExpanded }">
+          <div class="faq-answer" :class="{ expanded: item.isExpanded }">
             <p>{{ $t(item.answer) }}</p>
           </div>
         </div>
@@ -43,37 +49,37 @@
 
 <script>
 export default {
-  name: 'FAQ',
+  name: "FAQ",
   data() {
     return {
       isLoaded: false,
       faqItems: [
         {
-          question: 'faqQ1',
-          answer: 'faqA1',
-          isExpanded: true
+          question: "faqQ1",
+          answer: "faqA1",
+          isExpanded: true,
         },
         {
-          question: 'faqQ2',
-          answer: 'faqA2',
-          isExpanded: false
+          question: "faqQ2",
+          answer: "faqA2",
+          isExpanded: false,
         },
         {
-          question: 'faqQ3',
-          answer: 'faqA3',
-          isExpanded: false
+          question: "faqQ3",
+          answer: "faqA3",
+          isExpanded: false,
         },
         {
-          question: 'faqQ4',
-          answer: 'faqA4',
-          isExpanded: false
+          question: "faqQ4",
+          answer: "faqA4",
+          isExpanded: false,
         },
         {
-          question: 'faqQ5',
-          answer: 'faqA5',
-          isExpanded: false
-        }
-      ]
+          question: "faqQ5",
+          answer: "faqA5",
+          isExpanded: false,
+        },
+      ],
     };
   },
   mounted() {
@@ -92,19 +98,19 @@ export default {
       });
       // Toggle the clicked item
       this.faqItems[index].isExpanded = !this.faqItems[index].isExpanded;
-    }
-  }
+    },
+  },
 };
 </script>
 
 <style scoped>
 .faq {
-  background: #F4F4F5;
+  background: #f4f4f5;
   padding: 80px 0;
   width: 100%;
 }
 .dark .faq {
-  background: var(--secondary-bg);
+  background: var(--color-black);
   color: var(--primary-text);
 }
 .faq-content {
@@ -124,10 +130,19 @@ export default {
 .faq-title-box {
   padding: 20px 30px;
   display: inline-block;
-  max-width: 300px;
+  max-width: 426px;
   flex: 0 1 auto;
 }
 .dark .faq-title-box {
+  color: var(--primary-text);
+}
+.faq-title {
+  font-size: 38px;
+  font-weight: 600;
+  color: var(--black-text);
+  font-family: Outfit, sans-serif;
+}
+.dark .faq-title {
   color: var(--primary-text);
 }
 .faq-intro {
@@ -140,19 +155,19 @@ export default {
 }
 
 .faq-intro p {
-  color: #8C8E90;
+  color: var(--text-gray);
   padding: 20px 30px;
   font-family: Outfit, sans-serif;
   font-size: 16px;
   font-weight: 400;
-  line-height: 24px; 
+  line-height: 24px;
+  max-width: 464px;
 }
 .dark .faq-intro p {
-  color: var(--text-muted);
+  color: var(--black-gray);
 }
 .faq-container {
-  width: 90%;
-  max-width: 1200px;
+  max-width: 1280px;
   margin: 0 auto 40px auto;
   display: flex;
   flex-direction: row;
@@ -165,7 +180,6 @@ export default {
   flex: 1;
   min-width: 250px;
   max-width: 500px;
-  min-height: 500px;
   display: flex;
   align-items: flex-start;
 }
@@ -187,11 +201,21 @@ export default {
   gap: 20px;
 }
 
-.faq-item:nth-child(1) { animation-delay: 0.1s; }
-.faq-item:nth-child(2) { animation-delay: 0.2s; }
-.faq-item:nth-child(3) { animation-delay: 0.3s; }
-.faq-item:nth-child(4) { animation-delay: 0.4s; }
-.faq-item:nth-child(5) { animation-delay: 0.5s; }
+.faq-item:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.faq-item:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.faq-item:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.faq-item:nth-child(4) {
+  animation-delay: 0.4s;
+}
+.faq-item:nth-child(5) {
+  animation-delay: 0.5s;
+}
 
 @keyframes fadeInUp {
   to {
@@ -218,10 +242,9 @@ export default {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 .dark .faq-item {
-  background: var(--secondary-bg);
+  background: var(--color-black);
   color: var(--primary-text);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 -1px 3px rgba(255, 255, 255, 0.3);
 }
 
 .dark .faq-item:hover {
@@ -267,7 +290,7 @@ export default {
 }
 
 .question-text {
-  font-size: 1.1rem;
+  font-size: 20px;
   font-weight: 600;
   color: #333;
   margin: 0;
@@ -279,7 +302,7 @@ export default {
   color: var(--primary-text);
 }
 .dark .faq-answer {
-  color: var(--text-muted);
+  color: var(--color-black);
 }
 .faq-icon {
   width: 32px;
@@ -347,10 +370,6 @@ export default {
   .faq-header {
     gap: 60px;
   }
-  
-  .faq-intro p {
-    width: 40%;
-  }
 }
 
 @media (max-width: 900px) {
@@ -358,7 +377,8 @@ export default {
     flex-direction: column;
     gap: 32px;
   }
-  .faq-image, .faq-accordion {
+  .faq-image,
+  .faq-accordion {
     max-width: 100%;
   }
   .plumbers-photo {
@@ -370,32 +390,33 @@ export default {
   .faq {
     padding: 60px 0;
   }
-  
+
   .faq-container {
     flex-direction: column;
     gap: 40px;
   }
-  
+
   .faq-header {
     flex-direction: column;
     gap: 16px;
   }
-  
-  .faq-title-box, .faq-intro {
+
+  .faq-title-box,
+  .faq-intro {
     max-width: 100%;
     width: 100%;
     padding: 16px 10px;
   }
-  
+
   .faq-intro p {
     width: 100%;
     font-size: 0.9rem;
   }
-  
+
   .plumbers-photo {
     height: 300px;
   }
-  
+
   .faq-title {
     font-size: 2.5rem;
     font-weight: 700;
@@ -403,19 +424,19 @@ export default {
     font-family: Outfit, sans-serif;
     color: #333;
   }
-  
+
   .dark .faq-title {
     color: var(--primary-text);
   }
-  
+
   .faq-question {
     padding: 20px;
   }
-  
+
   .faq-answer {
     padding: 0 20px 20px 20px;
   }
-  
+
   .faq-content {
     margin-bottom: 24px;
   }
@@ -425,38 +446,38 @@ export default {
   .faq {
     padding: 40px 0;
   }
-  
+
   .faq-content {
     margin-bottom: 20px;
   }
-  
+
   .faq-container {
     gap: 30px;
   }
-  
+
   .faq-title {
     font-size: 2rem;
   }
-  
+
   .faq-intro p {
     font-size: 0.85rem;
   }
-  
+
   .plumbers-photo {
     height: 250px;
   }
-  
+
   .faq-question {
     padding: 16px;
   }
-  
+
   .faq-answer {
     padding: 0 16px 16px 16px;
     font-size: 0.9rem;
   }
-  
+
   .question-text {
     font-size: 1rem;
   }
 }
-</style> 
+</style>

@@ -1,18 +1,44 @@
 <template>
-  <section class="services-section m-20">
-    <div class="">
-      <h2 class="services-title">{{ $t('servicesSectionTitle') }}</h2>
-      <hr class="services-divider" />
-      <div class="services-grid">
-        <div v-for="(service, idx) in services" :key="idx" class="service-card">
-          <img :src="service.image" :alt="service.title" class="service-image" />
-          <div class="service-content">
-            <h3 class="service-title">{{ $t(service.title) }}</h3>
-            <p class="service-desc">{{ $t(service.desc) }}</p>
-            <button class="service-btn" @click="$router.push(service.route || '#')">
-              {{ $t('bookNow') }}
-              <span class="arrow">→</span>
-            </button>
+  <section class="services-section py-28">
+    <div class="custom-container">
+      <div class="">
+        <h2 class="services-title">{{ $t("servicesSectionTitle") }}</h2>
+        <hr class="services-divider" />
+        <div class="services-grid">
+          <div
+            v-for="(service, idx) in services"
+            :key="idx"
+            class="service-card"
+          >
+            <img
+              :src="service.image"
+              :alt="service.title"
+              class="service-image"
+            />
+            <div class="service-content">
+              <h3 class="service-title">{{ $t(service.title) }}</h3>
+              <p class="service-desc">{{ $t(service.desc) }}</p>
+              <button
+                class="service-btn"
+                @click="$router.push(service.route || '#')"
+              >
+                {{ $t("bookNow") }}
+                <span class="arrow"
+                  ><svg
+                    width="13"
+                    height="12"
+                    viewBox="0 0 13 12"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M10.3717 8.07225C10.3783 8.58189 10.7968 9.0004 11.3065 9.00702C11.8161 9.01364 12.2239 8.60586 12.2173 8.09622L12.1269 1.13614C12.1203 0.626497 11.7017 0.207986 11.1921 0.201368L4.23203 0.110977C3.72238 0.104357 3.3146 0.512138 3.32122 1.02178C3.32784 1.53142 3.74635 1.94993 4.25599 1.95655L8.98828 2.01801L0.667927 10.3384C0.312237 10.694 0.319825 11.2783 0.684875 11.6434C1.04993 12.0084 1.6342 12.016 1.98989 11.6603L10.3102 3.33997L10.3717 8.07225Z"
+                      fill="black"
+                    />
+                  </svg>
+                </span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -21,69 +47,64 @@
 </template>
 
 <script>
-import '../style.css'
+import "../style.css";
 export default {
-  name: 'ServicesSection',
+  name: "ServicesSection",
   data() {
     return {
       services: [
         {
-          title: 'plumbingServiceTitle',
-          title: 'Plumbing',
-          route: '/plumbing',
+          title: "plumbingServiceTitle",
+          title: "Plumbing",
+          route: "/plumbing",
 
-          image: '/images/servicesImages/plumbing.png',
-          desc: 'plumbingServiceDesc',
+          image: "/images/servicesImages/plumbing.png",
+          desc: "plumbingServiceDesc",
         },
         {
+          title: "carpentryServiceTitle",
 
-          title: 'carpentryServiceTitle',
+          title: "Carpentry",
+          route: "/carpentry",
 
-          title: 'Carpentry',
-          route: '/carpentry',
-
-          image: '/images/servicesImages/Carpentry.png',
-          desc: 'carpentryServiceDesc',
+          image: "/images/servicesImages/Carpentry.png",
+          desc: "carpentryServiceDesc",
         },
         {
+          title: "electricityServiceTitle",
 
-          title: 'electricityServiceTitle',
+          title: "Electricity",
+          route: "/electricity",
 
-          title: 'Electricity',
-          route: '/electricity',
-
-          image: '/images/servicesImages/Electrecity.png',
-          desc: 'electricityServiceDesc',
+          image: "/images/servicesImages/Electrecity.png",
+          desc: "electricityServiceDesc",
         },
         {
+          title: "acTechniciansServiceTitle",
 
-          title: 'acTechniciansServiceTitle',
+          title: "AC Technicians",
+          route: "/aircondition",
 
-          title: 'AC Technicians',
-          route: '/aircondition',
-
-          image: '/images/servicesImages/Ac Technicions.png',
-          desc: 'acTechniciansServiceDesc',
+          image: "/images/servicesImages/Ac Technicions.png",
+          desc: "acTechniciansServiceDesc",
         },
         {
+          title: "applianceRepairServiceTitle",
 
-          title: 'applianceRepairServiceTitle',
+          title: "Electrical Appliance Repair",
+          route: "/elecTechnicians",
 
-          title: 'Electrical Appliance Repair',
-          route: '/elecTechnicians',
-
-          image: '/images/servicesImages/electrical appliance repair.png',
-          desc: 'applianceRepairServiceDesc',
+          image: "/images/servicesImages/electrical appliance repair.png",
+          desc: "applianceRepairServiceDesc",
         },
         {
+          title: "wallFinishingServiceTitle",
 
-          title: 'wallFinishingServiceTitle',
+          title: "Wall finishing",
+          route: "/wallfinishing",
 
-          title: 'Wall finishing',
-          route: '/wallfinishing',
-
-          image: '/images/servicesImages/wall finishing.png',
-          desc: 'wallFinishingServiceDesc',
+          image: "/images/servicesImages/wall finishing.png",
+          desc: "wallFinishingServiceDesc",
         },
       ],
     };
@@ -92,161 +113,175 @@ export default {
 </script>
 
 <style scoped>
-
+.services-section {
+  background-color: var(--primary-text);
+}
+.dark .services-section {
+  background: var(--color-black);
+  color: var(--primary-text);
+}
 @media (max-width: 1000px) {
   .services-section {
-    display:flex;
+    margin: 80px 0;
+    display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
   }
 }
 .services-title {
-  font-size: 2.5rem;
-  font-weight: 700;
+  font-size: 44px;
+  font-weight: 600;
   text-align: center;
-  margin-bottom: 10px;
+  margin-bottom: 40px;
   font-family: Outfit, sans-serif;
+  line-height: 56px;
 }
 .services-divider {
   width: 100%;
-  border: 1.5px solid #c2bebe;
+  background-color: var(--light-green);
   margin-bottom: 32px;
 }
 .services-grid {
+  margin-top: 40px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 32px;
   width: 100%;
 }
 .service-card {
-  background: #fff;
-  border-radius: 18px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  gap: 16px;
   transition: transform 0.2s;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 30px;
 }
 .dark .service-card {
   background: var(--secondary-bg);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .service-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
 }
 .dark .service-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
 }
 .service-image {
   width: 100%;
-  height: 180px;
+  height: 262px;
   object-fit: cover;
+  border-radius: 30px;
 }
 .service-content {
-  padding: 24px 20px 20px 20px;
+  padding: 10px;
   flex: 1;
   display: flex;
   flex-direction: column;
+  gap: 16px;
 }
 .service-title {
-  font-size: 1.2rem;
-  font-weight: 700;
+  font-size: 24px;
+  font-weight: 600;
   margin-bottom: 8px;
+  line-height: 32px;
   font-family: Outfit, sans-serif;
+  color: var(--black-text);
+}
+.dark .service-title {
+  color: var(--color-white);
 }
 .service-desc {
-  font-size: 0.98rem;
-  color: var(--text-muted);
+  font-size: 16px;
+  color: var(--text-gray);
   margin-bottom: 18px;
   flex: 1;
+  font-weight: 400;
+  line-height: 24px;
 }
 .dark .service-desc {
-  color: var(--text-muted);
+  color: var(--card-text-gray);
 }
 .service-btn {
-  background: #625397;
+  background: var(--primary-color);
   color: #fff;
   border: none;
   border-radius: 20px;
-  padding: 10px 12px;
-  font-size: 0.95rem;
-  font-weight: 500;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
   cursor: pointer;
   display: flex;
-  align-items: center;
+  gap: 10px;
   width: fit-content;
-  min-width: 80px;
-  max-width: 120px;
+  align-items: center;
   transition: background 0.2s;
+  margin-bottom: 30px;
 }
 .dark .service-btn {
   background: var(--primary-color);
-  color: var(--primary-text);
+  color: var(--white);
 }
 .service-btn:hover {
   background: #4e3b7a;
 }
 .dark .service-btn:hover {
-  background: var(--primary-color);
+  background: #4e3b7a;
   color: var(--primary-text);
 }
-.arrow {
-  
-  margin-left: 6px;
-  transform: rotate(-45deg);
+.arrow svg {
+  font-size: 20px;
+  font-weight: 800;
 }
-
+.arrow svg path {
+  fill: var(--white);
+}
+.dark .arrow svg path {
+  fill: var(--white);
+}
 /* Responsive design */
 @media (max-width: 1024px) {
   .services-section {
-    width: 95%;
-    padding: 30px 0 0 0;
+    margin: 60px 0;
   }
-  
   .services-title {
     font-size: 2.2rem;
+    margin-bottom: 35px;
   }
-  
+
   .services-grid {
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 24px;
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 700px) {
   .services-section {
-    width: 95%;
-    margin: 0 auto 40px auto;
-    padding: 20px 0 0 0;
+    margin: 40px 0;
   }
-  
   .services-title {
     font-size: 2rem;
+    margin-bottom: 30px;
   }
-  
+
   .services-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(1, 1fr);
     gap: 20px;
   }
-  
+
   .service-card {
     max-width: 400px;
   }
-  
+
   .service-content {
     padding: 20px 16px 16px 16px;
   }
-  
+
   .service-title {
     font-size: 1.1rem;
   }
-  
+
   .service-desc {
     font-size: 0.9rem;
   }
@@ -254,37 +289,36 @@ export default {
 
 @media (max-width: 480px) {
   .services-section {
-    width: 100%;
-    padding: 15px 0 0 0;
+    margin: 20px 0;
   }
-  
   .services-title {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
   }
-  
+
   .services-grid {
     gap: 16px;
   }
-  
+
   .service-image {
     height: 150px;
   }
-  
+
   .service-content {
     padding: 16px 12px 12px 12px;
   }
-  
+
   .service-title {
     font-size: 1rem;
   }
-  
+
   .service-desc {
     font-size: 0.85rem;
   }
-  
+
   .service-btn {
     padding: 8px 10px;
     font-size: 0.9rem;
   }
 }
-</style> 
+</style>
