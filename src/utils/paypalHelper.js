@@ -54,7 +54,7 @@ class PayPalHelper {
       this.removeExistingScripts();
 
       // Debug the PayPal SDK URL
-      const paypalUrl = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD&intent=capture&components=buttons`;
+      const paypalUrl = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD&intent=capture&components=buttons&enable-funding=card`;
       console.log('🔗 PayPal SDK URL:', paypalUrl);
       console.log('📏 URL length:', paypalUrl.length);
       console.log('🔍 URL parameters breakdown:');
@@ -62,6 +62,7 @@ class PayPalHelper {
       console.log('- currency: USD');
       console.log('- intent: capture');
       console.log('- components: buttons');
+      console.log('- enable-funding: card');
 
       return new Promise((resolve, reject) => {
         const script = document.createElement('script');

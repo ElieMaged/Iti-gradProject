@@ -600,14 +600,14 @@ onMounted(async () => {
     }
     if (docSnap.exists()) {
       const techData = docSnap.data();
-      technician.value = {
-        ...techData,
-        uid: id, // Ensure uid is set for consistency
-        name: techData.fullName || techData.name, // Map fullName to name for consistency
-        image: techData.profileImage || techData.image || techData.idPhotoUrl || '/images/Avatar.png' // Map image field - prioritize profile picture
-      };
-      console.log('Technician data loaded:', technician.value);
-      console.log('Technician image:', technician.value.image);
+                    technician.value = {
+                ...techData,
+                uid: id, // Ensure uid is set for consistency
+                name: techData.fullName || techData.name, // Map fullName to name for consistency
+                profilePhotoUrl: techData.profileImage || techData.image || techData.idPhotoUrl || '/images/Avatar.png' // Map to profilePhotoUrl for template consistency
+              };
+              console.log('Technician data loaded:', technician.value);
+        console.log('Technician profile photo:', technician.value.profilePhotoUrl);
     } else {
       errorMsg.value = 'Technician not found. Please try again or contact support.';
       return;
@@ -856,7 +856,7 @@ function initializePayPalButton() {
       // Test button eligibility before creating
       try {
         const testButton = window.paypal.Buttons({
-          fundingSource: window.paypal.FUNDING.PAYPAL,
+          fundingSource: [window.paypal.FUNDING.PAYPAL, window.paypal.FUNDING.CARD],
           createOrder: () => Promise.resolve('test'),
           onApprove: () => Promise.resolve()
         });
@@ -876,8 +876,8 @@ function initializePayPalButton() {
       
       // Create PayPal button with enhanced error handling
       const paypalButton = window.paypal.Buttons({
-        // Use PayPal funding source only for now to resolve availability issues
-        fundingSource: window.paypal.FUNDING.PAYPAL,
+        // Enable both PayPal and card funding sources
+        fundingSource: [window.paypal.FUNDING.PAYPAL, window.paypal.FUNDING.CARD],
         
         // Add render method for additional debugging
         render: function(container) {
@@ -931,6 +931,9 @@ function initializePayPalButton() {
                 amount: {
                   value: usdAmount,
                   currency_code: 'USD'
+                },
+                payee: {
+                  email_address: 'narutossj23@yahoo.com'
                 },
                 description: `Booking with ${technician.value.name} - ${form.value.date} at ${form.value.time}`,
                 custom_id: `booking_${Date.now()}`,
