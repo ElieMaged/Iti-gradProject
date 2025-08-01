@@ -19,9 +19,7 @@
     "clean": "rm -rf dist node_modules package-lock.json && npm install"
   },
   "dependencies": {
-    "@emailjs/browser": "^4.4.1",
-    "@paypal/checkout-server-sdk": "^1.0.3",
-    "@paypal/react-paypal-js": "^8.8.3",
+    "@popperjs/core": "^2.11.8",
     "@sendgrid/mail": "^8.1.5",
     "@tailwindcss/vite": "^4.1.11",
     "bootstrap": "^5.3.7",

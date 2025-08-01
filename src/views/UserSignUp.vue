@@ -5,7 +5,6 @@ import { auth, db } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { ensureUserRole, fetchUserRole } from '../utils/userRole';
-import emailjs from '@emailjs/browser';
 
 
 const email = ref('');
