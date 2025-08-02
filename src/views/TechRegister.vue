@@ -164,9 +164,9 @@
           <div class="form-group">
             <label for="paypalEmail" class="form-label">{{ $t('paypalEmail') }}</label>
             <input 
-              type="email" 
-              id="paypalEmail" 
-              v-model="formData.paypalEmail" 
+              type="number" 
+              id="age" 
+              v-model="formData.age" 
               class="form-input" 
               :placeholder="$t('paypalEmail')" 
               required 
@@ -486,6 +486,8 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { collection, serverTimestamp, doc, setDoc, addDoc, getDocs, query, where, getDoc, updateDoc } from 'firebase/firestore';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useI18n } from 'vue-i18n';
+import emailjs from '@emailjs/browser';
+import { EMAILJS_CONFIG } from '../utils/emailjsConfig';
 
 
 
@@ -810,22 +812,33 @@ async function sendWelcomeEmail(email, fullName) {
     console.log('Email:', email);
     console.log('Full Name:', fullName);
 
+    // Initialize EmailJS before sending
+    emailjs.init(EMAILJS_CONFIG.publicKey);
+
     const templateParams = {
       to_email: email,
       to_name: fullName,
-      subject: 'Welcome to BoltFix! Your Technician Account is Ready',
-      message: `Dear ${fullName},\n\nCongratulations! Your BoltFix technician account has been successfully created. You are now part of our community of skilled professionals.\n\nYour account details:\nEmail: ${email}\n\nPlease keep your password secure and do not share it with anyone.\n\nBest regards,\nThe BoltFix Team`
+      user_name: fullName,
+      service_name: 'BoltFix'
     };
 
-    // Email functionality removed
-    console.log('Welcome email template:', templateParams);
-    return true;
+    const response = await emailjs.send(
+      EMAILJS_CONFIG.serviceId,
+      'template_68btlks', // Use the specified template ID
+      templateParams,
+      EMAILJS_CONFIG.publicKey
+    );
+
+    console.log('✅ Welcome email sent successfully:', response);
+    return response;
   } catch (error) {
     console.error('=== ERROR SENDING WELCOME EMAIL ===');
     console.error('Error details:', error);
     console.error('Error message:', error.message);
     console.error('Error code:', error.code);
-    return false;
+    console.error('Error status:', error.status);
+    console.error('Error text:', error.text);
+    throw error;
   }
 }
 

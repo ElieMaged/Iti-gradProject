@@ -154,6 +154,8 @@ import AdminSidebar from '../../components/admin-sidebar.vue';
 import Pagination from '../../components/pagination.vue';
 import { collection, getDocs, doc, setDoc, updateDoc, deleteDoc, addDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
+import emailjs from '@emailjs/browser';
+import { EMAILJS_CONFIG } from '../../utils/emailjsConfig';
 
 export default {
   name: 'AdminPendingTech',
@@ -219,6 +221,46 @@ export default {
         this.error = 'Failed to fetch applications';
       } finally {
         this.loading = false;
+      }
+    },
+
+    // Function to send acceptance email to technician
+    async sendAcceptanceEmail(application) {
+      try {
+        console.log('=== SENDING ACCEPTANCE EMAIL TO TECHNICIAN ===');
+        console.log('Application:', application);
+        console.log('Technician Email:', application.email);
+        console.log('Technician Name:', application.fullName);
+
+        // Initialize EmailJS before sending
+        emailjs.init(EMAILJS_CONFIG.publicKey);
+
+        const templateParams = {
+          to_email: application.email,
+          to_name: application.fullName,
+          user_name: application.fullName,
+          service_name: 'BoltFix',
+          specialization: application.specialization,
+          experience: application.experience
+        };
+
+        const response = await emailjs.send(
+          EMAILJS_CONFIG.serviceId,
+          'template_rn9r37x', // Use the specified template ID
+          templateParams,
+          EMAILJS_CONFIG.publicKey
+        );
+
+        console.log('✅ Acceptance email sent successfully:', response);
+        return response;
+      } catch (error) {
+        console.error('=== ERROR SENDING ACCEPTANCE EMAIL ===');
+        console.error('Error details:', error);
+        console.error('Error message:', error.message);
+        console.error('Error code:', error.code);
+        console.error('Error status:', error.status);
+        console.error('Error text:', error.text);
+        throw error;
       }
     },
 
@@ -318,6 +360,15 @@ export default {
         
         // Send notification to technician
         await this.sendApplicationStatusNotification(application, 'approved');
+        
+        // Send acceptance email to technician
+        try {
+          await this.sendAcceptanceEmail(application);
+          console.log('✅ Acceptance email sent successfully to:', application.email);
+        } catch (emailError) {
+          console.error('❌ Failed to send acceptance email:', emailError);
+          // Don't fail the acceptance if email fails
+        }
         
         // Remove from local array
         const index = this.applications.findIndex(app => app.id === application.id);

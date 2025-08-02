@@ -831,7 +831,7 @@ const messages = {
     retry: "Retry",
     submitting: "Submitting...",
     positive: "positive",
-    paypalEmail: 'PayPal Email',
+    paypalEmail: 'Age',
     
     reviews: 'Reviews',
     addReview: 'Add Review',
@@ -926,7 +926,7 @@ const messages = {
     pending: 'Pending',
     withdrawFunds: 'Withdraw Funds',
     amount: 'Amount',
-    paypalEmail: 'Paypal Email',
+    paypalEmail:'Age',
     
     // Technician Reviews Page
     myReviews: 'My Reviews',
@@ -1049,7 +1049,7 @@ const messages = {
     pending: 'Pending',
     withdrawFunds: 'Withdraw Funds',
     amount: 'Amount',
-    paypalEmail: 'Paypal Email',
+    paypalEmail: 'Age',
     
     // Technician Reviews Page
     myReviews: 'My Reviews',
@@ -2049,8 +2049,8 @@ const messages = {
     backToHome: "العودة للرئيسية",
     whatHappensNext: "ماذا يحدث بعد ذلك؟",
     positive: "إيجابي",
-    paypalEmail: 'PayPal Email',
-    paypalEmailAr: 'بريد إلكتروني PayPal',
+    paypalEmail:'Age',
+    paypalEmailAr: 'عمر',
     requestSubmitted: 'تم إرسال طلبك بنجاح',
     reviewBookingNotify: 'سنراجع حجزك ونخطرك عبر البريد الإلكتروني.',
     confirmationEmailInstructions: 'ستتلقى تأكيداً عبر البريد الإلكتروني بمجرد موافقة الفني على طلبك. في حالة الرفض، سيتم إخطارك بتعليمات إضافية.',
