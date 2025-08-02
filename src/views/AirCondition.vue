@@ -55,16 +55,7 @@
           </div>
         </div>
 
-        <!-- Pagination -->
-        <div class="pagination">
-          <button class="pagination-btn"><i class="fa-solid fa-chevron-left"></i></button>
-          <button class="pagination-btn active">1</button>
-          <button class="pagination-btn">2</button>
-          <button class="pagination-btn">3</button>
-          <span class="pagination-dots">...</span>
-          <button class="pagination-btn">10</button>
-          <button class="pagination-btn"><i class="fa-solid fa-chevron-right"></i></button>
-        </div>
+
       </div>
     </section>
 
@@ -88,16 +79,7 @@ import profile8 from '../assets/profile/8.png'
 import plumbingBg from '../assets/Professions/Air.jpg'
 
 const router = useRouter()
-const stockTechnicians = [
-  { id: 'stock-1', name: 'Ahmed Salah', image: profile1, bgColor: '#E8E4F3', price: 200, description: 'Experienced plumber with 10+ years in the field.', rating: 5 },
-  { id: 'stock-2', name: 'Mohammed Ali', image: profile2, bgColor: '#E3F2FD', price: 180, description: 'Expert in residential plumbing.', rating: 5 },
-  { id: 'stock-3', name: 'Omar Hassan', image: profile3, bgColor: '#FFF3E0', price: 220, description: 'Specialist in pipe installation and repair.', rating: 5 },
-  { id: 'stock-4', name: 'Youssef Ahmed', image: profile4, bgColor: '#F3E5F5', price: 210, description: 'Professional with a focus on customer satisfaction.', rating: 5 },
-  { id: 'stock-5', name: 'Karim Mahmoud', image: profile5, bgColor: '#E8F5E8', price: 190, description: 'Reliable and efficient plumbing solutions.', rating: 5 },
-  { id: 'stock-6', name: 'Hassan Ibrahim', image: profile6, bgColor: '#FFF8E1', price: 205, description: 'Expert in leak detection and repair.', rating: 5 },
-  { id: 'stock-7', name: 'Mahmoud Ali', image: profile7, bgColor: '#F1F8E9', price: 195, description: 'Specialist in bathroom and kitchen plumbing.', rating: 5 },
-  { id: 'stock-8', name: 'Ibrahim Hassan', image: profile8, bgColor: '#E0F2F1', price: 215, description: 'Trusted by hundreds of satisfied customers.', rating: 5 }
-]
+// Removed stock technicians - only show registered technicians
 const firebaseTechnicians = ref([])
 const searchQuery = ref('')
 const filterOption = ref('')
@@ -111,13 +93,17 @@ async function fetchTechnicians() {
 onMounted(fetchTechnicians)
 
 const mergedTechnicians = computed(() => {
-  // Avoid duplicate names/IDs with stock
-  const allTechs = [...stockTechnicians]
+  // Only include Firebase technicians, no stock technicians
+  const allTechs = []
   firebaseTechnicians.value.forEach(fbTech => {
-    if (!allTechs.some(t => t.name === fbTech.name && t.price === fbTech.price)) {
-      allTechs.push(fbTech)
-    }
+    allTechs.push({
+      ...fbTech,
+      image: fbTech.profilePhotoUrl || fbTech.idPhotoUrl || profile1, // Use profile photo first, then ID photo as fallback
+      name: fbTech.fullName || fbTech.name,
+      price: fbTech.basePrice || fbTech.price
+    })
   })
+  console.log('Firebase technicians:', allTechs)
   return allTechs
 })
 
@@ -333,43 +319,7 @@ const heroBackgroundStyle = computed(() => {
   background-color: #4a3f7a;
 }
 
-/* Pagination */
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.5rem;
-}
 
-.pagination-btn {
-  width: 40px;
-  height: 40px;
-  border: 1px solid #ddd;
-  background: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: 600;
-}
-
-.pagination-btn:hover {
-  border-color: var(--primary-color);
-  color: var(--primary-color);
-}
-
-.pagination-btn.active {
-  background-color: var(--primary-color);
-  color: white;
-  border-color: var(--primary-color);
-}
-
-.pagination-dots {
-  color: #666;
-  font-weight: bold;
-}
 
 /* Call to Action Section */
 .cta-section {
