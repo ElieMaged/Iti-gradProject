@@ -13,7 +13,7 @@
     <div class="main-content">
       <!-- Page title -->
       <div class="page-title">
-        <h1>Book Now With The Best Technicians !</h1>
+        <h1>{{ $t('bookNowWithBestTechnicians') }}</h1>
       </div>
 
       <!-- Main content grid -->
@@ -31,19 +31,19 @@
               <div class="technician-details">
                 <div class="detail-item">
                   <span class="detail-label">{{ $t('location') }}:</span>
-                  <span class="detail-value">{{ technician.government && technician.district ? `${technician.government}, ${technician.district}` : (technician.location || 'Cairo, Giza') }}</span>
+                  <span class="detail-value">{{ technician.government && technician.district ? `${technician.government}, ${technician.district}` : (technician.location || $t('defaultLocation')) }}</span>
                 </div>
                 <div class="detail-item">
                   <span class="detail-label">{{ $t('gender') }}:</span>
-                  <span class="detail-value">{{ technician.gender || 'Male' }}</span>
+                  <span class="detail-value">{{ technician.gender || $t('defaultGender') }}</span>
                 </div>
                 <div class="detail-item">
                   <span class="detail-label">{{ $t('nationality') }}:</span>
-                  <span class="detail-value">{{ technician.nationality || 'Egyptian' }}</span>
+                  <span class="detail-value">{{ technician.nationality || $t('defaultNationality') }}</span>
                 </div>
                 <div class="detail-item">
                   <span class="detail-label">{{ $t('yearsOfExperience') }}:</span>
-                  <span class="detail-value">{{ technician.experience || technician.yearsOfExperience || '5' }} {{ $t('years') }}</span>
+                  <span class="detail-value">{{ technician.experience || technician.yearsOfExperience || $t('defaultExperience') }} {{ $t('years') }}</span>
                 </div>
               </div>
 
@@ -56,23 +56,23 @@
           </div>
 
           <div class="skills-section">
-            <h3 class="skills-title">{{ $t('skills') }}</h3>
+            <h3 class="skills-title">{{ $t('technicianSkills') }}</h3>
             <ul class="skills-list">
               <li v-for="skill in technician.skills" :key="skill" class="skill-item">{{ skill }}</li>
               <li v-if="!technician.skills || technician.skills.length === 0" class="skill-item">
-                Pipe installation and repair and Water heater installation & maintenance
+                {{ $t('pipeInstallationRepair') }}
               </li>
               <li v-if="!technician.skills || technician.skills.length === 0" class="skill-item">
-                Drain cleaning & unclogging & Leak detection and repair
+                {{ $t('drainCleaningUnclogging') }}
               </li>
               <li v-if="!technician.skills || technician.skills.length === 0" class="skill-item">
-                Fixture installation (toilets, sinks, faucets)
+                {{ $t('fixtureInstallation') }}
               </li>
               <li v-if="!technician.skills || technician.skills.length === 0" class="skill-item">
-                Gas piping (if certified)
+                {{ $t('gasPiping') }}
               </li>
               <li v-if="!technician.skills || technician.skills.length === 0" class="skill-item">
-                Pump and valve replacement & Sewer line inspection and repair & Pipe soldering, welding, or brazing & Knowledge of local plumbing codes
+                {{ $t('pumpValveReplacement') }}
               </li>
             </ul>
           </div>
@@ -80,10 +80,10 @@
 
         <!-- Right section - Booking Information -->
         <div class="booking-info-card">
-                     <h3 class="booking-title">Booking Information</h3>
+                     <h3 class="booking-title">{{ $t('bookingInformation') }}</h3>
           
           <div class="appointment-section">
-                         <h4 class="section-subtitle">Available Appointment</h4>
+                         <h4 class="section-subtitle">{{ $t('availableAppointment') }}</h4>
             <div class="date-selector">
               <button class="date-nav-btn" @click="previousDates">
                 <i class="fas fa-chevron-left"></i>
@@ -128,7 +128,14 @@
             <span class="price-value">{{ technician.basePrice || technician.visitPrice || '300' }} EGP</span>
           </div>
 
-          <button @click="bookNow" class="book-now-btn">{{ $t('bookNow') }}</button>
+          <button 
+            @click="bookNow" 
+            class="book-now-btn"
+            :class="{ 'disabled': !auth.currentUser }"
+            :disabled="!auth.currentUser"
+          >
+            {{ auth.currentUser ? $t('bookNow') : $t('loginToBook') || 'Login to Book' }}
+          </button>
         </div>
       </div>
       
@@ -601,6 +608,20 @@ const nextDates = () => {
 }
 
 const bookNow = () => {
+  // Check if user is logged in
+  if (!auth.currentUser) {
+    // Redirect to login page with return URL
+    router.push({
+      path: '/userlogin',
+      query: { 
+        returnUrl: route.fullPath,
+        message: 'Please log in to book a technician'
+      }
+    })
+    return
+  }
+  
+  // User is logged in, proceed to booking page
   router.push({
     path: '/bookingpage',
     query: { 
@@ -1098,6 +1119,19 @@ onMounted(async () => {
 
 .book-now-btn:hover {
   background: #52467f;
+}
+
+.book-now-btn:disabled,
+.book-now-btn.disabled {
+  background: #9ca3af;
+  color: #6b7280;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.book-now-btn:disabled:hover,
+.book-now-btn.disabled:hover {
+  background: #9ca3af;
 }
 
 /* Reviews Section */
@@ -2123,6 +2157,19 @@ onMounted(async () => {
 
 .dark .book-now-btn:hover {
   background: var(--secondary);
+}
+
+.dark .book-now-btn:disabled,
+.dark .book-now-btn.disabled {
+  background: var(--text-muted);
+  color: var(--border-color);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.dark .book-now-btn:disabled:hover,
+.dark .book-now-btn.disabled:hover {
+  background: var(--text-muted);
 }
 
 .dark .date-nav-btn {
