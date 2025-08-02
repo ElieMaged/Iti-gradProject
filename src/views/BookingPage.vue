@@ -295,7 +295,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { collection, doc, getDoc, addDoc, serverTimestamp, query, getDocs, where, orderBy, limit } from 'firebase/firestore'
 import { db } from '../firebase'
 import { useI18n } from 'vue-i18n'
-import { stockTechnicians } from '../assets/stockTechnicians'
+// Removed stockTechnicians import - only show registered technicians
 import { auth } from '../firebase';
 import LocationMap from '../components/LocationMap.vue'
 import { getGovernmentNames, getDistrictsForGovernment } from '../data/egyptianLocations.js'
@@ -1501,33 +1501,28 @@ onMounted(async () => {
     return;
   }
   
-  // Try to find in stockTechnicians first
-  const stock = stockTechnicians.find(t => t.id === id)
-  if (stock) {
-    technician.value = stock
+  // No stock technicians - only show registered technicians
+  // Try to fetch from Firestore (pendingTechnicians or technicians)
+  let docRef = doc(db, 'technicians', id);
+  let docSnap = await getDoc(docRef);
+  if (!docSnap.exists()) {
+    // Try pendingTechnicians (if not yet approved)
+    docRef = doc(db, 'pendingTechnicians', id);
+    docSnap = await getDoc(docRef);
+  }
+  if (docSnap.exists()) {
+    const techData = docSnap.data();
+    technician.value = {
+      ...techData,
+      uid: id, // Ensure uid is set for consistency
+      name: techData.fullName || techData.name, // Map fullName to name for consistency
+      profilePhotoUrl: techData.profilePhotoUrl || techData.image || techData.idPhotoUrl || '/images/Avatar.png' // Map to profilePhotoUrl for template consistency
+    };
+    console.log('Technician data loaded:', technician.value);
+    console.log('Technician profile photo:', technician.value.profilePhotoUrl);
   } else {
-    // Try to fetch from Firestore (pendingTechnicians or technicians)
-    let docRef = doc(db, 'technicians', id);
-    let docSnap = await getDoc(docRef);
-    if (!docSnap.exists()) {
-      // Try pendingTechnicians (if not yet approved)
-      docRef = doc(db, 'pendingTechnicians', id);
-      docSnap = await getDoc(docRef);
-    }
-    if (docSnap.exists()) {
-      const techData = docSnap.data();
-      technician.value = {
-        ...techData,
-        uid: id, // Ensure uid is set for consistency
-        name: techData.fullName || techData.name, // Map fullName to name for consistency
-                profilePhotoUrl: techData.profileImage || techData.image || techData.idPhotoUrl || '/images/Avatar.png' // Map to profilePhotoUrl for template consistency
-      };
-      console.log('Technician data loaded:', technician.value);
-        console.log('Technician profile photo:', technician.value.profilePhotoUrl);
-    } else {
-      errorMsg.value = 'Technician not found. Please try again or contact support.';
-      return;
-    }
+    errorMsg.value = 'Technician not found. Please try again or contact support.';
+    return;
   }
   
   // Fetch technician availability first

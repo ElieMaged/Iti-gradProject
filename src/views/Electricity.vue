@@ -99,12 +99,6 @@ import plumbingBg from '../assets/Professions/Electricity.jpg'
 
 const router = useRouter()
 const loading = ref(true)
-const stockTechnicians = [
-  // Example stock wall finishing technicians (update these as needed)
-  { id: 'stock-1', name: 'Ahmed Salah', image: profile1, bgColor: '#E8E4F3', price: 200, description: 'Experienced electricity with 10+ years in the field.', rating: 5, specialization: 'electricity' },
-  { id: 'stock-2', name: 'Mohammed Ali', image: profile2, bgColor: '#E3F2FD', price: 180, description: 'Expert in residential electricity.', rating: 5, specialization: 'electricity' },
-  // Add more stock wall finishing technicians as needed
-]
 const firebaseTechnicians = ref([])
 const searchQuery = ref('')
 const filterOption = ref('')
@@ -129,22 +123,20 @@ async function fetchTechnicians() {
 onMounted(fetchTechnicians)
 
 const mergedTechnicians = computed(() => {
-  // Only include stock wall finishing technicians
-  const allTechs = [...stockTechnicians.filter(t => t.specialization === 'electricity')]
+  // Only include Firebase technicians - no stock technicians
+  const allTechs = []
   firebaseTechnicians.value.forEach(fbTech => {
-    if (!allTechs.some(t => t.name === fbTech.fullName && t.price == fbTech.basePrice)) {
-      // Use uploaded photo if available, fallback to placeholder
-      allTechs.push({
-        id: fbTech.id,
-        name: fbTech.fullName,
-        image: fbTech.profilePhotoUrl || fbTech.idPhotoUrl || profile1, // Use profile photo first, then ID photo as fallback
-        bgColor: '#E8E4F3', // or any default color
-        price: fbTech.basePrice,
-        description: fbTech.bio,
-        rating: 5, // or fbTech.rating if available
-        specialization: fbTech.specialization
-      })
-    }
+    // Use uploaded photo if available, fallback to placeholder
+    allTechs.push({
+      id: fbTech.id,
+      name: fbTech.fullName,
+      image: fbTech.profilePhotoUrl || fbTech.idPhotoUrl || profile1, // Use profile photo first, then ID photo as fallback
+      bgColor: '#E8E4F3', // or any default color
+      price: fbTech.basePrice,
+      description: fbTech.bio,
+      rating: 5, // or fbTech.rating if available
+      specialization: fbTech.specialization
+    })
   })
   return allTechs
 })

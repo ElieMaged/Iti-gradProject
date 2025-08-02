@@ -99,12 +99,6 @@ import plumbingBg from '../assets/Professions/Plumbing.jpg'
 
 const router = useRouter()
 const loading = ref(true)
-const stockTechnicians = [
-  // Example stock wall finishing technicians (update these as needed)
-  { id: 'stock-1', name: 'Ahmed Salah', image: profile1, bgColor: '#E8E4F3', price: 200, description: 'Experienced plumbing with 10+ years in the field.', rating: 5, specialization: 'plumbing' },
-  { id: 'stock-2', name: 'Mohammed Ali', image: profile2, bgColor: '#E3F2FD', price: 180, description: 'Expert in residential plumbing.', rating: 5, specialization: 'plumbing' },
-  // Add more stock wall finishing technicians as needed
-]
 const firebaseTechnicians = ref([])
 const searchQuery = ref('')
 const filterOption = ref('')

@@ -52,7 +52,6 @@
 <script>
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase.js';
-import { stockTechnicians } from '../assets/stockTechnicians.js';
 
 export default {
   name: 'ExpertTeam',
@@ -90,7 +89,7 @@ export default {
           firebaseTechnicians.push({
             id: doc.id,
             name: data.fullName || data.name || 'Unknown Technician',
-            image: data.profileImage || data.idPhotoUrl || '/images/Avatar.png',
+            image: data.profilePhotoUrl || data.idPhotoUrl || '/images/Avatar.png',
             description: data.bio || data.description || 'Professional technician with years of experience.',
             rating: data.averageRating || 4.5,
             specialization: data.specialization || 'General Technician',
@@ -103,40 +102,12 @@ export default {
           });
         });
 
-        // Fallback to stockTechnicians if none found
-        this.teamMembers = firebaseTechnicians.length > 0
-          ? firebaseTechnicians
-          : stockTechnicians.map(tech => ({
-              id: tech.id,
-              name: tech.name,
-              image: tech.image || '/images/Avatar.png',
-              description: tech.description,
-              rating: tech.rating || 4.5,
-              specialization: tech.specialization || 'General Technician',
-              experience: tech.yearsOfExperience ? `${tech.yearsOfExperience}+ years` : '5+ years',
-              basePrice: tech.price || '300',
-              status: 'approved',
-              location: tech.location || 'Cairo',
-              phone: tech.phone || '+20 111 222 3333',
-              email: 'technician@example.com'
-            }));
+        // Only use Firebase technicians - no stock technicians
+        this.teamMembers = firebaseTechnicians;
       } catch (error) {
         console.error('Error fetching technicians:', error);
-        // Fallback to stockTechnicians
-        this.teamMembers = stockTechnicians.map(tech => ({
-          id: tech.id,
-          name: tech.name,
-          image: tech.image || '/images/Avatar.png',
-          description: tech.description,
-          rating: tech.rating || 4.5,
-          specialization: tech.specialization || 'General Technician',
-          experience: tech.yearsOfExperience ? `${tech.yearsOfExperience}+ years` : '5+ years',
-          basePrice: tech.price || '300',
-          status: 'approved',
-          location: tech.location || 'Cairo',
-          phone: tech.phone || '+20 111 222 3333',
-          email: 'technician@example.com'
-        }));
+        // No fallback - only show registered technicians
+        this.teamMembers = [];
       } finally {
         this.loading = false;
       }

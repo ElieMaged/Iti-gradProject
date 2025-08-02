@@ -106,105 +106,6 @@ import plumbingBg from '../assets/Professions/Wall.jpg'
 
 const router = useRouter()
 const loading = ref(true)
-const stockTechnicians = [
-  // Example stock wall finishing technicians (update these as needed)
-  { 
-    id: 'stock-1', 
-    name: 'Ahmed Salah', 
-    image: profile1, 
-    bgColor: '#E8E4F3', 
-    price: 200, 
-    description: 'Experienced wall finisher with 10+ years in the field.', 
-    rating: 4.5, 
-    specialization: 'Wall Finishing',
-    area: 'Maadi',
-    yearsOfExperience: 10
-  },
-  { 
-    id: 'stock-2', 
-    name: 'Mohammed Ali', 
-    image: profile2, 
-    bgColor: '#E3F2FD', 
-    price: 180, 
-    description: 'Expert in residential wall finishing.', 
-    rating: 4.8, 
-    specialization: 'Wall Finishing',
-    area: 'Mokattam',
-    yearsOfExperience: 8
-  },
-  { 
-    id: 'stock-3', 
-    name: 'Hassan Mahmoud', 
-    image: profile3, 
-    bgColor: '#FFF3E0', 
-    price: 150, 
-    description: 'Professional wall finishing specialist.', 
-    rating: 4.2, 
-    specialization: 'Wall Finishing',
-    area: 'Shoubra',
-    yearsOfExperience: 5
-  },
-  { 
-    id: 'stock-4', 
-    name: 'Omar Khalil', 
-    image: profile4, 
-    bgColor: '#F3E5F5', 
-    price: 220, 
-    description: 'Master wall finisher with premium services.', 
-    rating: 4.9, 
-    specialization: 'Wall Finishing',
-    area: 'Embaba',
-    yearsOfExperience: 12
-  },
-  { 
-    id: 'stock-5', 
-    name: 'Youssef Ahmed', 
-    image: profile5, 
-    bgColor: '#E0F2F1', 
-    price: 160, 
-    description: 'Skilled wall finishing technician.', 
-    rating: 4.0, 
-    specialization: 'Wall Finishing',
-    area: 'Maadi',
-    yearsOfExperience: 3
-  },
-  { 
-    id: 'stock-6', 
-    name: 'Karim Hassan', 
-    image: profile6, 
-    bgColor: '#FFF8E1', 
-    price: 190, 
-    description: 'Experienced wall finishing expert.', 
-    rating: 4.6, 
-    specialization: 'Wall Finishing',
-    area: 'Mokattam',
-    yearsOfExperience: 7
-  },
-  { 
-    id: 'stock-7', 
-    name: 'Samir Ibrahim', 
-    image: profile7, 
-    bgColor: '#F1F8E9', 
-    price: 170, 
-    description: 'Professional wall finishing contractor.', 
-    rating: 4.3, 
-    specialization: 'Wall Finishing',
-    area: 'Shoubra',
-    yearsOfExperience: 6
-  },
-  { 
-    id: 'stock-8', 
-    name: 'Tarek Mohamed', 
-    image: profile8, 
-    bgColor: '#E8F5E8', 
-    price: 210, 
-    description: 'Expert wall finishing specialist.', 
-    rating: 4.7, 
-    specialization: 'Wall Finishing',
-    area: 'Embaba',
-    yearsOfExperience: 9
-  }
-]
 const firebaseTechnicians = ref([])
 const searchQuery = ref('')
 const filterOption = ref('')
@@ -229,24 +130,22 @@ async function fetchTechnicians() {
 onMounted(fetchTechnicians)
 
 const mergedTechnicians = computed(() => {
-  // Only include stock wall finishing technicians
-  const allTechs = [...stockTechnicians.filter(t => t.specialization === 'Wall Finishing')]
+  // Only include Firebase technicians - no stock technicians
+  const allTechs = []
   firebaseTechnicians.value.forEach(fbTech => {
-    if (!allTechs.some(t => t.name === fbTech.fullName && t.price == fbTech.basePrice)) {
-      // Use uploaded photo if available, fallback to placeholder
-      allTechs.push({
-        id: fbTech.id,
-        name: fbTech.fullName,
-        image: fbTech.profilePhotoUrl || fbTech.idPhotoUrl || profile1, // Use profile photo first, then ID photo as fallback
-        bgColor: '#E8E4F3', // or any default color
-        price: fbTech.basePrice,
-        description: fbTech.bio,
-        rating: fbTech.rating || 4.0, // Use actual rating if available
-        specialization: fbTech.specialization,
-        area: fbTech.area || fbTech.location || 'Cairo', // Use area/location if available
-        yearsOfExperience: fbTech.yearsOfExperience || 5 // Use actual years if available
-      })
-    }
+    // Use uploaded photo if available, fallback to placeholder
+    allTechs.push({
+      id: fbTech.id,
+      name: fbTech.fullName,
+      image: fbTech.profilePhotoUrl || fbTech.idPhotoUrl || profile1, // Use profile photo first, then ID photo as fallback
+      bgColor: '#E8E4F3', // or any default color
+      price: fbTech.basePrice,
+      description: fbTech.bio,
+      rating: fbTech.rating || 4.0, // Use actual rating if available
+      specialization: fbTech.specialization,
+      area: fbTech.area || fbTech.location || 'Cairo', // Use area/location if available
+      yearsOfExperience: fbTech.yearsOfExperience || 5 // Use actual years if available
+    })
   })
   return allTechs
 })

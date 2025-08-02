@@ -183,7 +183,7 @@
 <script>
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../firebase.js';
-import { stockTechnicians } from '../assets/stockTechnicians.js';
+// Removed stockTechnicians import - only show registered technicians
 
     export default {
   name: 'AllServices',
@@ -288,7 +288,7 @@ import { stockTechnicians } from '../assets/stockTechnicians.js';
           firebaseTechnicians.push({
             id: doc.id,
             name: data.fullName || data.name || 'Unknown Technician',
-            image: data.idPhotoUrl || data.profileImage || '/images/Avatar.png',
+            image: data.profilePhotoUrl || data.idPhotoUrl || '/images/Avatar.png',
             description: data.bio || data.description || 'Professional technician with years of experience.',
             rating: data.averageRating || 4.5,
             price: data.basePrice || data.hourlyRate || 200,
@@ -316,7 +316,7 @@ import { stockTechnicians } from '../assets/stockTechnicians.js';
               firebaseTechnicians.push({
                 id: doc.id,
                 name: data.fullName || data.name || 'Unknown Technician',
-                image: data.idPhotoUrl || data.profileImage || '/images/Avatar.png',
+                image: data.profilePhotoUrl || data.idPhotoUrl || '/images/Avatar.png',
                 description: data.bio || data.description || 'Professional technician with years of experience.',
                 rating: data.averageRating || 4.5,
                 price: data.basePrice || data.hourlyRate || 200,
@@ -341,40 +341,23 @@ import { stockTechnicians } from '../assets/stockTechnicians.js';
           this.technicians = firebaseTechnicians;
           console.log('Using Firebase technicians');
         } else {
-          console.log('No Firebase technicians found, using stock data');
-          // Use stock data with some modifications for variety
-          this.technicians = stockTechnicians.map((tech, index) => ({
-            ...tech,
-            specialization: this.getSpecialization(index),
-            skills: tech.skills || ['General Repair'],
-            rating: tech.rating || 4.5,
-            price: tech.price || 200,
-            location: tech.location || 'Cairo',
-            yearsOfExperience: tech.yearsOfExperience || 5
-          }));
+          console.log('No Firebase technicians found');
+          this.technicians = [];
         }
       } catch (error) {
         console.error('Error fetching technicians:', error);
         // Handle Firebase errors gracefully
         if (error.code === 'permission-denied') {
-          console.log('Firebase permissions not configured, using stock data');
+          console.log('Firebase permissions not configured');
         } else if (error.code === 'unavailable') {
-          console.log('Firebase service unavailable, using stock data');
+          console.log('Firebase service unavailable');
         } else if (error.code === 'not-found') {
-          console.log('Firebase collection not found, using stock data');
+          console.log('Firebase collection not found');
         } else {
-          console.log('Firebase error occurred, using stock data');
+          console.log('Firebase error occurred');
         }
-        // Fallback to stock data
-        this.technicians = stockTechnicians.map((tech, index) => ({
-          ...tech,
-          specialization: this.getSpecialization(index),
-          skills: tech.skills || ['General Repair'],
-          rating: tech.rating || 4.5,
-          price: tech.price || 200,
-          location: tech.location || 'Cairo',
-          yearsOfExperience: tech.yearsOfExperience || 5
-        }));
+        // No fallback - only show registered technicians
+        this.technicians = [];
       } finally {
         this.loading = false;
       }
