@@ -636,13 +636,13 @@ onMounted(async () => {
     }
     if (docSnap.exists()) {
       const techData = docSnap.data();
-                    technician.value = {
-                ...techData,
-                uid: id, // Ensure uid is set for consistency
-                name: techData.fullName || techData.name, // Map fullName to name for consistency
+      technician.value = {
+        ...techData,
+        uid: id, // Ensure uid is set for consistency
+        name: techData.fullName || techData.name, // Map fullName to name for consistency
                 profilePhotoUrl: techData.profileImage || techData.image || techData.idPhotoUrl || '/images/Avatar.png' // Map to profilePhotoUrl for template consistency
-              };
-              console.log('Technician data loaded:', technician.value);
+      };
+      console.log('Technician data loaded:', technician.value);
         console.log('Technician profile photo:', technician.value.profilePhotoUrl);
     } else {
       errorMsg.value = 'Technician not found. Please try again or contact support.';
@@ -749,7 +749,7 @@ function loadPayPalScript() {
 
   // Create new script element with better error handling
   const script = document.createElement('script');
-        script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD&intent=capture&components=buttons,funding-eligibility`;
+  script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD&intent=capture&components=buttons,funding-eligibility`;
   script.async = true;
   script.defer = true;
   
@@ -873,7 +873,7 @@ function initializePayPalButton() {
 
     // Clear existing content and destroy any existing PayPal buttons
     container.innerHTML = '';
-    
+
     // Destroy any existing PayPal buttons to prevent conflicts
     if (window.paypal && window.paypal.Buttons) {
       try {
@@ -1144,10 +1144,10 @@ function initializePayPalButton() {
               if (!captureCompleted) {
                 console.error('Payment capture timeout - clearing loading state');
                 captureCompleted = true;
-                if (container) {
-                  container.innerHTML = '<div class="text-center p-4 text-red-500">Payment processing timed out. Please try again.</div>';
-                }
-                errorMsg.value = 'Payment processing timed out. Please try again.';
+              if (container) {
+                container.innerHTML = '<div class="text-center p-4 text-red-500">Payment processing timed out. Please try again.</div>';
+              }
+              errorMsg.value = 'Payment processing timed out. Please try again.';
               }
             }, 8000); // 8 second timeout
 
@@ -1156,13 +1156,13 @@ function initializePayPalButton() {
             let retryCount = 0;
             const maxRetries = 3;
             
-                        try {
+            try {
               while (retryCount < maxRetries) {
                 try {
                   console.log(`Starting PayPal capture (attempt ${retryCount + 1}/${maxRetries})...`);
-                  order = await Promise.race([
-                    actions.order.capture(),
-                    new Promise((_, reject) => 
+              order = await Promise.race([
+                actions.order.capture(),
+                new Promise((_, reject) => 
                       setTimeout(() => reject(new Error('PayPal capture timeout')), 10000)
                     )
                   ]);
@@ -1183,14 +1183,14 @@ function initializePayPalButton() {
               if (!captureCompleted) {
                 captureCompleted = true;
                 clearTimeout(captureTimeout);
-                const captureEndTime = Date.now();
-                console.log(`Payment captured successfully in ${captureEndTime - captureStartTime}ms:`, order);
+              const captureEndTime = Date.now();
+              console.log(`Payment captured successfully in ${captureEndTime - captureStartTime}ms:`, order);
               }
             } catch (captureError) {
               if (!captureCompleted) {
                 captureCompleted = true;
-                clearTimeout(captureTimeout);
-                console.error('PayPal capture failed:', captureError);
+              clearTimeout(captureTimeout);
+              console.error('PayPal capture failed:', captureError);
                 
                 // Handle specific PayPal errors
                 if (captureError.message.includes('Target window is closed') || 
@@ -1201,7 +1201,7 @@ function initializePayPalButton() {
                 } else if (captureError.message.includes('timeout')) {
                   throw new Error('Payment timed out. Please try again.');
                 } else {
-                  throw new Error(`Payment capture failed: ${captureError.message}`);
+              throw new Error(`Payment capture failed: ${captureError.message}`);
                 }
               }
             }
@@ -1479,12 +1479,12 @@ function initializePayPalButton() {
       
       // Try to render the button directly without eligibility check
       // The eligibility check can be unreliable, so we'll render and handle errors
-      paypalButton.render('#paypal-button-container')
-        .then(() => {
+        paypalButton.render('#paypal-button-container')
+          .then(() => {
           console.log('✅ PayPal button rendered successfully');
           console.log('✅ PayPal button is ready for transactions');
-        })
-        .catch((error) => {
+          })
+          .catch((error) => {
           console.error('❌ Error rendering PayPal button:', error);
           
                     // Check if it's a funding source eligibility issue
@@ -1533,15 +1533,15 @@ function initializePayPalButton() {
             }
             
             tryNextFallback();
-          } else {
+      } else {
             // Handle other types of errors
             errorMsg.value = 'Payment button failed to load. Please refresh the page and try again.';
-            
-            const container = document.getElementById('paypal-button-container');
-            if (container) {
+        
+        const container = document.getElementById('paypal-button-container');
+        if (container) {
               container.innerHTML = '<div class="text-center p-4 text-red-500">Payment button failed to load. Please refresh the page and try again.</div>';
-            }
-          }
+        }
+      }
         });
       
     } catch (error) {

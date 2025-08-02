@@ -3,12 +3,12 @@
     <!-- Sidebar -->
     <Sidebar :activeMenu="'booking'" :activeBookingStatus="'upcoming'" @navigate="handleSidebarNavigate" />
     <!-- Main Content -->
-    <div class="flex-1 p-8">
-      <div class="technician-dashboard-layout">
+    <div class="flex-1">
+      <div class="technician-dashboard-layout p-4 mr-20">
         <div class="booking-main">
           <div class="booking-container">
             <div class="title-search-row">
-              <h2 class="booking-title">Upcoming Bookings</h2>
+              <h2 class="page-title">{{ $t('upcomingBookings') }}</h2>
               <div class="search-wrapper">
                 <input v-model="searchQuery" class="search-input" type="text" placeholder="Search" />
                 <span class="search-icon"><i class="fas fa-search"></i></span>
@@ -339,7 +339,6 @@ onMounted(() => {
 
 .booking-main {
   flex: 1;
-  padding: 2.5rem;
 }
 
 .booking-container {
@@ -431,14 +430,15 @@ onMounted(() => {
   border-color: #ef4444;
 }
 
-.booking-title {
-  font-size: 2rem;
-  font-weight: bold;
+.page-title {
   color: var(--primary-color);
-  margin-bottom: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  font-family: Outfit, sans-serif;
 }
 
-.dark .booking-title {
+.dark .page-title {
   color: var(--primary-color);
 }
 

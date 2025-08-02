@@ -5,7 +5,7 @@
             @navigate="handleSidebarNavigate"
         />
     <div class="payment-content p-4 mr-20">
-      <h1 class="payment-title">{{ $t('payment') }}</h1>  
+      <h1 class="page-title">{{ $t('payment') }}</h1>  
       <div class="payment-balance-card">
         <div class="balance-labels">
           <span class="current-balance-label">{{ $t('currentBalance') }}</span>
@@ -84,15 +84,15 @@ export default {
 .dark .payment-page {
   background: var(--primary-bg);
 }
-.payment-title {
+.page-title {
   color: var(--primary-color);
   font-size: 2rem;
   font-weight: 700;
   margin-bottom: 2rem;
   font-family: Outfit, sans-serif;
-  margin-left: 48px;
 }
-.dark .payment-title {
+
+.dark .page-title {
   color: var(--primary-color);
 }
 .payment-balance-card {

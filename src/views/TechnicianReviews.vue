@@ -12,7 +12,7 @@
     <div id="admin-profile-container" class="p-4 mr-20">
       <div id="admin-profile-wrapper">
         <div id="admin-profile-card">
-          <h2 id="admin-profile-title">{{ $t('myReviews') }}</h2>
+          <h2 class="page-title">{{ $t('myReviews') }}</h2>
           
           <!-- Reviews Summary -->
           <div class="reviews-summary">
@@ -299,14 +299,15 @@ export default {
   background-color: var(--grey-bg);
 }
 
-#admin-profile-title {
-  font-size: 1.5rem;
-  font-weight: bold;
+.page-title {
   color: var(--primary-color);
-  margin-bottom: 1.5rem;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  font-family: Outfit, sans-serif;
 }
 
-.dark #admin-profile-title {
+.dark .page-title {
   color: var(--primary-color);
 }
 

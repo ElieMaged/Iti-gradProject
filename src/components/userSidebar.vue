@@ -139,19 +139,23 @@ body {
 }
 
 .sidebar-item:hover {
-  background-color: #c5b7e6;
+  background-color: var(--primary-color);
   color: white;
 }
 
 .sidebar-item.active {
-  background-color: var(--secondary);
+  background-color: var(--primary-color);
   color: white;
 }
-
 .dark .sidebar-item.active {
-  background-color: var(--icon-color);
+  background-color: #c5b7e6;
   color: var(--primary-text-dark);
 }
+.dark .sidebar-item:hover {
+  background-color: #c5b7e6;
+  color: var(--primary-text-dark);
+}
+
 
 .logout-btn {
   margin-top: 0.5rem;

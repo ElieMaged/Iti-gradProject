@@ -5,7 +5,7 @@
       <div class="edit-profile-wrapper">
         <div class="edit-profile-card">
           <div class="edit-profile-header">
-            <h2>{{ $t('editProfileTitle') }}</h2>
+            <h2 class="page-title">{{ $t('editProfileTitle') }}</h2>
           </div>
           <form class="edit-profile-form" @submit.prevent="saveProfile">
             <div class="edit-profile-content">
@@ -290,13 +290,15 @@ onMounted(() => {
   box-shadow: 0 10px 15px rgba(0,0,0,0.08);
   padding: 2rem;
 }
-.edit-profile-header h2 {
-  font-size: 1.5rem;
-  font-weight: bold;
+.page-title {
   color: var(--primary-color);
-  margin-bottom: 1.5rem;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  font-family: Outfit, sans-serif;
 }
-.dark .edit-profile-header h2 {
+
+.dark .page-title {
   color: var(--primary-color);
 }
 .edit-profile-form {

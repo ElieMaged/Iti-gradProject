@@ -187,17 +187,20 @@ body {
 }
 
 .sidebar-item:hover {
-  background-color: #c5b7e6;
-  color: var(--primary-text-dark);
+  background-color: var(--primary-color);
+  color: white;
 }
 
 .sidebar-item.active {
+  background-color: var(--primary-color);
+  color: white;
+}
+.dark .sidebar-item.active {
   background-color: #c5b7e6;
   color: var(--primary-text-dark);
 }
-
-.dark .sidebar-item.active {
-  background-color: var(--icon-color);
+.dark .sidebar-item:hover {
+  background-color: #c5b7e6;
   color: var(--primary-text-dark);
 }
 
@@ -240,23 +243,23 @@ body {
 }
 
 .dropdown-status-link:hover {
-  background: var(--icon-color);
-  color: var(--primary-text-dark);
+  background: var(--secondary);
+  color: white;
 }
 
 .dark .dropdown-status-link:hover {
-  background: var(--icon-color);
-  color: var(--primary-text-dark);
+  background: var(--secondary);
+  color: white;
 }
 
 .dropdown-status-link.active {
   background: var(--secondary);
-  color: var(--primary-text);
+  color: white;
 }
 
 .dark .dropdown-status-link.active {
-  background: var(--icon-color);
-  color: var(--primary-text-dark);
+  background: var(--secondary);
+  color: white;
 }
 
 .logout-btn {

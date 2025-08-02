@@ -234,18 +234,23 @@
     color: var(--text-main);
   }
   .sidebar-item:hover {
-    background-color: var(--icon-color);
-    color: white;
-  }
-  
-  .sidebar-item.active {
-    background-color: var(--icon-color);
-    color: white;
-  }
-  .dark .sidebar-item.active {
-    background-color: var(--icon-color);
-    color: var(--primary-text-dark);
-  }
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.sidebar-item.active {
+  background-color: var(--primary-color);
+  color: white;
+}
+.dark .sidebar-item.active {
+  background-color: #c5b7e6;
+  color: var(--primary-text-dark);
+}
+.dark .sidebar-item:hover {
+  background-color: #c5b7e6;
+  color: var(--primary-text-dark);
+}
+
   
   .dropdown-container {
     position: static;
@@ -282,15 +287,15 @@
   }
   
   .dropdown-menu a:hover,
-  .dropdown-link:hover {
-    background: var(--icon-color);
-    color: white;
-  }
-  
-  .dropdown-link.active {
-    background: var(--icon-color);
-    color: white;
-  }
+.dropdown-link:hover {
+  background: var(--secondary);
+  color: white;
+}
+
+.dropdown-link.active {
+  background: var(--secondary);
+  color: white;
+}
   
   .logout-btn {
     margin-top: 0.5rem;
@@ -320,30 +325,30 @@
   }
   
   .active-status-link {
-    background: var(--icon-color) !important;
-    color: var(--primary-text-dark) !important;
-    font-weight: 600;
-    box-shadow: 0 2px 4px rgba(124, 107, 176, 0.3);
-    position: relative;
-  }
-  
-  .active-status-link::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 3px;
-    height: 60%;
-    background: #fff;
-    border-radius: 0 2px 2px 0;
-  }
-  
-  .dropdown-status-link:hover {
-    background: var(--icon-color);
-    color: white;
-    transform: translateX(4px);
-  }
+  background: var(--secondary) !important;
+  color: white !important;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(124, 107, 176, 0.3);
+  position: relative;
+}
+
+.active-status-link::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background: #fff;
+  border-radius: 0 2px 2px 0;
+}
+
+.dropdown-status-link:hover {
+  background: var(--secondary);
+  color: white;
+  transform: translateX(4px);
+}
 
   /* Mobile Responsive - Horizontal Layout */
   @media (max-width: 768px) {

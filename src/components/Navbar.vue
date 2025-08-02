@@ -368,9 +368,9 @@ export default {
           <!-- Menu section -->
           <div class="mobile-menu-section">
             <button class="mobile-menu-toggle" @click="navAccordionOpen = !navAccordionOpen">
-              <span>{{ $t('Menu') }}</span>
+            <span>{{ $t('Menu') }}</span>
               <i :class="(navAccordionOpen ? 'fa fa-chevron-up' : 'fa fa-chevron-down') + ' toggle-icon'"></i>
-            </button>
+          </button>
             
             <div v-if="navAccordionOpen" class="mobile-menu-links">
               <router-link :to="locale === 'ar' ? getRoute('') : '/'" class="mobile-menu-link"
@@ -389,11 +389,11 @@ export default {
                 {{ $t('navContact') }}
               </router-link>
               
-              <!-- Mobile Services Dropdown -->
+            <!-- Mobile Services Dropdown -->
               <div class="mobile-services-section">
                 <button class="mobile-menu-link mobile-services-toggle" @click="toggleDropdownMobile">
                   <i class="fa fa-tools mobile-link-icon"></i>
-                  {{ $t('navServices') }}
+                {{ $t('navServices') }}
                   <i :class="(servicesDropdownOpen ? 'fa fa-chevron-up' : 'fa fa-chevron-down') + ' toggle-icon'"></i>
                 </button>
                 <div v-show="servicesDropdownOpen" class="mobile-services-dropdown">
@@ -425,9 +425,9 @@ export default {
                     <i class="fa fa-user-cog mobile-link-icon"></i>
                     {{ $t('navElectricityTechnicians') }}
                   </router-link>
-                </div>
               </div>
             </div>
+          </div>
           </div>
           
           <!-- User section -->
@@ -440,18 +440,18 @@ export default {
             </template>
             <template v-else>
               <div class="mobile-actions">
-                <LanguageToggle />
-                <button 
-                  @click="toggleDarkMode" 
+            <LanguageToggle />
+            <button 
+              @click="toggleDarkMode" 
                   class="mobile-action-btn"
-                  :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
-                  type="button">
+              :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+              type="button">
                   <i :class="iconClass"></i>
-                </button>
-                <NotificationBell v-if="user" />
+            </button>
+            <NotificationBell v-if="user" />
               </div>
               
-              <template v-if="user">
+            <template v-if="user">
                 <div class="mobile-user-info" @click="handleProfileClick">
                   <i class="fas fa-user-circle mobile-user-avatar"></i>
                   <div class="mobile-user-details">
@@ -461,14 +461,14 @@ export default {
                 </div>
                 <button class="mobile-logout-btn" @click="logout">
                   <i class="fa fa-sign-out-alt"></i>
-                  {{ $t('logout') }}
-                </button>
-              </template>
-              <template v-else>
+                {{ $t('logout') }}
+              </button>
+            </template>
+            <template v-else>
                 <button class="mobile-login-btn" @click="goToUserAccount">
                   <i class="fa fa-sign-in-alt"></i>
-                  {{ $t('loginRegister') }}
-                </button>
+                {{ $t('loginRegister') }}
+              </button>
               </template>
             </template>
           </div>

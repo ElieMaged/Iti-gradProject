@@ -12,7 +12,7 @@
     <div id="admin-profile-container" class="p-4 mr-20">
       <div id="admin-profile-wrapper">
         <div id="admin-profile-card">
-          <h2 id="admin-profile-title">{{ $t('personalInformation') }}</h2>
+          <h2 class="page-title">{{ $t('personalInformation') }}</h2>
           <div id="admin-profile-content">
             <div id="admin-profile-info">
               <div class="info-block">
@@ -219,19 +219,20 @@ export default {
   background-color: var(--grey-bg);
 }
 
-#admin-profile-title {
-  font-size: 1.5rem;
-  font-weight: bold;
+.page-title {
   color: var(--primary-color);
-  margin-bottom: 1.5rem;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  font-family: Outfit, sans-serif;
 }
 
-.dark #admin-profile-title {
+.dark .page-title {
   color: var(--primary-color);
 }
 
 /* RTL Support for Arabic */
-[dir="rtl"] #admin-profile-title {
+[dir="rtl"] .page-title {
   text-align: right;
 }
 
@@ -436,7 +437,7 @@ export default {
     padding: 1rem;
   }
   
-  #admin-profile-title {
+  .page-title {
     font-size: 1.125rem;
     margin-bottom: 0.875rem;
   }
@@ -480,7 +481,7 @@ export default {
     padding: 0.875rem;
   }
   
-  #admin-profile-title {
+  .page-title {
     font-size: 1rem;
     margin-bottom: 0.75rem;
   }
@@ -524,7 +525,7 @@ export default {
     padding: 0.75rem;
   }
   
-  #admin-profile-title {
+  .page-title {
     font-size: 0.875rem;
     margin-bottom: 0.625rem;
   }

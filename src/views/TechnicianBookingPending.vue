@@ -8,7 +8,7 @@
         <div class="booking-main">
           <div class="booking-container">
             <div class="title-search-row">
-              <h2 class="booking-title">{{ $t('pendingBookings') }}</h2>
+              <h2 class="page-title">{{ $t('pendingBookings') }}</h2>
               <div class="search-wrapper">
                 <input v-model="searchQuery" class="search-input" type="text" :placeholder="$t('search')" />
                 <span class="search-icon"><i class="fas fa-search"></i></span>
@@ -629,7 +629,6 @@ onMounted(() => {
 
 .booking-main {
   flex: 1;
-  padding: 2.5rem;
 }
 
 .booking-container {
@@ -644,14 +643,15 @@ onMounted(() => {
   margin-bottom: 1.5rem;
 }
 
-.booking-title {
-  font-size: 2rem;
-  font-weight: bold;
+.page-title {
   color: var(--primary-color);
-  margin: 1rem 0;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  font-family: Outfit, sans-serif;
 }
 
-.dark .booking-title {
+.dark .page-title {
   color: var(--primary-color);
 }
 
