@@ -1,5 +1,5 @@
 <template>
-    <body class="bg-gray-50 font-sans">
+    <body class="bg-gray-50 font-sans layout-container">
     
         <div class="flex min-h-screen">
             <Sidebar
@@ -415,6 +415,9 @@ export default {
    margin-bottom: 2rem;
    font-family: Outfit, sans-serif;
  }
+ .layout-container {
+  background-color: #faf8fd;
+ }
 
 .dark .page-title {
   color: var(--primary-color);
@@ -457,6 +460,11 @@ export default {
 .dark-mode thead {
   background-color: var(--text-muted);
   color: var(--primary-text);
+}
+
+/* Center align table header text */
+thead th {
+  text-align: center;
 }
 
 .message {
@@ -578,18 +586,7 @@ export default {
   letter-spacing: -0.5px;
 }
 
-.form-title::after {
-  content: '';
-  position: absolute;
-  bottom: -0.75rem;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80px;
-  height: 4px;
-  background: linear-gradient(90deg, #7c6bb0 0%, #8b5cf6 50%, #ec4899 100%);
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(107, 79, 161, 0.3);
-}
+
 
 .availability-form {
   width: 100%;

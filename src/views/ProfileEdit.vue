@@ -5,7 +5,7 @@
       <div class="edit-profile-wrapper">
         <div class="edit-profile-card">
           <div class="edit-profile-header">
-            <h2>{{ $t('editProfileTitle') }}</h2>
+            <h2 class="page-title">{{ $t('editProfileTitle') }}</h2>
           </div>
           <form class="edit-profile-form" @submit.prevent="saveProfile">
             <div class="edit-profile-content">
@@ -197,11 +197,18 @@ export default {
 .dark .edit-profile-card {
   background: var(--grey-bg);
 }
-.edit-profile-header h2 {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #7c6bb0;
-  margin-bottom: 1.5rem;
+/* Standardized Page Title Styles */
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 2rem;
+  text-align: left;
+  font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
+}
+
+.dark .page-title {
+  color: var(--primary-color);
 }
 .edit-profile-form {
   display: flex;
@@ -382,7 +389,7 @@ export default {
     border-radius: 0.75rem;
   }
   
-  .edit-profile-header h2 {
+  .page-title {
     font-size: 1.25rem;
     margin-bottom: 1rem;
   }
@@ -451,7 +458,7 @@ export default {
     padding: 1rem;
   }
   
-  .edit-profile-header h2 {
+  .page-title {
     font-size: 1.125rem;
   }
   
