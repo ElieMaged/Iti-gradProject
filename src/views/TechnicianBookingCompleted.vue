@@ -1,5 +1,5 @@
 <template>
-  <div class="flex min-h-screen">
+  <div class="flex min-h-screen layout-container">
     <!-- Sidebar -->
     <Sidebar :activeMenu="'booking'" :activeBookingStatus="'completed'" @navigate="handleSidebarNavigate" />
     <!-- Main Content -->
@@ -237,6 +237,9 @@ onMounted(() => {
 .admin-dashboard-layout {
   min-height: 100vh;
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
+}
+.layout-container {
+  background-color: #faf8fd;
 }
 
 .dark .admin-dashboard-layout {

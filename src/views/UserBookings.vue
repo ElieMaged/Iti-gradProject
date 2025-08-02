@@ -263,15 +263,27 @@ onMounted(() => {
 }
 
 .page-title {
-  font-size: 2.5rem;
-  font-weight: bold;
+  font-size: 2rem;
+  font-weight: 700;
   color: var(--primary-color);
-  margin-bottom: 0.5rem;
+  margin-bottom: 2rem;
+  text-align: left;
+  font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
+}
+
+.dark .page-title {
+  color: var(--primary-color);
 }
 
 .page-description {
   color: var(--primary-color);
   font-size: 1.1rem;
+  text-align: left;
+  font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
+}
+
+.dark .page-description {
+  color: var(--primary-color);
 }
 
 .bookings-container {
@@ -570,10 +582,11 @@ onMounted(() => {
   .page-title {
     font-size: 1.5rem;
     margin-bottom: 0.5rem;
-    text-align: left;
+    text-align: center;
   }
   
   .page-description {
+    color: var(--primary-color);
     font-size: 1rem;
     text-align: left;
   }
@@ -667,10 +680,11 @@ onMounted(() => {
   
   .page-title {
     font-size: 1.25rem;
-    text-align: left;
+    text-align: center;
   }
   
   .page-description {
+    color: var(--primary-color);
     font-size: 0.875rem;
     text-align: left;
   }
@@ -899,6 +913,7 @@ onMounted(() => {
   }
   
   .page-description {
+    color: var(--primary-color);
     font-size: 0.85rem;
   }
   
