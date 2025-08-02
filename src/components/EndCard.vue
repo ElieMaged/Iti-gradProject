@@ -23,7 +23,7 @@ const backgroundImage = endImage
     background-repeat: no-repeat;
     height: 400px;
     border-radius: 20px;
-    margin: 2rem;
+    margin: 5rem;
     display: flex;
     align-items: center;
     justify-content: center;
