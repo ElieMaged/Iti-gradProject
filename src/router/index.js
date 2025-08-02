@@ -9,6 +9,9 @@ import TechProfile from '../views/Profile.vue'
 import Plumbing from '../views/Plumbing.vue'
 import Electricity from '../views/Electricity.vue'
 import TestPage from '../views/TestPage.vue'
+import EmailTest from '../views/EmailTest.vue'
+import SimpleEmailTest from '../views/SimpleEmailTest.vue'
+import EmailDebugTest from '../views/EmailDebugTest.vue'
 import AirCondition from '../views/AirCondition.vue'
 import WallFinishing from '../views/WallFinishing.vue'
 import Carpentry from '../views/Carpentry.vue'
@@ -76,6 +79,9 @@ const routes = [
   { path: '/elecTechnicians', component: ElecTechnicians },
 
   { path: '/test', component: TestPage },
+  { path: '/email-test', component: EmailTest },
+  { path: '/simple-email-test', component: SimpleEmailTest },
+  { path: '/email-debug-test', component: EmailDebugTest },
   { path: '/usersignup', component: UserSignUp },
   { path: '/userlogin', component: UserLogin },
   { path: '/techprofile', component: TechProfile },

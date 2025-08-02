@@ -90,7 +90,7 @@ export default {
           firebaseTechnicians.push({
             id: doc.id,
             name: data.fullName || data.name || 'Unknown Technician',
-            image: data.idPhotoUrl || data.profileImage || '/images/Avatar.png',
+            image: data.profileImage || data.idPhotoUrl || '/images/Avatar.png',
             description: data.bio || data.description || 'Professional technician with years of experience.',
             rating: data.averageRating || 4.5,
             specialization: data.specialization || 'General Technician',

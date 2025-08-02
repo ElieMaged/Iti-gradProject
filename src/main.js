@@ -9,6 +9,10 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js"
 import "../fontawesome-free-6.7.2-web/css/all.min.css"
 import "../fontawesome-free-6.7.2-web/js/all.min.js"
 import i18n from './i18n'
+import { initializeEmailJS } from './utils/emailService'
+
+// Initialize EmailJS
+initializeEmailJS();
 
 createApp(App)
   .use(router)

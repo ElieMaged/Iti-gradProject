@@ -54,6 +54,14 @@
             <span class="summary-label">Payment Method:</span>
             <span class="summary-value">{{ booking.payment }}</span>
           </div>
+          
+          <!-- Total Amount Information -->
+          <div v-if="booking.adminAmount && booking.technicianAmount" class="total-amount-section">
+            <div class="summary-item">
+              <span class="summary-label">Total Amount:</span>
+              <span class="summary-value total-amount">{{ (booking.adminAmount + booking.technicianAmount) }} EGP</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -76,7 +84,9 @@ const booking = ref({
   date: '',
   time: '',
   technicianPhone: '',
-  payment: ''
+  payment: '',
+  adminAmount: null,
+  technicianAmount: null
 });
 
 onMounted(() => {
@@ -278,6 +288,21 @@ function goHome() {
   text-align: right;
   flex: 1;
   margin-left: 1rem;
+}
+
+/* Total Amount Section */
+.total-amount-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  width: 100%;
+  max-width: 500px;
+}
+
+.total-amount {
+  font-weight: 700;
+  color: #1f2937;
+  font-size: 1.1rem;
 }
 
 /* Back To Home Button */

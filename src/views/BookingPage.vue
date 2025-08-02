@@ -169,17 +169,17 @@
           <h3 class="section-title">{{ $t('choosePaymentMethod') }}</h3>
           <div class="payment-methods">
             <label class="payment-option">
-              <input type="radio" value="PayPal" v-model="form.payment" @change="handlePaymentMethodChange" />
-              <span class="payment-text">{{ $t('paypal') }}</span>
-              <img src="https://www.paypalobjects.com/webstatic/icon/pp258.png" alt="PayPal" class="paypal-logo" />
-            </label>
-            <label class="payment-option">
               <input type="radio" value="Cash on Visit" v-model="form.payment" @change="handlePaymentMethodChange" />
               <span class="payment-text">{{ $t('cashOnVisit') }}</span>
             </label>
+            <label class="payment-option">
+              <input type="radio" value="Credit Card" v-model="form.payment" @change="handlePaymentMethodChange" />
+              <span class="payment-text">{{ $t('creditCard') || 'Credit Card' }}</span>
+              <i class="fas fa-credit-card payment-icon"></i>
+            </label>
           </div>
           
-          <div v-if="form.payment === 'PayPal' && (technician.basePrice || technician.visitPrice)" class="payment-summary">
+          <div v-if="form.payment === 'Credit Card' && (technician.basePrice || technician.visitPrice)" class="payment-summary">
             <div class="payment-amount">
               <span>{{ $t('totalAmount') }}:</span>
               <span class="amount">{{ technician.visitPrice || technician.basePrice }} {{ $t('egp') }}</span>
@@ -188,35 +188,102 @@
               <span>USD Equivalent:</span>
               <span class="amount">${{ ((parseFloat((technician.visitPrice || technician.basePrice).replace(/[^\d.]/g, '')) / 31)).toFixed(2) }} USD</span>
             </div>
-            <div class="payment-note">{{ $t('paypalPaymentNote') }}</div>
+            <div class="payment-note">{{ $t('creditCardPaymentNote') || 'Your payment will be processed securely' }}</div>
           </div>
         </div>
         
-        <!-- PayPal Button Container -->
-        <div v-show="form.payment === 'PayPal'" class="paypal-container">
-          <div v-if="!paypalLoaded && !errorMsg" class="paypal-loading">
-            <div class="loading-spinner"></div>
-            <p>Loading payment system...</p>
-            <p class="loading-note">This may take a few seconds</p>
+        <!-- Credit Card Form -->
+        <div v-show="form.payment === 'Credit Card'" class="credit-card-container">
+          <div class="credit-card-form">
+            <div class="form-row">
+              <div class="form-group card-number-group">
+                <label for="cardNumber">
+                  <i class="fas fa-credit-card"></i>
+                  {{ $t('cardNumber') || 'Card Number' }}
+                </label>
+                <input 
+                  id="cardNumber"
+                  v-model="form.cardNumber" 
+                  type="text" 
+                  class="form-input card-input"
+                  :class="{ 'error': cardErrors.cardNumber }"
+                  placeholder="1234 5678 9012 3456"
+                  maxlength="19"
+                  @input="formatCardNumber"
+                  @blur="validateCardNumber"
+                />
+                <span v-if="cardErrors.cardNumber" class="error-message">{{ cardErrors.cardNumber }}</span>
+                <div class="card-type-indicator">
+                  <i v-if="detectedCardType" :class="getCardIcon()"></i>
           </div>
-          <div v-if="errorMsg && form.payment === 'PayPal'" class="paypal-error">
-            <div class="error-icon">⚠️</div>
-            <p>{{ errorMsg }}</p>
-            <button @click="retryPayPalLoading" class="retry-btn">Retry Payment System</button>
           </div>
-          <div id="paypal-button-container"></div>
-          
-
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="expiryDate">
+                  <i class="fas fa-calendar-alt"></i>
+                  {{ $t('expiryDate') || 'Expiry Date' }}
+                </label>
+                <input 
+                  id="expiryDate"
+                  v-model="form.expiryDate" 
+                  type="text" 
+                  class="form-input card-input"
+                  :class="{ 'error': cardErrors.expiryDate }"
+                  placeholder="MM/YY"
+                  maxlength="5"
+                  @input="formatExpiryDate"
+                  @blur="validateExpiryDate"
+                />
+                <span v-if="cardErrors.expiryDate" class="error-message">{{ cardErrors.expiryDate }}</span>
+              </div>
+              
+              <div class="form-group">
+                <label for="cvv">
+                  <i class="fas fa-lock"></i>
+                  {{ $t('cvv') || 'CVV' }}
+                </label>
+                <input 
+                  id="cvv"
+                  v-model="form.cvv" 
+                  type="text" 
+                  class="form-input card-input"
+                  :class="{ 'error': cardErrors.cvv }"
+                  placeholder="123"
+                  maxlength="4"
+                  @input="formatCVV"
+                  @blur="validateCVV"
+                />
+                <span v-if="cardErrors.cvv" class="error-message">{{ cardErrors.cvv }}</span>
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="cardholderName">
+                  <i class="fas fa-user"></i>
+                  {{ $t('cardholderName') || 'Cardholder Name' }}
+                </label>
+                <input 
+                  id="cardholderName"
+                  v-model="form.cardholderName" 
+                  type="text" 
+                  class="form-input card-input"
+                  :class="{ 'error': cardErrors.cardholderName }"
+                  placeholder="John Doe"
+                  @blur="validateCardholderName"
+                />
+                <span v-if="cardErrors.cardholderName" class="error-message">{{ cardErrors.cardholderName }}</span>
+              </div>
+            </div>
+          </div>
         </div>
         
         <!-- Confirm Booking Button -->
-        <button v-if="form.payment === 'Cash on Visit'" class="confirm-btn" type="submit">
+        <button v-if="form.payment === 'Cash on Visit' || form.payment === 'Credit Card'" class="confirm-btn" type="submit">
           {{ $t('confirmBooking') }}
         </button>
-
-
-        
-
       </form>
     </div>
   </div>
@@ -229,10 +296,7 @@ import { collection, doc, getDoc, addDoc, serverTimestamp, query, getDocs, where
 import { db } from '../firebase'
 import { useI18n } from 'vue-i18n'
 import { stockTechnicians } from '../assets/stockTechnicians'
-
 import { auth } from '../firebase';
-import { paypalHelper } from '../utils/paypalHelper';
-import { paypalTester } from '../utils/paypalTest';
 import LocationMap from '../components/LocationMap.vue'
 import { getGovernmentNames, getDistrictsForGovernment } from '../data/egyptianLocations.js'
 
@@ -241,11 +305,11 @@ const route = useRoute()
 const router = useRouter()
 const technician = ref({})
 const errorMsg = ref('')
-const paypalLoaded = ref(false)
+
 const technicianAvailability = ref(null)
 const dateAvailability = ref({})
 
-// Form data - moved before watch functions
+// Form data
 const form = ref({
   date: '', // will be set on mount
   time: '',
@@ -257,8 +321,23 @@ const form = ref({
   area: 'Giza',
   street: '',
   building: '',
-  payment: 'PayPal'
+  payment: 'Cash on Visit',
+  // Credit card fields
+  cardNumber: '',
+  expiryDate: '',
+  cvv: '',
+  cardholderName: ''
 })
+
+// Credit card validation
+const cardErrors = ref({
+  cardNumber: '',
+  expiryDate: '',
+  cvv: '',
+  cardholderName: ''
+})
+
+const detectedCardType = ref('')
 
 // Location data management
 const availableGovernorates = ref(getGovernmentNames())
@@ -279,7 +358,6 @@ watch(() => form.value.city, () => {
   // Reset area when governorate changes
   form.value.area = '';
 });
-const isProcessingPayment = ref(false)
 
 // Date and time management
 const currentDateOffset = ref(0)
@@ -360,6 +438,155 @@ function populateFormWithUserData() {
   
   console.log('Final form data:', form.value);
   console.log('=== END FORM POPULATION ===');
+}
+
+// Credit Card Validation and Formatting Functions
+function formatCardNumber(event) {
+  let value = event.target.value.replace(/\D/g, '')
+  value = value.replace(/(\d{4})/g, '$1 ').trim()
+  form.value.cardNumber = value
+  detectCardType(value.replace(/\s/g, ''))
+}
+
+function validateCardNumber() {
+  const cardNumber = form.value.cardNumber.replace(/\s/g, '')
+  cardErrors.value.cardNumber = ''
+  
+  if (!cardNumber) {
+    cardErrors.value.cardNumber = 'Card number is required'
+    return false
+  }
+  
+  if (cardNumber.length < 13 || cardNumber.length > 19) {
+    cardErrors.value.cardNumber = 'Card number must be between 13 and 19 digits'
+    return false
+  }
+  
+  return true
+}
+
+function formatExpiryDate(event) {
+  let value = event.target.value.replace(/\D/g, '')
+  if (value.length >= 2) {
+    value = value.slice(0, 2) + '/' + value.slice(2, 4)
+  }
+  form.value.expiryDate = value
+}
+
+function validateExpiryDate() {
+  const expiry = form.value.expiryDate
+  cardErrors.value.expiryDate = ''
+  
+  if (!expiry) {
+    cardErrors.value.expiryDate = 'Expiry date is required'
+    return false
+  }
+  
+  const [month, year] = expiry.split('/')
+  const currentDate = new Date()
+  const currentYear = currentDate.getFullYear() % 100
+  const currentMonth = currentDate.getMonth() + 1
+  
+  if (!month || !year) {
+    cardErrors.value.expiryDate = 'Please enter a valid expiry date (MM/YY)'
+    return false
+  }
+  
+  const monthNum = parseInt(month)
+  const yearNum = parseInt(year)
+  
+  if (monthNum < 1 || monthNum > 12) {
+    cardErrors.value.expiryDate = 'Invalid month'
+    return false
+  }
+  
+  if (yearNum < currentYear || (yearNum === currentYear && monthNum < currentMonth)) {
+    cardErrors.value.expiryDate = 'Card has expired'
+    return false
+  }
+  
+  return true
+}
+
+function formatCVV(event) {
+  let value = event.target.value.replace(/\D/g, '')
+  form.value.cvv = value
+}
+
+function validateCVV() {
+  const cvv = form.value.cvv
+  cardErrors.value.cvv = ''
+  
+  if (!cvv) {
+    cardErrors.value.cvv = 'CVV is required'
+    return false
+  }
+  
+  if (cvv.length < 3 || cvv.length > 4) {
+    cardErrors.value.cvv = 'CVV must be 3 or 4 digits'
+    return false
+  }
+  
+  return true
+}
+
+function validateCardholderName() {
+  const name = form.value.cardholderName
+  cardErrors.value.cardholderName = ''
+  
+  if (!name) {
+    cardErrors.value.cardholderName = 'Cardholder name is required'
+    return false
+  }
+  
+  if (name.length < 2) {
+    cardErrors.value.cardholderName = 'Cardholder name must be at least 2 characters'
+    return false
+  }
+  
+  return true
+}
+
+function detectCardType(cardNumber) {
+  const patterns = {
+    visa: /^4/,
+    mastercard: /^5[1-5]/,
+    amex: /^3[47]/,
+    discover: /^6(?:011|5)/,
+    diners: /^3(?:0[0-5]|[68])/,
+    jcb: /^(?:2131|1800|35\d{3})/
+  }
+  
+  for (const [type, pattern] of Object.entries(patterns)) {
+    if (pattern.test(cardNumber)) {
+      detectedCardType.value = type
+      return
+    }
+  }
+  detectedCardType.value = ''
+}
+
+function getCardIcon() {
+  const icons = {
+    visa: 'fab fa-cc-visa',
+    mastercard: 'fab fa-cc-mastercard',
+    amex: 'fab fa-cc-amex',
+    discover: 'fab fa-cc-discover',
+    diners: 'fab fa-cc-diners-club',
+    jcb: 'fab fa-cc-jcb'
+  }
+  return icons[detectedCardType.value] || 'fas fa-credit-card'
+}
+
+
+
+function validateCreditCardForm() {
+  const isCardNumberValid = validateCardNumber()
+  const isExpiryValid = validateExpiryDate()
+  const isCVVValid = validateCVV()
+  const isNameValid = validateCardholderName()
+  
+  return isCardNumberValid && isExpiryValid && isCVVValid && isNameValid
 }
 
 // Function to get day name from date string
@@ -554,15 +781,6 @@ watch(() => technician.value.uid, async (newUid) => {
   }
 })
 
-// Watch for available times changes to reinitialize PayPal
-watch(() => availableTimes.value, () => {
-  if (form.value.payment === 'PayPal' && paypalLoaded.value) {
-    setTimeout(() => {
-      initializePayPalButton();
-    }, 100);
-  }
-})
-
 // Watch for technician availability changes to update available dates
 watch(() => technicianAvailability.value, async () => {
   // When availability changes, update the selected date if current date is no longer available
@@ -614,1022 +832,118 @@ function nextDates() {
   currentDateOffset.value++
 }
 
-onMounted(async () => {
-  const id = route.query.techId || route.query.technicianId
-  if (!id) {
-    errorMsg.value = 'Technician ID is missing. Please try again or contact support.';
-    return;
-  }
-  
-  // Try to find in stockTechnicians first
-  const stock = stockTechnicians.find(t => t.id === id)
-  if (stock) {
-    technician.value = stock
-  } else {
-    // Try to fetch from Firestore (pendingTechnicians or technicians)
-    let docRef = doc(db, 'technicians', id);
-    let docSnap = await getDoc(docRef);
-    if (!docSnap.exists()) {
-      // Try pendingTechnicians (if not yet approved)
-      docRef = doc(db, 'pendingTechnicians', id);
-      docSnap = await getDoc(docRef);
-    }
-    if (docSnap.exists()) {
-      const techData = docSnap.data();
-      technician.value = {
-        ...techData,
-        uid: id, // Ensure uid is set for consistency
-        name: techData.fullName || techData.name, // Map fullName to name for consistency
-                profilePhotoUrl: techData.profileImage || techData.image || techData.idPhotoUrl || '/images/Avatar.png' // Map to profilePhotoUrl for template consistency
-      };
-      console.log('Technician data loaded:', technician.value);
-        console.log('Technician profile photo:', technician.value.profilePhotoUrl);
-    } else {
-      errorMsg.value = 'Technician not found. Please try again or contact support.';
-      return;
-    }
-  }
-  
-  // Fetch technician availability first
-  if (technician.value.uid) {
-    await fetchTechnicianAvailability(technician.value.uid);
-    await updateDateAvailability();
-  }
-  
-  // Set default date to the first available date
-  if (availableDates.value.length > 0) {
-    form.value.date = availableDates.value[0];
-    // Initialize availability times for the default date
-    await updateAvailableTimes(form.value.date);
-  } else {
-    // No available dates found
-    errorMsg.value = 'This technician has not set their availability yet. Please contact them directly or try again later.';
-  }
-  
-  // Load PayPal script with delay to ensure page is ready
-  setTimeout(() => {
-    loadPayPalScript();
-  }, 500);
-  
-  populateFormWithUserData(); // Call the new function here
-  
-  // Initialize available cities for default governorate
-  updateCities();
-})
-
-// Cleanup function to prevent memory leaks
-onUnmounted(() => {
-  // Clear any timeouts
-  if (window.paypalLoadingTimeout) {
-    clearTimeout(window.paypalLoadingTimeout);
-  }
-  
-  // Reset PayPal state
-  paypalLoaded.value = false;
+function handlePaymentMethodChange() {
+  // Clear any existing error messages
   errorMsg.value = '';
-})
-
-// Watch for technician data changes to initialize PayPal when data is available
-watch(() => technician.value, (newTechnician) => {
-  if (newTechnician && (newTechnician.visitPrice || newTechnician.basePrice) && form.value.payment === 'PayPal') {
-    console.log('Technician data loaded, initializing PayPal...');
-    setTimeout(() => {
-      if (paypalLoaded.value) {
-        initializePayPalButton();
-      }
-    }, 100);
-  }
-}, { deep: true })
-
-// Watch for payment method changes
-watch(() => form.value.payment, (newPayment) => {
-  if (newPayment === 'PayPal') {
-    // Initialize PayPal button after a short delay to ensure script is loaded
-    setTimeout(() => {
-      if (paypalLoaded.value) {
-        initializePayPalButton();
-      }
-    }, 100);
-  }
-});
-
-function loadPayPalScript() {
-  console.log('🔄 Starting PayPal script loading...');
   
-  // Check if PayPal is already loaded
-  if (window.paypal) {
-    console.log('✅ PayPal already loaded');
-    paypalLoaded.value = true;
-    if (form.value.payment === 'PayPal') {
-      setTimeout(() => {
-        initializePayPalButton();
-      }, 100);
-    }
-    return;
+  // Clear credit card errors when switching payment methods
+  if (form.value.payment === 'Credit Card') {
+    cardErrors.value = {
+      cardNumber: '',
+      expiryDate: '',
+      cvv: '',
+      cardholderName: ''
+    };
   }
-
-  const clientId = import.meta.env.VITE_PAYPAL_CLIENT_ID;
-  
-  // Validate client ID
-  if (!clientId || clientId === 'YOUR_PAYPAL_CLIENT_ID' || clientId.trim() === '') {
-    console.error('❌ PayPal Client ID not configured');
-    errorMsg.value = 'Payment system not configured. Please contact support.';
-    paypalLoaded.value = false; // Ensure loading state is cleared
-    return;
-  }
-
-  console.log('🔧 PayPal Client ID found, loading script...');
-
-  // Remove any existing PayPal scripts to prevent conflicts
-  const existingScripts = document.querySelectorAll('script[src*="paypal.com"]');
-  existingScripts.forEach(script => {
-    console.log('🗑️ Removing existing PayPal script:', script.src);
-    script.remove();
-  });
-
-  // Create new script element with better error handling
-  const script = document.createElement('script');
-  script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD&intent=capture&components=buttons,funding-eligibility`;
-  script.async = true;
-  script.defer = true;
-  
-  // Add loading timeout with better error handling
-  window.paypalLoadingTimeout = setTimeout(() => {
-    if (!paypalLoaded.value) {
-      console.error('⏰ PayPal script loading timeout after 10 seconds');
-      errorMsg.value = 'Payment system failed to load. Please refresh the page and try again.';
-      paypalLoaded.value = false; // Ensure loading state is cleared
-      
-      // Show error in the container
-      const container = document.getElementById('paypal-button-container');
-      if (container) {
-        container.innerHTML = '<div class="text-red-500 text-center p-4">Payment system failed to load. Please refresh the page and try again.</div>';
-      }
-    }
-  }, 10000); // 10 second timeout
-
-  script.onload = () => {
-    if (window.paypalLoadingTimeout) {
-      clearTimeout(window.paypalLoadingTimeout);
-    }
-    console.log('📦 PayPal script loaded successfully');
-    
-    // Add a small delay to ensure PayPal object is available
-    setTimeout(() => {
-      // Verify PayPal object is available
-      if (window.paypal) {
-        console.log('✅ PayPal object available');
-        paypalLoaded.value = true;
-        if (form.value.payment === 'PayPal') {
-          setTimeout(() => {
-            initializePayPalButton();
-          }, 200);
-        }
-      } else {
-        console.error('❌ PayPal object not available after script load');
-        errorMsg.value = 'Payment system error. Please try again.';
-        paypalLoaded.value = false; // Ensure loading state is cleared
-        
-        // Show error in the container
-        const container = document.getElementById('paypal-button-container');
-        if (container) {
-          container.innerHTML = '<div class="text-red-500 text-center p-4">Payment system error. Please try again.</div>';
-        }
-      }
-    }, 500); // Wait 500ms for PayPal object to be available
-  };
-
-  script.onerror = (error) => {
-    if (window.paypalLoadingTimeout) {
-      clearTimeout(window.paypalLoadingTimeout);
-    }
-    console.error('❌ Failed to load PayPal script:', error);
-    errorMsg.value = 'Failed to load payment system. Please check your internet connection and try again.';
-    paypalLoaded.value = false; // Ensure loading state is cleared
-    
-    // Show error in the container
-    const container = document.getElementById('paypal-button-container');
-    if (container) {
-      container.innerHTML = '<div class="text-red-500 text-center p-4">Failed to load payment system. Please check your internet connection and try again.</div>';
-    }
-  };
-
-  // Add script to document
-  console.log('📎 Adding PayPal script to document');
-  document.head.appendChild(script);
 }
 
-function initializePayPalButton() {
-  // Prevent initialization if payment is in progress
-  if (isProcessingPayment.value) {
-    console.log('Payment in progress, skipping PayPal button initialization');
+async function confirmBooking() {
+  // This function is for cash payments and credit card payments
+  if (form.value.payment !== 'Cash on Visit' && form.value.payment !== 'Credit Card') {
+    return;
+  }
+
+  // Validate credit card if payment method is Credit Card
+  if (form.value.payment === 'Credit Card') {
+    if (!validateCreditCardForm()) {
+      errorMsg.value = 'Please fix the credit card errors before proceeding.';
+    return;
+  }
+  }
+
+  // Validate that a date is selected
+  if (!form.value.date || availableDates.value.length === 0) {
+    errorMsg.value = 'Please select an available date for booking.';
     return;
   }
   
-  console.log('Initializing PayPal button...');
-  
-  // Multiple validation checks
-  if (!window.paypal) {
-    console.error('PayPal SDK not available');
-    errorMsg.value = 'Payment system not available. Please refresh the page.';
+  // Validate that a time is selected
+  if (!form.value.time || availableTimes.value.length === 0) {
+    errorMsg.value = 'Please select an available time slot for booking.';
     return;
   }
 
-  if (!technician.value.visitPrice && !technician.value.basePrice) {
-    console.error('No technician price available');
-    errorMsg.value = 'Technician pricing not available. Please try again later.';
+  // Validate required fields before creating booking data
+  if (!technician.value.uid && !technician.value.id) {
+    errorMsg.value = 'Technician information is missing. Please try again.';
     return;
   }
 
-  // Check if times are available
-  if (availableTimes.value.length === 0) {
-    console.log('No available times for booking');
-    const container = document.getElementById('paypal-button-container');
-    if (container) {
-      container.innerHTML = '<div class="text-red-500 text-center p-4">No available time slots for the selected date. Please choose a different date.</div>';
-    }
+  if (!auth.currentUser?.uid) {
+    errorMsg.value = 'User authentication required. Please log in again.';
     return;
   }
 
-  // Wait for DOM to be ready
-  setTimeout(() => {
-    const container = document.getElementById('paypal-button-container');
-    
-    if (!container) {
-      console.error('PayPal container not found');
-      errorMsg.value = 'Payment system error. Please refresh the page and try again.';
+  if (!form.value.fullName || !form.value.email || !form.value.phone) {
+    errorMsg.value = 'Please fill in all required fields (name, email, phone).';
       return;
     }
 
-    // Check if container is visible
-    const containerParent = container.closest('.paypal-container');
-    if (containerParent && containerParent.style.display === 'none') {
-      console.log('PayPal container is hidden, retrying...');
-      setTimeout(() => {
-        initializePayPalButton();
-      }, 200);
-      return;
-    }
-
-    // Clear existing content and destroy any existing PayPal buttons
-    container.innerHTML = '';
-
-    // Destroy any existing PayPal buttons to prevent conflicts
-    if (window.paypal && window.paypal.Buttons) {
-      try {
-        // Remove any existing PayPal elements
-        const existingButtons = container.querySelectorAll('[data-paypal-button]');
-        existingButtons.forEach(button => button.remove());
-      } catch (error) {
-        console.log('Error cleaning up existing PayPal buttons:', error);
-      }
-    }
-
-    try {
-      console.log('🔧 Creating PayPal button...');
-      console.log('Window PayPal object:', window.paypal);
-      console.log('PayPal FUNDING object:', window.paypal?.FUNDING);
-      console.log('PayPal FUNDING.PAYPAL:', window.paypal?.FUNDING?.PAYPAL);
-      console.log('PayPal FUNDING.CARD:', window.paypal?.FUNDING?.CARD);
-      
-      // Test button eligibility with different configurations
-      console.log('🔍 Testing PayPal eligibility with different configurations...');
-      
-      const testConfigurations = [
-        { name: 'Default (All Methods)', funding: undefined },
-        { name: 'PayPal Only', funding: window.paypal.FUNDING.PAYPAL },
-        { name: 'Card Only', funding: window.paypal.FUNDING.CARD },
-        { name: 'PayPal + Card', funding: [window.paypal.FUNDING.PAYPAL, window.paypal.FUNDING.CARD] }
-      ];
-      
-      let eligibleConfigurations = [];
-      
-      testConfigurations.forEach(config => {
-        try {
-          const buttonConfig = {
-            createOrder: () => Promise.resolve('test'),
-            onApprove: () => Promise.resolve()
-          };
-          
-          // Only add fundingSource if it's defined
-          if (config.funding !== undefined) {
-            buttonConfig.fundingSource = config.funding;
-          }
-          
-          const testButton = window.paypal.Buttons(buttonConfig);
-          
-          if (testButton.isEligible && typeof testButton.isEligible === 'function') {
-            try {
-              const isEligible = testButton.isEligible();
-              console.log(`🔍 ${config.name} eligibility:`, isEligible);
-              
-              if (isEligible) {
-                eligibleConfigurations.push(config);
-                console.log(`✅ ${config.name} is eligible`);
-              } else {
-                console.log(`❌ ${config.name} is not eligible`);
-              }
-            } catch (eligibilityError) {
-              console.error(`❌ Error testing ${config.name} eligibility:`, eligibilityError);
-            }
-          }
-        } catch (error) {
-          console.error(`❌ Error creating ${config.name} test button:`, error);
-        }
-      });
-      
-      console.log('📊 Eligible configurations:', eligibleConfigurations);
-      
-      if (eligibleConfigurations.length === 0) {
-        console.error('❌ No PayPal configurations are eligible');
-        console.log('🔍 This could be due to:');
-        console.log('- Geographic restrictions');
-        console.log('- Account limitations');
-        console.log('- Amount restrictions');
-        console.log('- PayPal account status issues');
-        
-        // Show user-friendly message with alternatives
-        const container = document.getElementById('paypal-button-container');
-        if (container) {
-          container.innerHTML = `
-            <div class="text-center p-4">
-              <div class="text-red-500 mb-2">PayPal is not available for this transaction.</div>
-              <div class="text-sm text-gray-600 mb-3">
-                This could be due to geographic restrictions, account limitations, or amount restrictions.
-              </div>
-              <div class="text-sm text-gray-600">
-                Please try:
-                <ul class="list-disc list-inside mt-1">
-                  <li>Using a different payment method</li>
-                  <li>Contacting support for assistance</li>
-                  <li>Checking your PayPal account status</li>
-                </ul>
-              </div>
-            </div>
-          `;
-        }
-      } else {
-        console.log('✅ Found eligible configurations:', eligibleConfigurations.map(c => c.name));
-      }
-      
-      // Create PayPal button with enhanced error handling
-      // Let PayPal show all available payment methods by default
-      const paypalButton = window.paypal.Buttons({
-        // Use Smart Payment Buttons with enhanced configuration
-        style: {
-          layout: 'vertical',
-          color: 'blue',
-          shape: 'rect',
-          label: 'pay'
-        },
-        
-        // Allow all payment methods including PayPal, credit cards, and debit cards
-        
-        // Add render method for additional debugging
-        render: function(container) {
-          console.log('🎨 PayPal button render method called');
-          console.log('Container element:', container);
-          return true;
-        },
-        
-        createOrder: function(data, actions) {
-          try {
-            console.log('🔄 Starting PayPal order creation...');
-            
-            // Validate form data
             if (!form.value.date || !form.value.time) {
-              throw new Error('Please select a date and time before proceeding with payment.');
-            }
-
-            // Convert price to number with better parsing
-            const priceString = technician.value.visitPrice || technician.value.basePrice;
-            console.log('Original price string:', priceString);
-            const amount = parseFloat(priceString.replace(/[^\d.]/g, ''));
-            console.log('Parsed amount (EGP):', amount);
-            
-            if (isNaN(amount) || amount <= 0) {
-              throw new Error('Invalid technician pricing. Please contact support.');
-            }
-
-            // Convert EGP to USD (approximate rate: 1 USD = 31 EGP)
-            const usdAmount = (amount / 31).toFixed(2);
-            console.log('Converted USD amount:', usdAmount);
-            
-            // Add geographic and amount validation
-            const amountNum = parseFloat(usdAmount);
-            if (amountNum < 0.01) {
-              console.warn('⚠️ Amount is too low for PayPal (minimum $0.01)');
-              throw new Error('Payment amount is too low. Please contact support.');
-            } else if (amountNum > 10000) {
-              console.warn('⚠️ Amount is very high for PayPal (maximum $10,000)');
-              throw new Error('Payment amount is too high. Please contact support.');
-            }
-            
-            // Log geographic information for debugging
-            console.log('🌍 Geographic Info:', {
-              userAgent: navigator.userAgent,
-              language: navigator.language,
-              timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-              amount: usdAmount
-            });
-            
-            // Check if amount meets PayPal requirements
-            if (amountNum < 0.01) {
-              console.warn('⚠️ Amount is too low for PayPal (minimum $0.01)');
-            } else if (amountNum > 10000) {
-              console.warn('⚠️ Amount is very high for PayPal (maximum $10,000)');
-            } else {
-              console.log('✅ Amount is within PayPal limits');
-            }
-            
-            console.log('Creating PayPal order:', {
-              amount: usdAmount,
-              technician: technician.value.name,
-              date: form.value.date,
-              time: form.value.time
-            });
-
-            const orderData = {
-              purchase_units: [{
-                amount: {
-                  value: usdAmount,
-                  currency_code: 'USD'
-                },
-                payee: {
-                  email_address: 'narutossj23@yahoo.com'
-                },
-                description: `Booking with ${technician.value.name} - ${form.value.date} at ${form.value.time}`,
-                custom_id: `booking_${Date.now()}`,
-                invoice_id: `INV_${Date.now()}`
-              }],
-              application_context: {
-                shipping_preference: 'NO_SHIPPING',
-                user_action: 'PAY_NOW',
-                return_url: window.location.origin + '/bookingconfirmation',
-                cancel_url: window.location.origin + '/bookingpage',
-                // Add these to improve payment flow reliability
-                brand_name: 'BoltFix',
-                landing_page: 'LOGIN',
-                user_action: 'CONTINUE'
-              }
-            };
-            
-            console.log('PayPal order data:', orderData);
-            console.log('Actions object:', actions);
-            console.log('Actions.order object:', actions.order);
-            
-            const orderPromise = actions.order.create(orderData);
-            console.log('Order creation promise:', orderPromise);
-            
-            return orderPromise.then(orderId => {
-              console.log('✅ PayPal order created successfully:', orderId);
-              return orderId;
-            }).catch(error => {
-              console.error('❌ PayPal order creation failed:', error);
-              throw error;
-            });
-          } catch (error) {
-            console.error('Error creating PayPal order:', error);
-            errorMsg.value = error.message || 'Error creating payment. Please try again.';
-            throw error;
-          }
-        },
-
-        onApprove: async (data, actions) => {
-          // Prevent multiple payment attempts
-          if (isProcessingPayment.value) {
-            console.log('Payment already in progress, ignoring duplicate request');
+    errorMsg.value = 'Please select a date and time for your booking.';
             return;
           }
           
-          isProcessingPayment.value = true;
-          
-          // Add a small delay to ensure PayPal window is fully loaded
-          await new Promise(resolve => setTimeout(resolve, 500));
-          
-          // Show payment instructions to user
-          const container = document.getElementById('paypal-button-container');
-          if (container) {
-            container.innerHTML = `
-              <div class="text-center p-4">
-                <div class="text-blue-600 mb-2">Processing Payment...</div>
-                <div class="text-sm text-gray-600">
-                  Please complete your payment in the PayPal window.<br>
-                  <strong>Important:</strong> Do not close the PayPal window until payment is finished.<br>
-                  The window will close automatically when payment is complete.
-                </div>
-                <div class="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded">
-                  <i class="fas fa-exclamation-triangle text-yellow-600"></i>
-                  <span class="text-sm text-yellow-800">
-                    Keep the PayPal window open until you see a confirmation message.
-                  </span>
-                </div>
-              </div>
-            `;
-          }
-          
-          try {
-            console.log('PayPal payment approved, capturing order...');
-            const captureStartTime = Date.now();
-            
-            // Show loading state with timeout protection
-            const container = document.getElementById('paypal-button-container');
-            if (container) {
-              container.innerHTML = '<div class="text-center p-4"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div><p class="mt-2">Processing payment...</p></div>';
-            }
+  // Ensure all numeric values are valid numbers
+  const basePrice = parseFloat((technician.value.visitPrice || technician.value.basePrice || '0').replace(/[^\d.]/g, '')) || 0;
+  const adminAmount = Math.round(basePrice * 0.25 * 100) / 100; // Round to 2 decimal places
+  const technicianAmount = Math.round(basePrice * 0.75 * 100) / 100; // Round to 2 decimal places
 
-            // Single timeout mechanism to prevent infinite loading
-            let captureCompleted = false;
-            const captureTimeout = setTimeout(() => {
-              if (!captureCompleted) {
-                console.error('Payment capture timeout - clearing loading state');
-                captureCompleted = true;
-              if (container) {
-                container.innerHTML = '<div class="text-center p-4 text-red-500">Payment processing timed out. Please try again.</div>';
-              }
-              errorMsg.value = 'Payment processing timed out. Please try again.';
-              }
-            }, 8000); // 8 second timeout
-
-            // Wrap the capture call with better error handling and retry mechanism
-            let order;
-            let retryCount = 0;
-            const maxRetries = 3;
-            
-            try {
-              while (retryCount < maxRetries) {
-                try {
-                  console.log(`Starting PayPal capture (attempt ${retryCount + 1}/${maxRetries})...`);
-              order = await Promise.race([
-                actions.order.capture(),
-                new Promise((_, reject) => 
-                      setTimeout(() => reject(new Error('PayPal capture timeout')), 10000)
-                    )
-                  ]);
-                  break; // Success, exit retry loop
-                } catch (captureError) {
-                  retryCount++;
-                  console.log(`Capture attempt ${retryCount} failed:`, captureError.message);
-                  
-                  if (retryCount >= maxRetries) {
-                    throw captureError; // Re-throw if all retries failed
-                  }
-                  
-                  // Wait before retry
-                  await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
-                }
-              }
-                
-              if (!captureCompleted) {
-                captureCompleted = true;
-                clearTimeout(captureTimeout);
-              const captureEndTime = Date.now();
-              console.log(`Payment captured successfully in ${captureEndTime - captureStartTime}ms:`, order);
-              }
-            } catch (captureError) {
-              if (!captureCompleted) {
-                captureCompleted = true;
-              clearTimeout(captureTimeout);
-              console.error('PayPal capture failed:', captureError);
-                
-                // Handle specific PayPal errors
-                if (captureError.message.includes('Target window is closed') || 
-                    captureError.message.includes('postrobot_method')) {
-                  throw new Error('Payment window was closed too early. Please try again and keep the PayPal window open until you see a confirmation message.');
-                } else if (captureError.message.includes('network')) {
-                  throw new Error('Network error during payment. Please check your connection and try again.');
-                } else if (captureError.message.includes('timeout')) {
-                  throw new Error('Payment timed out. Please try again.');
-                } else {
-              throw new Error(`Payment capture failed: ${captureError.message}`);
-                }
-              }
-            }
-            
-            // Reset payment processing flag
-            isProcessingPayment.value = false;
-            
-            // Validate payment response
-            if (!order || !order.id || order.status !== 'COMPLETED') {
-              throw new Error('Payment was not completed successfully.');
-            }
-
-            // Extract payment details
-            const paymentAmount = parseFloat(order.purchase_units[0].amount.value);
-            const paypalOrderId = order.id;
-            
-            // Validate payment amount
-            if (isNaN(paymentAmount) || paymentAmount <= 0) {
-              throw new Error('Invalid payment amount received.');
-            }
-
-            console.log('Payment details:', {
-              amount: paymentAmount,
-              orderId: paypalOrderId,
-              status: order.status
-            });
-
-            // Split the payment between accounts (non-blocking)
-            splitPaymentToAccounts(paypalOrderId, paymentAmount, technician.value.uid)
-              .then(splitSuccess => {
-                if (splitSuccess) {
-                  console.log('Payment split successfully between accounts');
-                } else {
-                  console.warn('Payment split failed, but payment was successful');
-                }
-              })
-              .catch(error => {
-                console.error('Error in payment split:', error);
-              });
-            
-            // Create booking data with enhanced validation
             const bookingData = {
               technicianId: technician.value.uid || technician.value.id,
-              technicianName: technician.value.name,
-              userId: auth.currentUser?.uid,
-              userName: form.value.fullName,
-              userEmail: form.value.email,
-              userPhone: form.value.phone,
+    technicianName: technician.value.name || 'Unknown Technician',
+    userId: auth.currentUser.uid,
+    userName: form.value.fullName.trim(),
+    userEmail: form.value.email.trim(),
+    userPhone: form.value.phone.trim(),
               date: form.value.date,
               time: form.value.time,
-              address: constructAddress(form.value),
+    address: constructAddress(form.value) || 'Address not provided',
               price: technician.value.visitPrice || technician.value.basePrice || 'N/A',
               note: form.value.note || '',
               payment: form.value.payment,
-              paymentDetails: {
-                paypalOrderId: paypalOrderId,
-                paypalPayerId: order.payer.payer_id,
-                amount: paymentAmount,
-                currency: order.purchase_units[0].amount.currency_code,
-                status: order.status,
-                captureId: order.purchase_units[0].payments.captures[0]?.id,
-                paymentMethod: 'PayPal',
-                transactionTime: new Date().toISOString()
-              },
               status: 'pending',
               createdAt: serverTimestamp(),
-              paymentSplit: splitSuccess
-            };
-            
-            console.log('Creating PayPal booking with data:', bookingData);
-            
-            // Save booking to Firestore with timeout (non-blocking)
-            let bookingRef;
-            const bookingSaveStartTime = Date.now();
-            
-            // Make booking save non-blocking with shorter timeout
-            const bookingSavePromise = addDoc(collection(db, 'bookings'), bookingData)
-              .then(ref => {
-                const bookingSaveEndTime = Date.now();
-                console.log(`PayPal booking saved with ID: ${ref.id} in ${bookingSaveEndTime - bookingSaveStartTime}ms`);
-                return ref;
-              })
-              .catch(firestoreError => {
-                console.error('Error saving booking to Firestore:', firestoreError);
-                // Record failed transaction but don't fail the payment
-                recordFailedTransaction({
-                  message: 'Payment successful but booking save failed',
-                  error: firestoreError,
-                  orderId: paypalOrderId
-                });
-                return null;
-              });
-            
-            // Wait for booking save with timeout, but don't block the flow
-            try {
-              bookingRef = await Promise.race([
-                bookingSavePromise,
-                new Promise((_, reject) => setTimeout(() => reject(new Error('Booking save timeout')), 5000))
-              ]);
-            } catch (timeoutError) {
-              console.warn('Booking save timed out, continuing with payment success');
-              bookingRef = null;
-            }
-            
-            // Update booking data with the Firestore ID
-            if (bookingRef) {
-              bookingData.id = bookingRef.id;
-            } else {
-              // If booking save failed, still proceed with payment success
-              bookingData.id = `temp_${Date.now()}`;
-              console.log('Using temporary booking ID due to save timeout');
-            }
-            
-            // Send notifications (non-blocking)
-            sendPaymentNotifications(
-              bookingData.paymentDetails,
-              technician.value.uid || technician.value.id,
-              technician.value.name
-            ).catch(notificationError => {
-              console.error('Error sending payment notifications:', notificationError);
-            });
-
-            sendBookingRequestNotification(bookingData).catch(notificationError => {
-              console.error('Error sending booking request notification:', notificationError);
-            });
-            
-            sendBookingRequestEmail(bookingData).catch(emailError => {
-              console.error('Error sending booking request email:', emailError);
-            });
-            
-            // Store booking data and redirect immediately
-            localStorage.setItem('bookingData', JSON.stringify(bookingData));
-            console.log('PayPal booking completed successfully');
-            
-            // Clear any loading states and show success immediately
-            if (container) {
-              container.innerHTML = '<div class="text-center p-4 text-green-500">Payment successful! Redirecting...</div>';
-            }
-            
-            // Reset payment processing flag
-            isProcessingPayment.value = false;
-            
-            // Redirect to confirmation page immediately
-            const redirectStartTime = Date.now();
-            router.push('/bookingconfirmation');
-            const redirectEndTime = Date.now();
-            console.log(`Redirect initiated in ${redirectEndTime - redirectStartTime}ms`);
-            
-          } catch (err) {
-            console.error('Error capturing PayPal payment:', err);
-            
-            // Clear timeout if it exists
-            if (typeof captureTimeout !== 'undefined') {
-              clearTimeout(captureTimeout);
-            }
-            
-            // Record failed transaction
-            recordFailedTransaction(err);
-            
-            // Show user-friendly error message
-            const errorMessage = err.message || 'Payment failed. Please try again.';
-            errorMsg.value = errorMessage;
-            
-            // Clear loading state and show error
-            if (container) {
-              container.innerHTML = '<div class="text-center p-4 text-red-500">Payment failed. Please try again.</div>';
-            }
-            
-            // Reset payment processing flag
-            isProcessingPayment.value = false;
-            
-            // Re-initialize PayPal button for retry
-            setTimeout(() => {
-              initializePayPalButton();
-            }, 1000);
-          }
-        },
-
-        onError: function(err) {
-          console.error('PayPal error:', err);
-          
-          // Log specific card field errors for debugging
-          if (err.message && (err.message.includes('scf_') || err.message.includes('credit_form'))) {
-            console.log('🔍 PayPal Card Field Error Details:', {
-              error: err.message,
-              timestamp: new Date().toISOString(),
-              userAgent: navigator.userAgent,
-              url: window.location.href
-            });
-          }
-          
-          // Handle window closure errors with alternative approach
-          if (err.message && (err.message.includes('window') || err.message.includes('postrobot'))) {
-            console.log('🔄 Window closure detected, trying alternative payment approach...');
-            
-            // Try to reinitialize with a different configuration
-            setTimeout(() => {
-              tryAlternativePaymentFlow();
-            }, 1000);
-            return;
-          }
-          
-          // Record failed transaction
-          recordFailedTransaction(err);
-          
-          // Show user-friendly error message
-          let errorMessage = 'Payment failed. Please try again.';
-          let detailedMessage = '';
-          
-          if (err.message) {
-            if (err.message.includes('popup')) {
-              errorMessage = 'Payment popup was blocked.';
-              detailedMessage = 'Please allow popups for this site and try again.';
-            } else if (err.message.includes('network')) {
-              errorMessage = 'Network error occurred.';
-              detailedMessage = 'Please check your internet connection and try again.';
-            } else if (err.message.includes('timeout')) {
-              errorMessage = 'Payment timed out.';
-              detailedMessage = 'Please try again.';
-            } else if (err.message.includes('window is closed')) {
-              errorMessage = 'Payment window was closed.';
-              detailedMessage = 'Please complete the payment without closing the PayPal window.';
-            } else if (err.message.includes('card') || err.message.includes('credit') || err.message.includes('debit')) {
-              errorMessage = 'Card payment failed.';
-              detailedMessage = 'Please check your card details and try again, or use PayPal account payment instead.';
-            } else if (err.message.includes('scf_') || err.message.includes('credit_form')) {
-              errorMessage = 'Card payment processing failed.';
-              detailedMessage = 'This may be due to geographic restrictions or card limitations. Please try using PayPal account payment instead.';
-            } else if (err.message.includes('add this card') || err.message.includes('card details')) {
-              errorMessage = 'Card payment failed.';
-              detailedMessage = 'Please check your card details or try using PayPal account payment instead.';
-            }
-          }
-          
-          errorMsg.value = errorMessage;
-          
-          // Reset payment processing flag
-          isProcessingPayment.value = false;
-          
-          // Show detailed error message with retry button
-          const container = document.getElementById('paypal-button-container');
-          if (container) {
-            container.innerHTML = `
-              <div class="text-center p-4">
-                <div class="text-red-500 mb-2">${errorMessage}</div>
-                <div class="text-sm text-gray-600 mb-3">
-                  ${detailedMessage}
-                </div>
-                <button onclick="window.location.reload()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                  Try Again
-                </button>
-              </div>
-            `;
-          }
-          
-          // Re-initialize PayPal button for retry after a delay
-          // For window closure errors, retry immediately
-          const retryDelay = (err.message && (err.message.includes('window') || err.message.includes('postrobot'))) ? 2000 : 5000;
-          setTimeout(() => {
-            console.log('🔄 Retrying PayPal button initialization...');
-            initializePayPalButton();
-          }, retryDelay);
-        },
-
-        onCancel: function(data) {
-          console.log('PayPal payment cancelled by user');
-          isProcessingPayment.value = false;
-          errorMsg.value = 'Payment was cancelled. You can try again or choose a different payment method.';
-        }
-      });
-
-      // Render the button with error handling
-      console.log('🔍 Rendering PayPal button...');
-      console.log('PayPal button object:', paypalButton);
-      
-      // Try to render the button directly without eligibility check
-      // The eligibility check can be unreliable, so we'll render and handle errors
-        paypalButton.render('#paypal-button-container')
-          .then(() => {
-          console.log('✅ PayPal button rendered successfully');
-          console.log('✅ PayPal button is ready for transactions');
-          })
-          .catch((error) => {
-          console.error('❌ Error rendering PayPal button:', error);
-          
-                    // Check if it's a funding source eligibility issue
-          if (error.message && error.message.includes('not eligible')) {
-            console.log('🔍 Funding source eligibility issue detected');
-            console.log('🔄 Trying fallback with different funding sources...');
-            
-            const fallbackOptions = [
-              { name: 'PayPal + Card', sources: [window.paypal.FUNDING.PAYPAL, window.paypal.FUNDING.CARD] },
-              { name: 'PayPal Only', sources: window.paypal.FUNDING.PAYPAL },
-              { name: 'Card Only', sources: window.paypal.FUNDING.CARD }
-            ];
-            
-            let fallbackIndex = 0;
-            
-            function tryNextFallback() {
-              if (fallbackIndex >= fallbackOptions.length) {
-                console.log('❌ All fallback options failed');
-                const container = document.getElementById('paypal-button-container');
-                if (container) {
-                  container.innerHTML = '<div class="text-center p-4 text-red-500">PayPal is not available for this transaction. Please choose a different payment method.</div>';
-                }
-                return;
-              }
-              
-              const option = fallbackOptions[fallbackIndex];
-              console.log(`🔄 Trying fallback: ${option.name}`);
-              
-              const fallbackButton = window.paypal.Buttons({
-                fundingSource: option.sources,
-                createOrder: paypalButton.createOrder,
-                onApprove: paypalButton.onApprove,
-                onError: paypalButton.onError,
-                onCancel: paypalButton.onCancel
-              });
-              
-              fallbackButton.render('#paypal-button-container')
-                .then(() => {
-                  console.log(`✅ PayPal fallback "${option.name}" rendered successfully`);
-                })
-                .catch((fallbackError) => {
-                  console.error(`❌ Fallback "${option.name}" failed:`, fallbackError);
-                  fallbackIndex++;
-                  tryNextFallback();
-                });
-            }
-            
-            tryNextFallback();
-      } else {
-            // Handle other types of errors
-            errorMsg.value = 'Payment button failed to load. Please refresh the page and try again.';
-        
-        const container = document.getElementById('paypal-button-container');
-        if (container) {
-              container.innerHTML = '<div class="text-center p-4 text-red-500">Payment button failed to load. Please refresh the page and try again.</div>';
-        }
-      }
-        });
-      
-    } catch (error) {
-      console.error('Error initializing PayPal button:', error);
-      errorMsg.value = 'Payment system error. Please try again.';
-      
-      const container = document.getElementById('paypal-button-container');
-      if (container) {
-        container.innerHTML = '<div class="text-center p-4 text-red-500">Payment system error. Please refresh the page and try again.</div>';
-      }
+    // Payment splitting data - ensure all are numbers
+    basePrice: basePrice,
+    adminAmount: adminAmount,
+    technicianAmount: technicianAmount,
+    paymentSplit: {
+      admin: adminAmount,
+      technician: technicianAmount,
+      total: basePrice
     }
-  }, 300); // Increased delay for better reliability
-}
-
-function handlePaymentMethodChange() {
-  if (form.value.payment === 'PayPal') {
-    // Clear any existing error messages
-    errorMsg.value = '';
-    
-    // Add a longer delay to ensure DOM is fully updated
-    setTimeout(() => {
-      if (paypalLoaded.value) {
-        initializePayPalButton();
-      } else {
-        // If PayPal is not loaded yet, try loading it
-        loadPayPalScript();
-      }
-    }, 300);
-  }
-}
-
-
-
-// Retry PayPal loading
-function retryPayPalLoading() {
-  console.log('🔄 Retrying PayPal loading...');
-  errorMsg.value = ''; // Clear error message
-  paypalLoaded.value = false; // Reset loading state
-  
-  // Clear the container
-  const container = document.getElementById('paypal-button-container');
-  if (container) {
-    container.innerHTML = '';
-  }
-  
-  // Reload PayPal script
-  setTimeout(() => {
-    loadPayPalScript();
-  }, 100);
-}
-
-async function createBookingWithPayment(paymentDetails) {
-  try {
-    loading.value = true;
-    
-    // Create booking data
-  const bookingData = {
-    technicianId: technician.value.uid || technician.value.id,
-    technicianName: technician.value.name,
-    userId: auth.currentUser?.uid, // Add current user's UID
-    userName: form.value.fullName,
-    userEmail: form.value.email,
-    userPhone: form.value.phone,
-    date: form.value.date,
-    time: form.value.time,
-    address: constructAddress(form.value),
-    price: technician.value.visitPrice || technician.value.basePrice || 'N/A',
-    note: form.value.note || '',
-    payment: form.value.payment,
-    paymentDetails: {
-        ...paymentDetails,
-        paymentMethod: form.value.payment
-    },
-    status: 'pending',
-    createdAt: serverTimestamp()
   };
 
-    console.log('Creating booking with payment details:', bookingData);
-    console.log('Complete form data:', form.value);
-    console.log('User email being saved:', bookingData.userEmail);
-    console.log('Form email value:', form.value.email);
-    console.log('Technician ID being saved:', bookingData.technicianId);
-    console.log('Technician UID:', technician.value.uid);
-    console.log('Technician ID:', technician.value.id);
-    console.log('Technician name:', technician.value.name);
-    console.log('Address being saved:', bookingData.address);
-    console.log('Address type:', typeof bookingData.address);
-    console.log('Address length:', bookingData.address ? bookingData.address.length : 'undefined');
+  // Debug: Log the booking data to check for any undefined values
+  console.log('Booking data validation:');
+  console.log('- technicianId:', bookingData.technicianId);
+  console.log('- technicianName:', bookingData.technicianName);
+  console.log('- userId:', bookingData.userId);
+  console.log('- userName:', bookingData.userName);
+  console.log('- userEmail:', bookingData.userEmail);
+  console.log('- userPhone:', bookingData.userPhone);
+  console.log('- date:', bookingData.date);
+  console.log('- time:', bookingData.time);
+  console.log('- address:', bookingData.address);
+  console.log('- basePrice:', bookingData.basePrice, 'type:', typeof bookingData.basePrice);
+  console.log('- adminAmount:', bookingData.adminAmount, 'type:', typeof bookingData.adminAmount);
+  console.log('- technicianAmount:', bookingData.technicianAmount, 'type:', typeof bookingData.technicianAmount);
+
+  try {
+    console.log('Creating booking with payment splitting:', bookingData);
+    console.log('Payment split - Admin (25%):', adminAmount, 'EGP');
+    console.log('Payment split - Technician (75%):', technicianAmount, 'EGP');
 
     // Save booking to Firestore
     const bookingRef = await addDoc(collection(db, 'bookings'), bookingData);
@@ -1638,96 +952,8 @@ async function createBookingWithPayment(paymentDetails) {
     // Update booking data with the Firestore ID
     bookingData.id = bookingRef.id;
 
-    // Send payment notifications for cash payments
-    if (form.value.payment === 'Cash on Visit') {
-      await sendPaymentNotifications(
-        bookingData.paymentDetails,
-        technician.value.uid || technician.value.id,
-        technician.value.name
-      );
-    }
-    
-    // Send booking request notifications
-    await sendBookingRequestNotification(bookingData);
-    
-    // Store booking data and redirect
-    localStorage.setItem('bookingData', JSON.stringify(bookingData));
-    router.push('/bookingconfirmation');
-    
-  } catch (error) {
-    console.error('Error creating booking:', error);
-    errorMsg.value = t('bookingError');
-  } finally {
-    loading.value = false;
-  }
-}
-
-function sendConfirmationEmail(userEmail, technicianName, date, time, payment) {
-  const data = {
-    to_email: userEmail,
-    technician_name: technicianName,
-    date,
-    time,
-    payment
-  };
-  console.log('Email data:', data);
-  // Email functionality removed
-}
-
-async function confirmBooking() {
-  // This function is for cash payments
-  if (form.value.payment !== 'Cash on Visit') {
-    return;
-  }
-
-  // Validate that a date is selected
-  if (!form.value.date || availableDates.value.length === 0) {
-    errorMsg.value = 'Please select an available date for booking.';
-    return;
-  }
-
-  // Validate that a time is selected
-  if (!form.value.time || availableTimes.value.length === 0) {
-    errorMsg.value = 'Please select an available time slot for booking.';
-    return;
-  }
-
-  const bookingData = {
-    technicianId: technician.value.uid || technician.value.id,
-    technicianName: technician.value.name,
-    userId: auth.currentUser?.uid, // Add current user's UID
-    userName: form.value.fullName,
-    userEmail: form.value.email,
-    userPhone: form.value.phone,
-    date: form.value.date,
-    time: form.value.time,
-    address: constructAddress(form.value),
-    price: technician.value.visitPrice || technician.value.basePrice || 'N/A',
-    note: form.value.note || '',
-    payment: form.value.payment,
-    status: 'pending',
-    createdAt: serverTimestamp()
-  };
-
-  try {
-    console.log('Creating cash booking with data:', bookingData);
-    console.log('Complete form data:', form.value);
-    console.log('User email being saved:', bookingData.userEmail);
-    console.log('Form email value:', form.value.email);
-    console.log('Technician ID being saved:', bookingData.technicianId);
-    console.log('Technician UID:', technician.value.uid);
-    console.log('Technician ID:', technician.value.id);
-    console.log('Technician name:', technician.value.name);
-    console.log('Address being saved:', bookingData.address);
-    console.log('Address type:', typeof bookingData.address);
-    console.log('Address length:', bookingData.address ? bookingData.address.length : 'undefined');
-    
-    // Save booking to Firestore
-    const bookingRef = await addDoc(collection(db, 'bookings'), bookingData);
-    console.log('Cash booking saved with ID:', bookingRef.id);
-    
-    // Update booking data with the Firestore ID
-    bookingData.id = bookingRef.id;
+    // Process payment splitting
+    await processPaymentSplitting(bookingData);
     
     // Send confirmation email to customer
     if (form.value.email) {
@@ -1747,189 +973,173 @@ async function confirmBooking() {
       technicianName: technician.value.name,
       date: form.value.date,
       time: form.value.time,
-      payment: form.value.payment
+      payment: form.value.payment,
+      adminAmount: adminAmount,
+      technicianAmount: technicianAmount
     };
     localStorage.setItem('bookingData', JSON.stringify(confirmationData));
     
-    console.log('Cash booking completed successfully');
+    console.log('Booking completed successfully with payment splitting');
     router.push('/bookingconfirmation');
   } catch (e) {
     console.error('Booking Firestore error:', e);
-    errorMsg.value = t('bookingCreationFailed');
+    console.error('Error details:', {
+      code: e.code,
+      message: e.message,
+      stack: e.stack
+    });
+    
+    // Provide more specific error messages
+    if (e.code === 'permission-denied') {
+      errorMsg.value = 'Permission denied. Please check your authentication.';
+    } else if (e.code === 'invalid-argument') {
+      errorMsg.value = 'Invalid data provided. Please check your booking information.';
+    } else if (e.code === 'unavailable') {
+      errorMsg.value = 'Service temporarily unavailable. Please try again.';
+    } else {
+      errorMsg.value = `Booking creation failed: ${e.message}`;
+    }
   }
 }
 
-// Function to try alternative payment flow
-function tryAlternativePaymentFlow() {
-  console.log('🔄 Trying alternative payment flow...');
-  
-  const container = document.getElementById('paypal-button-container');
-  if (!container) return;
-  
-  // Clear existing content
-  container.innerHTML = '';
-  
-  // Create alternative PayPal button with different configuration
-  const alternativeButton = window.paypal.Buttons({
-    style: {
-      layout: 'horizontal',
-      color: 'gold',
-      shape: 'rect',
-      label: 'paypal'
-    },
-    
-    createOrder: function(data, actions) {
-      // Same order creation logic
-      const priceString = technician.value.visitPrice || technician.value.basePrice;
-      const amount = parseFloat(priceString.replace(/[^\d.]/g, ''));
-      const usdAmount = (amount / 31).toFixed(2);
-      
-      return actions.order.create({
-        purchase_units: [{
-          amount: {
-            value: usdAmount,
-            currency_code: 'USD'
-          },
-          payee: {
-            email_address: 'narutossj23@yahoo.com'
-          },
-          description: `Booking with ${technician.value.name} - ${form.value.date} at ${form.value.time}`,
-          custom_id: `booking_${Date.now()}`,
-          invoice_id: `INV_${Date.now()}`
-        }],
-        application_context: {
-          shipping_preference: 'NO_SHIPPING',
-          user_action: 'PAY_NOW',
-          return_url: window.location.origin + '/bookingconfirmation',
-          cancel_url: window.location.origin + '/bookingpage',
-          brand_name: 'BoltFix',
-          landing_page: 'LOGIN'
-        }
-      });
-    },
-    
-    onApprove: async function(data, actions) {
-      // Same approval logic as main button
-      if (isProcessingPayment.value) return;
-      isProcessingPayment.value = true;
-      
-      try {
-        const order = await actions.order.capture();
-        // Handle successful payment (same as main flow)
-        console.log('✅ Alternative payment flow successful:', order);
-        // Continue with booking creation...
-      } catch (error) {
-        console.error('❌ Alternative payment flow failed:', error);
-        errorMsg.value = 'Payment failed. Please try again or contact support.';
-      } finally {
-        isProcessingPayment.value = false;
-      }
-    },
-    
-    onError: function(err) {
-      console.error('Alternative payment flow error:', err);
-      errorMsg.value = 'Payment system unavailable. Please try again later.';
-    }
-  });
-  
-  // Render the alternative button
-  alternativeButton.render('#paypal-button-container')
-    .then(() => {
-      console.log('✅ Alternative payment flow initialized');
-    })
-    .catch(error => {
-      console.error('❌ Failed to initialize alternative payment flow:', error);
-      container.innerHTML = '<div class="text-center p-4 text-red-500">Payment system temporarily unavailable. Please try again later.</div>';
-    });
-}
-
-function recordFailedTransaction(error) {
-  console.error('PayPal transaction failed:', error);
-  const errorMessage = error.message || JSON.stringify(error);
-  const errorDetails = {
-    errorMessage: errorMessage,
-    errorCode: error.code,
-    errorDetails: error.details,
-    timestamp: serverTimestamp()
-  };
-
-  addDoc(collection(db, 'failedPayPalTransactions'), errorDetails)
-    .then(() => {
-      console.log('Failed PayPal transaction recorded successfully.');
-    })
-    .catch(err => {
-      console.error('Error recording failed PayPal transaction:', err);
-    });
-}
-
-// After successful PayPal payment, split the amount
-async function splitPaymentToAccounts(paypalOrderId, totalAmountUSD, technicianId) {
+// Process payment splitting between admin and technician
+async function processPaymentSplitting(bookingData) {
   try {
-    console.log('Splitting payment:', totalAmountUSD, 'USD between accounts');
+    console.log('Processing payment splitting for booking:', bookingData.id);
     
-    // Get technician's PayPal email from their profile (with timeout)
-    let technicianPayPalEmail = '';
-    try {
-      const technicianDocPromise = getDoc(doc(db, 'technicians', technicianId));
-      const technicianDoc = await Promise.race([
-        technicianDocPromise,
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
-      ]);
-      
-      if (technicianDoc.exists()) {
-        const technicianData = technicianDoc.data();
-        technicianPayPalEmail = technicianData.paypalEmail || technicianData.email || '';
-        console.log('Technician PayPal email:', technicianPayPalEmail);
-      }
-    } catch (error) {
-      console.error('Error fetching technician PayPal email:', error);
-      // Use a default email if we can't fetch the technician's email
-      technicianPayPalEmail = 'technician@default.com';
+    const { adminAmount, technicianAmount, basePrice } = bookingData;
+    
+    // Validate the data before processing
+    if (!bookingData.id || !bookingData.technicianId || !bookingData.userName) {
+      throw new Error('Missing required booking data for payment splitting');
     }
     
-    if (!technicianPayPalEmail) {
-      console.error('No technician PayPal email found');
-      return false;
+    if (typeof adminAmount !== 'number' || typeof technicianAmount !== 'number' || typeof basePrice !== 'number') {
+      throw new Error('Invalid payment amounts for splitting');
     }
     
-    // Calculate split amounts (25% platform fee, 75% technician)
-    const platformFeeUSD = totalAmountUSD * 0.25; // 25% to platform
-    const technicianAmountUSD = totalAmountUSD * 0.75; // 75% to technician
-    
-    console.log('Platform fee (25%):', platformFeeUSD, 'USD');
-    console.log('Technician payment (75%):', technicianAmountUSD, 'USD');
-    
-    // Store split information directly in Firebase (client-side)
-    const splitRecord = {
-      paypalOrderId: paypalOrderId,
-      totalAmountUSD: totalAmountUSD,
-      platformFeeUSD: platformFeeUSD,
-      technicianAmountUSD: technicianAmountUSD,
-      platformAccount: "narutossj23@yahoo.com", // Your platform account
-      technicianAccount: technicianPayPalEmail, // Technician's PayPal account
-      splitPercentage: {
-        platform: 25,
-        technician: 75
-      },
-      status: 'pending',
+    // Add credits to admin
+    const adminCreditData = {
+      amount: adminAmount,
+      credits: adminAmount,
+      type: 'booking_payment',
+      bookingId: bookingData.id,
+      technicianId: bookingData.technicianId,
+      technicianName: bookingData.technicianName || 'Unknown Technician',
+      customerName: bookingData.userName,
+      customerEmail: bookingData.userEmail,
+      paymentMethod: bookingData.payment,
+      status: 'approved',
       createdAt: serverTimestamp(),
-      transactionType: 'payment_split'
+      description: `25% of booking payment (${basePrice} EGP) from ${bookingData.userName}`
     };
     
-    // Add to paymentSplits collection with timeout
-    const addDocPromise = addDoc(collection(db, 'paymentSplits'), splitRecord);
-    await Promise.race([
-      addDocPromise,
-      new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
-    ]);
+    console.log('Creating admin credit record:', adminCreditData);
+    await addDoc(collection(db, 'adminCredits'), adminCreditData);
+    console.log('Admin credits added:', adminAmount, 'EGP');
     
-    console.log('Payment split recorded successfully:', splitRecord);
+    // Add credits to technician
+    const technicianCreditData = {
+      technicianId: bookingData.technicianId,
+      technicianName: bookingData.technicianName || 'Unknown Technician',
+      amount: technicianAmount,
+      credits: technicianAmount,
+      type: 'booking_payment',
+      bookingId: bookingData.id,
+      customerName: bookingData.userName,
+      customerEmail: bookingData.userEmail,
+      paymentMethod: bookingData.payment,
+      status: 'approved',
+      createdAt: serverTimestamp(),
+      description: `75% of booking payment (${basePrice} EGP) from ${bookingData.userName}`
+    };
+    
+    console.log('Creating technician credit record:', technicianCreditData);
+    await addDoc(collection(db, 'technicianCredits'), technicianCreditData);
+    console.log('Technician credits added:', technicianAmount, 'EGP');
+    
+    // Create payment split record
+    const paymentSplitData = {
+      bookingId: bookingData.id,
+      technicianId: bookingData.technicianId,
+      technicianName: bookingData.technicianName || 'Unknown Technician',
+      customerName: bookingData.userName,
+      customerEmail: bookingData.userEmail,
+      totalAmount: basePrice,
+      adminAmount: adminAmount,
+      technicianAmount: technicianAmount,
+      paymentMethod: bookingData.payment,
+      status: 'completed',
+      createdAt: serverTimestamp(),
+      description: `Payment split for booking ${bookingData.id}`
+    };
+    
+    console.log('Creating payment split record:', paymentSplitData);
+    await addDoc(collection(db, 'paymentSplits'), paymentSplitData);
+    console.log('Payment split record created');
+    
+    // Send admin notification about payment received
+    await sendAdminPaymentNotification(bookingData);
+    
+    console.log('Payment splitting completed successfully');
     return true;
     
-  } catch (error) {
-    console.error('Error splitting payment:', error);
-    return false;
+    } catch (error) {
+    console.error('Error processing payment splitting:', error);
+    console.error('Error details:', {
+      code: error.code,
+      message: error.message,
+      stack: error.stack
+    });
+    throw error;
   }
+}
+
+// Send admin notification about payment received
+async function sendAdminPaymentNotification(bookingData) {
+  try {
+    console.log('Sending admin payment notification...');
+    
+    const { adminAmount, technicianAmount, basePrice } = bookingData;
+    
+    const adminNotification = {
+      type: 'payment_received',
+      title: 'Payment Received from Booking',
+      message: `Payment of ${basePrice} EGP received from ${bookingData.userName}. Admin share: ${adminAmount} EGP, Technician share: ${technicianAmount} EGP`,
+      bookingId: bookingData.id,
+      technicianId: bookingData.technicianId,
+      technicianName: bookingData.technicianName,
+      customerName: bookingData.userName,
+      customerEmail: bookingData.userEmail,
+      paymentMethod: bookingData.payment,
+      totalAmount: basePrice,
+      adminAmount: adminAmount,
+      technicianAmount: technicianAmount,
+      recipientId: 'admin',
+      recipientType: 'admin',
+      status: 'unread',
+      createdAt: serverTimestamp(),
+      read: false
+    };
+    
+    await addDoc(collection(db, 'notifications'), adminNotification);
+    console.log('Admin payment notification sent successfully');
+    
+  } catch (error) {
+    console.error('Error sending admin payment notification:', error);
+  }
+}
+
+function sendConfirmationEmail(userEmail, technicianName, date, time, payment) {
+  const data = {
+    to_email: userEmail,
+    technician_name: technicianName,
+    date,
+    time,
+    payment
+  };
+  console.log('Email data:', data);
+  // Email functionality removed
 }
 
 // Send payment notifications to technician and admin
@@ -1944,7 +1154,6 @@ async function sendPaymentNotifications(paymentDetails, technicianId, technician
       paymentMethod: paymentDetails.paymentMethod,
       amount: paymentDetails.amount,
       currency: paymentDetails.currency,
-      paypalOrderId: paymentDetails.paypalOrderId,
       technicianId: technicianId,
       technicianName: technicianName,
       customerName: form.value.fullName,
@@ -2223,102 +1432,6 @@ async function sendBookingRequestEmail(bookingData) {
   }
 }
 
-// Test notification function
-async function testNotification() {
-  try {
-    console.log('=== TESTING BOOKING REQUEST NOTIFICATION ===');
-    
-    const testBookingData = {
-      id: 'test-booking-id',
-      technicianId: 'test-technician-id',
-      technicianName: 'Maged Ishak',
-      userName: 'Test User',
-      userEmail: 'narutossj23@yahoo.com',
-      userPhone: '1234567890',
-      date: '2023-10-27',
-      time: '10:00 AM',
-      payment: 'PayPal',
-      status: 'pending'
-    };
-    
-    console.log('Test booking data:', testBookingData);
-    
-    // Test the notification function
-    const result = await sendBookingRequestNotification(testBookingData);
-    
-    if (result) {
-      alert('✅ Test notification sent successfully! Check console for details.');
-    } else {
-      alert('❌ Test notification failed! Check console for errors.');
-    }
-    
-  } catch (error) {
-    console.error('❌ Error in test notification:', error);
-    alert('❌ Test notification error: ' + error.message);
-  }
-}
-
-// Manual notification test function
-async function createManualNotification() {
-  try {
-    console.log('=== CREATING MANUAL NOTIFICATION ===');
-    
-    // Find Maged Ishak in the technicians collection
-    const techQuery = query(
-      collection(db, 'technicians'),
-      where('fullName', '==', 'Maged Ishak')
-    );
-    const techSnapshot = await getDocs(techQuery);
-    
-    if (techSnapshot.empty) {
-      alert('❌ Maged Ishak not found in technicians collection');
-      return;
-    }
-    
-    const techDoc = techSnapshot.docs[0];
-    const techData = techDoc.data();
-    const technicianUid = techDoc.id;
-    const technicianEmail = techData.email;
-    
-    console.log('Found technician:', { uid: technicianUid, email: technicianEmail, data: techData });
-    
-    // Create a test notification
-    const testNotification = {
-      type: 'booking_request',
-      title: 'Test Booking Request',
-      message: 'This is a test booking request notification',
-      bookingId: 'test-manual-booking',
-      technicianId: technicianUid,
-      technicianName: 'Maged Ishak',
-      technicianEmail: technicianEmail,
-      customerName: 'Test Customer',
-      customerEmail: 'test@example.com',
-      customerPhone: '1234567890',
-      bookingDate: '2023-10-27',
-      bookingTime: '10:00 AM',
-      paymentMethod: 'Cash',
-      status: 'pending',
-      recipientId: technicianUid,
-      recipientType: 'technician',
-      createdAt: serverTimestamp(),
-      read: false
-    };
-    
-    console.log('Creating manual notification:', testNotification);
-    
-    const notificationRef = await addDoc(collection(db, 'notifications'), testNotification);
-    console.log('Manual notification created with ID:', notificationRef.id);
-    
-    alert(`✅ Manual notification created successfully!\nTechnician UID: ${technicianUid}\nNotification ID: ${notificationRef.id}`);
-    
-  } catch (error) {
-    console.error('Manual notification error:', error);
-    alert('❌ Manual notification error: ' + error.message);
-  }
-}
-
-
-
 function constructAddress(formData) {
   console.log('=== CONSTRUCTING ADDRESS ===');
   console.log('Form data for address:', {
@@ -2380,6 +1493,78 @@ function handleLocationDetected(locationData) {
     });
   }
 }
+
+onMounted(async () => {
+  const id = route.query.techId || route.query.technicianId
+  if (!id) {
+    errorMsg.value = 'Technician ID is missing. Please try again or contact support.';
+    return;
+  }
+  
+  // Try to find in stockTechnicians first
+  const stock = stockTechnicians.find(t => t.id === id)
+  if (stock) {
+    technician.value = stock
+  } else {
+    // Try to fetch from Firestore (pendingTechnicians or technicians)
+    let docRef = doc(db, 'technicians', id);
+    let docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) {
+      // Try pendingTechnicians (if not yet approved)
+      docRef = doc(db, 'pendingTechnicians', id);
+      docSnap = await getDoc(docRef);
+    }
+    if (docSnap.exists()) {
+      const techData = docSnap.data();
+      technician.value = {
+        ...techData,
+        uid: id, // Ensure uid is set for consistency
+        name: techData.fullName || techData.name, // Map fullName to name for consistency
+                profilePhotoUrl: techData.profileImage || techData.image || techData.idPhotoUrl || '/images/Avatar.png' // Map to profilePhotoUrl for template consistency
+      };
+      console.log('Technician data loaded:', technician.value);
+        console.log('Technician profile photo:', technician.value.profilePhotoUrl);
+    } else {
+      errorMsg.value = 'Technician not found. Please try again or contact support.';
+      return;
+    }
+  }
+  
+  // Fetch technician availability first
+  if (technician.value.uid) {
+    await fetchTechnicianAvailability(technician.value.uid);
+    await updateDateAvailability();
+  }
+  
+  // Set default date to the first available date
+  if (availableDates.value.length > 0) {
+    form.value.date = availableDates.value[0];
+    // Initialize availability times for the default date
+    await updateAvailableTimes(form.value.date);
+  } else {
+    // No available dates found
+    errorMsg.value = 'This technician has not set their availability yet. Please contact them directly or try again later.';
+  }
+  
+  populateFormWithUserData(); // Call the new function here
+  
+  // Initialize available cities for default governorate
+  updateCities();
+})
+
+// Cleanup function to prevent memory leaks
+onUnmounted(() => {
+  errorMsg.value = '';
+})
+
+// Watch for technician data changes
+watch(() => technician.value, (newTechnician) => {
+  // Check if times are available
+  if (availableTimes.value.length === 0) {
+    console.log('No available times for booking');
+    return;
+  }
+})
 </script>
 
 <style scoped>
@@ -2426,7 +1611,6 @@ function handleLocationDetected(locationData) {
   align-items: center;
   justify-content: center;
   margin-bottom: 3rem;
-
 }
 
 .progress-step {
@@ -2688,9 +1872,9 @@ function handleLocationDetected(locationData) {
   color: #374151;
 }
 
-.paypal-logo {
-  height: 20px;
-  margin-left: auto;
+.payment-icon {
+  margin-left: 0.5rem;
+  color: #6b7280;
 }
 
 .payment-summary {
@@ -2725,24 +1909,8 @@ function handleLocationDetected(locationData) {
   font-style: italic;
 }
 
-.payment-info {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
-  padding: 0.75rem;
-  background: #f0f9ff;
-  border: 1px solid #bae6fd;
-  border-radius: 6px;
-}
-
-.payment-info i {
-  margin-top: 0.125rem;
-  flex-shrink: 0;
-}
-
-/* PayPal Container */
-.paypal-container {
+/* Credit Card Container */
+.credit-card-container {
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
@@ -2750,63 +1918,27 @@ function handleLocationDetected(locationData) {
   margin-top: 1rem;
 }
 
-.paypal-loading {
-  text-align: center;
-  padding: 2rem;
+.credit-card-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.card-number-group {
+  position: relative;
+}
+
+.card-type-indicator {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
   color: #6b7280;
+  font-size: 1.2rem;
 }
 
-.loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #f3f4f6;
-  border-top: 4px solid #7c6bb1;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 1rem;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.loading-note {
-  font-size: 0.875rem;
-  color: #9ca3af;
-  margin-top: 0.5rem;
-}
-
-.paypal-error {
-  text-align: center;
-  padding: 2rem;
-  color: #dc2626;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-}
-
-.error-icon {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-}
-
-.retry-btn {
-  background: #dc2626;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-  margin-top: 1rem;
-}
-
-.retry-btn:hover {
-  background: #b91c1c;
+.card-input {
+  padding-right: 2.5rem;
 }
 
 /* Confirm Button */
@@ -2828,334 +1960,15 @@ function handleLocationDetected(locationData) {
   background: #6b5fa7;
 }
 
-/* Test Button */
-.test-btn {
-  background: #f59e0b;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-  align-self: flex-end;
-  margin-top: 1rem;
-  margin-left: 1rem;
+/* Error styling */
+.error {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
 }
 
-.test-btn:hover {
-  background: #d97706;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .booking-page {
-    padding: 1rem 0 2rem 0;
-  }
-  
-  .page-title {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-  }
-  
-  .booking-card {
-    margin: 0 1rem;
-    padding: 1.5rem 1rem;
-    border-radius: 12px;
-  }
-  
-  .progress-indicator {
-    gap: 1rem;
-    margin-bottom: 2rem;
-  }
-  
-  .step-circle {
-    width: 40px;
-    height: 40px;
-    font-size: 1rem;
-  }
-  
-  .step-text {
-    font-size: 0.8rem;
-  }
-  
-  .progress-line {
-    width: 50px;
-    margin: 0;
-    align-self: flex-start;
-    margin-top: 20px;
-  }
-  
-  .technician-section {
-    flex-direction: column;
-    gap: 1.5rem;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-  }
-  
-  .technician-info {
-    flex-direction: column;
-    text-align: center;
-    gap: 1rem;
-  }
-  
-  .technician-photo {
-    width: 100px;
-    height: 100px;
-  }
-  
-  .technician-details h3 {
-    font-size: 1.3rem;
-  }
-  
-  .available-appointments {
-    margin-left: 0;
-  }
-  
-  .appointment-title {
-    text-align: center;
-    margin-bottom: 1rem;
-  }
-  
-  .date-navigation {
-    flex-direction: row;
-    gap: 0.5rem;
-  }
-  
-  .date-slots {
-    flex-direction: row;
-    gap: 0.5rem;
-    overflow-x: auto;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-  
-  .date-slots::-webkit-scrollbar {
-    display: none;
-  }
-  
-  .date-slot {
-    padding: 0.75rem;
-  }
-  
-  .nav-arrow {
-    align-self: center;
-  }
-  
-  .booking-form {
-    gap: 1.5rem;
-  }
-  
-  .form-section {
-    padding: 1.5rem;
-  }
-  
-  .section-title {
-    font-size: 1.1rem;
-    margin-bottom: 1rem;
-  }
-  
-  .form-row {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  
-  .form-group.full-width {
-    margin-top: 1rem;
-  }
-  
-  .form-input {
-    padding: 0.875rem 1rem;
-    font-size: 1rem;
-  }
-  
-  .form-input.textarea {
-    min-height: 80px;
-  }
-  
-  .payment-methods {
-    gap: 0.75rem;
-  }
-  
-  .payment-option {
-    padding: 0.875rem;
-  }
-  
-  .payment-summary {
-    padding: 1rem;
-  }
-  
-  .payment-amount {
-    font-size: 0.9rem;
-  }
-  
-  .amount {
-    font-size: 1rem;
-  }
-  
-  .paypal-container {
-    padding: 1rem;
-  }
-  
-  .confirm-btn {
-    width: 100%;
-    padding: 1rem;
-    font-size: 1rem;
-    margin-top: 1.5rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .booking-page {
-    padding: 0.5rem 0 1.5rem 0;
-  }
-  
-  .page-title {
-    font-size: 1.75rem;
-  }
-  
-  .booking-card {
-    margin: 0 0.5rem;
-    padding: 1rem 0.75rem;
-  }
-  
-  .technician-section {
-    padding: 1rem;
-  }
-  
-  .technician-photo {
-    width: 80px;
-    height: 80px;
-  }
-  
-  .technician-details h3 {
-    font-size: 1.2rem;
-  }
-  
-  .form-section {
-    padding: 1rem;
-  }
-  
-  .section-title {
-    font-size: 1rem;
-  }
-  
-  .form-input {
-    padding: 0.75rem 0.875rem;
-    font-size: 0.95rem;
-  }
-  
-  .step-circle {
-    width: 35px;
-    height: 35px;
-    font-size: 0.9rem;
-  }
-  
-  .step-text {
-    font-size: 0.75rem;
-  }
-  
-  .progress-line {
-    width: 30px;
-    margin: 0;
-    align-self: flex-start;
-    margin-top: 17px;
-  }
-  
-  .date-slot {
-    padding: 0.5rem;
-    min-width: 80px;
-    flex-shrink: 0;
-  }
-  
-  .day-name {
-    font-size: 0.9rem;
-  }
-  
-  .date-number {
-    font-size: 0.8rem;
-  }
-  
-  .time-slot {
-    font-size: 0.8rem;
-  }
-  
-  .nav-arrow {
-    width: 35px;
-    height: 35px;
-  }
-  
-  .payment-option {
-    padding: 0.75rem;
-  }
-  
-  .payment-text {
-    font-size: 0.9rem;
-  }
-  
-  .paypal-logo {
-    height: 18px;
-  }
-}
-
-@media (max-width: 360px) {
-  .booking-card {
-    margin: 0 0.25rem;
-    padding: 0.75rem 0.5rem;
-  }
-  
-  .page-title {
-    font-size: 1.5rem;
-  }
-  
-  .technician-photo {
-    width: 70px;
-    height: 70px;
-  }
-  
-  .technician-details h3 {
-    font-size: 1.1rem;
-  }
-  
-  .form-section {
-    padding: 0.75rem;
-  }
-  
-  .form-input {
-    padding: 0.625rem 0.75rem;
-    font-size: 0.9rem;
-  }
-  
-  .step-circle {
-    width: 30px;
-    height: 30px;
-    font-size: 0.8rem;
-  }
-  
-  .progress-line {
-    width: 25px;
-    margin: 0;
-    align-self: flex-start;
-    margin-top: 15px;
-  }
-  
-  .date-slot {
-    padding: 0.4rem;
-    min-width: 70px;
-    flex-shrink: 0;
-  }
-  
-  .day-name {
-    font-size: 0.85rem;
-  }
-  
-  .date-number {
-    font-size: 0.75rem;
-  }
-  
-  .time-slot {
-    font-size: 0.75rem;
-  }
+.error-message {
+  color: #dc2626;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
 }
 </style> 

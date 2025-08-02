@@ -5,6 +5,8 @@ import { auth, db } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { ensureUserRole, fetchUserRole } from '../utils/userRole';
+import { sendWelcomeEmail } from '../utils/emailService';
+import emailjs from '@emailjs/browser';
 
 
 const email = ref('');
@@ -141,11 +143,8 @@ const handleRegister = async () => {
   }
 
   try {
-    console.log('Starting user registration process...');
-    
     // Create user account with Firebase Auth
     const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
-    console.log('User account created successfully:', userCredential.user.uid);
     
     // Create user document in Firestore
     const userDoc = {
@@ -164,13 +163,19 @@ const handleRegister = async () => {
     };
 
     await setDoc(doc(db, 'users', userCredential.user.uid), userDoc);
-    console.log('User document created in Firestore');
     
     // Enforce persistent admin role for elie1400674@gmail.com
     await ensureUserRole(userCredential.user);
     await fetchUserRole(userCredential.user);
     
-    console.log('Registration completed successfully');
+    // Send welcome email using EmailJS
+    try {
+      await sendWelcomeEmail(email.value, firstName.value, lastName.value);
+    } catch (emailError) {
+      console.error('Email sending failed:', emailError);
+      // Don't fail the registration if email fails
+    }
+    
     router.push('/'); // Redirect to home page after registration
   } catch (err) {
     console.error('Registration error:', err);
@@ -185,6 +190,8 @@ const openTermsModal = () => {
 const closeTermsModal = () => {
   showTermsModal.value = false;
 };
+
+
 
 
 </script>
@@ -374,6 +381,8 @@ const closeTermsModal = () => {
    <path fill-rule="evenodd" d="M14 2.5a.5.5 0 0 0-.5-.5h-6a.5.5 0 0 0 0 1h4.793L2.146 13.146a.5.5 0 0 0 .708.708L13 3.707V8.5a.5.5 0 0 0 1 0z"/>
          </svg>
        </button>
+
+       
 
        
 
@@ -764,6 +773,7 @@ body {
 .submit-btn:hover .arrow-icon {
     transform: translateX(4px);
 }
+
 
 
 
