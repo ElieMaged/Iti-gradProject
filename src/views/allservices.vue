@@ -9,27 +9,45 @@
           <p class="services-overview-subtitle">{{ $t('servicesOverviewDesc') || 'Discover our comprehensive range of professional services' }}</p>
         </div>
         
-                 <div class="services-overview-grid">
-           <div 
-             v-for="service in servicesList" 
-             :key="service.id" 
-             class="service-overview-card"
-           >
-             <img :src="service.image" :alt="service.title" class="service-overview-image" />
-             <div class="service-overview-content">
-               <h3 class="service-overview-name">{{ $t(service.title) || service.title }}</h3>
-               <p class="service-overview-desc">{{ $t(service.description) || service.description }}</p>
-               <button class="service-overview-btn" @click="navigateToService(service.route)">
-                 {{ $t('bookNow') || 'Book Now' }}
-                 <span class="arrow">→</span>
-               </button>
-             </div>
-           </div>
-         </div>
+        <div class="services-overview-grid">
+          <div 
+            v-for="service in servicesList" 
+            :key="service.id" 
+            class="service-overview-card"
+            @click="navigateToService(service.route)"
+          >
+            <div class="service-overview-icon">
+              <i :class="service.icon"></i>
+            </div>
+            <div class="service-overview-content">
+              <h3 class="service-overview-name">{{ $t(service.title) || service.title }}</h3>
+              <p class="service-overview-desc">{{ $t(service.description) || service.description }}</p>
+              <div class="service-overview-meta">
+                <span class="service-overview-price">{{ service.price }}</span>
+                <span class="service-overview-duration">{{ service.duration }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
-         <!-- Loading State -->
+    <!-- Search Section -->
+    <div class="search-section">
+      <div class="search-container">
+        <div class="search-box">
+          <i class="fas fa-search search-icon"></i>
+          <input 
+            v-model="searchQuery" 
+            type="text" 
+            :placeholder="$t('searchServices')"
+            class="search-input"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
     <div v-if="loading" class="loading-section">
       <div class="loading-spinner"></div>
       <p>{{ $t('loadingTechnicians') || 'Loading technicians...' }}</p>
@@ -38,42 +56,56 @@
     <!-- Technicians Grid -->
     <section v-else class="services-section">
       <div class="services-container">
-                 <div class="services-header">
-           <h2 class="services-title">{{ $t('meetTechniciansTeam') || 'Meet Our Technicians' }}</h2>
-           <hr class="services-divider" />
-           <p class="services-count">{{ filteredTechnicians.length }} {{ $t('techniciansFound') || 'technicians found' }}</p>
-         </div>
-         
-         <!-- Search Section -->
-         <div class="search-section">
-           <div class="search-box">
-             <i class="fas fa-search search-icon"></i>
-             <input 
-               v-model="searchQuery" 
-               type="text" 
-               :placeholder="$t('searchServices')"
-               class="search-input"
-             />
-           </div>
-         </div>
-         
-         <div class="technicians-grid">
+        <div class="services-header">
+          <h2 class="services-title">{{ $t('meetTechniciansTeam') || 'Meet Our Technicians' }}</h2>
+          <hr class="services-divider" />
+          <p class="services-count">{{ filteredTechnicians.length }} {{ $t('techniciansFound') || 'technicians found' }}</p>
+        </div>
+        
+        <div class="services-grid">
           <div 
             v-for="(technician, idx) in filteredTechnicians" 
             :key="technician.id" 
-            class="technician-card"
+            class="service-card"
             @click="viewTechnicianDetails(technician)"
           >
-            <div class="technician-image">
-              <img :src="technician.image || '/images/Avatar.png'" :alt="technician.name" />
-            </div>
-            <div class="technician-info">
-              <h3 class="technician-name">{{ technician.name }}</h3>
-              <div class="rating">
-                <i class="fa-solid fa-star" v-for="n in 5" :key="n"></i>
+            <div class="service-image-container">
+              <img :src="technician.image || '/images/Avatar.png'" :alt="technician.name" class="service-image" />
+              <div class="service-overlay">
+                <span class="service-category">{{ technician.specialization || 'General' }}</span>
               </div>
-              <p class="technician-description">{{ technician.description }}</p>
-              <button class="view-profile-btn" @click.stop="viewTechnicianDetails(technician)">
+            </div>
+            <div class="service-content">
+              <h3 class="service-title">{{ technician.name }}</h3>
+              <div class="technician-specialization">{{ technician.specialization || 'General' }}</div>
+              <p class="service-desc">{{ technician.description }}</p>
+              <div class="service-meta">
+                <span class="service-rating">
+                  <i class="fas fa-star"></i>
+                  {{ technician.rating || '4.8' }}
+                </span>
+                <span class="service-time">
+                  <i class="fas fa-map-marker-alt"></i>
+                  {{ technician.location || 'Cairo' }}
+                </span>
+                <span class="service-price">
+                  <i class="fas fa-money-bill"></i>
+                  {{ technician.price || '200' }} EGP
+                </span>
+              </div>
+              <div class="technician-skills">
+                <span 
+                  v-for="skill in technician.skills?.slice(0, 2)" 
+                  :key="skill" 
+                  class="skill-tag"
+                >
+                  {{ skill }}
+                </span>
+                <span v-if="technician.skills?.length > 2" class="skill-tag more">
+                  +{{ technician.skills.length - 2 }} more
+                </span>
+              </div>
+              <button class="service-btn" @click.stop="viewTechnicianDetails(technician)">
                 {{ $t('viewTechnician') }}
               </button>
             </div>
@@ -151,6 +183,7 @@
 <script>
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../firebase.js';
+import { stockTechnicians } from '../assets/stockTechnicians.js';
 
     export default {
   name: 'AllServices',
@@ -160,50 +193,62 @@ import { db } from '../firebase.js';
       selectedTechnician: null,
       loading: true,
       technicians: [],
-             servicesList: [
-         {
-           id: 'plumbing',
-           title: 'plumbingServiceTitle',
-           description: 'plumbingServiceDesc',
-           route: '/plumbing',
-           image: '/images/servicesImages/plumbing.png'
-         },
-         {
-           id: 'carpentry',
-           title: 'carpentryServiceTitle',
-           description: 'carpentryServiceDesc',
-           route: '/carpentry',
-           image: '/images/servicesImages/Carpentry.png'
-         },
-         {
-           id: 'electrical',
-           title: 'electricityServiceTitle',
-           description: 'electricityServiceDesc',
-           route: '/electricity',
-           image: '/images/servicesImages/Electrecity.png'
-         },
-         {
-           id: 'acTechnicians',
-           title: 'acTechniciansServiceTitle',
-           description: 'acTechniciansServiceDesc',
-           route: '/aircondition',
-           image: '/images/servicesImages/Ac Technicions.png'
-         },
-         {
-           id: 'applianceRepair',
-           title: 'applianceRepairServiceTitle',
-           description: 'applianceRepairServiceDesc',
-           route: '/elecTechnicians',
-           image: '/images/servicesImages/electrical appliance repair.png'
-         },
-         {
-           id: 'wallFinishing',
-           title: 'wallFinishingServiceTitle',
-           description: 'wallFinishingServiceDesc',
-           route: '/wallfinishing',
-           image: '/images/servicesImages/wall finishing.png'
-         }
-       ]
+      servicesList: [
+        {
+          id: 'plumbing',
+          title: 'plumbingServiceTitle',
+          description: 'plumbingServiceDesc',
+          route: '/plumbing',
+          icon: 'fas fa-faucet',
+          price: '150-300 EGP',
+          duration: '2-4 hours'
+        },
+        {
+          id: 'carpentry',
+          title: 'carpentryServiceTitle',
+          description: 'carpentryServiceDesc',
+          route: '/carpentry',
+          icon: 'fas fa-hammer',
+          price: '200-400 EGP',
+          duration: '3-6 hours'
+        },
+        {
+          id: 'electrical',
+          title: 'electricityServiceTitle',
+          description: 'electricityServiceDesc',
+          route: '/electricity',
+          icon: 'fas fa-bolt',
+          price: '180-350 EGP',
+          duration: '1-3 hours'
+        },
+        {
+          id: 'acTechnicians',
+          title: 'acTechniciansServiceTitle',
+          description: 'acTechniciansServiceDesc',
+          route: '/aircondition',
+          icon: 'fas fa-snowflake',
+          price: '250-500 EGP',
+          duration: '2-5 hours'
+        },
+        {
+          id: 'applianceRepair',
+          title: 'applianceRepairServiceTitle',
+          description: 'applianceRepairServiceDesc',
+          route: '/elecTechnicians',
+          icon: 'fas fa-tools',
+          price: '120-280 EGP',
+          duration: '1-2 hours'
+        },
+        {
+          id: 'wallFinishing',
+          title: 'wallFinishingServiceTitle',
+          description: 'wallFinishingServiceDesc',
+          route: '/wallfinishing',
+          icon: 'fas fa-paint-roller',
+          price: '300-600 EGP',
+          duration: '4-8 hours'
+        }
+      ]
     };
   },
   computed: {
@@ -243,7 +288,7 @@ import { db } from '../firebase.js';
           firebaseTechnicians.push({
             id: doc.id,
             name: data.fullName || data.name || 'Unknown Technician',
-            image: data.profilePhotoUrl || data.idPhotoUrl || data.profileImage || '/images/Avatar.png',
+            image: data.idPhotoUrl || data.profileImage || '/images/Avatar.png',
             description: data.bio || data.description || 'Professional technician with years of experience.',
             rating: data.averageRating || 4.5,
             price: data.basePrice || data.hourlyRate || 200,
@@ -271,7 +316,7 @@ import { db } from '../firebase.js';
               firebaseTechnicians.push({
                 id: doc.id,
                 name: data.fullName || data.name || 'Unknown Technician',
-                image: data.profilePhotoUrl || data.idPhotoUrl || data.profileImage || '/images/Avatar.png',
+                image: data.idPhotoUrl || data.profileImage || '/images/Avatar.png',
                 description: data.bio || data.description || 'Professional technician with years of experience.',
                 rating: data.averageRating || 4.5,
                 price: data.basePrice || data.hourlyRate || 200,
@@ -291,26 +336,61 @@ import { db } from '../firebase.js';
 
         console.log('Firebase technicians found:', firebaseTechnicians.length);
         
-        // Use only Firebase technicians
-        this.technicians = firebaseTechnicians;
-        console.log('Using Firebase technicians');
+        // If we have Firebase data, use it; otherwise use stock data
+        if (firebaseTechnicians.length > 0) {
+          this.technicians = firebaseTechnicians;
+          console.log('Using Firebase technicians');
+        } else {
+          console.log('No Firebase technicians found, using stock data');
+          // Use stock data with some modifications for variety
+          this.technicians = stockTechnicians.map((tech, index) => ({
+            ...tech,
+            specialization: this.getSpecialization(index),
+            skills: tech.skills || ['General Repair'],
+            rating: tech.rating || 4.5,
+            price: tech.price || 200,
+            location: tech.location || 'Cairo',
+            yearsOfExperience: tech.yearsOfExperience || 5
+          }));
+        }
       } catch (error) {
         console.error('Error fetching technicians:', error);
         // Handle Firebase errors gracefully
         if (error.code === 'permission-denied') {
-          console.log('Firebase permissions not configured');
+          console.log('Firebase permissions not configured, using stock data');
         } else if (error.code === 'unavailable') {
-          console.log('Firebase service unavailable');
+          console.log('Firebase service unavailable, using stock data');
         } else if (error.code === 'not-found') {
-          console.log('Firebase collection not found');
+          console.log('Firebase collection not found, using stock data');
         } else {
-          console.log('Firebase error occurred');
+          console.log('Firebase error occurred, using stock data');
         }
-        // No fallback to stock data - technicians array will remain empty
-        this.technicians = [];
+        // Fallback to stock data
+        this.technicians = stockTechnicians.map((tech, index) => ({
+          ...tech,
+          specialization: this.getSpecialization(index),
+          skills: tech.skills || ['General Repair'],
+          rating: tech.rating || 4.5,
+          price: tech.price || 200,
+          location: tech.location || 'Cairo',
+          yearsOfExperience: tech.yearsOfExperience || 5
+        }));
       } finally {
         this.loading = false;
       }
+    },
+    getSpecialization(index) {
+      const specializations = [
+        'Plumbing',
+        'Electrical', 
+        'Carpentry',
+        'AC Technician',
+        'Appliance Repair',
+        'Wall Finishing',
+        'Plumbing',
+        'Electrical'
+      ];
+      return specializations[index % specializations.length];
     },
     clearSearch() {
       this.searchQuery = '';
@@ -366,11 +446,11 @@ import { db } from '../firebase.js';
 /* Services Overview Section */
 .services-overview-section {
   padding: 4rem 2rem;
-  background: white;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
 }
 
 .dark .services-overview-section {
-  background: var(--secondary-bg);
+  background: linear-gradient(135deg, var(--secondary-bg) 0%, var(--primary-bg) 100%);
 }
 
 .services-overview-container {
@@ -409,110 +489,119 @@ import { db } from '../firebase.js';
 
 .services-overview-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-  gap: 32px;
-  width: 100%;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
 }
 
 .service-overview-card {
-  background: #fff;
-  border-radius: 18px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.2s;
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 2px solid transparent;
 }
 
 .dark .service-overview-card {
   background: var(--secondary-bg);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .service-overview-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-5px);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  border-color: #625397;
 }
 
-.dark .service-overview-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+.service-overview-icon {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #625397 0%, #4e3b7a 100%);
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin-bottom: 1.5rem;
 }
 
-.service-overview-image {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
+.service-overview-icon i {
+  font-size: 1.5rem;
+  color: white;
 }
 
 .service-overview-content {
-  padding: 24px 20px 20px 20px;
   flex: 1;
-  display: flex;
-  flex-direction: column;
 }
 
 .service-overview-name {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   font-weight: 700;
-  margin-bottom: 8px;
-  font-family: Outfit, sans-serif;
+  margin-bottom: 0.8rem;
+  color: #333;
+}
+
+.dark .service-overview-name {
+  color: var(--primary-text);
 }
 
 .service-overview-desc {
-  font-size: 0.98rem;
-  color: var(--text-muted);
-  margin-bottom: 18px;
-  flex: 1;
-}
-
-.service-overview-btn {
-  background: #625397;
-  color: #fff;
-  border: none;
-  border-radius: 20px;
-  padding: 10px 12px;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
   font-size: 0.95rem;
-  font-weight: 500;
-  cursor: pointer;
+}
+
+.dark .service-overview-desc {
+  color: var(--text-muted);
+}
+
+.service-overview-meta {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  width: fit-content;
-  min-width: 80px;
-  max-width: 120px;
-  transition: background 0.2s;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e0e0;
 }
 
-.dark .service-overview-btn {
-  background: var(--primary-color);
-  color: var(--primary-text);
+.dark .service-overview-meta {
+  border-top-color: var(--border-color);
 }
 
-.service-overview-btn:hover {
-  background: #4e3b7a;
+.service-overview-price {
+  font-weight: 600;
+  color: #625397;
+  font-size: 0.9rem;
 }
 
-.dark .service-overview-btn:hover {
-  background: var(--primary-color);
-  color: var(--primary-text);
+.service-overview-duration {
+  color: #666;
+  font-size: 0.85rem;
 }
 
-.arrow {
-  margin-left: 6px;
-  transform: rotate(-45deg);
+.dark .service-overview-duration {
+  color: var(--text-muted);
 }
 
 /* Search Section */
 .search-section {
-  margin-bottom: 2rem;
+  background: white;
+  padding: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.dark .search-section {
+  background: var(--secondary-bg);
+}
+
+.search-container {
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .search-box {
   position: relative;
-  max-width: 500px;
-  margin: 0 auto;
+  margin-bottom: 1.5rem;
 }
 
 .search-icon {
@@ -605,130 +694,179 @@ import { db } from '../firebase.js';
   color: var(--text-muted);
 }
 
-.technicians-grid {
+.services-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 2rem;
-  margin-bottom: 3rem;
-  grid-auto-rows: 1fr;
-  justify-items: center;
+  align-items: start;
 }
 
-.dark .technicians-grid {
-  background-color: var(--primary-bg);
-}
-
-.technician-card {
+.service-card {
   background: white;
-  border-radius: 12px;
+  border-radius: 18px;
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  min-height: 420px;
-  width: 100%;
-  max-width: 340px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  height: fit-content;
   display: flex;
   flex-direction: column;
-  cursor: pointer;
 }
 
-.dark .technician-card {
-  background-color: var(--secondary-bg);
-  color: var(--primary-text);
+.dark .service-card {
+  background: var(--secondary-bg);
 }
 
-.technician-card:hover {
+.service-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
 }
 
-.technician-image {
-  height: 300px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.service-image-container {
+  position: relative;
 }
 
-.dark .technician-image {
-  background-color: var(--secondary-bg);
-  color: var(--primary-text);
-}
-
-.technician-image img {
+.service-image {
   width: 100%;
-  height: 100%;
-  border-radius: 8px;
+  height: 200px;
   object-fit: cover;
 }
 
-.dark .technician-image img {
-  background-color: var(--secondary-bg);
-  color: var(--primary-text);
+.service-overlay {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(98, 83, 151, 0.9);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
 }
 
-.technician-info {
+.service-content {
   padding: 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
-.technician-name {
+.service-title {
   font-size: 1.3rem;
-  font-weight: bold;
-  color: #333;
+  font-weight: 700;
   margin-bottom: 0.5rem;
+  color: #333;
 }
 
-.dark .technician-name {
+.dark .service-title {
   color: var(--primary-text);
 }
 
-.rating {
-  margin-bottom: 1rem;
+.technician-specialization {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #625397;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.dark .rating {
-  color: var(--primary-text);
+.dark .technician-specialization {
+  color: #8b7bb8;
 }
 
-.rating i {
-  color: #FFC230;
-  margin-right: 0.2rem;
-}
-
-.dark .rating i {
-  color: var(--primary-text);
-}
-
-.technician-description {
+.service-desc {
   color: #666;
-  font-size: 0.95rem;
+  margin-bottom: 1rem;
   line-height: 1.5;
-  margin-bottom: 1.5rem;
+  min-height: 3rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.dark .technician-description {
-  color: var(--primary-text);
+.dark .service-desc {
+  color: var(--text-muted);
 }
 
-.view-profile-btn {
-  background-color: var(--primary-color);
+.service-meta {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  color: #666;
+  flex-wrap: wrap;
+}
+
+.dark .service-meta {
+  color: var(--text-muted);
+}
+
+.service-rating,
+.service-time,
+.service-price {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.technician-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  min-height: 2rem;
+  align-items: flex-start;
+}
+
+.skill-tag {
+  background: #f0f0f0;
+  color: #666;
+  padding: 0.3rem 0.8rem;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.dark .skill-tag {
+  background: var(--primary-bg);
+  color: var(--text-muted);
+}
+
+.skill-tag.more {
+  background: #625397;
+  color: white;
+}
+
+.service-btn {
+  background: #625397;
   color: white;
   border: none;
-  padding: 0.75rem 1.5rem;
   border-radius: 25px;
-  font-weight: 600;
+  padding: 0.8rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  width: 100%;
-  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  width: fit-content;
+  margin-top: auto;
 }
 
-.dark .view-profile-btn {
-  background-color: var(--primary-color);
-  color: var(--primary-text);
+.service-btn:hover {
+  background: #4e3b7a;
+  transform: translateY(-2px);
 }
 
-.view-profile-btn:hover {
-  background-color: #4a3f7a;
+.arrow {
+  transition: transform 0.3s ease;
+}
+
+.service-btn:hover .arrow {
+  transform: translateX(3px);
 }
 
 /* No Results */
@@ -928,22 +1066,6 @@ import { db } from '../firebase.js';
 }
 
 /* Responsive Design */
-@media (max-width: 1024px) {
-  .services-overview-section {
-    width: 95%;
-    padding: 30px 0 0 0;
-  }
-  
-  .services-overview-title {
-    font-size: 2.2rem;
-  }
-  
-  .services-overview-grid {
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 24px;
-  }
-}
-
 @media (max-width: 768px) {
   .hero-title {
     font-size: 2rem;
@@ -954,9 +1076,7 @@ import { db } from '../firebase.js';
   }
   
   .services-overview-section {
-    width: 95%;
-    margin: 0 auto 40px auto;
-    padding: 20px 0 0 0;
+    padding: 2rem 1rem;
   }
   
   .services-overview-title {
@@ -965,23 +1085,11 @@ import { db } from '../firebase.js';
   
   .services-overview-grid {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 1.5rem;
   }
   
   .service-overview-card {
-    max-width: 400px;
-  }
-  
-  .service-overview-content {
-    padding: 20px 16px 16px 16px;
-  }
-  
-  .service-overview-name {
-    font-size: 1.1rem;
-  }
-  
-  .service-overview-desc {
-    font-size: 0.9rem;
+    padding: 1.5rem;
   }
   
   .search-section {
@@ -1016,40 +1124,6 @@ import { db } from '../firebase.js';
   
   .modal-body {
     padding: 1.5rem;
-  }
-  
-  .services-overview-section {
-    width: 100%;
-    padding: 15px 0 0 0;
-  }
-  
-  .services-overview-title {
-    font-size: 1.8rem;
-  }
-  
-  .services-overview-grid {
-    gap: 16px;
-  }
-  
-  .service-overview-image {
-    height: 150px;
-  }
-  
-  .service-overview-content {
-    padding: 16px 12px 12px 12px;
-  }
-  
-  .service-overview-name {
-    font-size: 1rem;
-  }
-  
-  .service-overview-desc {
-    font-size: 0.85rem;
-  }
-  
-  .service-overview-btn {
-    padding: 8px 10px;
-    font-size: 0.9rem;
   }
 }
 </style>

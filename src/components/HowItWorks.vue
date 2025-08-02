@@ -1,5 +1,5 @@
 <template>
-  <section class="how-it-works custom-container">
+  <section class="how-it-works mx-5 md:mx-10 lg:mx-20">
     <div class="flex flex-col items-center justify-center">
       <h2 class="how-title">{{ $t("howItWorksTitle") }}</h2>
       <p class="how-it-works-subtitle">{{ $t("howItWorksSubtitle") }}</p>
@@ -76,9 +76,7 @@ export default {
 
 <style scoped>
 .how-it-works {
-  width: 90%;
-  max-width: 1100px;
-  margin: 120px auto 120px auto;
+  margin: 0 10px 80px 10px;
   padding: 40px 0;
   text-align: center;
 }

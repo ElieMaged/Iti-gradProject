@@ -1,8 +1,10 @@
 <template>
-  <div class="admin-dashboard-layout">
-    <userSidebar :activeTab="'bookings'" />
+  <div class="user-bookings-page">
+    <div class="sidebar-container">
+      <userSidebar :activeTab="'bookings'" />
+    </div>
     
-    <div class="user-bookings-main mr-20 p-4">
+    <div class="main-content">
       <div class="page-header">
         <h1 class="page-title">{{ $t('myBookings') }}</h1>
         <p class="page-description">{{ $t('myBookingsDescription') }}</p>
@@ -50,18 +52,18 @@
             </thead>
             <tbody>
               <tr v-for="booking in filteredBookings" :key="booking.id" class="table-row">
-                <td data-label="Technician">{{ booking.technicianName }}</td>
-                <td data-label="Specialization">{{ getSpecializationTranslation(booking.specialization) }}</td>
-                <td data-label="Date">{{ booking.date }}</td>
-                <td data-label="Time">{{ booking.time }}</td>
-                <td data-label="Address">{{ booking.address }}</td>
-                <td data-label="Price">{{ booking.price }} {{ $t('egp') }}</td>
-                <td data-label="Status">
+                <td>{{ booking.technicianName }}</td>
+                <td>{{ getSpecializationTranslation(booking.specialization) }}</td>
+                <td>{{ booking.date }}</td>
+                <td>{{ booking.time }}</td>
+                <td>{{ booking.address }}</td>
+                <td>{{ booking.price }} {{ $t('egp') }}</td>
+                <td>
                   <span :class="getStatusClass(booking.status)">
                     {{ getStatusTranslation(booking.status) }}
                   </span>
                 </td>
-                <td data-label="Actions">
+                <td>
                   <button v-if="booking.status === 'pending'" @click="cancelBooking(booking.id)" :disabled="cancellingBooking === booking.id" class="cancel-btn">
                     {{ cancellingBooking === booking.id ? $t('cancelling') : $t('cancelBooking') }}
                   </button>
@@ -263,27 +265,15 @@ onMounted(() => {
 }
 
 .page-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--primary-color);
-  margin-bottom: 2rem;
-  text-align: left;
-  font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
-}
-
-.dark .page-title {
-  color: var(--primary-color);
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 0.5rem;
 }
 
 .page-description {
-  color: var(--primary-color);
+  color: #666;
   font-size: 1.1rem;
-  text-align: left;
-  font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
-}
-
-.dark .page-description {
-  color: var(--primary-color);
 }
 
 .bookings-container {
@@ -291,9 +281,6 @@ onMounted(() => {
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   padding: 2rem;
-}
-.dark .bookings-container {
-  background: var(--primary-bg);
 }
 
 .bookings-header {
@@ -305,15 +292,11 @@ onMounted(() => {
   border-bottom: 1px solid #e5e7eb;
 }
 
-
 .bookings-header h2 {
   font-size: 1.5rem;
   font-weight: 600;
   color: #333;
   margin: 0;
-}
-.dark .bookings-header {
- color: var(--primary-color);
 }
 
 .filter-controls {
@@ -350,9 +333,6 @@ onMounted(() => {
   padding: 1rem 1.5rem;
   border-bottom: 1px solid #e5e7eb;
 }
-.dark .table-header {
-  background: var(--secondary-bg);
-}
 
 .table-header th {
   padding: 0.75rem 1.5rem;
@@ -370,10 +350,6 @@ onMounted(() => {
 .table-row:hover {
   background-color: #f1f3f5;
 }
-.dark .table-row {
-  background: var(--gray-200);
-}
-
 
 .table-cell {
   padding: 0.75rem 1.5rem;
@@ -462,7 +438,6 @@ onMounted(() => {
   margin: 0 auto 1rem;
 }
 
-
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
@@ -482,9 +457,7 @@ onMounted(() => {
   cursor: pointer;
   font-weight: 500;
 }
-.dark .retry-btn {
-  background: var(--primary-color);
-}
+
 .retry-btn:hover {
   background: #6b5fa7;
 }
@@ -500,24 +473,18 @@ onMounted(() => {
   color: #9ca3af;
   margin-bottom: 1rem;
 }
-.dark .empty-icon {
-  color: var(--icon-color);
-}
+
 .empty-state h3 {
   font-size: 1.5rem;
   color: #333;
   margin-bottom: 0.5rem;
 }
-.dark .empty-state h3 {
-  color: var(--muted-text);
-}
+
 .empty-state p {
   color: #666;
   margin-bottom: 2rem;
 }
-.dark .empty-state p {
-  color: var(--muted-text);
-}
+
 .browse-services-btn {
   background: #7c6bb0;
   color: white;
@@ -528,91 +495,15 @@ onMounted(() => {
   cursor: pointer;
   transition: background-color 0.2s;
 }
-.dark .browse-services-btn {
-  background: var(--primary-color);
-}
+
 .browse-services-btn:hover {
   background: #6b5fa7;
 }
 
-/* Responsive Layout Styles */
-.admin-dashboard-layout {
-  display: flex;
-  min-height: 100vh;
-  font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
-  background: #faf8fd;
-}
-
-.dark .admin-dashboard-layout {
-  background-color: var(--primary-bg);
-}
-
-.user-bookings-main {
-  background-color: #f9fafb;
-  min-height: 100vh;
-  font-family: sans-serif;
-  flex: 1;
-}
-
-.dark .user-bookings-main {
-  background-color: var(--primary-bg);
-}
-
-/* Mobile Responsive Styles */
+/* Responsive Design */
 @media (max-width: 768px) {
-  .layout {
-    flex-direction: column;
-    min-height: auto;
-  }
-  .admin-dashboard-layout {
-    flex-direction: column;
-  }
-  
-  .user-bookings-main {
-    margin-top: 80px;
+  .main-content {
     padding: 1rem;
-    margin-right: 0;
-  }
-  
-  .page-header {
-    margin-bottom: 1.5rem;
-    text-align: left;
-  }
-  
-  .page-title {
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
-    text-align: center;
-  }
-  
-  .page-description {
-    color: var(--primary-color);
-    font-size: 1rem;
-    text-align: left;
-  }
-  
-  .bookings-container {
-    padding: 1.5rem;
-    border-radius: 0.75rem;
-  }
-  
-  .bookings-header {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: flex-start;
-  }
-  
-  .bookings-header h2 {
-    font-size: 1.25rem;
-  }
-  
-  .filter-controls {
-    width: 100%;
-  }
-  
-  .filter-select {
-    width: 100%;
-    padding: 0.75rem;
   }
   
   .table-wrapper {
@@ -631,386 +522,36 @@ onMounted(() => {
   .table-row {
     display: block;
     margin-bottom: 1rem;
-    padding: 1rem;
-    background: white;
-    border-radius: 0.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   }
 
-  .table-row td {
+  .table-cell {
     display: block;
-    text-align: left;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #e5e7eb;
+    text-align: right;
+    padding-left: 50%;
     position: relative;
+    border-bottom: 1px solid #e5e7eb;
   }
 
-  .table-row td:before {
+  .table-cell:before {
     content: attr(data-label);
+    position: absolute;
+    left: 0;
+    width: 50%;
+    padding-left: 1rem;
     font-weight: 600;
-    color: #666;
-    margin-right: 0.5rem;
+    text-align: left;
   }
 
-  .table-row td:last-child {
+  .table-cell:last-child {
     border-bottom: none;
   }
 
   .booking-actions {
     flex-direction: column;
-    gap: 0.5rem;
-  }
-  
-  .cancel-btn, .book-again-btn, .view-profile-btn {
-    width: 100%;
-    padding: 0.75rem;
-    text-align: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .user-bookings-main {
-    margin-top: 60px;
-    padding: 0.75rem;
-  }
-  
-  .bookings-container {
-    padding: 1rem;
   }
   
   .page-title {
-    font-size: 1.25rem;
-    text-align: center;
-  }
-  
-  .page-description {
-    color: var(--primary-color);
-    font-size: 0.875rem;
-    text-align: left;
-  }
-  
-  .bookings-header h2 {
-    font-size: 1.125rem;
-  }
-  
-  .table-row {
-    padding: 0.75rem;
-  }
-  
-  .table-row td {
-    font-size: 0.875rem;
-  }
-  
-  .cancel-btn, .book-again-btn, .view-profile-btn {
-    font-size: 0.875rem;
-    padding: 0.5rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .main-content {
-    padding: 0.75rem;
-  }
-  
-  .page-title {
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-  }
-  
-  .filter-controls {
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-  
-  .filter-select {
-    width: 100%;
-    padding: 0.6rem;
-    font-size: 0.9rem;
-  }
-  
-  .table-cell {
-    padding-left: 45%;
-    font-size: 0.85rem;
-  }
-  
-  .table-cell:before {
-    width: 45%;
-    font-size: 0.8rem;
-  }
-  
-  .booking-actions {
-    gap: 0.5rem;
-  }
-  
-  .action-btn {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.8rem;
-  }
-  
-  .empty-state {
-    padding: 2rem 1rem;
-  }
-  
-  .empty-icon {
-    font-size: 3rem;
-  }
-  
-  .empty-state h3 {
-    font-size: 1.25rem;
-  }
-  
-  .empty-state p {
-    font-size: 0.9rem;
-  }
-  
-  .browse-services-btn {
-    padding: 0.6rem 1.5rem;
-    font-size: 0.9rem;
-  }
-  
-  .loading-spinner {
-    width: 35px;
-    height: 35px;
-  }
-  
-  .error-message {
-    padding: 0.75rem;
-    font-size: 0.85rem;
-  }
-  
-  .retry-btn {
-    padding: 0.5rem 1rem;
-    font-size: 0.85rem;
-  }
-}
-
-@media (max-width: 360px) {
-  .main-content {
-    padding: 0.5rem;
-  }
-  
-  .page-title {
-    font-size: 1.25rem;
-    margin-bottom: 0.75rem;
-  }
-  
-  .filter-controls {
-    gap: 0.5rem;
-  }
-  
-  .filter-select {
-    padding: 0.5rem;
-    font-size: 0.85rem;
-  }
-  
-  .table-cell {
-    padding-left: 40%;
-    font-size: 0.8rem;
-  }
-  
-  .table-cell:before {
-    width: 40%;
-    font-size: 0.75rem;
-  }
-  
-  .action-btn {
-    padding: 0.4rem 0.6rem;
-    font-size: 0.75rem;
-  }
-  
-  .empty-state {
-    padding: 1.5rem 0.75rem;
-  }
-  
-  .empty-icon {
-    font-size: 2.5rem;
-  }
-  
-  .empty-state h3 {
-    font-size: 1.1rem;
-  }
-  
-  .empty-state p {
-    font-size: 0.85rem;
-  }
-  
-  .browse-services-btn {
-    padding: 0.5rem 1.25rem;
-    font-size: 0.85rem;
-  }
-  
-  .loading-spinner {
-    width: 30px;
-    height: 30px;
-  }
-  
-  .error-message {
-    padding: 0.6rem;
-    font-size: 0.8rem;
-  }
-  
-  .retry-btn {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.8rem;
-  }
-}
-
-/* Landscape orientation adjustments */
-@media (max-width: 768px) and (orientation: landscape) {
-  .main-content {
-    padding: 0.75rem;
-  }
-  
-  .filter-controls {
-    flex-direction: row;
-    gap: 1rem;
-  }
-  
-  .filter-select {
-    width: auto;
-    flex: 1;
-  }
-  
-  .booking-actions {
-    flex-direction: row;
-  }
-  
-  .action-btn {
-    flex: 1;
-  }
-}
-
-/* High DPI displays */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-  .table-cell {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-}
-
-/* Reduced motion preferences */
-@media (prefers-reduced-motion: reduce) {
-  .action-btn,
-  .browse-services-btn,
-  .retry-btn {
-    transition: none;
-  }
-  
-  .loading-spinner {
-    animation: none;
-  }
-}
-
-/* Additional mobile optimizations */
-@media (max-width: 320px) {
-  .main-content {
-    padding: 0.5rem;
-  }
-  
-  .page-title {
-    font-size: 1.25rem;
-    margin-bottom: 0.5rem;
-  }
-  
-  .page-description {
-    color: var(--primary-color);
-    font-size: 0.85rem;
-  }
-  
-  .bookings-container {
-    padding: 0.75rem;
-  }
-  
-  .bookings-header {
-    gap: 0.5rem;
-  }
-  
-  .bookings-header h2 {
-    font-size: 1rem;
-  }
-  
-  .filter-controls {
-    gap: 0.4rem;
-  }
-  
-  .filter-select {
-    padding: 0.5rem;
-    font-size: 0.8rem;
-  }
-  
-  .table-row {
-    padding: 0.5rem;
-    margin-bottom: 0.5rem;
-  }
-  
-  .table-cell {
-    padding: 0.3rem 0;
-    padding-left: 30%;
-    font-size: 0.8rem;
-  }
-  
-  .table-cell:before {
-    width: 25%;
-    font-size: 0.7rem;
-  }
-  
-  .booking-actions {
-    gap: 0.3rem;
-    margin-top: 0.5rem;
-  }
-  
-  .action-btn {
-    padding: 0.4rem 0.6rem;
-    font-size: 0.75rem;
-  }
-  
-  .empty-state {
-    padding: 1rem 0.5rem;
-  }
-  
-  .empty-icon {
-    font-size: 2.5rem;
-  }
-  
-  .empty-state h3 {
-    font-size: 1rem;
-  }
-  
-  .empty-state p {
-    font-size: 0.8rem;
-  }
-  
-  .browse-services-btn {
-    padding: 0.5rem 1.25rem;
-    font-size: 0.8rem;
-  }
-  
-  .loading-spinner {
-    width: 30px;
-    height: 30px;
-  }
-  
-  .error-message {
-    padding: 0.5rem;
-    font-size: 0.8rem;
-  }
-  
-  .retry-btn {
-    padding: 0.4rem 0.6rem;
-    font-size: 0.8rem;
-  }
-}
-
-/* Touch device optimizations */
-@media (hover: none) and (pointer: coarse) {
-  .action-btn,
-  .browse-services-btn,
-  .retry-btn {
-    min-height: 44px;
-  }
-  
-  .filter-select {
-    min-height: 44px;
+    font-size: 2rem;
   }
 }
 </style> 

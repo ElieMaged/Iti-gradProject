@@ -1,22 +1,42 @@
 <template>
-  <section class="expert-team m-20">
+  <section class="expert-team mx-5 md:mx-10 lg:mx-20">
+    <!-- Team Header -->
     <div class="team-header">
       <div class="team-title-section">
-        <h2 class="team-title">{{ $t('meetOurExpertTechnicians') || 'Meet Our Expert Technicians' }}</h2>
+        <h2 class="team-title">
+          {{ $t("meetOurExpertTechnicians") || "Meet Our Expert Technicians" }}
+        </h2>
       </div>
       <div class="team-subtitle-section">
-        <h3 class="team-subtitle">{{ $t('ourTechniciansSubtitle') || 'Our technicians are highly skilled and ready to help you.' }}</h3>
-        <p class="team-description">{{ $t('ourTechniciansDescription') || 'Browse our team of professionals and view their profiles to find the right expert for your needs.' }}</p>
+        <h3 class="team-subtitle">
+          {{
+            $t("ourTechniciansSubtitle") ||
+            "Our technicians are highly skilled and ready to help you."
+          }}
+        </h3>
+        <p class="team-description">
+          {{
+            $t("ourTechniciansDescription") ||
+            "Browse our team of professionals and view their profiles to find the right expert for your needs."
+          }}
+        </p>
       </div>
     </div>
 
     <div v-if="loading" class="loading-container">
       <div class="loading-spinner"></div>
-      <p>{{ $t('loadingTeamMembers') }}</p>
+      <p>{{ $t("loadingTeamMembers") }}</p>
     </div>
 
     <div v-else class="team-cards">
-      <div v-for="(member, index) in teamMembers.slice(currentIndex, currentIndex + 4)" :key="member.id" class="team-card">
+      <div
+        v-for="(member, index) in teamMembers.slice(
+          currentIndex,
+          currentIndex + 4
+        )"
+        :key="member.id"
+        class="team-card"
+      >
         <div class="member-image">
           <img :src="member.image" :alt="member.name" class="member-photo" />
         </div>
@@ -25,12 +45,18 @@
           <div class="member-specialization">{{ member.specialization }}</div>
           <div class="member-location">{{ member.location }}</div>
           <div class="member-rating">
-            <i v-for="star in Math.floor(member.rating || 5)" :key="star" class="fas fa-star"></i>
+            <i
+              v-for="star in Math.floor(member.rating || 5)"
+              :key="star"
+              class="fas fa-star"
+            ></i>
           </div>
           <p class="member-description">{{ $t(member.description) }}</p>
-          <div class="member-experience">{{ member.experience }} {{ $t('yearsOfExperience') }}</div>
+          <div class="member-experience">
+            {{ member.experience }} {{ $t("yearsOfExperience") }}
+          </div>
           <button class="view-profile-btn" @click="viewProfile(member)">
-            {{ $t('viewProfile') }}
+            {{ $t("viewProfile") }}
             <i class="fas fa-arrow-right arrow-right"></i>
           </button>
         </div>
@@ -39,8 +65,8 @@
 
     <!-- Points navigation -->
     <div class="slider-points" v-if="teamMembers.length > 4">
-      <div 
-        v-for="(point, index) in totalSlides" 
+      <div
+        v-for="(point, index) in totalSlides"
         :key="index"
         @click="goToSlide(index)"
         :class="['slider-point', { active: currentSlideIndex === index }]"
@@ -50,11 +76,12 @@
 </template>
 
 <script>
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../firebase.js';
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../firebase.js";
+import { stockTechnicians } from "../assets/stockTechnicians.js";
 
 export default {
-  name: 'ExpertTeam',
+  name: "ExpertTeam",
   data() {
     return {
       teamMembers: [],
@@ -67,7 +94,7 @@ export default {
   computed: {
     totalSlides() {
       return Math.ceil(this.teamMembers.length / 4);
-    }
+    },
   },
   async mounted() {
     await this.fetchTechnicians();
@@ -80,34 +107,73 @@ export default {
     async fetchTechnicians() {
       try {
         this.loading = true;
-        const techniciansCollection = collection(db, 'technicians');
+        const techniciansCollection = collection(db, "technicians");
         const techniciansSnapshot = await getDocs(techniciansCollection);
 
         const firebaseTechnicians = [];
-        techniciansSnapshot.forEach(doc => {
+        techniciansSnapshot.forEach((doc) => {
           const data = doc.data();
           firebaseTechnicians.push({
             id: doc.id,
-            name: data.fullName || data.name || 'Unknown Technician',
-            image: data.profilePhotoUrl || data.idPhotoUrl || '/images/Avatar.png',
-            description: data.bio || data.description || 'Professional technician with years of experience.',
+            name: data.fullName || data.name || "Unknown Technician",
+            image: data.idPhotoUrl || data.profileImage || "/images/Avatar.png",
+            description:
+              data.bio ||
+              data.description ||
+              "Professional technician with years of experience.",
             rating: data.averageRating || 4.5,
-            specialization: data.specialization || 'General Technician',
-            experience: data.experience || data.yearsOfExperience ? `${data.yearsOfExperience || data.experience}+ years` : '5+ years',
-            basePrice: data.basePrice || '300',
-            status: data.status || 'approved',
-            location: data.government || data.location || 'Cairo',
-            phone: data.phone || '+20 111 222 3333',
-            email: data.email || 'technician@example.com'
+            specialization: data.specialization || "General Technician",
+            experience:
+              data.experience || data.yearsOfExperience
+                ? `${data.yearsOfExperience || data.experience}+ years`
+                : "5+ years",
+            basePrice: data.basePrice || "300",
+            status: data.status || "approved",
+            location: data.government || data.location || "Cairo",
+            phone: data.phone || "+20 111 222 3333",
+            email: data.email || "technician@example.com",
           });
         });
 
-        // Only use Firebase technicians - no stock technicians
-        this.teamMembers = firebaseTechnicians;
+        // Fallback to stockTechnicians if none found
+        this.teamMembers =
+          firebaseTechnicians.length > 0
+            ? firebaseTechnicians
+            : stockTechnicians.map((tech) => ({
+                id: tech.id,
+                name: tech.name,
+                image: tech.image || "/images/Avatar.png",
+                description: tech.description,
+                rating: tech.rating || 4.5,
+                specialization: tech.specialization || "General Technician",
+                experience: tech.yearsOfExperience
+                  ? `${tech.yearsOfExperience}+ years`
+                  : "5+ years",
+                basePrice: tech.price || "300",
+                status: "approved",
+                location: tech.location || "Cairo",
+                phone: tech.phone || "+20 111 222 3333",
+                email: "technician@example.com",
+              }));
       } catch (error) {
-        console.error('Error fetching technicians:', error);
-        // No fallback - only show registered technicians
-        this.teamMembers = [];
+        console.error("Error fetching technicians:", error);
+        // Fallback to stockTechnicians
+        this.teamMembers = stockTechnicians.map((tech) => ({
+          id: tech.id,
+          name: tech.name,
+          image: tech.image || "/images/Avatar.png",
+          description: tech.description,
+          rating: tech.rating || 4.5,
+          specialization: tech.specialization || "General Technician",
+          experience: tech.yearsOfExperience
+            ? `${tech.yearsOfExperience}+ years`
+            : "5+ years",
+          basePrice: tech.price || "300",
+          status: "approved",
+          location: tech.location || "Cairo",
+          phone: tech.phone || "+20 111 222 3333",
+          email: "technician@example.com",
+        }));
       } finally {
         this.loading = false;
       }
@@ -156,7 +222,7 @@ export default {
       // Navigate to technician profile with the specific technician's ID and all available data
       this.$router.push({
         path: `/texhView/${member.id}`,
-        query: { 
+        query: {
           name: member.name,
           specialization: member.specialization,
           rating: member.rating,
@@ -167,16 +233,15 @@ export default {
           phone: member.phone,
           email: member.email,
           status: member.status,
-          image: member.image
-        }
+          image: member.image,
+        },
       });
-    }
-  }
+    },
+  },
 };
 </script>
 
 <style scoped>
-
 .team-header {
   display: flex;
   justify-content: space-between;
@@ -190,9 +255,10 @@ export default {
 }
 
 .team-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #333;
+  font-size: 44px;
+  font-weight: 600;
+  line-height: 56px;
+  color: var(--black-text);
   line-height: 1.2;
   font-family: Outfit, sans-serif;
   text-align: start;
@@ -209,9 +275,10 @@ export default {
 }
 
 .team-subtitle {
-  font-size: 1.5rem;
+  font-size: 20px;
   font-weight: 600;
-  color: #333;
+  line-height: 28px;
+  color: var(--black-text);
   margin-bottom: 16px;
   font-family: Outfit, sans-serif;
 }
@@ -221,9 +288,9 @@ export default {
 }
 
 .team-description {
-  font-size: 1rem;
-  color: #8c8e90;
-  line-height: 1.6;
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--text-gray);
   font-family: Outfit, sans-serif;
 }
 
@@ -239,12 +306,8 @@ export default {
   margin-bottom: 30px;
 }
 
-.dark .member-name {
-  color: var(--primary-text);
-}
-
 .dark .member-description {
-  color: var(--text-muted);
+  color: var(--card-text-gray);
 }
 
 .dark .member-rating i {
@@ -278,7 +341,6 @@ export default {
   align-items: center;
   justify-content: center;
 }
-
 .member-photo {
   width: 100%;
   height: 100%;
@@ -288,19 +350,20 @@ export default {
 
 .member-info {
   padding: 24px 20px;
-  text-align: center;
 }
 
 .member-name {
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: #333;
-  margin-bottom: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--black-text);
+  margin-bottom: 16px;
   font-family: Outfit, sans-serif;
 }
-
+.dark .member-name {
+  color: var(--primary-text);
+}
 .member-specialization {
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: #625397;
   margin-bottom: 4px;
   font-weight: 600;
@@ -308,8 +371,8 @@ export default {
 }
 
 .member-location {
-  font-size: 0.9rem;
-  color: #8c8e90;
+  font-size: 1rem;
+  color: var(--card-text-gray);
   margin-bottom: 8px;
   font-family: Outfit, sans-serif;
 }
@@ -317,7 +380,6 @@ export default {
 .member-rating {
   margin-bottom: 16px;
   display: flex;
-  justify-content: center;
   gap: 2px;
   color: #f3d361;
 }
@@ -328,16 +390,16 @@ export default {
 }
 
 .member-description {
-  font-size: 0.9rem;
-  color: #8c8e90;
+  font-size: 1rem;
+  color: var(--card-text-gray);
   line-height: 1.5;
   margin-bottom: 20px;
   font-family: Outfit, sans-serif;
 }
 
 .member-experience {
-  font-size: 0.9rem;
-  color: #8c8e90;
+  font-size: 1rem;
+  color: var(--card-text-gray);
   margin-bottom: 20px;
   font-family: Outfit, sans-serif;
 }
@@ -406,6 +468,7 @@ export default {
   align-items: center;
   gap: 12px;
   margin-top: 20px;
+  margin-bottom: 60px;
 }
 
 .slider-point {
@@ -451,22 +514,16 @@ export default {
 
   .team-card {
     flex: 1 1 calc(50% - 20px);
-    min-width: 280px;
   }
 }
-
-@media (max-width: 768px) {
-  .expert-team {
-    margin: 0 auto 40px auto;
-    padding: 30px 0;
-  }
-
+@media (max-width: 999px) {
   .team-header {
     flex-direction: column;
     gap: 24px;
     margin-bottom: 32px;
   }
-
+}
+@media (max-width: 768px) {
   .team-title {
     font-size: 2rem;
   }
@@ -483,7 +540,6 @@ export default {
 
   .team-card {
     width: 100%;
-    max-width: 320px;
   }
 
   .member-image {
@@ -492,31 +548,21 @@ export default {
 }
 
 @media (max-width: 480px) {
-  .expert-team {
-    width: 95%;
-    margin: 0 auto 30px auto;
-    padding: 20px 0;
-  }
-
   .team-header {
     gap: 16px;
     margin-bottom: 24px;
-    text-align: center;
   }
 
   .team-title {
     font-size: 1.8rem;
-    text-align: center;
   }
 
   .team-subtitle {
     font-size: 1.2rem;
-    text-align: center;
   }
 
   .team-description {
     font-size: 0.9rem;
-    text-align: center;
   }
 
   .team-cards {
@@ -568,6 +614,9 @@ export default {
   .slider-point {
     width: 10px;
     height: 10px;
+  }
+  .member-rating {
+    justify-content: center;
   }
 }
 </style>

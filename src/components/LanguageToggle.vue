@@ -1,49 +1,34 @@
 <template>
   <button @click="toggleLanguage" class="lang-toggle-btn">
-    <i class="fa-solid fa-globe navbar-icon"></i>
+    <i class="fa-solid fa-globe"></i>
   </button>
 </template>
 
 <script setup>
-import { useI18n } from 'vue-i18n';
+import { useI18n } from "vue-i18n";
 
 const { locale } = useI18n();
 
 function toggleLanguage() {
-  locale.value = locale.value === 'en' ? 'ar' : 'en';
+  locale.value = locale.value === "en" ? "ar" : "en";
 }
 </script>
 
 <style scoped>
 .lang-toggle-btn {
   background: none;
-  border: none;
-  color: var(--primary-color);
-  border-radius: 50%;
-  padding: 8px;
+  border: 1px solid #6b4fa1;
+  color: #6b4fa1;
+  border-radius: 20px;
+  padding: 0.5rem 1.25rem;
+  font-weight: 600;
   cursor: pointer;
-  margin-left: 0.5rem;
-  transition: all 0.3s ease;
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.navbar-icon {
-  font-size: 1.2rem;
-  transition: all 0.3s ease;
-  width: 20px;  
-  height: 20px;
-  color: inherit;
+  margin-left: 1rem;
+  transition: background 0.2s, color 0.2s;
 }
 
 .lang-toggle-btn:hover {
-  color: var(--gray-500);
-}
-
-.navbar-icon:hover {
-  transform: scale(1.1);
-  color: var(--primary-color) !important;
+  background: #6b4fa1;
+  color: #fff;
 }
 </style>

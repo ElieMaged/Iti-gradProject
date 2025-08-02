@@ -24,7 +24,7 @@
 <script>
 
 import { db } from '../firebase.js'; // adjust the path as needed
-// Removed stockTechnicians import - only show registered technicians
+import { stockTechnicians } from '../assets/stockTechnicians.js';
 
 export default {
   name: 'chatbot',
@@ -36,8 +36,8 @@ export default {
       ],
       loading: false,
       suggestedProfession: null,
-      suggestedTechnicians: []
-      // Removed suggestedStockTechnicians - no stock technicians
+      suggestedTechnicians: [],
+      suggestedStockTechnicians: []
     }
   },
   methods: {
@@ -105,12 +105,30 @@ export default {
         console.error('Firebase error:', e);
         this.messages.push({ sender: 'ai', text: 'Sorry, there was an error connecting to the technician database.' });
       }
-      // No stock technicians - only show registered technicians
+      // Filter stock technicians by profession
+      const stock = stockTechnicians.filter(t => {
+        // Normalize profession for stock technicians (assume a 'profession' field or use skills/description)
+        if (t.profession) {
+          return t.profession.toLowerCase() === profession;
+        }
+        // Fallback: try to match profession in description or skills
+        if (t.skills && t.skills.some(skill => skill.toLowerCase().includes(profession))) {
+          return true;
+        }
+        if (t.description && t.description.toLowerCase().includes(profession)) {
+          return true;
+        }
+        return false;
+      });
       this.suggestedTechnicians = registered;
+      this.suggestedStockTechnicians = stock;
       // Compose message
       let msg = '';
       if (registered.length > 0) {
         msg += '<b>Registered Technicians:</b><br>' + registered.map(t => `${t.name} - ${t.phone || ''}`).join('<br>') + '<br>';
+      }
+      if (stock.length > 0) {
+        msg += '<b>Stock Technicians:</b><br>' + stock.map(t => `${t.name} - ${t.phone || ''}`).join('<br>');
       }
       if (!msg) {
         msg = 'Sorry, no technicians found for this profession.';

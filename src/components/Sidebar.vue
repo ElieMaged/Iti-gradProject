@@ -65,7 +65,11 @@
         <i class="fa-regular fa-star"></i>
         <span>{{ $t('myReviews') }}</span>
       </a>
-     
+
+      <button @click="handleLogout" class="sidebar-item logout-btn">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        <span>{{ $t('logout') }}</span>
+      </button>
     </div>
   </div>
 </template>
@@ -147,7 +151,7 @@ body {
 
 .layout {
   display: flex;
-  min-height: auto;
+  min-height: 100vh;
 }
 
 .sidebar {
@@ -187,20 +191,17 @@ body {
 }
 
 .sidebar-item:hover {
-  background-color: var(--primary-color);
+  background-color: #c5b7e6;
   color: white;
 }
 
 .sidebar-item.active {
-  background-color: var(--primary-color);
+  background-color: var(--secondary);
   color: white;
 }
+
 .dark .sidebar-item.active {
-  background-color: #c5b7e6;
-  color: var(--primary-text-dark);
-}
-.dark .sidebar-item:hover {
-  background-color: #c5b7e6;
+  background-color: var(--icon-color);
   color: var(--primary-text-dark);
 }
 
@@ -224,8 +225,6 @@ body {
   border: none;
 }
 
-
-
 .dropdown-status-link {
   padding: 10px 24px;
   color: var(--text-main);
@@ -238,26 +237,12 @@ body {
   transition: background 0.16s, color 0.16s;
 }
 
-.dark .dropdown-status-link {
-  color: var(--primary-text);
-}
-
 .dropdown-status-link:hover {
-  background: var(--secondary);
-  color: white;
-}
-
-.dark .dropdown-status-link:hover {
-  background: var(--secondary);
+  background: #c5b7e6;
   color: white;
 }
 
 .dropdown-status-link.active {
-  background: var(--secondary);
-  color: white;
-}
-
-.dark .dropdown-status-link.active {
   background: var(--secondary);
   color: white;
 }
@@ -283,117 +268,5 @@ body {
 
 .dark .chevron-icon {
   color: var(--primary-text);
-}
-
-/* Mobile Responsive - Horizontal Layout */
-@media (max-width: 768px) {
-  .layout {
-    flex-direction: column;
-    max-height: 10vh;
-  }
-  
-  .sidebar {
-    width: 100vw;
-    flex-direction: row;
-    padding: 1rem;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin: 0;
-    box-sizing: border-box;
-  }
-  
-  .sidebar-item {
-    width: auto;
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-    border-radius: 8px;
-    min-width: fit-content;
-    margin: 0 20px;
-  }
-  
-  .sidebar-item span {
-    display: none;
-  }
-  
-  .sidebar-item i {
-    font-size: 1rem;
-  }
-  
-  .dropdown-container {
-    position: relative;
-    width: auto;
-  }
-  
-  .dropdown-menu {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    min-width: 200px;
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    z-index: 10;
-    margin: 0;
-    width: auto;
-  }
-  
-  .dark .dropdown-menu {
-    background: var(--secondary-bg);
-    border: 1px solid var(--border-color);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-  }
-  
-  .dropdown-status-link {
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-    margin: 0;
-    border-radius: 0;
-  }
-  
-  .dropdown-status-link:first-child {
-    border-radius: 8px 8px 0 0;
-  }
-  
-  .dropdown-status-link:last-child {
-    border-radius: 0 0 8px 8px;
-  }
-  
-  .logout-btn {
-    margin-top: 0;
-  }
-}
-
-@media (max-width: 480px) {
-  .sidebar {
-    padding: 0.75rem;
-    gap: 0.25rem;
-  }
-  
-  .layout {
-    margin-top: 30px;
-    max-height: 10vh;
-  }
-  
-  .sidebar-item {
-    padding: 0.375rem 0.75rem;
-    font-size: 0.75rem;
-  }
-  
-  .sidebar-item i {
-    font-size: 0.875rem;
-  }
-  
-  .dropdown-menu {
-    min-width: 150px;
-  }
-  
-  .dropdown-status-link {
-    padding: 0.375rem 0.75rem;
-    font-size: 0.75rem;
-  }
 }
 </style> 

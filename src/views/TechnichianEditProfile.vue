@@ -5,7 +5,7 @@
       <div class="edit-profile-wrapper">
         <div class="edit-profile-card">
           <div class="edit-profile-header">
-            <h2 class="page-title">{{ $t('editProfileTitle') }}</h2>
+            <h2>{{ $t('editProfileTitle') }}</h2>
           </div>
           <form class="edit-profile-form" @submit.prevent="saveProfile">
             <div class="edit-profile-content">
@@ -263,7 +263,7 @@ onMounted(() => {
 <style scoped>
 .admin-dashboard-layout {
   display: flex;
-  min-height: auto;
+  min-height: 100vh;
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
   background: #faf8fd;
 }
@@ -290,16 +290,17 @@ onMounted(() => {
   box-shadow: 0 10px 15px rgba(0,0,0,0.08);
   padding: 2rem;
 }
-.page-title {
-  color: var(--primary-color);
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 2rem;
-  font-family: Outfit, sans-serif;
+.dark .edit-profile-header h2 {
+  color: var(--primary-text);
 }
-
-.dark .page-title {
-  color: var(--primary-color);
+.dark .edit-profile-card {
+  background: var(--grey-bg);
+}
+.edit-profile-header h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #7c6bb0;
+  margin-bottom: 1.5rem;
 }
 .edit-profile-form {
   display: flex;
@@ -330,7 +331,7 @@ onMounted(() => {
   margin-bottom: 0.25rem;
 }
 .dark .edit-profile-fields label {
-  color: var(--primary-text);
+  color: var(--primary-text-dark);
 }
 .edit-profile-fields input,
 .edit-profile-fields select,
@@ -429,7 +430,7 @@ onMounted(() => {
   margin-bottom: 1rem;
 }
 .dark .edit-profile-section h3 {
-  color: var(--primary-text);
+  color: var(--primary-text-dark);
 }
 .edit-profile-address {
   display: grid;
@@ -448,7 +449,7 @@ onMounted(() => {
   margin-bottom: 0.25rem;
 }
 .dark .edit-profile-address label {
-  color: var(--primary-text);
+  color: var(--primary-text-dark);
 }
 .edit-profile-address select {
   width: 100%;
@@ -486,7 +487,7 @@ onMounted(() => {
   cursor: pointer;
 }
 .dark .radio-option {
-  color: var(--primary-text);
+  color: var(--primary-text-dark);
 }
 .radio-option input[type="radio"] {
   width: auto;
@@ -518,190 +519,5 @@ onMounted(() => {
 .dark .save-btn:hover {
   background: var(--primary);
   color: var(--primary-text);
-}
-
-/* Responsive Design */
-@media (max-width: 1200px) {
-  .edit-profile-wrapper {
-    max-width: 900px;
-  }
-  
-  .edit-profile-fields {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  }
-}
-
-@media (max-width: 768px) {
-  .admin-dashboard-layout {
-    flex-direction: column;
-  }
-  
-  .edit-profile-main {
-    margin-left: 0;
-    margin-right: 0;
-    padding: 1rem;
-  }
-  
-  .edit-profile-card {
-    padding: 1.5rem;
-    border-radius: 0.75rem;
-  }
-  
-  .edit-profile-content {
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-  
-  .edit-profile-fields {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  
-  .edit-profile-image-section {
-    order: -1;
-    align-self: center;
-  }
-  
-  .profile-image-container {
-    width: 100px;
-    height: 100px;
-  }
-  
-  .profile-image-placeholder {
-    font-size: 2.5rem;
-  }
-  
-  .edit-profile-address {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  
-  .edit-profile-header h2 {
-    font-size: 1.25rem;
-    text-align: left;
-  }
-  
-  .edit-profile-actions {
-    justify-content: center;
-  }
-  
-  .save-btn {
-    width: 100%;
-    max-width: 300px;
-    padding: 0.875rem 2rem;
-    font-size: 1rem;
-  }
-  
-  .radio-group {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  
-  .radio-option {
-    padding: 0.5rem;
-    border: 1px solid #e0e0e0;
-    border-radius: 0.5rem;
-    background: #f8f9fa;
-  }
-  
-  .dark .radio-option {
-    background: var(--input-bg);
-    border-color: var(--border-color);
-  }
-}
-
-@media (max-width: 480px) {
-  .edit-profile-main {
-    padding: 0.5rem;
-  }
-  
-  .edit-profile-card {
-    padding: 1rem;
-    border-radius: 0.5rem;
-  }
-  
-  .edit-profile-header h2 {
-    font-size: 1.125rem;
-    margin-bottom: 1rem;
-  }
-  
-  .edit-profile-fields label {
-    font-size: 0.875rem;
-  }
-  
-  .edit-profile-fields input,
-  .edit-profile-fields select,
-  .edit-profile-fields textarea {
-    padding: 0.75rem;
-    font-size: 0.875rem;
-  }
-  
-  .edit-profile-address label {
-    font-size: 0.875rem;
-  }
-  
-  .edit-profile-address select {
-    padding: 0.75rem;
-    font-size: 0.875rem;
-  }
-  
-  .profile-image-container {
-    width: 80px;
-    height: 80px;
-  }
-  
-  .profile-image-placeholder {
-    font-size: 2rem;
-  }
-  
-  .upload-btn {
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-  }
-  
-  .save-btn {
-    padding: 0.75rem 1.5rem;
-    font-size: 0.875rem;
-  }
-  
-  .edit-profile-section h3 {
-    font-size: 1rem;
-  }
-}
-
-@media (max-width: 360px) {
-  .edit-profile-card {
-    padding: 0.75rem;
-  }
-  
-  .edit-profile-fields {
-    gap: 0.75rem;
-  }
-  
-  .edit-profile-fields input,
-  .edit-profile-fields select,
-  .edit-profile-fields textarea {
-    padding: 0.625rem;
-    font-size: 0.8125rem;
-  }
-  
-  .profile-image-container {
-    width: 70px;
-    height: 70px;
-  }
-  
-  .profile-image-placeholder {
-    font-size: 1.75rem;
-  }
-  
-  .upload-btn {
-    padding: 0.375rem 0.75rem;
-    font-size: 0.8125rem;
-  }
-  
-  .save-btn {
-    padding: 0.625rem 1.25rem;
-    font-size: 0.8125rem;
-  }
 }
 </style>

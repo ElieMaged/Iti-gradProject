@@ -2,10 +2,10 @@
   <div class="plumbing-page">
 
     <!-- Hero Section -->
-    <section class="hero-section" :style="heroBackgroundStyle">
+    <section class="hero-section m-5" :style="heroBackgroundStyle">
       <div class="hero-overlay">
         <div class="hero-content">
-          <h1 class="hero-title">{{ $t('electricalTechniciansTitle') }}</h1>
+          <h1 class="hero-title">{{ $t('plumbingTitle') }}</h1>
           <SearchBar
             :filterOptions="[
               { value: 'price', label: 'Select a price' },
@@ -37,6 +37,7 @@
       <div class="container">
         <div class="section-header">
           <h2 class="section-title">{{ $t('meetTechniciansTeam') }}</h2>
+          <p class="section-description">{{ $t('carpentryTeamDescription') }}</p>
         </div>
 
         <div class="technicians-grid">
@@ -72,7 +73,7 @@
           </div>
         </div>
 
-
+        <!-- Remove pagination controls -->
       </div>
     </section>
 <EndCard />
@@ -85,6 +86,7 @@ import { ref, computed, onMounted } from 'vue'
 import { collection, getDocs } from 'firebase/firestore'
 import { db } from '../firebase'
 import { useRouter } from 'vue-router'
+import EndCard from '../components/EndCard.vue'
 import SearchBar from '../components/SearchBar.vue'
 import profile1 from '../assets/profile/1.jpg'
 import profile2 from '../assets/profile/2.png'
@@ -98,12 +100,18 @@ import plumbingBg from '../assets/Professions/Technicians.jpg'
 
 const router = useRouter()
 const loading = ref(true)
-// Removed stock technicians - only show registered technicians
+const stockTechnicians = [
+  // Example stock wall finishing technicians (update these as needed)
+  { id: 'stock-1', name: 'Ahmed Salah', image: profile1, bgColor: '#E8E4F3', price: 200, description: 'Experienced electricity technician with 10+ years in the field.', rating: 5, specialization: 'electricity technician' },
+  { id: 'stock-2', name: 'Mohammed Ali', image: profile2, bgColor: '#E3F2FD', price: 180, description: 'Expert in residential electricity technician.', rating: 5, specialization: 'electricity technician' },
+  // Add more stock wall finishing technicians as needed
+]
 const firebaseTechnicians = ref([])
 const searchQuery = ref('')
 const filterOption = ref('')
 const sortOption = ref('')
-// Removed pagination logic
+const techniciansPerPage = 8;
+const currentPage = ref(1);
 
 async function fetchTechnicians() {
   try {
@@ -122,22 +130,23 @@ async function fetchTechnicians() {
 onMounted(fetchTechnicians)
 
 const mergedTechnicians = computed(() => {
-  // Only include Firebase technicians, no stock technicians
-  const allTechs = []
+  // Only include stock wall finishing technicians
+  const allTechs = [...stockTechnicians.filter(t => t.specialization === 'electricity technician')]
   firebaseTechnicians.value.forEach(fbTech => {
-    // Use uploaded photo if available, fallback to placeholder
-    allTechs.push({
-      id: fbTech.id,
-      name: fbTech.fullName,
-      image: fbTech.profilePhotoUrl || fbTech.idPhotoUrl || profile1, // Use profile photo first, then ID photo as fallback
-      bgColor: '#E8E4F3', // or any default color
-      price: fbTech.basePrice,
-      description: fbTech.bio,
-      rating: 5, // or fbTech.rating if available
-      specialization: fbTech.specialization
-    })
+    if (!allTechs.some(t => t.name === fbTech.fullName && t.price == fbTech.basePrice)) {
+      // Use uploaded photo if available, fallback to placeholder
+      allTechs.push({
+        id: fbTech.id,
+        name: fbTech.fullName,
+        image: fbTech.profilePhotoUrl || fbTech.idPhotoUrl || profile1, // Use profile photo first, then ID photo as fallback
+        bgColor: '#E8E4F3', // or any default color
+        price: fbTech.basePrice,
+        description: fbTech.bio,
+        rating: 5, // or fbTech.rating if available
+        specialization: fbTech.specialization
+      })
+    }
   })
-  console.log('Firebase technicians:', allTechs)
   return allTechs
 })
 
@@ -195,11 +204,7 @@ function goToBooking(id) {
 
 const heroBackgroundStyle = computed(() => {
   return {
-    backgroundImage: `linear-gradient(rgba(98, 84, 152, 0.7), rgba(98, 84, 152, 0.7)), url(${plumbingBg})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat',
-    width: '100%'
+    backgroundImage: `linear-gradient(rgba(98, 84, 152, 0.7), rgba(98, 84, 152, 0.7)), url(${plumbingBg})`
   }
 })
 </script>
@@ -214,27 +219,19 @@ const heroBackgroundStyle = computed(() => {
 /* Hero Section */
 .hero-section {
   position: relative;
-  height: 300px;
+  height: 400px;
   background-size: cover;
   background-position: center;
-  background-repeat: no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  width: 100%;
-  margin: 0;
-  padding: 0;
 }
 .dark .hero-content {
   color: var(--primary-text);
 }
 .hero-content {
   color: white;
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  align-items: center;
 }
 
 .hero-title {
@@ -259,7 +256,7 @@ const heroBackgroundStyle = computed(() => {
 /* Technicians Section */
 .technicians-section {
   padding: 4rem 0;
-  background-color: white;
+  background-color: #f8f9fa;
 }
 .dark .technicians-section {
   background-color: var(--primary-bg);
@@ -405,7 +402,58 @@ const heroBackgroundStyle = computed(() => {
   background-color: #4a3f7a;
 }
 
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+.dark .pagination {
+  color: var(--primary-text);
+}
 
+.pagination-btn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+.dark .pagination-btn {
+  background-color: var(--primary-color);
+  color: var(--primary-text);
+}
+.pagination-btn:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+.dark .pagination-btn:hover {
+  background-color: var(--primary-color);
+  color: var(--primary-text);
+}
+.pagination-btn.active {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+.dark .pagination-btn.active {
+  background-color: var(--primary-color);
+  color: var(--primary-text);
+}
+.pagination-dots {
+  color: #666;
+  font-weight: bold;
+}
+.dark .pagination-dots {
+  color: var(--primary-text);
+}
 /* Call to Action Section */
 .cta-section {
   position: relative;
@@ -536,312 +584,6 @@ const heroBackgroundStyle = computed(() => {
     width: 35px;
     height: 35px;
     font-size: 0.9rem;
-  }
-}
-
-/* Enhanced Responsive Design */
-@media (max-width: 1200px) {
-  .hero-section {
-    padding: 2rem 1rem;
-  }
-  
-  .hero-title {
-    font-size: 3rem;
-  }
-  
-  .hero-subtitle {
-    font-size: 1.1rem;
-  }
-  
-  .technicians-grid {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
-  }
-  
-  .technician-card {
-    padding: 1.25rem;
-  }
-  
-  .technician-image {
-    height: 250px;
-  }
-  
-  .technician-name {
-    font-size: 1.2rem;
-  }
-  
-  .technician-description {
-    font-size: 0.9rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .hero-section {
-    padding: 1.5rem 0.75rem;
-  }
-  
-  .hero-title {
-    font-size: 2.25rem;
-    margin-bottom: 0.75rem;
-  }
-  
-  .hero-subtitle {
-    font-size: 1rem;
-    margin-bottom: 1.5rem;
-  }
-  
-  .breadcrumbs {
-    font-size: 0.85rem;
-    margin-bottom: 1rem;
-  }
-  
-  .section-header {
-    text-align: center;
-    margin-bottom: 2rem;
-  }
-  
-  .section-title {
-    font-size: 1.75rem;
-    margin-bottom: 0.75rem;
-  }
-  
-  .section-description {
-    font-size: 0.95rem;
-  }
-  
-  .technicians-grid {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.25rem;
-  }
-  
-  .technician-card {
-    padding: 1rem;
-  }
-  
-  .technician-image {
-    height: 200px;
-  }
-  
-  .technician-info {
-    padding: 1rem;
-  }
-  
-  .technician-name {
-    font-size: 1.1rem;
-    margin-bottom: 0.5rem;
-  }
-  
-  .rating {
-    margin-bottom: 0.75rem;
-  }
-  
-  .rating i {
-    font-size: 0.9rem;
-  }
-  
-  .technician-description {
-    font-size: 0.85rem;
-    margin-bottom: 1rem;
-  }
-  
-  .view-profile-btn {
-    padding: 0.6rem 1.25rem;
-    font-size: 0.9rem;
-  }
-  
-  .container {
-    padding: 0 0.75rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .hero-section {
-    padding: 1rem 0.5rem;
-  }
-  
-  .hero-title {
-    font-size: 1.75rem;
-    margin-bottom: 0.5rem;
-  }
-  
-  .hero-subtitle {
-    font-size: 0.9rem;
-    margin-bottom: 1.25rem;
-  }
-  
-  .breadcrumbs {
-    font-size: 0.8rem;
-    margin-bottom: 0.75rem;
-  }
-  
-  .section-header {
-    margin-bottom: 1.5rem;
-  }
-  
-  .section-title {
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
-  }
-  
-  .section-description {
-    font-size: 0.9rem;
-  }
-  
-  .technicians-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  
-  .technician-card {
-    padding: 0.75rem;
-  }
-  
-  .technician-image {
-    height: 180px;
-  }
-  
-  .technician-info {
-    padding: 0.75rem;
-  }
-  
-  .technician-name {
-    font-size: 1rem;
-    margin-bottom: 0.4rem;
-  }
-  
-  .rating {
-    margin-bottom: 0.6rem;
-  }
-  
-  .rating i {
-    font-size: 0.8rem;
-  }
-  
-  .technician-description {
-    font-size: 0.8rem;
-    margin-bottom: 0.75rem;
-  }
-  
-  .view-profile-btn {
-    padding: 0.5rem 1rem;
-    font-size: 0.85rem;
-  }
-  
-  .container {
-    padding: 0 0.5rem;
-  }
-}
-
-@media (max-width: 360px) {
-  .hero-section {
-    padding: 0.75rem 0.25rem;
-  }
-  
-  .hero-title {
-    font-size: 1.5rem;
-    margin-bottom: 0.4rem;
-  }
-  
-  .hero-subtitle {
-    font-size: 0.85rem;
-    margin-bottom: 1rem;
-  }
-  
-  .breadcrumbs {
-    font-size: 0.75rem;
-    margin-bottom: 0.6rem;
-  }
-  
-  .section-header {
-    margin-bottom: 1.25rem;
-  }
-  
-  .section-title {
-    font-size: 1.25rem;
-    margin-bottom: 0.4rem;
-  }
-  
-  .section-description {
-    font-size: 0.85rem;
-  }
-  
-  .technicians-grid {
-    gap: 0.75rem;
-  }
-  
-  .technician-card {
-    padding: 0.6rem;
-  }
-  
-  .technician-image {
-    height: 160px;
-  }
-  
-  .technician-info {
-    padding: 0.6rem;
-  }
-  
-  .technician-name {
-    font-size: 0.95rem;
-    margin-bottom: 0.3rem;
-  }
-  
-  .rating {
-    margin-bottom: 0.5rem;
-  }
-  
-  .rating i {
-    font-size: 0.75rem;
-  }
-  
-  .technician-description {
-    font-size: 0.75rem;
-    margin-bottom: 0.6rem;
-  }
-  
-  .view-profile-btn {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.8rem;
-  }
-  
-  .container {
-    padding: 0 0.25rem;
-  }
-}
-
-/* Landscape orientation adjustments */
-@media (max-width: 768px) and (orientation: landscape) {
-  .hero-section {
-    padding: 1rem 0.5rem;
-  }
-  
-  .hero-title {
-    font-size: 2rem;
-  }
-  
-  .technicians-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-  }
-  
-  .technician-image {
-    height: 150px;
-  }
-}
-
-/* High DPI displays */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-  .technician-image {
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
-  }
-}
-
-/* Reduced motion preferences */
-@media (prefers-reduced-motion: reduce) {
-  .technician-card,
-  .view-profile-btn {
-    transition: none;
   }
 }
 

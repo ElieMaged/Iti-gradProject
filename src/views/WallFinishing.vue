@@ -2,7 +2,7 @@
   <div class="plumbing-page">
 
     <!-- Hero Section -->
-    <section class="hero-section" :style="heroBackgroundStyle">
+    <section class="hero-section m-5" :style="heroBackgroundStyle">
       <div class="hero-overlay">
         <div class="hero-content">
           <h1 class="hero-title">{{ $t('wallFinishingTitle') }}</h1>
@@ -37,6 +37,7 @@
       <div class="container">
         <div class="section-header">
           <h2 class="section-title">{{ $t('meetTechniciansTeam') }}</h2>
+          <p class="section-description">{{ $t('wallFinishingTeamDescription') }}</p>
         </div>
 
         <div class="technicians-grid">
@@ -78,9 +79,10 @@
           </div>
         </div>
 
-
+        <!-- Remove pagination controls -->
       </div>
     </section>
+<EndCard />
 
   </div>
 </template>
@@ -90,6 +92,7 @@ import { ref, computed, onMounted } from 'vue'
 import { collection, getDocs } from 'firebase/firestore'
 import { db } from '../firebase'
 import { useRouter } from 'vue-router'
+import EndCard from '../components/EndCard.vue'
 import SearchBar from '../components/SearchBar.vue'
 import profile1 from '../assets/profile/1.jpg'
 import profile2 from '../assets/profile/2.png'
@@ -103,12 +106,111 @@ import plumbingBg from '../assets/Professions/Wall.jpg'
 
 const router = useRouter()
 const loading = ref(true)
-// Removed stock technicians - only show registered technicians
+const stockTechnicians = [
+  // Example stock wall finishing technicians (update these as needed)
+  { 
+    id: 'stock-1', 
+    name: 'Ahmed Salah', 
+    image: profile1, 
+    bgColor: '#E8E4F3', 
+    price: 200, 
+    description: 'Experienced wall finisher with 10+ years in the field.', 
+    rating: 4.5, 
+    specialization: 'Wall Finishing',
+    area: 'Maadi',
+    yearsOfExperience: 10
+  },
+  { 
+    id: 'stock-2', 
+    name: 'Mohammed Ali', 
+    image: profile2, 
+    bgColor: '#E3F2FD', 
+    price: 180, 
+    description: 'Expert in residential wall finishing.', 
+    rating: 4.8, 
+    specialization: 'Wall Finishing',
+    area: 'Mokattam',
+    yearsOfExperience: 8
+  },
+  { 
+    id: 'stock-3', 
+    name: 'Hassan Mahmoud', 
+    image: profile3, 
+    bgColor: '#FFF3E0', 
+    price: 150, 
+    description: 'Professional wall finishing specialist.', 
+    rating: 4.2, 
+    specialization: 'Wall Finishing',
+    area: 'Shoubra',
+    yearsOfExperience: 5
+  },
+  { 
+    id: 'stock-4', 
+    name: 'Omar Khalil', 
+    image: profile4, 
+    bgColor: '#F3E5F5', 
+    price: 220, 
+    description: 'Master wall finisher with premium services.', 
+    rating: 4.9, 
+    specialization: 'Wall Finishing',
+    area: 'Embaba',
+    yearsOfExperience: 12
+  },
+  { 
+    id: 'stock-5', 
+    name: 'Youssef Ahmed', 
+    image: profile5, 
+    bgColor: '#E0F2F1', 
+    price: 160, 
+    description: 'Skilled wall finishing technician.', 
+    rating: 4.0, 
+    specialization: 'Wall Finishing',
+    area: 'Maadi',
+    yearsOfExperience: 3
+  },
+  { 
+    id: 'stock-6', 
+    name: 'Karim Hassan', 
+    image: profile6, 
+    bgColor: '#FFF8E1', 
+    price: 190, 
+    description: 'Experienced wall finishing expert.', 
+    rating: 4.6, 
+    specialization: 'Wall Finishing',
+    area: 'Mokattam',
+    yearsOfExperience: 7
+  },
+  { 
+    id: 'stock-7', 
+    name: 'Samir Ibrahim', 
+    image: profile7, 
+    bgColor: '#F1F8E9', 
+    price: 170, 
+    description: 'Professional wall finishing contractor.', 
+    rating: 4.3, 
+    specialization: 'Wall Finishing',
+    area: 'Shoubra',
+    yearsOfExperience: 6
+  },
+  { 
+    id: 'stock-8', 
+    name: 'Tarek Mohamed', 
+    image: profile8, 
+    bgColor: '#E8F5E8', 
+    price: 210, 
+    description: 'Expert wall finishing specialist.', 
+    rating: 4.7, 
+    specialization: 'Wall Finishing',
+    area: 'Embaba',
+    yearsOfExperience: 9
+  }
+]
 const firebaseTechnicians = ref([])
 const searchQuery = ref('')
 const filterOption = ref('')
 const sortOption = ref('')
-// Removed pagination logic
+const techniciansPerPage = 8;
+const currentPage = ref(1);
 
 async function fetchTechnicians() {
   try {
@@ -235,11 +337,7 @@ function viewProfile(id) {
 
 const heroBackgroundStyle = computed(() => {
   return {
-    backgroundImage: `linear-gradient(rgba(98, 84, 152, 0.7), rgba(98, 84, 152, 0.7)), url(${plumbingBg})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat',
-    width: '100%'
+    backgroundImage: `linear-gradient(rgba(98, 84, 152, 0.7), rgba(98, 84, 152, 0.7)), url(${plumbingBg})`
   }
 })
 </script>
@@ -254,27 +352,19 @@ const heroBackgroundStyle = computed(() => {
 /* Hero Section */
 .hero-section {
   position: relative;
-  height: 300px;
+  height: 400px;
   background-size: cover;
   background-position: center;
-  background-repeat: no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  width: 100%;
-  margin: 0;
-  padding: 0;
 }
 .dark .hero-content {
   color: var(--primary-text);
 }
 .hero-content {
   color: white;
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  align-items: center;
 }
 
 .hero-title {
@@ -299,7 +389,7 @@ const heroBackgroundStyle = computed(() => {
 /* Technicians Section */
 .technicians-section {
   padding: 4rem 0;
-  background-color: white;
+  background-color: #f8f9fa;
 }
 .dark .technicians-section {
   background-color: var(--primary-bg);
@@ -461,7 +551,58 @@ const heroBackgroundStyle = computed(() => {
   background-color: #4a3f7a;
 }
 
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+.dark .pagination {
+  color: var(--primary-text);
+}
 
+.pagination-btn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+.dark .pagination-btn {
+  background-color: var(--primary-color);
+  color: var(--primary-text);
+}
+.pagination-btn:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+.dark .pagination-btn:hover {
+  background-color: var(--primary-color);
+  color: var(--primary-text);
+}
+.pagination-btn.active {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+.dark .pagination-btn.active {
+  background-color: var(--primary-color);
+  color: var(--primary-text);
+}
+.pagination-dots {
+  color: #666;
+  font-weight: bold;
+}
+.dark .pagination-dots {
+  color: var(--primary-text);
+}
 /* Call to Action Section */
 .cta-section {
   position: relative;
@@ -539,309 +680,59 @@ const heroBackgroundStyle = computed(() => {
 .dark .cta-btn:hover i {
   color: var(--primary-text);
 }
-/* Enhanced Responsive Design */
-@media (max-width: 1200px) {
-  .hero-section {
-    padding: 2rem 1rem;
-  }
-  
-  .hero-title {
-    font-size: 3rem;
-  }
-  
-  .hero-subtitle {
-    font-size: 1.1rem;
-  }
-  
-  .technicians-grid {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
-  }
-  
-  .technician-card {
-    padding: 1.25rem;
-  }
-  
-  .technician-image {
-    height: 250px;
-  }
-  
-  .technician-name {
-    font-size: 1.2rem;
-  }
-  
-  .technician-description {
-    font-size: 0.9rem;
-  }
-}
-
+/* Responsive Design */
 @media (max-width: 768px) {
-  .hero-section {
-    padding: 1.5rem 0.75rem;
-  }
-  
   .hero-title {
-    font-size: 2.25rem;
-    margin-bottom: 0.75rem;
-  }
-  
-  .hero-subtitle {
-    font-size: 1rem;
-    margin-bottom: 1.5rem;
-  }
-  
-  .breadcrumbs {
-    font-size: 0.85rem;
-    margin-bottom: 1rem;
-  }
-  
-  .section-header {
-    text-align: center;
-    margin-bottom: 2rem;
+    font-size: 2.5rem;
   }
   
   .section-title {
-    font-size: 1.75rem;
-    margin-bottom: 0.75rem;
-  }
-  
-  .section-description {
-    font-size: 0.95rem;
-  }
-  
-  .technicians-grid {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.25rem;
-  }
-  
-  .technician-card {
-    padding: 1rem;
-  }
-  
-  .technician-image {
-    height: 200px;
-  }
-  
-  .technician-info {
-    padding: 1rem;
-  }
-  
-  .technician-name {
-    font-size: 1.1rem;
-    margin-bottom: 0.5rem;
-  }
-  
-  .rating {
-    margin-bottom: 0.75rem;
-  }
-  
-  .rating i {
-    font-size: 0.9rem;
-  }
-  
-  .technician-description {
-    font-size: 0.85rem;
-    margin-bottom: 1rem;
-  }
-  
-  .view-profile-btn {
-    padding: 0.6rem 1.25rem;
-    font-size: 0.9rem;
-  }
-  
-  .container {
-    padding: 0 0.75rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .hero-section {
-    padding: 1rem 0.5rem;
-  }
-  
-  .hero-title {
-    font-size: 1.75rem;
-    margin-bottom: 0.5rem;
-  }
-  
-  .hero-subtitle {
-    font-size: 0.9rem;
-    margin-bottom: 1.25rem;
-  }
-  
-  .breadcrumbs {
-    font-size: 0.8rem;
-    margin-bottom: 0.75rem;
-  }
-  
-  .section-header {
-    margin-bottom: 1.5rem;
-  }
-  
-  .section-title {
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
-  }
-  
-  .section-description {
-    font-size: 0.9rem;
-  }
-  
-  .technicians-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  
-  .technician-card {
-    padding: 0.75rem;
-  }
-  
-  .technician-image {
-    height: 180px;
-  }
-  
-  .technician-info {
-    padding: 0.75rem;
-  }
-  
-  .technician-name {
-    font-size: 1rem;
-    margin-bottom: 0.4rem;
-  }
-  
-  .rating {
-    margin-bottom: 0.6rem;
-  }
-  
-  .rating i {
-    font-size: 0.8rem;
-  }
-  
-  .technician-description {
-    font-size: 0.8rem;
-    margin-bottom: 0.75rem;
-  }
-  
-  .view-profile-btn {
-    padding: 0.5rem 1rem;
-    font-size: 0.85rem;
-  }
-  
-  .container {
-    padding: 0 0.5rem;
-  }
-}
-
-@media (max-width: 360px) {
-  .hero-section {
-    padding: 0.75rem 0.25rem;
-  }
-  
-  .hero-title {
-    font-size: 1.5rem;
-    margin-bottom: 0.4rem;
-  }
-  
-  .hero-subtitle {
-    font-size: 0.85rem;
-    margin-bottom: 1rem;
-  }
-  
-  .breadcrumbs {
-    font-size: 0.75rem;
-    margin-bottom: 0.6rem;
-  }
-  
-  .section-header {
-    margin-bottom: 1.25rem;
-  }
-  
-  .section-title {
-    font-size: 1.25rem;
-    margin-bottom: 0.4rem;
-  }
-  
-  .section-description {
-    font-size: 0.85rem;
-  }
-  
-  .technicians-grid {
-    gap: 0.75rem;
-  }
-  
-  .technician-card {
-    padding: 0.6rem;
-  }
-  
-  .technician-image {
-    height: 160px;
-  }
-  
-  .technician-info {
-    padding: 0.6rem;
-  }
-  
-  .technician-name {
-    font-size: 0.95rem;
-    margin-bottom: 0.3rem;
-  }
-  
-  .rating {
-    margin-bottom: 0.5rem;
-  }
-  
-  .rating i {
-    font-size: 0.75rem;
-  }
-  
-  .technician-description {
-    font-size: 0.75rem;
-    margin-bottom: 0.6rem;
-  }
-  
-  .view-profile-btn {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.8rem;
-  }
-  
-  .container {
-    padding: 0 0.25rem;
-  }
-}
-
-/* Landscape orientation adjustments */
-@media (max-width: 768px) and (orientation: landscape) {
-  .hero-section {
-    padding: 1rem 0.5rem;
-  }
-  
-  .hero-title {
     font-size: 2rem;
   }
   
   .technicians-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
   }
   
-  .technician-image {
-    height: 150px;
+  .cta-title {
+    font-size: 2.5rem;
+  }
+  
+  .container {
+    padding: 0 1rem;
   }
 }
 
-/* High DPI displays */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-  .technician-image {
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 2rem;
   }
-}
-
-/* Reduced motion preferences */
-@media (prefers-reduced-motion: reduce) {
-  .technician-card,
-  .view-profile-btn {
-    transition: none;
+  
+  .section-title {
+    font-size: 1.8rem;
+  }
+  
+  .technicians-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .cta-title {
+    font-size: 2rem;
+  }
+  
+  .cta-description {
+    font-size: 1rem;
+  }
+  
+  .pagination {
+    gap: 0.25rem;
+  }
+  
+  .pagination-btn {
+    width: 35px;
+    height: 35px;
+    font-size: 0.9rem;
   }
 }
 

@@ -57,16 +57,16 @@
           <div class="dropdown-menu" v-show="showBooking">
             <router-link to="/booking-upcoming" 
                          class="dropdown-status-link" 
-                         :class="{ 'active-status-link': isBookingStatusActive('upcoming') }">{{ $t('upcoming') }}</router-link>
+                         active-class="active-status-link">{{ $t('upcoming') }}</router-link>
             <router-link to="/booking-pending" 
                          class="dropdown-status-link" 
-                         :class="{ 'active-status-link': isBookingStatusActive('pending') }">{{ $t('pending') }}</router-link>
+                         active-class="active-status-link">{{ $t('pending') }}</router-link>
             <router-link to="/booking-completed" 
                          class="dropdown-status-link" 
-                         :class="{ 'active-status-link': isBookingStatusActive('completed') }">{{ $t('completed') }}</router-link>
+                         active-class="active-status-link">{{ $t('completed') }}</router-link>
             <router-link to="/booking-canceled" 
                          class="dropdown-status-link" 
-                         :class="{ 'active-status-link': isBookingStatusActive('canceled') }">{{ $t('canceled') }}</router-link>
+                         active-class="active-status-link">{{ $t('canceled') }}</router-link>
           </div>
         </div>
         
@@ -114,12 +114,6 @@
     return route.path === path || route.path.startsWith(path + '/');
   }
   
-  function isBookingStatusActive(status) {
-    const currentPath = route.path;
-    const statusPath = `/booking-${status}`;
-    return currentPath === statusPath || currentPath.startsWith(statusPath + '/');
-  }
-  
   function toggleDropdown(type) {
     if (type === 'tech') {
       showTechnicians.value = !showTechnicians.value;
@@ -164,11 +158,6 @@
       showTechnicians.value = true;
     }
     if (isBookingActive.value) {
-      showBooking.value = true;
-    }
-    
-    // Auto-expand booking dropdown if on any booking status page
-    if (route.path.includes('/booking-')) {
       showBooking.value = true;
     }
     
@@ -234,23 +223,18 @@
     color: var(--text-main);
   }
   .sidebar-item:hover {
-  background-color: var(--primary-color);
-  color: white;
-}
-
-.sidebar-item.active {
-  background-color: var(--primary-color);
-  color: white;
-}
-.dark .sidebar-item.active {
-  background-color: #c5b7e6;
-  color: var(--primary-text-dark);
-}
-.dark .sidebar-item:hover {
-  background-color: #c5b7e6;
-  color: var(--primary-text-dark);
-}
-
+    background-color: var(--icon-color);
+    color: white;
+  }
+  
+  .sidebar-item.active {
+    background-color: var(--icon-color);
+    color: white;
+  }
+  .dark .sidebar-item.active {
+    background-color: var(--icon-color);
+    color: var(--primary-text-dark);
+  }
   
   .dropdown-container {
     position: static;
@@ -287,15 +271,15 @@
   }
   
   .dropdown-menu a:hover,
-.dropdown-link:hover {
-  background: var(--secondary);
-  color: white;
-}
-
-.dropdown-link.active {
-  background: var(--secondary);
-  color: white;
-}
+  .dropdown-link:hover {
+    background: var(--icon-color);
+    color: white;
+  }
+  
+  .dropdown-link.active {
+    background: var(--icon-color);
+    color: white;
+  }
   
   .logout-btn {
     margin-top: 0.5rem;
@@ -320,40 +304,24 @@
     text-decoration: none;
     margin: 0 4px;
     display: block;
-    transition: all 0.2s ease;
-    position: relative;
+    transition: background 0.16s, color 0.16s;
   }
   
   .active-status-link {
-  background: var(--secondary) !important;
-  color: white !important;
-  font-weight: 600;
-  box-shadow: 0 2px 4px rgba(124, 107, 176, 0.3);
-  position: relative;
-}
-
-.active-status-link::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 3px;
-  height: 60%;
-  background: #fff;
-  border-radius: 0 2px 2px 0;
-}
-
-.dropdown-status-link:hover {
-  background: var(--secondary);
-  color: white;
-  transform: translateX(4px);
-}
+    background: var(--primary-color) !important;
+    color: #fff !important;
+  }
+  
+  .dropdown-status-link:hover {
+    background: var(--icon-color);
+    color: white;
+  }
 
   /* Mobile Responsive - Horizontal Layout */
   @media (max-width: 768px) {
     .layout {
       flex-direction: column;
+      max-height: 10vh;
     }
     
     .sidebar {
@@ -431,7 +399,8 @@
       gap: 0.25rem;
     }
     .layout {
-      min-height: auto;
+      margin-top: 30px;
+      max-height: 10vh;
     }
     .sidebar-item {
       padding: 0.375rem 0.75rem;

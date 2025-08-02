@@ -1,9 +1,9 @@
 <template>
   <section class="about-us">
-    <div class="about-container custom-container">
+    <div class="about-container mx-20">
       <div class="about-content">
         <div class="about-text">
-          <h2 class="aboutus-title">{{ $t("aboutUsSectionTitle") }}</h2>
+          <h2 class="about-title">{{ $t("aboutUsSectionTitle") }}</h2>
           <p class="about-description">
             {{ $t("aboutUsSectionDesc") }}
           </p>
@@ -25,7 +25,7 @@
             <div class="feature-item">
               <div class="feature-icon">
                 <img
-                  src="../../public/images/About-Us images/Frame 18596.png"
+                  src="/images/About-Us images/Frame 18596.png"
                   alt="Qualified team"
                 />
               </div>
@@ -58,12 +58,17 @@ export default {
 <style scoped>
 .about-us {
   background: #f3d361;
-  padding: 80px 0;
+  padding: 60px 0;
   width: 100%;
   position: relative;
 }
-
+.dark .about-us {
+  background: var(--dark-yellow);
+}
 .about-container {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
   display: flex;
   align-items: center;
   gap: 60px;
@@ -80,15 +85,15 @@ export default {
 .about-title {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #333;
+  color: var(--black-text);
   line-height: 1.2;
   margin-bottom: 24px;
   font-family: Outfit, sans-serif;
 }
 
 .about-description {
-  font-size: 1.1rem;
-  color: #555;
+  font-size: 20px;
+  color: var(--black-text);
   line-height: 1.6;
   margin-bottom: 32px;
   font-family: Outfit, sans-serif;
@@ -97,6 +102,8 @@ export default {
 .about-features {
   display: flex;
   flex-direction: row;
+  flex-direction: row;
+  gap: 50px;
 }
 
 .feature-item {
@@ -129,16 +136,16 @@ export default {
 }
 
 .feature-title {
-  font-size: 1.2rem;
+  font-size: 20px;
   font-weight: 600;
-  color: #333;
+  color: var(--black-text);
   margin-bottom: 8px;
   font-family: Outfit, sans-serif;
 }
 
 .feature-description {
-  font-size: 0.95rem;
-  color: #666;
+  font-size: 16px;
+  color: var(--black-text);
   line-height: 1.5;
   font-family: Outfit, sans-serif;
 }
@@ -149,7 +156,7 @@ export default {
   border: none;
   border-radius: 30px;
   padding: 14px 32px;
-  font-size: 1rem;
+  font-size: 1.3rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
@@ -171,9 +178,7 @@ export default {
   height: 100%;
   object-fit: cover;
 }
-.dark .about-us {
-  background-color: var(--secondary);
-}
+
 @media (max-width: 1000px) {
   .about-container {
     display: flex;
@@ -209,13 +214,6 @@ export default {
   color: var(--primary-text);
 }
 
-.about-description {
-  font-size: 1.5rem;
-  color: #555;
-  line-height: 1.6;
-  margin-bottom: 32px;
-  font-family: Outfit, sans-serif;
-}
 .dark .about-description {
   color: var(--primary-text);
 }
@@ -251,20 +249,6 @@ export default {
   flex: 1;
 }
 
-.feature-title {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 8px;
-  font-family: Outfit, sans-serif;
-}
-
-.feature-description {
-  font-size: 0.95rem;
-  color: #666;
-  line-height: 1.5;
-  font-family: Outfit, sans-serif;
-}
 .dark .feature-title {
   color: var(--primary-text);
 }
@@ -278,7 +262,7 @@ export default {
   border: none;
   border-radius: 30px;
   padding: 14px 32px;
-  font-size: 1rem;
+  font-size: 1.3rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
@@ -345,10 +329,10 @@ export default {
     text-align: center;
   }
 
-  .about-description {
+  /* .about-description {
     font-size: 0.9rem;
     text-align: center;
-  }
+  } */
 
   .about-text {
     text-align: center;

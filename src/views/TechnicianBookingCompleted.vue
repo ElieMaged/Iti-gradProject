@@ -1,14 +1,14 @@
 <template>
-  <div class="flex min-h-screen layout-container">
+  <div class="flex min-h-screen">
     <!-- Sidebar -->
     <Sidebar :activeMenu="'booking'" :activeBookingStatus="'completed'" @navigate="handleSidebarNavigate" />
     <!-- Main Content -->
-    <div class="flex-1 p-4 mr-20">
+    <div class="flex-1 p-8">
       <div class="admin-dashboard-layout">
         <div class="booking-main">
           <div class="booking-container">
             <div class="title-search-row">
-              <h2 class="page-title">{{ $t('completedBookings') }}</h2>
+              <h2 class="booking-title">{{ $t('completedBookings') }}</h2>
               <div class="search-wrapper">
                 <input v-model="searchQuery" class="search-input" type="text" :placeholder="$t('search')" />
                 <span class="search-icon"><i class="fas fa-search"></i></span>
@@ -238,9 +238,6 @@ onMounted(() => {
   min-height: 100vh;
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
 }
-.layout-container {
-  background-color: #faf8fd;
-}
 
 .dark .admin-dashboard-layout {
   background: var(--primary-bg);
@@ -248,6 +245,7 @@ onMounted(() => {
 
 .booking-main {
   flex: 1;
+  padding: 2.5rem;
 }
 
 .booking-container {
@@ -262,16 +260,11 @@ onMounted(() => {
   margin-bottom: 1.5rem;
 }
 
-.page-title {
-  color: var(--primary-color);
+.booking-title {
   font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 2rem;
-  font-family: Outfit, sans-serif;
-}
-
-.dark .page-title {
-  color: var(--primary-color);
+  font-weight: bold;
+  color: #7c6bb0;
+  margin-bottom: 0;
 }
 
 .search-wrapper {
@@ -320,21 +313,10 @@ onMounted(() => {
   transform: translateY(-50%);
   color: #b6a7e6;
   font-size: 1.1rem;
-  padding: 8px;
-  border-radius: 50%;
-  transition: background-color 0.2s ease;
-}
-
-.search-icon:hover {
-  background-color: rgba(182, 167, 230, 0.1);
 }
 
 .dark .search-icon {
   color: var(--text-muted);
-}
-
-.dark .search-icon:hover {
-  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .loading-state {
@@ -522,331 +504,25 @@ onMounted(() => {
   color: #dcfce7;
 }
 
-/* Enhanced Responsive Design */
-@media (max-width: 1200px) {
-  .booking-container {
-    max-width: 95%;
-  }
-  
-  .booking-title {
-    font-size: 1.75rem;
-  }
-  
-  .search-wrapper {
-    width: 350px;
-  }
-}
-
-@media (max-width: 1024px) {
-  .booking-main {
-    padding: 1.5rem;
-  }
-  
-  .booking-title {
-    font-size: 1.5rem;
-  }
-  
-  .search-wrapper {
-    width: 300px;
-    height: 45px;
-  }
-  
-  .table-header th,
-  .table-row td {
-    padding: 0.625rem 0.75rem;
-    font-size: 0.875rem;
-  }
-}
-
-@media (max-width: 900px) {
-  .flex {
-    flex-direction: column;
-  }
-  
-  .flex-1.p-8 {
-    padding: 1rem;
-  }
-  
-  .admin-dashboard-layout {
-    margin-right: 0;
-    padding: 0.75rem;
-  }
-  
+@media (max-width: 768px) {
   .booking-main {
     padding: 1rem;
   }
-  
-  .booking-container {
-    max-width: 100%;
-  }
-  
   .title-search-row {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
   }
-  
   .search-wrapper {
     width: 100%;
-    max-width: 400px;
+    max-width: none;
   }
-  
-  .booking-title {
-    font-size: 1.375rem;
-    text-align: left;
-    width: 100%;
-  }
-}
-
-@media (max-width: 768px) {
-  .flex-1.p-8 {
-    padding: 0.75rem;
-  }
-  
-  .admin-dashboard-layout {
-    padding: 0.5rem;
-  }
-  
-  .booking-main {
-    padding: 0.75rem;
-  }
-  
-  .booking-title {
-    font-size: 1.25rem;
-    text-align: left;
-  }
-  
-  .search-wrapper {
-    width: 100%;
-    height: 50px;
-  }
-  
-  .search-input {
-    font-size: 0.875rem;
-    padding: 0 12px 0 45px;
-  }
-  
-  .search-icon {
-    left: 8px;
-    font-size: 1rem;
-    padding: 6px;
-  }
-  
   .table-wrapper {
-    border-radius: 0.5rem;
-    overflow-x: auto;
+    font-size: 0.8rem;
   }
-  
-  .booking-table {
-    min-width: 800px;
-    font-size: 0.75rem;
-  }
-  
   .table-header th,
   .table-row td {
     padding: 0.5rem 0.5rem;
-    font-size: 0.75rem;
-  }
-  
-  .status-completed {
-    padding: 0.125rem 0.5rem;
-    font-size: 0.6875rem;
-  }
-}
-
-@media (max-width: 600px) {
-  .flex-1.p-8 {
-    padding: 0.5rem;
-  }
-  
-  .admin-dashboard-layout {
-    padding: 0.375rem;
-  }
-  
-  .booking-main {
-    padding: 0.5rem;
-  }
-  
-  .booking-title {
-    font-size: 1.125rem;
-    margin-bottom: 0.75rem;
-    text-align: left;
-  }
-  
-  .title-search-row {
-    gap: 0.75rem;
-  }
-  
-  .search-wrapper {
-    width: 100%;
-    height: 50px;
-  }
-  
-  .search-input {
-    font-size: 0.8125rem;
-    padding: 0 10px 0 40px;
-  }
-  
-  .search-icon {
-    left: 6px;
-    font-size: 0.875rem;
-    padding: 5px;
-  }
-  
-  .booking-table {
-    min-width: 700px;
-    font-size: 0.6875rem;
-  }
-  
-  .table-header th,
-  .table-row td {
-    padding: 0.375rem 0.375rem;
-    font-size: 0.6875rem;
-  }
-  
-  .status-completed {
-    padding: 0.125rem 0.375rem;
-    font-size: 0.625rem;
-  }
-  
-  .loading-state,
-  .error-state,
-  .empty-state {
-    padding: 2rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .flex-1.p-8 {
-    padding: 0.375rem;
-  }
-  
-  .admin-dashboard-layout {
-    padding: 0.25rem;
-  }
-  
-  .booking-main {
-    padding: 0.375rem;
-  }
-  
-  .booking-title {
-    font-size: 1rem;
-    margin-bottom: 0.625rem;
-    text-align: left;
-  }
-  
-  .title-search-row {
-    gap: 0.625rem;
-  }
-  
-  .search-wrapper {
-    width: 100%;
-    height: 50px;
-  }
-  
-  .search-input {
-    font-size: 0.75rem;
-    padding: 0 8px 0 38px;
-  }
-  
-  .search-icon {
-    left: 4px;
-    font-size: 0.8125rem;
-    padding: 20px;
-  }
-  
-  .booking-table {
-    min-width: 600px;
-    font-size: 0.625rem;
-  }
-  
-  .table-header th,
-  .table-row td {
-    padding: 0.25rem 0.25rem;
-    font-size: 0.625rem;
-  }
-  
-  .status-completed {
-    padding: 0.125rem 0.25rem;
-    font-size: 0.5625rem;
-  }
-  
-  .loading-state,
-  .error-state,
-  .empty-state {
-    padding: 1.5rem;
-  }
-  
-  .loading-spinner {
-    width: 32px;
-    height: 32px;
-  }
-}
-
-@media (max-width: 360px) {
-  .flex-1.p-8 {
-    padding: 0.25rem;
-  }
-  
-  .admin-dashboard-layout {
-    padding: 0.125rem;
-  }
-  
-  .booking-main {
-    padding: 0.25rem;
-  }
-  
-  .booking-title {
-    font-size: 0.875rem;
-    margin-bottom: 0.5rem;
-    text-align: left;
-  }
-  
-  .title-search-row {
-    gap: 0.5rem;
-  }
-  
-  .search-wrapper {
-    width: 100%;
-    height: 50px;
-  }
-  
-  .search-input {
-    font-size: 0.6875rem;
-    padding: 0 6px 0 36px;
-  }
-  
-  .search-icon {
-    left: 2px;
-    font-size: 0.75rem;
-    padding: 6px;
-  }
-  
-  .booking-table {
-    min-width: 550px;
-    font-size: 0.5625rem;
-  }
-  
-  .table-header th,
-  .table-row td {
-    padding: 0.125rem 0.125rem;
-    font-size: 0.5625rem;
-  }
-  
-  .status-completed {
-    padding: 0.125rem 0.125rem;
-    font-size: 0.5rem;
-  }
-  
-  .loading-state,
-  .error-state,
-  .empty-state {
-    padding: 1rem;
-  }
-  
-  .loading-spinner {
-    width: 28px;
-    height: 28px;
   }
 }
 </style> 

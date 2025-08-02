@@ -135,7 +135,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { collection, query, where, getDocs, doc, getDoc, updateDoc, onSnapshot, orderBy, addDoc } from 'firebase/firestore'
 import { db, auth } from '../firebase'
 import { useI18n } from 'vue-i18n'
-// Removed stockTechnicians import - only show registered technicians
+import { stockTechnicians } from '../assets/stockTechnicians'
 
 const route = useRoute()
 const router = useRouter()
@@ -172,8 +172,12 @@ onMounted(async () => {
     }
     loading.value = false
   } else {
-    // No stock technicians - only show registered technicians
-    try {
+    // Try to find in stockTechnicians first
+    const stock = stockTechnicians.find(t => t.id === id)
+    if (stock) {
+      technician.value = stock
+      loading.value = false
+    } else {
       try {
         const docRef = doc(db, 'technicians', id)
         const docSnap = await getDoc(docRef)

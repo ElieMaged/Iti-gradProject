@@ -35,7 +35,7 @@ export default {
 .hero-section {
   padding: 0;
   width: 100%;
-  min-height: 700px;
+  /* min-height: 700px; */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -163,7 +163,7 @@ export default {
 
 @media (max-width: 768px) {
   .hero-section {
-    min-height: 500px;
+    /* min-height: 500px; */
   }
 
   .hero-banner {
@@ -193,7 +193,7 @@ export default {
 
 @media (max-width: 480px) {
   .hero-section {
-    min-height: 400px;
+    /* min-height: 400px; */
   }
 
   .hero-banner {

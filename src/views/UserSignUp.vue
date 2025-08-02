@@ -5,9 +5,7 @@ import { auth, db } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { ensureUserRole, fetchUserRole } from '../utils/userRole';
-import { sendWelcomeEmail } from '../utils/emailService';
-import emailjs from '@emailjs/browser';
-
+import emailjs from 'emailjs-com';
 
 const email = ref('');
 const password = ref('');
@@ -132,7 +130,38 @@ const validateForm = () => {
   return Object.keys(errors.value).length === 0;
 };
 
+// Function to send welcome email to the user
+async function sendWelcomeEmail(userEmail, firstName, lastName) {
+  try {
+    console.log('=== SENDING WELCOME EMAIL TO USER ===');
+    console.log('Email:', userEmail);
+    console.log('Name:', firstName, lastName);
 
+    const fullName = `${firstName} ${lastName}`.trim();
+    
+    const templateParams = {
+      to_email: userEmail,
+      to_name: fullName || 'Valued Customer',
+      subject: 'Welcome to BoltFix! Your Account is Ready',
+      message: `Dear ${fullName || 'Valued Customer'},\n\nWelcome to BoltFix! Your account has been successfully created and you're now ready to connect with skilled technicians for all your home service needs.\n\nYour account details:\nEmail: ${userEmail}\n\nYou can now:\n- Browse available technicians\n- Book appointments\n- Track your bookings\n- Leave reviews\n\nThank you for choosing BoltFix!\n\nBest regards,\nThe BoltFix Team`
+    };
+
+    await emailjs.send(
+      import.meta.env.VITE_EMAILJS_SERVICE_ID,
+      import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+      templateParams,
+      import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+    );
+    console.log('Welcome email sent successfully!');
+    return true;
+  } catch (error) {
+    console.error('=== ERROR SENDING WELCOME EMAIL ===');
+    console.error('Error details:', error);
+    console.error('Error message:', error.message);
+    console.error('Error code:', error.code);
+    return false;
+  }
+}
 
 const handleRegister = async () => {
   error.value = '';
@@ -143,7 +172,6 @@ const handleRegister = async () => {
   }
 
   try {
-    // Create user account with Firebase Auth
     const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
     
     // Create user document in Firestore
@@ -164,21 +192,14 @@ const handleRegister = async () => {
 
     await setDoc(doc(db, 'users', userCredential.user.uid), userDoc);
     
+    // Send welcome email using reactive form data
+    await sendWelcomeEmail(email.value, firstName.value, lastName.value);
+    
     // Enforce persistent admin role for elie1400674@gmail.com
     await ensureUserRole(userCredential.user);
     await fetchUserRole(userCredential.user);
-    
-    // Send welcome email using EmailJS
-    try {
-      await sendWelcomeEmail(email.value, firstName.value, lastName.value);
-    } catch (emailError) {
-      console.error('Email sending failed:', emailError);
-      // Don't fail the registration if email fails
-    }
-    
     router.push('/'); // Redirect to home page after registration
   } catch (err) {
-    console.error('Registration error:', err);
     error.value = err.message;
   }
 };
@@ -190,10 +211,6 @@ const openTermsModal = () => {
 const closeTermsModal = () => {
   showTermsModal.value = false;
 };
-
-
-
-
 </script>
 
 <template>
@@ -209,7 +226,7 @@ const closeTermsModal = () => {
     </div>
     
     <div class="form-grid">
-    <!-- first name -->
+      <!-- first name -->
       <div class="form-group">
         <label for="firstName" class="form-label">{{ $t('firstName') }}</label>
         <input 
@@ -222,9 +239,9 @@ const closeTermsModal = () => {
           required 
         />
         <p v-if="errors.firstName" class="error-message">{{ errors.firstName }}</p>
-  </div>
+      </div>
 
-  <!-- last name -->
+      <!-- last name -->
       <div class="form-group">
         <label for="lastName" class="form-label">{{ $t('lastName') }}</label>
         <input 
@@ -287,7 +304,7 @@ const closeTermsModal = () => {
           required 
         />
         <p v-if="errors.age" class="error-message">{{ errors.age }}</p>
-  </div>
+      </div>
 
       <!-- address -->
       <div class="form-group">
@@ -302,7 +319,7 @@ const closeTermsModal = () => {
           required 
         />
         <p v-if="errors.address" class="error-message">{{ errors.address }}</p>
-  </div>
+      </div>
 
       <!-- area -->
       <div class="form-group">
@@ -317,7 +334,7 @@ const closeTermsModal = () => {
           required 
         />
         <p v-if="errors.area" class="error-message">{{ errors.area }}</p>
-  </div>
+      </div>
 
       <!-- city -->
       <div class="form-group">
@@ -347,7 +364,7 @@ const closeTermsModal = () => {
           required 
         />
         <p v-if="errors.password" class="error-message">{{ errors.password }}</p>
-  </div>
+      </div>
 
       <!-- confirm password -->
       <div class="form-group">
@@ -363,7 +380,7 @@ const closeTermsModal = () => {
         />
         <p v-if="errors.confirmPass" class="error-message">{{ errors.confirmPass }}</p>
       </div>
-  </div>
+    </div>
 
     <div class="form-footer">
       <div class="checkbox-group">
@@ -375,19 +392,13 @@ const closeTermsModal = () => {
         </label>
       </div>
 
-             <button type="submit" class="submit-btn">
-         <span>{{ $t('register') }}</span>
-         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="arrow-icon" viewBox="0 0 16 16">
-   <path fill-rule="evenodd" d="M14 2.5a.5.5 0 0 0-.5-.5h-6a.5.5 0 0 0 0 1h4.793L2.146 13.146a.5.5 0 0 0 .708.708L13 3.707V8.5a.5.5 0 0 0 1 0z"/>
-         </svg>
-       </button>
-
-       
-
-       
-
+      <button type="submit" class="submit-btn">
+        <span>{{ $t('register') }}</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="arrow-icon" viewBox="0 0 16 16">
+          <path fill-rule="evenodd" d="M14 2.5a.5.5 0 0 0-.5-.5h-6a.5.5 0 0 0 0 1h4.793L2.146 13.146a.5.5 0 0 0 .708.708L13 3.707V8.5a.5.5 0 0 0 1 0z"/>
+        </svg>
+      </button>
       
-
       <p v-if="error" class="error-text">{{ error }}</p>
       <p class="login-link">{{ $t('haveAccount') }} <a href="/userlogin">{{ $t('signIn') }}</a></p>
     </div>
@@ -596,7 +607,7 @@ body {
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
     margin-bottom: 2rem;
- }
+}
 
 .form-group {
     display: flex;
@@ -625,15 +636,15 @@ body {
     border-radius: 12px;
     font-size: 1rem;
     transition: all 0.2s ease;
-    background: var(--input-bg, #ffffff);
-    color: var(--primary-text, #1f2937);
+    background: #ffffff;
+    color: #1f2937;
     font-family: inherit;
 }
 
 .dark .form-input {
-  background: var(--input-bg, #374151);
+  background: #374151;
   border-color: #4b5563;
-  color: var(--primary-text, #f9fafb);
+  color: #f9fafb;
 }
 
 .form-input:focus {
@@ -648,29 +659,11 @@ body {
 }
 
 .form-input::placeholder {
-    color: var(--text-muted, #9ca3af);
+    color: #9ca3af;
 }
 
 .dark .form-input::placeholder {
-  color: var(--text-muted, #6b7280);
-}
-
-/* Style for select dropdowns to match placeholder color */
-.form-input option {
-    color: var(--text-muted, #9ca3af);
-}
-
-.dark .form-input option {
-  color: var(--text-muted, #6b7280);
-}
-
-/* Style for select dropdown placeholder text */
-.form-input:invalid {
-    color: var(--text-muted, #9ca3af);
-}
-
-.dark .form-input:invalid {
-  color: var(--text-muted, #6b7280);
+  color: #6b7280;
 }
 
 .form-input.error {
@@ -754,7 +747,7 @@ body {
 }
 
 .dark .submit-btn {
-  background: var(--primary-color);
+  background: linear-gradient(135deg, var(--primary-color) 0%, #7c3aed 100%);
 }
 
 .submit-btn:hover {
@@ -773,9 +766,6 @@ body {
 .submit-btn:hover .arrow-icon {
     transform: translateX(4px);
 }
-
-
-
 
 .error-text {
     color: #ef4444;
@@ -799,11 +789,11 @@ body {
     text-decoration: none;
     font-weight: 600;
     transition: color 0.2s ease;
- }
+}
 
 .dark .login-link a {
   color: var(--primary-color);
- }
+}
 
 .login-link a:hover {
     color: #7c3aed;
@@ -1046,5 +1036,5 @@ body {
     .modal-content {
         margin: 0.5rem;
     }
- }
+}
 </style>

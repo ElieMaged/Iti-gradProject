@@ -1,7 +1,7 @@
 <template>
   <section class="faq">
     <!-- FAQ Content at the top -->
-    <div class="faq-content my-14">
+    <div class="faq-content m-20">
       <div class="faq-header">
         <div class="faq-title-box">
           <h2 class="faq-title">{{ $t("faqTitle") }}</h2>
@@ -23,7 +23,7 @@
         />
       </div>
       <!-- Left Side - FAQ Accordion -->
-      <div class="faq-accordion custom-container">
+      <div class="faq-accordion">
         <div
           v-for="(item, index) in faqItems"
           :key="index"
@@ -115,7 +115,7 @@ export default {
 }
 .faq-content {
   width: 90%;
-  max-width: 1200px;
+  /* max-width: 1200px; */
   margin: 0 auto 40px auto;
 }
 
@@ -164,11 +164,10 @@ export default {
   max-width: 464px;
 }
 .dark .faq-intro p {
-  color: var(--black-gray);
+  color: var(--primary-text);
 }
 .faq-container {
-  max-width: 1280px;
-  margin: 0 auto 40px auto;
+  margin: 20px 80px;
   display: flex;
   flex-direction: row;
   gap: 40px;
@@ -302,7 +301,7 @@ export default {
   color: var(--primary-text);
 }
 .dark .faq-answer {
-  color: var(--color-black);
+  color: var(--primary-text);
 }
 .faq-icon {
   width: 32px;
@@ -394,6 +393,7 @@ export default {
   .faq-container {
     flex-direction: column;
     gap: 40px;
+    margin: 20px 40px;
   }
 
   .faq-header {
@@ -453,6 +453,7 @@ export default {
 
   .faq-container {
     gap: 30px;
+    margin: 0 20px;
   }
 
   .faq-title {

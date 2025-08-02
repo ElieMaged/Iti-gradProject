@@ -12,7 +12,7 @@
     <div id="admin-profile-container" class="p-4 mr-20">
       <div id="admin-profile-wrapper">
         <div id="admin-profile-card">
-          <h2 class="page-title">{{ $t('personalInformation') }}</h2>
+          <h2 id="admin-profile-title">{{ $t('personalInformation') }}</h2>
           <div id="admin-profile-content">
             <div id="admin-profile-info">
               <div class="info-block">
@@ -219,20 +219,19 @@ export default {
   background-color: var(--grey-bg);
 }
 
-.page-title {
-  color: var(--primary-color);
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 2rem;
-  font-family: Outfit, sans-serif;
+#admin-profile-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #7c6bb0;
+  margin-bottom: 1.5rem;
 }
 
-.dark .page-title {
-  color: var(--primary-color);
+.dark #admin-profile-title {
+  color: var(--white);
 }
 
 /* RTL Support for Arabic */
-[dir="rtl"] .page-title {
+[dir="rtl"] #admin-profile-title {
   text-align: right;
 }
 
@@ -286,7 +285,7 @@ export default {
 }
 
 .dark .info-value {
-  color: var(--text-muted);
+  color: var(--primary-text-dark);
 }
 
 #admin-profile-image {
@@ -312,251 +311,5 @@ export default {
 
 .dark #profile-icon {
   color: var(--white);
-}
-
-/* Responsive Design */
-@media (max-width: 1200px) {
-  #admin-profile-wrapper {
-    max-width: 95%;
-  }
-  
-  #admin-profile-info {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.25rem;
-  }
-}
-
-@media (max-width: 1024px) {
-  #admin-profile-container {
-    padding: 1rem;
-  }
-  
-  #admin-profile-card {
-    padding: 1.5rem;
-  }
-  
-  #admin-profile-info {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-  }
-  
-  .info-label {
-    font-size: 1rem;
-  }
-  
-  .info-value {
-    font-size: 0.875rem;
-  }
-}
-
-@media (max-width: 900px) {
-  .admin-dashboard-layout {
-    flex-direction: column;
-  }
-  
-  #admin-profile-container {
-    margin-right: 0;
-    padding: 1rem;
-  }
-  
-  #admin-profile-wrapper {
-    max-width: 100%;
-  }
-  
-  #admin-profile-content {
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-  
-  #admin-profile-image {
-    width: 8rem;
-    height: 8rem;
-    margin: 0 auto;
-  }
-  
-  #profile-icon {
-    font-size: 3rem;
-  }
-}
-
-@media (max-width: 768px) {
-  #admin-profile-container {
-    padding: 0.75rem;
-  }
-  
-  #admin-profile-card {
-    padding: 1.25rem;
-  }
-  
-  #admin-profile-title {
-    font-size: 1.25rem;
-    margin-bottom: 1rem;
-    text-align: left;
-  }
-  
-  #admin-profile-info {
-    grid-template-columns: 1fr;
-    gap: 0.875rem;
-  }
-  
-  .info-block {
-    padding: 0.75rem;
-    background-color: #f9fafb;
-    border-radius: 0.5rem;
-  }
-  
-  .dark .info-block {
-    background-color: var(--secondary-bg);
-  }
-  
-  .info-label {
-    font-size: 0.875rem;
-  }
-  
-  .info-value {
-    font-size: 0.8125rem;
-    margin-top: 0.125rem;
-  }
-  
-  #admin-profile-image {
-    width: 6rem;
-    height: 6rem;
-  }
-  
-  #profile-icon {
-    font-size: 2.5rem;
-  }
-}
-
-@media (max-width: 600px) {
-  #admin-profile-container {
-    padding: 0.5rem;
-  }
-  
-  #admin-profile-card {
-    padding: 1rem;
-  }
-  
-  .page-title {
-    font-size: 1.125rem;
-    margin-bottom: 0.875rem;
-  }
-  
-  #admin-profile-content {
-    gap: 1.25rem;
-  }
-  
-  #admin-profile-info {
-    gap: 0.75rem;
-  }
-  
-  .info-block {
-    padding: 0.625rem;
-  }
-  
-  .info-label {
-    font-size: 0.8125rem;
-  }
-  
-  .info-value {
-    font-size: 0.75rem;
-  }
-  
-  #admin-profile-image {
-    width: 5rem;
-    height: 5rem;
-  }
-  
-  #profile-icon {
-    font-size: 2rem;
-  }
-}
-
-@media (max-width: 480px) {
-  #admin-profile-container {
-    padding: 0.375rem;
-  }
-  
-  #admin-profile-card {
-    padding: 0.875rem;
-  }
-  
-  .page-title {
-    font-size: 1rem;
-    margin-bottom: 0.75rem;
-  }
-  
-  #admin-profile-content {
-    gap: 1rem;
-  }
-  
-  #admin-profile-info {
-    gap: 0.625rem;
-  }
-  
-  .info-block {
-    padding: 0.5rem;
-  }
-  
-  .info-label {
-    font-size: 0.75rem;
-  }
-  
-  .info-value {
-    font-size: 0.6875rem;
-  }
-  
-  #admin-profile-image {
-    width: 4rem;
-    height: 4rem;
-  }
-  
-  #profile-icon {
-    font-size: 1.75rem;
-  }
-}
-
-@media (max-width: 360px) {
-  #admin-profile-container {
-    padding: 0.25rem;
-  }
-  
-  #admin-profile-card {
-    padding: 0.75rem;
-  }
-  
-  .page-title {
-    font-size: 0.875rem;
-    margin-bottom: 0.625rem;
-  }
-  
-  #admin-profile-content {
-    gap: 0.875rem;
-  }
-  
-  #admin-profile-info {
-    gap: 0.5rem;
-  }
-  
-  .info-block {
-    padding: 0.375rem;
-  }
-  
-  .info-label {
-    font-size: 0.6875rem;
-  }
-  
-  .info-value {
-    font-size: 0.625rem;
-  }
-  
-  #admin-profile-image {
-    width: 3.5rem;
-    height: 3.5rem;
-  }
-  
-  #profile-icon {
-    font-size: 1.5rem;
-  }
 }
 </style>

@@ -56,7 +56,6 @@ export default {
   },
   data() {
     return {
-      activeTab: 'canceled',
       searchQuery: '',
       bookings: [
         {
@@ -279,19 +278,6 @@ export default {
   color: #991b1b !important;
   font-size: 0.75rem;
   font-weight: 600;
-  padding: 0.25rem 0.75rem;
-  border-radius: 1rem;
-  border: 1px solid #991b1b;
-  transition: all 0.2s ease;
-  cursor: pointer;
-}
-
-.status-canceled:hover {
-  background: var(--primary-color);
-  color: white !important;
-  border-color: var(--primary-color);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 @media (max-width: 768px) {

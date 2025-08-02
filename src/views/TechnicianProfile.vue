@@ -1,141 +1,89 @@
 <template>
-  <div v-if="loading" class="loading-container">
-    <div class="loading-spinner"></div>
+  <div v-if="loading">
     <p>{{ $t('loading') }}</p>
   </div>
-  
-  <div v-else-if="error" class="error-container">
-    <p class="error-message">{{ error }}</p>
+  <div v-else-if="error">
+    <p class="text-red-500">{{ error }}</p>
   </div>
-  
-  <div v-else-if="technician" class="technician-profile-page">
-    <!-- Main content area -->
-    <div class="main-content">
-      <!-- Page title -->
-      <div class="page-title">
-        <h1>{{ $t('bookNowWithBestTechnicians') }}</h1>
-      </div>
-
-      <!-- Main content grid -->
-      <div class="content-grid">
-        <!-- Left section - Technician Info Card -->
-        <div class="technician-info-card">
-          <div class="profile-section">
-            <div class="profile-picture">
-              <img :src="technician.profilePhotoUrl || technician.idPhotoUrl || '/images/Avatar.png'" :alt="technician.name" />
+  <div v-else-if="technician">
+    <div class="profile-hero">
+      <h1 class="profile-title">Technician</h1>
+    </div>
+    <div class="profile-main">
+      <div class="profile-card">
+        <img :src="technician.image" alt="Technician" class="profile-img" />
+        <div class="profile-info">
+          <h2 class="profile-name">{{ technician.name }}</h2>
+          <div class="profile-role">{{ getSpecializationTranslation(technician.specialization) }}</div>
+          <div class="profile-meta">
+            <div><b>{{ $t('location') }}:</b> {{ technician.government && technician.district ? `${technician.government}, ${technician.district}` : (technician.location || $t('technicianNotAvailable')) }}</div>
+            <div><b>{{ $t('yearsOfExperience') }}:</b> {{ technician.experience || technician.yearsOfExperience || $t('noExperienceInfo') }}</div>
+            <div v-if="technician.basePrice"><b>{{ $t('baseVisitPrice') }}:</b> {{ technician.basePrice }} {{ $t('egp') }}</div>
+            <div v-if="technician.willingToTravel"><b>{{ $t('willingToTravel') }}:</b> {{ technician.willingToTravel === 'yes' ? $t('yes') : $t('no') }}</div>
+          </div>
+          <div class="profile-rating">
+            <div class="rating-stars">
+              <i class="fa-solid fa-star" :style="{ color: 1 <= averageRating ? '#FFC230' : '#ddd', fontSize: '1.2rem' }"></i>
+              <i class="fa-solid fa-star" :style="{ color: 2 <= averageRating ? '#FFC230' : '#ddd', fontSize: '1.2rem' }"></i>
+              <i class="fa-solid fa-star" :style="{ color: 3 <= averageRating ? '#FFC230' : '#ddd', fontSize: '1.2rem' }"></i>
+              <i class="fa-solid fa-star" :style="{ color: 4 <= averageRating ? '#FFC230' : '#ddd', fontSize: '1.2rem' }"></i>
+              <i class="fa-solid fa-star" :style="{ color: 5 <= averageRating ? '#FFC230' : '#ddd', fontSize: '1.2rem' }"></i>
             </div>
-            <div class="profile-details">
-              <h2 class="technician-name">{{ technician.name || technician.fullName }}</h2>
-              <p class="technician-specialization">{{ getSpecializationTranslation(technician.specialization) }}</p>
-              
-              <div class="technician-details">
-                <div class="detail-item">
-                  <span class="detail-label">{{ $t('location') }}:</span>
-                  <span class="detail-value">{{ technician.government && technician.district ? `${technician.government}, ${technician.district}` : (technician.location || $t('defaultLocation')) }}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="detail-label">{{ $t('gender') }}:</span>
-                  <span class="detail-value">{{ technician.gender || $t('defaultGender') }}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="detail-label">{{ $t('nationality') }}:</span>
-                  <span class="detail-value">{{ technician.nationality || $t('defaultNationality') }}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="detail-label">{{ $t('yearsOfExperience') }}:</span>
-                  <span class="detail-value">{{ technician.experience || technician.yearsOfExperience || $t('defaultExperience') }} {{ $t('years') }}</span>
-                </div>
-              </div>
-
-              <div class="rating-section">
-                <div class="rating-stars">
-                  <i v-for="n in 5" :key="n" class="fas fa-star star-filled"></i>
-                </div>
-              </div>
+            <div class="rating-text">
+              {{ averageRating.toFixed(1) }} ({{ reviews.length }} {{ $t('reviews') }})
+            </div>
+            <div v-if="reviews.length === 0" class="no-rating">
+              {{ $t('noReviewsYet') }}
             </div>
           </div>
-
-          <div class="skills-section">
-            <h3 class="skills-title">{{ $t('technicianSkills') }}</h3>
-            <ul class="skills-list">
-              <li v-for="skill in technician.skills" :key="skill" class="skill-item">{{ skill }}</li>
-              <li v-if="!technician.skills || technician.skills.length === 0" class="skill-item">
-                {{ $t('pipeInstallationRepair') }}
-              </li>
-              <li v-if="!technician.skills || technician.skills.length === 0" class="skill-item">
-                {{ $t('drainCleaningUnclogging') }}
-              </li>
-              <li v-if="!technician.skills || technician.skills.length === 0" class="skill-item">
-                {{ $t('fixtureInstallation') }}
-              </li>
-              <li v-if="!technician.skills || technician.skills.length === 0" class="skill-item">
-                {{ $t('gasPiping') }}
-              </li>
-              <li v-if="!technician.skills || technician.skills.length === 0" class="skill-item">
-                {{ $t('pumpValveReplacement') }}
-              </li>
+          <div class="profile-skills">
+            <b>{{ $t('skills') }}</b>
+            <ul v-if="technician.skills && technician.skills.length > 0">
+              <li v-for="skill in technician.skills" :key="skill">{{ skill }}</li>
             </ul>
+            <p v-else class="no-skills">{{ $t('noSkillsListed') }}</p>
           </div>
+          <div v-if="technician.bio" class="profile-bio">
+            <b>{{ $t('about') }}:</b>
+            <p>{{ technician.bio }}</p>
           </div>
-
-        <!-- Right section - Booking Information -->
-        <div class="booking-info-card">
-                     <h3 class="booking-title">{{ $t('bookingInformation') }}</h3>
-          
-          <div class="appointment-section">
-                         <h4 class="section-subtitle">{{ $t('availableAppointment') }}</h4>
-            <div class="date-selector">
-              <button class="date-nav-btn" @click="previousDates">
-                <i class="fas fa-chevron-left"></i>
-              </button>
-              <div class="date-options">
-                <div v-if="visibleDates.length > 0" v-for="date in visibleDates" :key="date" class="date-option" :class="{ 'selected': selectedDate === date }" @click="selectDate(date)">
-                  {{ date }}
         </div>
-                <div v-else-if="!loading && availableDates.length === 0" class="date-option unavailable">
-                  {{ $t('noAvailableDates') }}
-                </div>
-                <div v-else class="date-option loading">
-                  {{ $t('loadingDates') }}
-                </div>
-              </div>
-              <button class="date-nav-btn" @click="nextDates">
-                <i class="fas fa-chevron-right"></i>
-              </button>
       </div>
       
-            <div class="time-slots">
-              <div v-if="loading || !technicianAvailability" class="time-slot loading">
-                {{ $t('loadingAvailability') }}
+      <!-- About Technician Section -->
+      <div class="about-section">
+        <h3>{{ $t('aboutTechnician') }}</h3>
+        <div class="about-content">
+          <div class="about-item">
+            <i class="fas fa-check-circle"></i>
+            <span>{{ $t('verifiedTechnician') }}</span>
           </div>
-              <div v-else-if="selectedDate && availableTimeSlots.length > 0" v-for="timeSlot in availableTimeSlots" :key="timeSlot" class="time-slot">
-                {{ timeSlot }}
+          <div class="about-item">
+            <div class="about-stars">
+              <i 
+                v-for="n in 5" 
+                :key="n" 
+                class="fa-solid fa-star"
+                :class="{
+                  'filled': n <= averageRating,
+                  'empty': n > averageRating
+                }"
+              ></i>
             </div>
-              <div v-else-if="selectedDate && availableTimeSlots.length === 0" class="time-slot unavailable">
-                {{ $t('noAvailableTimeSlots') }}
+            <span>{{ $t('professionalService') }} ({{ averageRating.toFixed(1) }})</span>
           </div>
-              <div v-else-if="availableDates.length === 0" class="time-slot unavailable">
-                {{ $t('technicianNotSetAvailability') }}
+          <div class="about-item">
+            <i class="fas fa-shield-alt"></i>
+            <span>{{ $t('qualityGuarantee') }} ({{ positiveReviewPercentage }}% {{ $t('positive') }})</span>
           </div>
-              <div v-else class="time-slot">
-                {{ $t('selectDateToSeeSlots') }}
+          <div class="about-item">
+            <i class="fas fa-heart"></i>
+            <span>{{ $t('customerSatisfaction') }} ({{ reviews.length }} {{ $t('reviews') }})</span>
           </div>
         </div>
-          </div>
-
-          <div class="visit-price">
-            <span class="price-label">{{ $t('visitPrice') }}:</span>
-            <span class="price-value">{{ technician.basePrice || technician.visitPrice || '300' }} EGP</span>
-          </div>
-
-          <button 
-            @click="bookNow" 
-            class="book-now-btn"
-            :class="{ 'disabled': !auth.currentUser }"
-            :disabled="!auth.currentUser"
-          >
-            {{ auth.currentUser ? $t('bookNow') : $t('loginToBook') || 'Login to Book' }}
-          </button>
+        <div class="action-buttons">
+          <button @click="bookNow" class="book-now-btn">{{ $t('bookNow') }}</button>
+          <button @click="viewAllServices" class="view-services-btn">{{ $t('viewAllServices') }}</button>
         </div>
       </div>
       
@@ -157,11 +105,11 @@
             <div v-else-if="reviews.find(r => r.userEmail === auth.currentUser?.email)" class="review-notice">
               {{ $t('thankYouForReview') }}
             </div>
-             <div v-else-if="!userBookings.some(booking => booking.technicianId === route.params.id && (booking.status === 'completed' || booking.status === 'upcoming'))" class="review-notice">
+            <div v-else-if="!userBookings.some(booking => booking.technicianId === route.params.id && (booking.status === 'completed' || booking.status === 'upcoming'))" class="review-notice">
               {{ $t('bookingRequiredToReview') }}
             </div>
-             <div v-else class="review-notice">
-               {{ $t('loginToLeaveReview') }}
+            <div v-else class="review-notice">
+              {{ $t('loginToLeaveReview') }}
             </div>
           </div>
         </div>
@@ -203,15 +151,15 @@
             <div class="validation-status">
               <div v-if="newReview.rating === 0" class="validation-error">
                 <i class="fa-solid fa-exclamation-circle"></i>
-                 {{ $t('pleaseSelectRating') }}
+                Please select a rating
               </div>
               <div v-else-if="newReview.text.trim().length < 10" class="validation-error">
                 <i class="fa-solid fa-exclamation-circle"></i>
-                 {{ $t('reviewMustBeAtLeast') }} {{ newReview.text.trim().length }}/{{ $t('reviewMustBeAtLeastCharacters') }}
+                Review must be at least 10 characters ({{ newReview.text.trim().length }}/10)
               </div>
               <div v-else class="validation-success">
                 <i class="fa-solid fa-check-circle"></i>
-                 {{ $t('readyToSubmit') }}
+                Ready to submit!
               </div>
             </div>
             <button @click="submitReview" :disabled="!isValidReview || submittingReview" class="submit-btn">
@@ -258,385 +206,256 @@
             <div class="empty-icon">⭐</div>
             <p>{{ $t('noReviewsYet') }}</p>
             <p v-if="canReview">{{ $t('beFirstToReview') }}</p>
-             <p v-else-if="!auth.currentUser">{{ $t('loginToLeaveReview') }}</p>
-             <p v-else-if="!userBookings.some(booking => booking.technicianId === route.params.id && (booking.status === 'completed' || booking.status === 'upcoming'))">{{ $t('bookingRequiredToReview') }}</p>
+            <p v-else-if="!auth.currentUser">{{ $t('loginToLeaveReview') }}</p>
+            <p v-else-if="!userBookings.some(booking => booking.technicianId === route.params.id && (booking.status === 'completed' || booking.status === 'upcoming'))">{{ $t('bookingRequiredToReview') }}</p>
             <p v-else>{{ $t('loginToLeaveReview') }}</p>
-           </div>
           </div>
         </div>
       </div>
-
-
+    </div>
+  </div>
+  <div v-else>
+    <p>{{ $t('loading') }}</p>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { collection, query, where, getDocs, doc, getDoc, updateDoc, onSnapshot, orderBy, addDoc } from 'firebase/firestore'
+import { db, auth } from '../firebase'
 import { useI18n } from 'vue-i18n'
-import { doc, getDoc, collection, query, where, getDocs, orderBy, addDoc } from 'firebase/firestore'
-import { db, auth } from '../firebase.js'
+import ReviewSection from '../components/ReviewSection.vue'
+import { stockTechnicians } from '../assets/stockTechnicians'
 
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
-
-// Reactive data
 const technician = ref(null)
 const loading = ref(true)
-const error = ref(null)
-const reviews = ref([])
-const reviewsLoading = ref(false)
-const reviewsError = ref(null)
-const userBookings = ref([])
-const userBookingsLoading = ref(false)
-const selectedDate = ref('')
-const technicianAvailability = ref(null)
-const availableDates = ref([])
-const visibleDates = ref([])
-const dateAvailability = ref({})
-const availableTimeSlots = ref([])
+const error = ref('')
 
-// Review form state
+// Reviews state
+const reviews = ref([])
+const reviewsLoading = ref(true)
+const reviewsError = ref(null)
 const showReviewForm = ref(false)
 const hoverRating = ref(0)
 const newReview = ref({
   rating: 0,
   text: ''
 })
+
 const submittingReview = ref(false)
 
-// Fetch technician data
-const fetchTechnician = async () => {
-  try {
-    loading.value = true
-    const technicianId = route.params.id
-    
-    console.log('Fetching technician with ID:', technicianId)
-    
-    // Try to get technician from technicians collection
-    const technicianDoc = await getDoc(doc(db, 'technicians', technicianId))
-    
-    if (technicianDoc.exists()) {
-      console.log('Found technician in technicians collection:', technicianDoc.data())
-      technician.value = {
-        id: technicianDoc.id,
-        ...technicianDoc.data()
-      }
-  } else {
-      console.log('Technician not found in technicians collection, checking users collection...')
-      // If not found in technicians, try users collection
-      const userDoc = await getDoc(doc(db, 'users', technicianId))
-      if (userDoc.exists()) {
-        const userData = userDoc.data()
-        console.log('Found user in users collection:', userData)
-        if (userData.role === 'technician') {
-        technician.value = {
-            id: userDoc.id,
-            ...userData
-        }
-      } else {
-          throw new Error('User is not a technician')
-        }
-      } else {
-        console.log('Technician not found in either collection')
-        throw new Error('Technician not found')
-      }
-    }
-  } catch (err) {
-    console.error('Error fetching technician:', err)
-    error.value = err.message
-  } finally {
-    loading.value = false
-  }
-}
+// User bookings state
+const userBookings = ref([])
+const userBookingsLoading = ref(false)
 
-// Fetch reviews
-const fetchReviews = async () => {
-  try {
-    reviewsLoading.value = true
-    const technicianId = route.params.id
-    
-    const reviewsQuery = query(
-        collection(db, 'reviews'), 
-        where('technicianId', '==', technicianId),
-        orderBy('createdAt', 'desc')
-      )
-    
-    const reviewsSnapshot = await getDocs(reviewsQuery)
-    reviews.value = reviewsSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }))
-  } catch (err) {
-    console.error('Error fetching reviews:', err)
-    reviewsError.value = err.message
-  } finally {
-    reviewsLoading.value = false
-  }
-}
-
-// Fetch user bookings for review eligibility
-const fetchUserBookings = async () => {
-  if (!auth.currentUser) return
-  
-  try {
-    userBookingsLoading.value = true
-    const bookingsQuery = query(
-      collection(db, 'bookings'),
-      where('userId', '==', auth.currentUser.uid)
-    )
-    
-    const bookingsSnapshot = await getDocs(bookingsQuery)
-    userBookings.value = bookingsSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }))
-  } catch (err) {
-    console.error('Error fetching user bookings:', err)
-  } finally {
-    userBookingsLoading.value = false
-  }
-}
-
-// Fetch technician availability
-const fetchTechnicianAvailability = async (technicianId) => {
-  try {
-    const availabilityRef = doc(db, 'technicianAvailability', technicianId)
-    const availabilitySnap = await getDoc(availabilityRef)
-    
-    if (availabilitySnap.exists()) {
-      const data = availabilitySnap.data()
-      technicianAvailability.value = data
-      return data
-    }
-    technicianAvailability.value = null
-    return null
-  } catch (error) {
-    console.error('Error fetching technician availability:', error)
-    technicianAvailability.value = null
-    return null
-  }
-}
-
-// Generate available dates for the next 30 days
-const generateAvailableDates = () => {
-  const dates = []
-  const today = new Date()
-  
-  for (let i = 0; i < 30; i++) {
-    const date = new Date(today)
-    date.setDate(today.getDate() + i)
-    
-    const dayName = date.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase()
-    
-    // Check if technician is available on this day
-    if (technicianAvailability.value && 
-        technicianAvailability.value[dayName] && 
-        technicianAvailability.value[dayName].available) {
-      const formattedDate = date.toLocaleDateString('en-US', {
-        month: 'numeric',
-        day: 'numeric',
-        year: 'numeric'
-      })
-      dates.push(formattedDate)
-    }
-  }
-  
-  return dates
-}
-
-// Update visible dates (show first 3 available dates)
-const updateVisibleDates = () => {
-  availableDates.value = generateAvailableDates()
-  visibleDates.value = availableDates.value.slice(0, 3)
-  
-  // Set first available date as selected if none selected
-  if (visibleDates.value.length > 0 && !selectedDate.value) {
-    selectedDate.value = visibleDates.value[0]
-  }
-}
-
-// Get day name from date string
-const getDayName = (dateString) => {
-  const [month, day, year] = dateString.split('/')
-  const date = new Date(year, month - 1, day)
-  return date.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase()
-}
-
-// Generate time slots between start and end time
-const generateTimeSlots = (startTime, endTime) => {
-  const slots = []
-  const start = new Date(`2000-01-01 ${startTime}`)
-  const end = new Date(`2000-01-01 ${endTime}`)
-  
-  while (start < end) {
-    slots.push(start.toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
-      minute: '2-digit',
-      hour12: true 
-    }))
-    start.setMinutes(start.getMinutes() + 60) // 1-hour slots
-  }
-  
-  return slots
-}
-
-// Fetch existing bookings for a technician on a specific date
-const fetchExistingBookings = async (technicianId, selectedDate) => {
-  try {
-    // Convert date format from MM/DD/YYYY to YYYY-MM-DD for Firestore query
-    const [month, day, year] = selectedDate.split('/')
-    const formattedDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
-    
-    const bookingsQuery = query(
-      collection(db, 'bookings'),
-      where('technicianId', '==', technicianId),
-      where('date', '==', formattedDate),
-      where('status', 'in', ['pending', 'upcoming', 'completed'])
-    )
-    
-    const snapshot = await getDocs(bookingsQuery)
-    const existingBookings = []
-    
-    snapshot.forEach(doc => {
-      const booking = doc.data()
-      existingBookings.push({
-        id: doc.id,
-        time: booking.time,
-        status: booking.status
-      })
-    })
-    
-    return existingBookings
-  } catch (error) {
-    console.error('Error fetching existing bookings:', error)
-    return []
-  }
-}
-
-// Get available time slots for selected date
-const getAvailableTimeSlots = async (date) => {
-  if (!technicianAvailability.value || !date) return []
-  
-  const dayName = getDayName(date)
-  const dayAvailability = technicianAvailability.value[dayName]
-  
-  if (dayAvailability && dayAvailability.available) {
-    const allTimeSlots = generateTimeSlots(dayAvailability.startTime, dayAvailability.endTime)
-    const existingBookings = await fetchExistingBookings(route.params.id, date)
-    
-    return allTimeSlots.filter(timeSlot => {
-      return !existingBookings.some(booking => booking.time === timeSlot)
-    })
-  }
-  
-  return []
-}
-
-// Computed properties
 const averageRating = computed(() => {
-  if (reviews.value.length === 0) return 5
-  const totalRating = reviews.value.reduce((sum, review) => sum + review.rating, 0)
-  return totalRating / reviews.value.length
+  if (reviews.value.length === 0) return 0;
+  const total = reviews.value.reduce((sum, review) => sum + review.rating, 0);
+  const average = total / reviews.value.length;
+  console.log('Average rating calculation:', {
+    totalReviews: reviews.value.length,
+    totalRating: total,
+    average: average,
+    reviews: reviews.value.map(r => ({ rating: r.rating, user: r.userName }))
+  });
+  return average;
 })
 
 const positiveReviewPercentage = computed(() => {
-  if (reviews.value.length === 0) return 100
-  const positiveReviews = reviews.value.filter(review => review.rating >= 4).length
-  return Math.round((positiveReviews / reviews.value.length) * 100)
+  if (reviews.value.length === 0) return 0;
+  const positiveReviews = reviews.value.filter(review => review.rating >= 4);
+  return (positiveReviews.length / reviews.value.length) * 100;
+});
+
+const isValidReview = computed(() => {
+  return newReview.value.rating > 0 && newReview.value.text.trim().length >= 10;
 })
 
 const canReview = computed(() => {
-  if (!auth.currentUser) return false
+  if (!auth.currentUser) return false;
   
   // Check if user has already reviewed this technician
   const existingReview = reviews.value.find(review => 
     review.userEmail === auth.currentUser.email
-  )
+  );
   
   // Check if user has a booking with this technician
   const hasBooking = userBookings.value.some(booking => 
     booking.technicianId === route.params.id && 
     (booking.status === 'completed' || booking.status === 'upcoming')
-  )
+  );
   
   // User can review if they haven't already reviewed AND they have a booking with this technician
-  return !existingReview && hasBooking
+  return !existingReview && hasBooking;
 })
 
-const isValidReview = computed(() => {
-  return newReview.value.rating > 0 && newReview.value.text.trim().length >= 10
-})
-
-// Methods
-const getSpecializationTranslation = (specialization) => {
-  const translations = {
-    'plumbing': t('plumbing'),
-    'electricity': t('electricity'),
-    'airCondition': t('airCondition'),
-    'carpentry': t('carpentry'),
-    'wallFinishing': t('wallFinishing'),
-    'acTechnician': t('acTechnician')
-  }
-  return translations[specialization] || specialization || 'Plumber'
-}
-
-const selectDate = async (date) => {
-  selectedDate.value = date
-  if (date) {
-    availableTimeSlots.value = await getAvailableTimeSlots(date)
-  } else {
-    availableTimeSlots.value = []
-  }
-}
-
-const previousDates = () => {
-  const currentIndex = availableDates.value.indexOf(visibleDates.value[0])
-  if (currentIndex > 0) {
-    const startIndex = Math.max(0, currentIndex - 3)
-    visibleDates.value = availableDates.value.slice(startIndex, startIndex + 3)
-  }
-}
-
-const nextDates = () => {
-  const currentIndex = availableDates.value.indexOf(visibleDates.value[0])
-  if (currentIndex + 3 < availableDates.value.length) {
-    const startIndex = currentIndex + 3
-    visibleDates.value = availableDates.value.slice(startIndex, startIndex + 3)
-  }
-}
-
-const bookNow = () => {
-  // Check if user is logged in
-  if (!auth.currentUser) {
-    // Redirect to login page with return URL
-    router.push({
-      path: '/userlogin',
-      query: { 
-        returnUrl: route.fullPath,
-        message: 'Please log in to book a technician'
-      }
-    })
-    return
-  }
+onMounted(async () => {
+  const id = route.params.id
   
-  // User is logged in, proceed to booking page
+  // First check if technician data is passed via query parameters
+  if (route.query.name) {
+    // Use data from query parameters
+    technician.value = {
+      id: id,
+      name: route.query.name,
+      specialization: route.query.specialization,
+      rating: parseFloat(route.query.rating) || 4.5,
+      experience: route.query.experience,
+      basePrice: route.query.basePrice,
+      bio: route.query.bio,
+      location: route.query.location,
+      phone: route.query.phone,
+      email: route.query.email,
+      status: route.query.status,
+      image: route.query.image || 'https://randomuser.me/api/portraits/men/32.jpg',
+      government: route.query.location,
+      district: route.query.location,
+      fullName: route.query.name
+    }
+    loading.value = false
+  } else {
+    // Try to find in stockTechnicians first
+    const stock = stockTechnicians.find(t => t.id === id)
+    if (stock) {
+      technician.value = stock
+      loading.value = false
+    } else {
+      try {
+        const docRef = doc(db, 'technicians', id)
+        const docSnap = await getDoc(docRef)
+        if (docSnap.exists()) {
+          const data = docSnap.data()
+          technician.value = {
+            ...data,
+            name: data.fullName,
+            location: data.government,
+            price: data.basePrice,
+            image: data.profilePhotoUrl || data.idPhotoUrl || 'https://randomuser.me/api/portraits/men/32.jpg'
+          }
+        } else {
+          error.value = 'Technician profile not found.'
+        }
+      } catch (e) {
+        error.value = 'Error loading profile.'
+      } finally {
+        loading.value = false
+      }
+    }
+  }
+  await Promise.all([fetchReviews(), fetchUserBookings()])
+})
+
+async function fetchUserBookings() {
+  try {
+    userBookingsLoading.value = true
+    const userId = auth.currentUser?.uid
+    
+    if (!userId) {
+      userBookings.value = []
+      return
+    }
+    
+    const q = query(
+      collection(db, 'bookings'),
+      where('userId', '==', userId)
+    )
+    const snapshot = await getDocs(q)
+    userBookings.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+  } catch (e) {
+    console.error('Error fetching user bookings:', e)
+    userBookings.value = []
+  } finally {
+    userBookingsLoading.value = false
+  }
+}
+
+async function fetchReviews() {
+  try {
+    reviewsLoading.value = true
+    reviewsError.value = null
+    const technicianId = route.params.id
+    
+    // Try the indexed query first
+    try {
+      const q = query(
+        collection(db, 'reviews'), 
+        where('technicianId', '==', technicianId),
+        orderBy('createdAt', 'desc')
+      )
+      const snapshot = await getDocs(q)
+      reviews.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+    } catch (indexError) {
+      // Fallback: Simple query without orderBy, sort in JavaScript
+      const q = query(
+        collection(db, 'reviews'), 
+        where('technicianId', '==', technicianId)
+      )
+      const snapshot = await getDocs(q)
+      
+      // Sort reviews in JavaScript
+      reviews.value = snapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }))
+        .sort((a, b) => {
+          const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+          const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+          return dateB - dateA; // Sort by newest first
+        });
+    }
+  } catch (e) {
+    console.error('Error fetching reviews:', e);
+    reviewsError.value = t('retry')
+  } finally {
+    reviewsLoading.value = false
+  }
+}
+
+function formatDate(date) {
+  if (!date) return ''
+  const d = date.toDate ? date.toDate() : new Date(date)
+  return d.toLocaleDateString()
+}
+
+function bookNow() {
+  const technicianId = route.params.id
   router.push({
     path: '/bookingpage',
-    query: { 
-      technicianId: route.params.id,
-      technicianName: technician.value?.name || technician.value?.fullName
-    }
+    query: { techId: technicianId }
   })
 }
 
+function viewAllServices() {
+  router.push('/allservices')
+}
+
+function getSpecializationTranslation(specialization) {
+  if (!specialization) return t('plumber')
+  
+  const specializationMap = {
+    'Plumbing': t('plumber'),
+    'Electrical': t('electrician'),
+    'Carpentry': t('carpenter'),
+    'Air Conditioning': t('acTechnician'),
+    'Wall Finishing': t('wallFinisher'),
+    'plumber': t('plumber'),
+    'electrician': t('electrician'),
+    'carpenter': t('carpenter'),
+    'acTechnician': t('acTechnician'),
+    'wallFinisher': t('wallFinisher')
+  }
+  
+  return specializationMap[specialization] || specialization
+}
+
 // Review functions
-const setRating = (rating) => {
+function setRating(rating) {
   newReview.value.rating = rating
 }
 
-const submitReview = () => {
+function submitReview() {
   if (!isValidReview.value || submittingReview.value) return
   
   submittingReview.value = true
@@ -666,541 +485,265 @@ const submitReview = () => {
     })
 }
 
-const cancelReview = () => {
+function cancelReview() {
   newReview.value = { rating: 0, text: '' }
   showReviewForm.value = false
 }
-
-const formatDate = (date) => {
-  if (!date) return ''
-  const d = date.toDate ? date.toDate() : new Date(date)
-  return d.toLocaleDateString()
-}
-
-// Lifecycle
-onMounted(async () => {
-  await fetchTechnician()
-  await fetchReviews()
-  await fetchUserBookings()
-  await fetchTechnicianAvailability(route.params.id)
-  updateVisibleDates()
-  
-  // Set initial selected date and fetch time slots
-  if (visibleDates.value.length > 0) {
-    await selectDate(visibleDates.value[0])
-  }
-})
 </script>
 
 <style scoped>
-/* Loading and Error States */
-.loading-container, .error-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 50vh;
+/* Profile Styles */
+.profile-hero {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 2rem;
   text-align: center;
 }
 
-.loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #6366f1;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 1rem;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.error-message {
-  color: #ef4444;
-  font-size: 1.1rem;
-}
-
-/* Header Contact Bar */
-.header-contact-bar {
-  background: linear-gradient(135deg, #f59e0b, #f97316);
-  color: white;
-  padding: 0.5rem 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.875rem;
-}
-
-.contact-info {
-  display: flex;
-  gap: 2rem;
-}
-
-.contact-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.social-media {
-  display: flex;
-  gap: 1rem;
-}
-
-.social-icon {
-  color: white;
-  font-size: 1.1rem;
-  transition: opacity 0.2s;
-}
-
-.social-icon:hover {
-  opacity: 0.8;
-}
-
-/* Main Navigation */
-.main-nav {
-  background: white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  padding: 1rem 2rem;
-}
-
-.nav-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.nav-logo {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.logo-icon {
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  font-size: 1.2rem;
-}
-
-.logo-text {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #1f2937;
-}
-
-.nav-links {
-  display: flex;
-  gap: 2rem;
-}
-
-.nav-link {
-  color: #6b7280;
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.2s;
-}
-
-.nav-link:hover {
-  color: #625397;
-}
-
-.nav-actions {
-  display: flex;
-  gap: 1rem;
-}
-
-.nav-icon {
-  color: #6b7280;
-  font-size: 1.2rem;
-  cursor: pointer;
-  transition: color 0.2s;
-}
-
-.nav-icon:hover {
-  color: #625397;
-}
-
-/* Main Content */
-.main-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
-.page-title {
-  text-align: left;
-  margin-bottom: 3rem;
-}
-
-.page-title h1 {
+.profile-title {
   font-size: 2.5rem;
   font-weight: bold;
-  color: #929394;
   margin: 0;
 }
 
-/* Content Grid */
-.content-grid {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 2rem;
-  margin-bottom: 3rem;
-}
-
-/* Technician Info Card */
-.technician-info-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+.profile-main {
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 2rem;
 }
 
-.profile-section {
+.profile-card {
   display: flex;
-  align-items: center;
-  gap: 1.5rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
   margin-bottom: 2rem;
 }
 
-.profile-picture {
+.profile-img {
   width: 200px;
   height: 200px;
-  border-radius: 50%;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.profile-picture img {
-  width: 100%;
-  height: 100%;
   object-fit: cover;
 }
 
-.profile-details {
+.profile-info {
+  padding: 2rem;
   flex: 1;
 }
 
-.technician-name {
-  font-size: 1.8rem;
+.profile-name {
+  font-size: 2rem;
   font-weight: bold;
-  color: #1f2937;
+  color: #333;
   margin: 0 0 0.5rem 0;
 }
 
-.technician-specialization {
+.profile-role {
+  color: #666;
   font-size: 1.1rem;
-  color: #6b7280;
-  margin: 0;
+  margin-bottom: 1rem;
 }
 
-.technician-details {
-  margin: 1.5rem 0;
+.profile-meta {
+  margin-bottom: 1rem;
 }
 
-.detail-item {
+.profile-meta div {
+  margin-bottom: 0.5rem;
+}
+
+.profile-rating {
   display: flex;
-  justify-content: flex-start;
-  gap: 0.5rem;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #f3f4f6;
-}
-
-.detail-item:last-child {
-  border-bottom: none;
-}
-
-.detail-label {
-  font-weight: 600;
-  color: #374151;
-}
-
-.detail-value {
-  color: #6b7280;
-}
-
-.rating-section {
-  margin-top: 1rem;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
 }
 
 .rating-stars {
   display: flex;
-  gap: 0.25rem;
+  gap: 0.2rem;
 }
 
-.star-filled {
-  color: #fbbf24;
+.rating-stars .fa-solid {
   font-size: 1.2rem;
 }
 
-.skills-section {
-  border-top: 1px solid #e5e7eb;
-  padding-top: 1.5rem;
+.rating-stars .fa-star.filled {
+  color: #FFC230 !important;
 }
 
-.skills-title {
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #1f2937;
-  margin: 0 0 1rem 0;
+.rating-stars .fa-star.empty {
+  color: #ddd !important;
 }
 
-.skills-list {
+.rating-text {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.no-rating {
+  color: #999;
+  font-size: 0.9rem;
+  font-style: italic;
+  margin-top: 0.5rem;
+}
+
+.profile-skills {
+  margin-top: 1rem;
+}
+
+.profile-skills ul {
   list-style: none;
   padding: 0;
+  margin: 0.5rem 0 0 0;
+}
+
+.profile-skills li {
+  background: #f0f0f0;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  display: inline-block;
+  margin: 0.2rem;
+  font-size: 0.9rem;
+}
+
+.no-skills {
+  color: #6b7280;
+  font-style: italic;
+  margin: 0.5rem 0;
+}
+
+.profile-bio {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 0.5rem;
+  border-left: 4px solid #7c6bb0;
+}
+
+.profile-bio b {
+  color: #7c6bb0;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.profile-bio p {
+  color: #374151;
+  line-height: 1.6;
   margin: 0;
 }
 
-.skill-item {
-  color: #6b7280;
-  margin-bottom: 0.5rem;
-  line-height: 1.5;
-}
-
-/* Booking Info Card */
-.booking-info-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+/* About Section Styles */
+.about-section {
+  background: #fff;
+  border-radius: 0.75rem;
   padding: 2rem;
-  height: fit-content;
+  margin-bottom: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.booking-title {
-  font-size: 1.3rem;
-  font-weight: bold;
-  color: #1f2937;
-  text-align: center;
-  margin: 0 0 2rem 0;
-}
-
-.section-subtitle {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #374151;
-  margin: 0 0 1rem 0;
-  text-align: center;
-}
-
-.date-selector {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+.about-section h3 {
+  color: #7c6bb0;
+  font-size: 1.5rem;
   margin-bottom: 1.5rem;
-}
-
-.date-nav-btn {
-  background: none;
-  border: none;
-  color: #6b7280;
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-}
-
-.date-nav-btn:hover {
-  background-color: #f3f4f6;
-}
-
-.date-options {
-  display: flex;
-  gap: 0.5rem;
-  flex: 1;
-}
-
-.date-option {
-  flex: 1;
-  padding: 0.75rem;
-  background: #f3f4f6;
-  border-radius: 8px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-size: 0.9rem;
-  color: #374151;
-}
-
-.date-option:hover {
-  background: #e5e7eb;
-}
-
-.date-option.selected {
-  background: #625397;
-  color: white;
-}
-
-.date-option.unavailable {
-  background: #fef3f2;
-  color: #ef4444;
-  border: 1px solid #f56565;
-  cursor: not-allowed;
-}
-
-.date-option.loading {
-  background: #f9fafb;
-  color: #6b7280;
-  border: 1px solid #d1d5db;
-  font-style: italic;
-  cursor: not-allowed;
-}
-
-.time-slots {
-  margin-bottom: 2rem;
-}
-
-.time-slot {
-  padding: 0.75rem;
-  background: #f3f4f6;
-  border-radius: 8px;
-  margin-bottom: 0.5rem;
-  text-align: center;
-  color: #374151;
-  font-size: 0.9rem;
-}
-
-.time-slot.unavailable {
-  color: #ef4444;
-  background-color: #fef3f2;
-  border: 1px solid #f56565;
-}
-
-.time-slot.loading {
-  color: #6b7280;
-  background-color: #f9fafb;
-  border: 1px solid #d1d5db;
-  font-style: italic;
-}
-
-.visit-price {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  padding: 1rem;
-  background: #f9fafb;
-  border-radius: 8px;
-}
-
-.price-label {
   font-weight: 600;
+}
+
+.about-content {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  overflow-x: auto;
+}
+
+.about-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 0.5rem;
+  border-left: 4px solid #7c6bb0;
+  min-width: 200px;
+  flex-shrink: 0;
+}
+
+.about-item i {
+  color: #7c6bb0;
+  font-size: 1.2rem;
+}
+
+.about-item span {
+  font-weight: 500;
   color: #374151;
 }
 
-.price-value {
-  font-weight: bold;
-  color: #625397;
-  font-size: 1.1rem;
+.about-stars {
+  display: flex;
+  gap: 0.2rem;
+}
+
+.about-stars .fa-solid {
+  font-size: 1.2rem;
+}
+
+.about-stars .fa-star.filled {
+  color: #FFC230;
+}
+
+.about-stars .fa-star.empty {
+  color: #ddd;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .book-now-btn {
-  width: 100%;
-  padding: 1rem;
-  background: #625397;
+  background: #7c6bb0;
   color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 1.1rem;
+  padding: 0.75rem 2rem;
+  border-radius: 0.5rem;
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
 .book-now-btn:hover {
-  background: #52467f;
+  background: #6b5fa7;
 }
 
-.book-now-btn:disabled,
-.book-now-btn.disabled {
-  background: #9ca3af;
-  color: #6b7280;
-  cursor: not-allowed;
-  opacity: 0.7;
+.view-services-btn {
+  background: transparent;
+  color: #7c6bb0;
+  border: 2px solid #7c6bb0;
+  padding: 0.75rem 2rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.book-now-btn:disabled:hover,
-.book-now-btn.disabled:hover {
-  background: #9ca3af;
+.view-services-btn:hover {
+  background: #7c6bb0;
+  color: white;
 }
 
 /* Reviews Section */
 .reviews-section {
-  margin-top: 3rem;
-}
-
-.reviews-title {
-  font-size: 2rem;
-  font-weight: bold;
-  color: #1f2937;
-  text-align: center;
-  margin: 0 0 2rem 0;
-}
-
-.reviews-container {
-  display: grid;
-  gap: 1.5rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
   margin-bottom: 2rem;
 }
 
-.review-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  padding: 1.5rem;
-}
-
-.review-rating {
-  display: flex;
-  gap: 0.25rem;
-  margin-bottom: 1rem;
-}
-
-.review-text {
-  color: #6b7280;
-  line-height: 1.6;
-  margin-bottom: 1rem;
-}
-
-.review-author {
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 0.25rem;
-}
-
-.review-date {
-  font-size: 0.875rem;
-  color: #9ca3af;
-}
-
-.show-more-container {
-  text-align: center;
-}
-
-.show-more-btn {
-  background: none;
-  border: none;
-  color: #625397;
-  font-weight: 600;
-  cursor: pointer;
-  text-decoration: underline;
-}
-
- .show-more-btn:hover {
-   color: #52467f;
- }
-
-/* Reviews Header */
 .reviews-header {
   display: flex;
   justify-content: space-between;
@@ -1208,13 +751,168 @@ onMounted(async () => {
   margin-bottom: 2rem;
 }
 
-.review-actions {
+.reviews-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+}
+
+.reviews-subtitle {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #6b7280;
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.reviews-container {
   display: flex;
+  flex-direction: column;
   gap: 1rem;
 }
 
+.review-card {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 1px solid #e5e7eb;
+  transition: box-shadow 0.2s ease;
+}
+
+.review-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.review-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.review-rating .fa-star {
+  font-size: 0.875rem;
+}
+
+.review-rating .fa-star.filled {
+  color: #fbbf24;
+}
+
+.review-rating .fa-star.empty {
+  color: #d1d5db;
+}
+
+.rating-text {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+  margin-left: 0.5rem;
+}
+
+.review-meta {
+  text-align: right;
+}
+
+.review-author {
+  display: block;
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.875rem;
+}
+
+.review-date {
+  display: block;
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+.review-text {
+  color: #374151;
+  line-height: 1.6;
+  font-size: 0.875rem;
+}
+
+.empty-reviews {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: #6b7280;
+}
+
+.empty-reviews p {
+  margin: 0.5rem 0;
+}
+
+.empty-reviews p:first-of-type {
+  font-weight: 500;
+  font-size: 1rem;
+  color: #374151;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+/* Loading and Error States */
+.loading-state {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+}
+
+.loading-spinner {
+  border: 2px solid #e5e7eb;
+  border-top: 2px solid #7c6bb0;
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-state {
+  text-align: center;
+  padding: 2rem;
+}
+
+.error-message {
+  color: #dc2626;
+  margin-bottom: 1rem;
+}
+
+.retry-btn {
+  background: #7c6bb0;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.retry-btn:hover {
+  background: #6b5a9f;
+}
+
+
+
 .add-review-btn {
-  background: #625397;
+  background: #667eea;
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -1225,17 +923,22 @@ onMounted(async () => {
 }
 
 .add-review-btn:hover {
-  background: #52467f;
+  background: #5a6fd8;
+}
+
+.review-actions {
+  display: flex;
+  align-items: center;
 }
 
 .review-notice {
-  color: #6b7280;
+  color: #666;
   font-size: 0.9rem;
   font-style: italic;
   padding: 0.5rem 1rem;
   background: #f8f9fa;
   border-radius: 6px;
-  border-left: 3px solid #625397;
+  border-left: 3px solid #667eea;
 }
 
 /* Review Form */
@@ -1248,7 +951,7 @@ onMounted(async () => {
 
 .review-form h3 {
   margin: 0 0 1rem 0;
-  color: #1f2937;
+  color: #333;
 }
 
 .star-rating-input {
@@ -1260,7 +963,7 @@ onMounted(async () => {
 
 .star-rating-input label {
   font-weight: 600;
-  color: #374151;
+  color: #333;
 }
 
 .stars {
@@ -1287,11 +990,11 @@ onMounted(async () => {
 
 .star-button:hover {
   transform: scale(1.1);
-  background-color: rgba(251, 191, 36, 0.1);
+  background-color: rgba(255, 194, 48, 0.1);
 }
 
 .star-button.filled {
-  color: #fbbf24;
+  color: #FFC230;
 }
 
 .star-button.empty {
@@ -1299,11 +1002,11 @@ onMounted(async () => {
 }
 
 .star-button.filled:hover {
-  color: #f59e0b;
+  color: #FFB800;
 }
 
 .star-button.empty:hover {
-  color: #fbbf24;
+  color: #FFC230;
 }
 
 .form-group {
@@ -1313,14 +1016,14 @@ onMounted(async () => {
 .form-group label {
   display: block;
   font-weight: 600;
-  color: #374151;
+  color: #333;
   margin-bottom: 0.5rem;
 }
 
 .form-group textarea {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid #ddd;
   border-radius: 8px;
   resize: vertical;
   font-family: inherit;
@@ -1329,26 +1032,26 @@ onMounted(async () => {
 .char-count {
   text-align: right;
   font-size: 0.8rem;
-  color: #6b7280;
+  color: #666;
   margin-top: 0.25rem;
 }
 
 .form-actions {
   display: flex;
   gap: 1rem;
-  align-items: center;
 }
 
 .validation-status {
   display: flex;
   gap: 0.5rem;
+  margin-bottom: 1rem;
 }
 
 .validation-error {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #dc2626;
+  color: #dc3545;
   font-size: 0.85rem;
   font-weight: 500;
 }
@@ -1361,7 +1064,7 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #059669;
+  color: #28a745;
   font-size: 0.85rem;
   font-weight: 500;
 }
@@ -1380,844 +1083,74 @@ onMounted(async () => {
 }
 
 .submit-btn {
-  background: #625397;
+  background: #28a745;
   color: white;
 }
 
 .submit-btn:hover:not(:disabled) {
-  background: #52467f;
+  background: #218838;
 }
 
 .submit-btn:disabled {
-  background: #6b7280;
+  background: #6c757d;
   cursor: not-allowed;
 }
 
 .cancel-btn {
-  background: #625397;
+  background: #6c757d;
   color: white;
 }
 
 .cancel-btn:hover {
-  background: #52467f;
-}
-
-/* Reviews List */
-.reviews-list {
-  margin-top: 2rem;
-}
-
-.loading-state, .error-state {
-  text-align: center;
-  padding: 2rem;
-  color: #6b7280;
-}
-
-.retry-btn {
-  background: #625397;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  margin-top: 1rem;
-}
-
-.retry-btn:hover {
-  background: #52467f;
-}
-
-.reviews-subtitle {
-  font-size: 1.1rem;
-  font-weight: 500;
-  color: #6b7280;
-  margin: 0 0 1rem 0;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.review-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 1rem;
-}
-
-.review-meta {
-  text-align: right;
-}
-
-.review-author {
-  display: block;
-  font-weight: 600;
-  color: #374151;
-  font-size: 0.875rem;
-}
-
-.review-date {
-  display: block;
-  font-size: 0.75rem;
-  color: #6b7280;
-  margin-top: 0.25rem;
-}
-
-.empty-reviews {
-  text-align: center;
-  padding: 3rem 2rem;
-  color: #6b7280;
-}
-
-.empty-reviews p {
-  margin: 0.5rem 0;
-}
-
-.empty-reviews p:first-of-type {
-  font-weight: 500;
-  font-size: 1rem;
-}
-
-.empty-icon {
-  font-size: 4rem;
-  margin-bottom: 1rem;
+  background: #5a6268;
 }
 
 
-
-/* Responsive Design */
-@media (max-width: 1200px) {
-  .main-content {
-    max-width: 95%;
-    padding: 1.5rem;
-  }
-  
-  .content-grid {
-    grid-template-columns: 1.5fr 1fr;
-    gap: 1.5rem;
-  }
-  
-  .page-title h1 {
-    font-size: 2rem;
-  }
-}
-
-@media (max-width: 1024px) {
-  .main-content {
-    padding: 1rem;
-  }
-  
-  .content-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-  
-  .technician-info-card {
-    padding: 1.5rem;
-    width: 100%;
-  }
-  
-  .booking-info-card {
-    padding: 1.5rem;
-    width: 100%;
-  }
-  
-  .profile-section {
-    flex-direction: column;
-    text-align: center;
-    gap: 1rem;
-    width: 100%;
-  }
-  
-  .profile-picture {
-    width: 150px;
-    height: 150px;
-  }
-  
-  .technician-name {
-    font-size: 1.5rem;
-  }
-  
-  .technician-specialization {
-    font-size: 1rem;
-  }
-}
 
 @media (max-width: 768px) {
-  .main-content {
-    padding: 0.75rem;
-    width: 100%;
-  }
-  
-  .page-title {
-    margin-bottom: 2rem;
-    width: 100%;
-  }
-  
-  .page-title h1 {
-    font-size: 1.75rem;
-  }
-  
-  .technician-info-card {
+  .profile-main {
     padding: 1rem;
-    border-radius: 8px;
-    width: 100%;
   }
   
-  .booking-info-card {
-    padding: 1rem;
-    border-radius: 8px;
-    width: 100%;
-  }
-  
-  .profile-section {
-    width: 100%;
+  .profile-card {
     flex-direction: column;
-    text-align: center;
+  }
+  
+  .profile-img {
+    width: 100%;
+    height: 200px;
+  }
+  
+  .reviews-header {
+    flex-direction: column;
     gap: 1rem;
+    align-items: flex-start;
   }
   
-  .profile-picture {
-    width: 120px;
-    height: 120px;
-  }
-  
-  .profile-details {
-    width: 100%;
-  }
-  
-  .technician-name {
-    font-size: 1.25rem;
-  }
-  
-  .technician-specialization {
-    font-size: 0.9rem;
-  }
-  
-  .technician-details {
-    margin: 1rem 0;
-    width: 100%;
-  }
-  
-  .detail-item {
-    padding: 0.375rem 0;
-    font-size: 0.9rem;
-    width: 100%;
-  }
-  
-  .skills-title {
-    font-size: 1.1rem;
-  }
-  
-  .skills-list {
+  .star-rating-input {
+    flex-direction: column;
+    align-items: flex-start;
     gap: 0.5rem;
-    width: 100%;
   }
   
-  .skill-item {
-    padding: 0.5rem;
-    font-size: 0.85rem;
-    width: 100%;
+  .form-actions {
+    flex-direction: column;
   }
   
-  .booking-title {
-    font-size: 1.25rem;
-  }
-  
-  .section-subtitle {
-    font-size: 1rem;
-  }
-  
-  .date-options {
+  .review-header {
+    flex-direction: column;
+    align-items: flex-start;
     gap: 0.5rem;
-    width: 100%;
   }
   
-  .date-option {
-    padding: 0.5rem;
-    font-size: 0.8rem;
+  .about-content {
+    gap: 0.5rem;
   }
   
-  .time-slot {
-    padding: 0.5rem;
-    font-size: 0.8rem;
-  }
-  
-  .visit-price {
+  .about-item {
+    min-width: 150px;
     padding: 0.75rem;
-    width: 100%;
-  }
-  
-  .price-label {
     font-size: 0.9rem;
   }
-  
-  .price-value {
-    font-size: 1rem;
-  }
-  
-  .book-now-btn {
-    padding: 0.75rem;
-    font-size: 1rem;
-    width: 100%;
-  }
-  
-  .date-nav-btn {
-    padding: 0.5rem;
-    font-size: 0.8rem;
-  }
-}
-
-@media (max-width: 600px) {
-  .main-content {
-    padding: 0.5rem;
-    width: 100%;
-  }
-  
-  .page-title h1 {
-    font-size: 1.5rem;
-  }
-  
-  .technician-info-card {
-    padding: 0.75rem;
-    width: 100%;
-  }
-  
-  .booking-info-card {
-    padding: 0.75rem;
-    width: 100%;
-  }
-  
-  .profile-section {
-    width: 100%;
-  }
-  
-  .profile-picture {
-    width: 100px;
-    height: 100px;
-  }
-  
-  .profile-details {
-    width: 100%;
-  }
-  
-  .technician-name {
-    font-size: 1.1rem;
-  }
-  
-  .technician-specialization {
-    font-size: 0.8rem;
-  }
-  
-  .detail-item {
-    padding: 0.25rem 0;
-    font-size: 0.8rem;
-    width: 100%;
-  }
-  
-  .skills-title {
-    font-size: 1rem;
-  }
-  
-  .skill-item {
-    padding: 0.375rem;
-    font-size: 0.75rem;
-    width: 100%;
-  }
-  
-  .booking-title {
-    font-size: 1.1rem;
-  }
-  
-  .section-subtitle {
-    font-size: 0.9rem;
-  }
-  
-  .date-options {
-    gap: 0.25rem;
-    width: 100%;
-  }
-  
-  .date-option {
-    padding: 0.375rem;
-    font-size: 0.75rem;
-  }
-  
-  .time-slot {
-    padding: 0.375rem;
-    font-size: 0.75rem;
-  }
-  
-  .visit-price {
-    padding: 0.5rem;
-    width: 100%;
-  }
-  
-  .price-label {
-    font-size: 0.8rem;
-  }
-  
-  .price-value {
-    font-size: 0.9rem;
-  }
-  
-  .book-now-btn {
-    padding: 0.5rem;
-    font-size: 0.9rem;
-    width: 100%;
-  }
-  
-  .date-nav-btn {
-    padding: 0.375rem;
-    font-size: 0.7rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .main-content {
-    padding: 0.25rem;
-    width: 100%;
-  }
-  
-  .page-title {
-    margin-bottom: 1.5rem;
-    width: 100%;
-  }
-  
-  .page-title h1 {
-    font-size: 1.25rem;
-  }
-  
-  .technician-info-card {
-    padding: 0.5rem;
-    width: 100%;
-  }
-  
-  .booking-info-card {
-    padding: 0.5rem;
-    width: 100%;
-  }
-  
-  .profile-section {
-    width: 100%;
-  }
-  
-  .profile-picture {
-    width: 80px;
-    height: 80px;
-  }
-  
-  .profile-details {
-    width: 100%;
-  }
-  
-  .technician-name {
-    font-size: 1rem;
-  }
-  
-  .technician-specialization {
-    font-size: 0.75rem;
-  }
-  
-  .detail-item {
-    padding: 0.125rem 0;
-    font-size: 0.75rem;
-    width: 100%;
-  }
-  
-  .skills-title {
-    font-size: 0.9rem;
-  }
-  
-  .skill-item {
-    padding: 0.25rem;
-    font-size: 0.7rem;
-    width: 100%;
-  }
-  
-  .booking-title {
-    font-size: 1rem;
-  }
-  
-  .section-subtitle {
-    font-size: 0.8rem;
-  }
-  
-  .date-options {
-    gap: 0.125rem;
-    width: 100%;
-  }
-  
-  .date-option {
-    padding: 0.25rem;
-    font-size: 0.7rem;
-  }
-  
-  .time-slot {
-    padding: 0.25rem;
-    font-size: 0.7rem;
-  }
-  
-  .visit-price {
-    padding: 0.375rem;
-    width: 100%;
-  }
-  
-  .price-label {
-    font-size: 0.75rem;
-  }
-  
-  .price-value {
-    font-size: 0.8rem;
-  }
-  
-  .book-now-btn {
-    padding: 0.375rem;
-    font-size: 0.8rem;
-    width: 100%;
-  }
-  
-  .date-nav-btn {
-    padding: 0.25rem;
-    font-size: 0.6rem;
-  }
-}
-
-@media (max-width: 360px) {
-  .main-content {
-    padding: 0.125rem;
-    width: 100%;
-  }
-  
-  .page-title h1 {
-    font-size: 1.1rem;
-  }
-  
-  .technician-info-card {
-    padding: 0.375rem;
-    width: 100%;
-  }
-  
-  .booking-info-card {
-    padding: 0.375rem;
-    width: 100%;
-  }
-  
-  .profile-section {
-    width: 100%;
-  }
-  
-  .profile-picture {
-    width: 70px;
-    height: 70px;
-  }
-  
-  .profile-details {
-    width: 100%;
-  }
-  
-  .technician-name {
-    font-size: 0.9rem;
-  }
-  
-  .technician-specialization {
-    font-size: 0.7rem;
-  }
-  
-  .detail-item {
-    padding: 0.1rem 0;
-    font-size: 0.7rem;
-    width: 100%;
-  }
-  
-  .skills-title {
-    font-size: 0.8rem;
-  }
-  
-  .skill-item {
-    padding: 0.2rem;
-    font-size: 0.65rem;
-    width: 100%;
-  }
-  
-  .booking-title {
-    font-size: 0.9rem;
-  }
-  
-  .section-subtitle {
-    font-size: 0.75rem;
-  }
-  
-  .date-option {
-    padding: 0.2rem;
-    font-size: 0.65rem;
-  }
-  
-  .time-slot {
-    padding: 0.2rem;
-    font-size: 0.65rem;
-  }
-  
-  .visit-price {
-    padding: 0.25rem;
-    width: 100%;
-  }
-  
-  .price-label {
-    font-size: 0.7rem;
-  }
-  
-  .price-value {
-    font-size: 0.75rem;
-  }
-  
-  .book-now-btn {
-    padding: 0.25rem;
-    font-size: 0.75rem;
-    width: 100%;
-  }
-  
-  .date-nav-btn {
-    padding: 0.2rem;
-    font-size: 0.55rem;
-  }
-}
-
-/* Dark Mode Styles */
-.dark .technician-profile-page {
-  background-color: var(--primary-bg);
-  color: var(--primary-text);
-}
-
-.dark .loading-container,
-.dark .error-container {
-  background-color: var(--primary-bg);
-  color: var(--primary-text);
-}
-
-.dark .loading-spinner {
-  border-color: var(--border-color);
-  border-top-color: var(--primary);
-}
-
-.dark .error-message {
-  color: #f87171;
-}
-
-.dark .header-contact-bar {
-  background: linear-gradient(135deg, #f59e0b, #f97316);
-}
-
-.dark .review-card{
-  background: var(--input-bg);
-  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-}
-.dark .main-nav {
-  background: var(--secondary-bg);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-.dark .logo-text {
-  color: var(--primary-text);
-}
-
-.dark .nav-link {
-  color: var(--text-muted);
-}
-
-.dark .nav-link:hover {
-  color: var(--primary);
-}
-
-.dark .nav-icon {
-  color: var(--text-muted);
-}
-
-.dark .nav-icon:hover {
-  color: var(--primary);
-}
-
-.dark .main-content {
-  background-color: var(--primary-bg);
-}
-
-.dark .page-title h1 {
-  color: var(--primary-color);
-}
-
-.dark .technician-info-card {
-  background: var(--secondary-bg);
-  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-}
-
-.dark .technician-name {
-  color: var(--primary-text);
-}
-
-.dark .technician-specialization {
-  color: var(--text-muted);
-}
-
-.dark .detail-item {
-  border-bottom-color: var(--border-color);
-}
-
-.dark .detail-label {
-  color: var(--text-muted);
-}
-
-.dark .detail-value {
-  color: var(--primary-text);
-}
-
-.dark .skills-title {
-  color: var(--primary-text);
-}
-
-.dark .skill-item {
-  color: var(--primary-text);
-}
-
-.dark .booking-info-card {
-  background: var(--secondary-bg);
-  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-}
-
-.dark .booking-title {
-  color: var(--primary-text);
-}
-
-.dark .section-subtitle {
-  color: var(--primary-text);
-}
-
-.dark .date-option {
-  background: var(--input-bg);
-  color: var(--primary-text-dark);
-}
-
-.dark .date-option:hover {
-  background: var(--border-color);
-}
-
-.dark .date-option.selected {
-  background: var(--primary);
-  color: var(--primary-text);
-}
-
-.dark .date-option.unavailable {
-  background: #7f1d1d;
-  color: #fecaca;
-  border-color: #ef4444;
-}
-
-.dark .date-option.loading {
-  background: var(--input-bg);
-  color: var(--text-muted);
-  border-color: var(--border-color);
-}
-
-.dark .time-slot {
-  background: var(--input-bg);
-  color: var(--text-muted);
-}
-
-.dark .time-slot.unavailable {
-  background-color: #7f1d1d;
-  color: #fecaca;
-  border-color: #ef4444;
-}
-
-.dark .time-slot.loading {
-  background-color: var(--input-bg);
-  color: var(--text-muted);
-  border-color: var(--border-color);
-}
-.dark .review-actions{
-  background: var(--icon-color);
-  color: var(--primary-text-dark);
-}
-.dark .visit-price {
-  background: var(--input-bg);
-  color: var(--text-muted);
-}
-
-.dark .price-label {
-  color: var(--primary-text-dark);
-}
-
-.dark .price-value {
-  color: var(--primary);
-}
-
-.dark .book-now-btn {
-  background: var(--primary);
-  color: var(--primary-text);
-}
-
-.dark .book-now-btn:hover {
-  background: var(--secondary);
-}
-
-.dark .book-now-btn:disabled,
-.dark .book-now-btn.disabled {
-  background: var(--text-muted);
-  color: var(--border-color);
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-
-.dark .book-now-btn:disabled:hover,
-.dark .book-now-btn.disabled:hover {
-  background: var(--text-muted);
-}
-
-.dark .date-nav-btn {
-  background: var(--input-bg);
-  color: var(--primary-text-dark);
-  border-color: var(--border-color);
-}
-
-.dark .date-nav-btn:hover {
-  background: var(--icon-color);
-}
-
-.dark .reviews-section {
-  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-}
-
-.dark .reviews-title {
-  color: var(--primary-text);
-}
-
-.dark .review-item {
-  background: var(--input-bg);
-  border-color: var(--border-color);
-  color: var(--primary-text-dark);
-}
-
-.dark .review-header {
-  border-bottom-color: var(--border-color);
-  color: var(--primary-text-dark);
-}
-
-.dark .reviewer-name {
-  color: var(--primary-text);
-}
-
-.dark .review-date {
-  color: var(--text-muted);
-}
-
-.dark .review-text {
-  color: var(--primary-text-dark);
-}
-
-.dark .fa-star {
-  color: #fbbf24 !important;
-}
-
-.dark .star-empty {
-  color: var(--border-color);
 }
 </style> 

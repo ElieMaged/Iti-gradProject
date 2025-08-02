@@ -8,61 +8,122 @@
       <!-- Quick Info -->
       <div class="footer__col footer__col--desc">
         <div class="footer__logo-row">
-          <img class="footer__logo" src="../assets/Logo.png" alt="BoltFix logo">
+          <img
+            class="footer__logo"
+            src="../assets/Logo.png"
+            alt="BoltFix logo"
+          />
         </div>
-        <p class="footer__desc">{{ $t('footerQuickInfo') }}</p>
-        <div class="footer__social-label">{{ $t('footerSocialLinks') }}</div>
+        <p class="footer__desc">{{ $t("footerQuickInfo") }}</p>
+        <div class="footer__social-label">{{ $t("footerSocialLinks") }}</div>
         <div class="footer__social-row">
-          <a href="https://www.facebook.com/" target="_blank" aria-label="Facebook" class="footer__social-icon"><i
-              class="fa-brands fa-facebook-f"></i></a>
-          <a href="https://twitter.com/" target="_blank" aria-label="X" class="footer__social-icon"><i
-              class="fa-brands fa-x-twitter"></i></a>
-          <a href="https://www.linkedin.com/" target="_blank" aria-label="LinkedIn" class="footer__social-icon"><i
-              class="fa-brands fa-linkedin-in"></i></a>
-          <a href="https://www.youtube.com/" target="_blank" aria-label="YouTube" class="footer__social-icon"><i
-              class="fa-brands fa-youtube"></i></a>
+          <a
+            href="https://www.facebook.com/"
+            target="_blank"
+            aria-label="Facebook"
+            class="footer__social-icon"
+            ><i class="fa-brands fa-facebook-f"></i
+          ></a>
+          <a
+            href="https://twitter.com/"
+            target="_blank"
+            aria-label="X"
+            class="footer__social-icon"
+            ><i class="fa-brands fa-x-twitter"></i
+          ></a>
+          <a
+            href="https://www.linkedin.com/"
+            target="_blank"
+            aria-label="LinkedIn"
+            class="footer__social-icon"
+            ><i class="fa-brands fa-linkedin-in"></i
+          ></a>
+          <a
+            href="https://www.youtube.com/"
+            target="_blank"
+            aria-label="YouTube"
+            class="footer__social-icon"
+            ><i class="fa-brands fa-youtube"></i
+          ></a>
         </div>
       </div>
       <!-- Quick Links -->
       <div class="footer__col">
-        <div class="footer__col-title">{{ $t('footerQuickLink') }}</div>
+        <div class="footer__col-title">{{ $t("footerQuickLink") }}</div>
         <ul class="footer__list">
-          <li><router-link to="/">{{ $t('footerHome') }}</router-link></li>
-          <li><router-link to="/about">{{ $t('footerAboutUs') }}</router-link></li>
-          <li><router-link to="/services">{{ $t('footerServices') }}</router-link></li>
-          <li><router-link to="/contact">{{ $t('footerContactUs') }}</router-link></li>
-          <li><router-link to="/faqs">{{ $t('footerFaqs') }}</router-link></li>
+          <li>
+            <router-link to="/">{{ $t("footerHome") }}</router-link>
+          </li>
+          <li>
+            <router-link to="/about">{{ $t("footerAboutUs") }}</router-link>
+          </li>
+          <li>
+            <router-link to="/services">{{ $t("footerServices") }}</router-link>
+          </li>
+          <li>
+            <router-link to="/contact">{{ $t("footerContactUs") }}</router-link>
+          </li>
+          <li>
+            <router-link to="/faqs">{{ $t("footerFaqs") }}</router-link>
+          </li>
         </ul>
       </div>
       <!-- Services -->
       <div class="footer__col">
-        <div class="footer__col-title">{{ $t('footerService') }}</div>
+        <div class="footer__col-title">{{ $t("footerService") }}</div>
         <ul class="footer__list">
-          <li><router-link to="/plumbing">{{ $t('footerPlumbing') }}</router-link></li>
-          <li><router-link to="/aircondition">{{ $t('footerAirConditioner') }}</router-link></li>
-          <li><router-link to="/electricity">{{ $t('footerElectricity') }}</router-link></li>
-          <li><router-link to="/wallfinishing">{{ $t('footerWallFinishing') }}</router-link></li>
-          <li><router-link to="/carpentry">{{ $t('footerCarpentry') }}</router-link></li>
+          <li>
+            <router-link to="/plumbing">{{ $t("footerPlumbing") }}</router-link>
+          </li>
+          <li>
+            <router-link to="/aircondition">{{
+              $t("footerAirConditioner")
+            }}</router-link>
+          </li>
+          <li>
+            <router-link to="/electricity">{{
+              $t("footerElectricity")
+            }}</router-link>
+          </li>
+          <li>
+            <router-link to="/wallfinishing">{{
+              $t("footerWallFinishing")
+            }}</router-link>
+          </li>
+          <li>
+            <router-link to="/carpentry">{{
+              $t("footerCarpentry")
+            }}</router-link>
+          </li>
         </ul>
       </div>
       <!-- Contact Us -->
       <div class="footer__col footer__col--contact">
-        <div class="footer__col-title">{{ $t('footerContactUs') }}</div>
+        <div class="footer__col-title">{{ $t("footerContactUs") }}</div>
         <ul class="footer__contact-list">
-          <li><i class="fa-solid fa-phone footer__contact-icon"></i><span>{{ $t('footerPhone') }}</span></li>
-          <li><i class="fa-solid fa-envelope footer__contact-icon"></i><a href="mailto:boltfix@gmail.com">boltfix@gmail.com</a></li>
-          <li><i class="fa-solid fa-location-dot footer__contact-icon"></i><span>{{ $t('footerAddress') }}</span></li>
+          <li>
+            <i class="fa-solid fa-phone footer__contact-icon"></i
+            ><span>{{ $t("footerPhone") }}</span>
+          </li>
+          <li>
+            <i class="fa-solid fa-envelope footer__contact-icon"></i
+            ><a href="mailto:boltfix@gmail.com">boltfix@gmail.com</a>
+          </li>
+          <li>
+            <i class="fa-solid fa-location-dot footer__contact-icon"></i
+            ><span>{{ $t("footerAddress") }}</span>
+          </li>
         </ul>
       </div>
     </div>
-    <div class="footer__bottom">
+    <div class="footer__bottom custom-container">
       <hr class="footer__divider" />
       <div class="footer__bottom-row">
-        <span>{{ $t('footerCopyright') }}</span>
+        <span>{{ $t("footerCopyright") }}</span>
         <div class="footer__bottom-links">
-          <a href="#">{{ $t('footerPrivacyPolicy') }}</a>
+          <a href="#">{{ $t("footerPrivacyPolicy") }}</a>
           <span class="footer__bottom-sep">|</span>
-          <a href="#">{{ $t('footerTermsOfService') }}</a>
+          <a href="#">{{ $t("footerTermsOfService") }}</a>
         </div>
       </div>
     </div>
@@ -71,18 +132,19 @@
 
 <style lang="scss" scoped>
 .footer {
-  background: #6B5FA7;
+  background: #6b5fa7;
   color: #fff;
   border-radius: 20px 20px 0 0;
-  font-family: 'Nunito', Arial, sans-serif;
-  padding: 0;
+  font-family: "Nunito", Arial, sans-serif;
+  padding: 76px 0 60px;
 
   &__main {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
+    display: grid;
+    justify-items: center;
+    grid-template-columns: repeat(4, 1fr);
     padding: 3rem 2rem 2rem 2rem;
     gap: 2rem;
+    margin: 0 auto;
   }
 
   &__col {
@@ -123,7 +185,7 @@
   }
 
   &__brand--fix {
-    color: #FFD230;
+    color: #ffd230;
   }
 
   &__desc {
@@ -153,7 +215,7 @@
     height: 40px;
     border-radius: 50%;
     background: #fff;
-    color: #6B5FA7;
+    color: #6b5fa7;
     font-size: 1.3rem;
     transition: background 0.2s, color 0.2s;
     border: none;
@@ -161,8 +223,8 @@
   }
 
   &__social-icon:hover {
-    background: #FFD230;
-    color: #6B5FA7;
+    background: #ffd230;
+    color: #6b5fa7;
   }
 
   &__col-title {
@@ -188,7 +250,7 @@
   }
 
   &__list li a:hover {
-    color: #FFD230;
+    color: #ffd230;
   }
 
   &__col--contact {
@@ -209,7 +271,7 @@
   &__contact-icon {
     margin-right: 0.7rem;
     font-size: 1.1rem;
-    color: #FFD230;
+    color: var(--light-purple);
     width: 20px;
     text-align: center;
   }
@@ -239,26 +301,33 @@
   }
 
   &__bottom-links a {
-    color: #fff;
+    // color: #fff;
     text-decoration: none;
     font-size: 0.95rem;
     transition: color 0.2s;
   }
 
   &__bottom-links a:hover {
-    color: #FFD230;
+    color: #ffd230;
   }
 
   &__bottom-sep {
-    color: #fff;
+    // color: #fff;
     opacity: 0.5;
     font-size: 1.1rem;
   }
 }
-
+.footer__bottom-row span,
+.footer__bottom-links a {
+  color: var(--color-white);
+}
+.dark .footer__bottom-row span,
+.dark .footer__bottom-links a {
+  color: var(--color-black);
+}
 @media (max-width: 900px) {
   .footer__main {
-    flex-direction: column;
+    grid-template-columns: repeat(2, 1fr);
     align-items: flex-start;
     gap: 2.5rem;
   }
@@ -282,11 +351,6 @@
   .footer {
     padding: 3rem 1rem 1rem 1rem;
   }
-
-  .footer__main {
-    gap: 2rem;
-  }
-
   .footer__col-title {
     font-size: 1.1rem;
   }
@@ -310,6 +374,8 @@
   }
 
   .footer__main {
+    grid-template-columns: repeat(1, 1fr);
+    justify-items: start;
     gap: 1.5rem;
   }
 

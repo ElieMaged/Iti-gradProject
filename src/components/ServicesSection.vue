@@ -1,44 +1,38 @@
 <template>
   <section class="services-section py-28">
-    <div class="custom-container">
-      <div class="">
-        <h2 class="services-title">{{ $t("servicesSectionTitle") }}</h2>
-        <hr class="services-divider" />
-        <div class="services-grid">
-          <div
-            v-for="(service, idx) in services"
-            :key="idx"
-            class="service-card"
-          >
-            <img
-              :src="service.image"
-              :alt="service.title"
-              class="service-image"
-            />
-            <div class="service-content">
-              <h3 class="service-title">{{ $t(service.title) }}</h3>
-              <p class="service-desc">{{ $t(service.desc) }}</p>
-              <button
-                class="service-btn"
-                @click="$router.push(service.route || '#')"
-              >
-                {{ $t("bookNow") }}
-                <span class="arrow"
-                  ><svg
-                    width="13"
-                    height="12"
-                    viewBox="0 0 13 12"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M10.3717 8.07225C10.3783 8.58189 10.7968 9.0004 11.3065 9.00702C11.8161 9.01364 12.2239 8.60586 12.2173 8.09622L12.1269 1.13614C12.1203 0.626497 11.7017 0.207986 11.1921 0.201368L4.23203 0.110977C3.72238 0.104357 3.3146 0.512138 3.32122 1.02178C3.32784 1.53142 3.74635 1.94993 4.25599 1.95655L8.98828 2.01801L0.667927 10.3384C0.312237 10.694 0.319825 11.2783 0.684875 11.6434C1.04993 12.0084 1.6342 12.016 1.98989 11.6603L10.3102 3.33997L10.3717 8.07225Z"
-                      fill="black"
-                    />
-                  </svg>
-                </span>
-              </button>
-            </div>
+    <div class="mx-5 md:mx-10 lg:mx-20">
+      <h2 class="services-title">{{ $t("servicesSectionTitle") }}</h2>
+      <hr class="services-divider" />
+      <div class="services-grid">
+        <div v-for="(service, idx) in services" :key="idx" class="service-card">
+          <img
+            :src="service.image"
+            :alt="service.title"
+            class="service-image"
+          />
+          <div class="service-content">
+            <h3 class="service-title">{{ $t(service.title) }}</h3>
+            <p class="service-desc">{{ $t(service.desc) }}</p>
+            <button
+              class="service-btn"
+              @click="$router.push(service.route || '#')"
+            >
+              {{ $t("bookNow") }}
+              <span class="arrow"
+                ><svg
+                  width="13"
+                  height="12"
+                  viewBox="0 0 13 12"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10.3717 8.07225C10.3783 8.58189 10.7968 9.0004 11.3065 9.00702C11.8161 9.01364 12.2239 8.60586 12.2173 8.09622L12.1269 1.13614C12.1203 0.626497 11.7017 0.207986 11.1921 0.201368L4.23203 0.110977C3.72238 0.104357 3.3146 0.512138 3.32122 1.02178C3.32784 1.53142 3.74635 1.94993 4.25599 1.95655L8.98828 2.01801L0.667927 10.3384C0.312237 10.694 0.319825 11.2783 0.684875 11.6434C1.04993 12.0084 1.6342 12.016 1.98989 11.6603L10.3102 3.33997L10.3717 8.07225Z"
+                    fill="black"
+                  />
+                </svg>
+              </span>
+            </button>
           </div>
         </div>
       </div>
@@ -122,7 +116,7 @@ export default {
 }
 @media (max-width: 1000px) {
   .services-section {
-    margin: 80px 0;
+    /* margin: 80px 0; */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -243,7 +237,7 @@ export default {
 /* Responsive design */
 @media (max-width: 1024px) {
   .services-section {
-    margin: 60px 0;
+    /* margin: 60px 0; */
   }
   .services-title {
     font-size: 2.2rem;
@@ -258,7 +252,7 @@ export default {
 
 @media (max-width: 700px) {
   .services-section {
-    margin: 40px 0;
+    /* margin: 40px 0; */
   }
   .services-title {
     font-size: 2rem;
@@ -289,7 +283,7 @@ export default {
 
 @media (max-width: 480px) {
   .services-section {
-    margin: 20px 0;
+    /* margin: 20px 0; */
   }
   .services-title {
     font-size: 1.5rem;

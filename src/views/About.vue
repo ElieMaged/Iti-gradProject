@@ -86,7 +86,7 @@ export default {
 <template>
     <!-- //About-1// -->
   <div class="">
-      <div class="contact-1">
+      <div class="contact-1 m-5">
         <div class="blur"></div>
         <h1 class="text-center flex flex-row justify-center h1">{{ $t('aboutUsTitle') }}</h1>
     </div>
@@ -116,22 +116,25 @@ export default {
       <p class="text-lg">{{ $t(stat.label) }}</p>
     </div>
    </div>
-               <!-- About-3 -->
-      <div class="mt-20 mb-10">
-     <h1 class="text-center">{{ $t('whyChooseUsTitle') }}</h1>
-     </div>
+   <!-- About-3 -->
+    <div class="mt-20 mb-20">
+   <h1 class="text-center">{{ $t('whyChooseUsTitle') }}</h1>
+   </div>
    <section class="services-features">
     <div class="services-container">
-             <div v-for="(service, index) in services" :key="index" class="service-card">
-         <div class="service-icon">
-           <i :class="service.icon" style="color: var(--secondary-color); font-size: 3rem;"></i>
-         </div>
-         <h3 class="service-title">{{ $t(service.title) }}</h3>
-         <p class="service-description">{{ $t(service.description) }}</p>
-       </div>
+      <div v-for="(service, index) in services" :key="index" class="service-card">
+        <div class="service-icon">
+          <i :class="service.icon" style="color: var(--secondary-color); font-size: 3rem;"></i>
+        </div>
+        <h3 class="service-title">{{ $t(service.title) }}</h3>
+        <p class="service-description">{{ $t(service.description) }}</p>
+        <button class="get-started-btn" @click="$router.push('/allservices')">
+          {{ $t('getStartedButtonText') }}
+          <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
     </div>
-     </section>
-   
+  </section>
 <EndCard />
 <!-- <div class="flex flex-col justify-center end md:m-20 align-items-center">
 <h2 class="h1">We're Here to Help You.</h2>
@@ -182,15 +185,11 @@ export default {
   background: #fff;
   border-radius: 16px;
   padding: 32px 24px;
-  text-align: left;
+  text-align: center;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   flex: 1;
   max-width: 280px;
   transition: transform 0.2s;
-  display: flex;
-  flex-direction: column;
-  gap: 2.5rem;
-  position: relative;
 }
 .dark .service-card {
   background: var(--secondary-bg);
@@ -202,10 +201,7 @@ export default {
 }
 
 .service-icon {
-  position: absolute;
-  top: 24px;
-  left: 24px;
-  margin-bottom: 0;
+  margin-bottom: 20px;
 }
 
 .service-icon i {
@@ -219,7 +215,6 @@ export default {
   color: #333;
   margin-bottom: 16px;
   font-family: Outfit, sans-serif;
-  margin-top: 4rem;
 }
 .dark .service-title {
   color: var(--primary-text);
@@ -228,9 +223,8 @@ export default {
   font-size: 0.95rem;
   color: #666;
   line-height: 1.5;
-  margin-bottom: 0;
+  margin-bottom: 24px;
   font-family: Outfit, sans-serif;
-  text-align: left;
 }
 .dark .service-description {
   color: var(--text-muted);
@@ -452,21 +446,17 @@ export default {
   background-image: url('../assets/Contact/aboutUs.jpg');
   background-size: cover;
   background-position: center;
-  background-repeat: no-repeat;
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 300px;
+  height: 20rem;
   color: white;
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
   font-size: 3rem;
-  border-radius: 0;
+  border-radius: 2rem;
   overflow: hidden;
-  width: 100%;
-  margin: 0;
-  padding: 0;
 }
 
 .contact-1::before {
@@ -484,11 +474,6 @@ export default {
 .contact-1 .breadcrumb {
   position: relative;
   z-index: 2;
-}
-
-.contact-1 h1 {
-  font-size: 48px;
-  font-weight: bold;
 }
 
 .breadcrumb {
@@ -543,8 +528,6 @@ export default {
   width: 300rem;
   height: 100%;
 }
-
-
 
 /* Responsive adjustments */
 @media (max-width: 768px) {

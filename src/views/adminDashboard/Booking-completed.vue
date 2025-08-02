@@ -58,7 +58,6 @@ export default {
   },
   data() {
     return {
-      activeTab: 'completed',
       searchQuery: '',
       bookings: [
         {

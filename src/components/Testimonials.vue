@@ -1,6 +1,6 @@
 <template>
-  <section class="testimonials pt-14">
-    <div class="testimonials-container custom-container">
+  <section class="testimonials pt-14 pb-1">
+    <div class="testimonials-container">
       <!-- Header Section -->
       <div class="testimonials-header">
         <div class="header-left">
@@ -63,6 +63,9 @@ export default {
 .testimonials {
   background-color: #f4f4f5;
   width: 100%;
+}
+.testimonials-container {
+  margin: 20px 80px;
 }
 .dark .testimonials {
   background-color: var(--color-black);
@@ -256,6 +259,9 @@ export default {
 }
 
 @media (max-width: 768px) {
+  .testimonials-container {
+    margin: 0 40px;
+  }
   .testimonials {
     padding: 60px 0;
   }
@@ -306,6 +312,9 @@ export default {
     padding: 40px 0;
   }
 
+  .testimonials-container {
+    margin: 0 20px;
+  }
   .testimonials-header {
     gap: 20px;
   }

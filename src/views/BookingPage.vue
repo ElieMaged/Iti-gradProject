@@ -26,7 +26,7 @@
       <div class="technician-section">
         <div class="technician-info">
           <img 
-            :src="technician.profilePhotoUrl  || '/images/Avatar.png'" 
+            :src="technician.image || '/images/Avatar.png'" 
             alt="Technician" 
             class="technician-photo"
             @error="$event.target.src = '/images/Avatar.png'"
@@ -124,18 +124,16 @@
           <div class="form-row">
             <div class="form-group">
               <label>{{ $t('city') }}</label>
-              <select v-model="form.city" class="form-input" @change="updateCities">
-                <option value="">{{ $t('selectCity') || 'Select City' }}</option>
-                <option v-for="governorate in availableGovernorates" :key="governorate" :value="governorate">
-                  {{ governorate }}
-                </option>
+              <select v-model="form.city" class="form-input">
+                <option value="Cairo">{{ $t('cairo') }}</option>
+                <option value="Giza">{{ $t('giza') }}</option>
               </select>
             </div>
             <div class="form-group">
               <label>{{ $t('area') }}</label>
               <select v-model="form.area" class="form-input">
-                <option value="">{{ $t('selectArea') || 'Select Area' }}</option>
-                <option v-for="city in availableCities" :key="city" :value="city">{{ city }}</option>
+                <option value="Giza">{{ $t('giza') }}</option>
+                <option value="Maadi">{{ $t('maadi') }}</option>
               </select>
             </div>
           </div>
@@ -149,19 +147,6 @@
               <input v-model="form.building" :placeholder="$t('building5')" class="form-input" />
             </div>
           </div>
-          
-          <!-- Location Map Component -->
-          <LocationMap 
-            :city="form.city"
-            :area="form.area"
-            :street="form.street"
-            :building="form.building"
-            @locationDetected="handleLocationDetected"
-            @updateCity="form.city = $event"
-            @updateArea="form.area = $event"
-            @updateStreet="form.street = $event"
-            @updateBuilding="form.building = $event"
-          />
         </div>
 
         <!-- Payment Method Section -->
@@ -169,17 +154,17 @@
           <h3 class="section-title">{{ $t('choosePaymentMethod') }}</h3>
           <div class="payment-methods">
             <label class="payment-option">
+              <input type="radio" value="PayPal" v-model="form.payment" @change="handlePaymentMethodChange" />
+              <span class="payment-text">{{ $t('paypal') }}</span>
+              <img src="https://www.paypalobjects.com/webstatic/icon/pp258.png" alt="PayPal" class="paypal-logo" />
+            </label>
+            <label class="payment-option">
               <input type="radio" value="Cash on Visit" v-model="form.payment" @change="handlePaymentMethodChange" />
               <span class="payment-text">{{ $t('cashOnVisit') }}</span>
             </label>
-            <label class="payment-option">
-              <input type="radio" value="Credit Card" v-model="form.payment" @change="handlePaymentMethodChange" />
-              <span class="payment-text">{{ $t('creditCard') || 'Credit Card' }}</span>
-              <i class="fas fa-credit-card payment-icon"></i>
-            </label>
           </div>
           
-          <div v-if="form.payment === 'Credit Card' && (technician.basePrice || technician.visitPrice)" class="payment-summary">
+          <div v-if="form.payment === 'PayPal' && (technician.basePrice || technician.visitPrice)" class="payment-summary">
             <div class="payment-amount">
               <span>{{ $t('totalAmount') }}:</span>
               <span class="amount">{{ technician.visitPrice || technician.basePrice }} {{ $t('egp') }}</span>
@@ -188,101 +173,31 @@
               <span>USD Equivalent:</span>
               <span class="amount">${{ ((parseFloat((technician.visitPrice || technician.basePrice).replace(/[^\d.]/g, '')) / 31)).toFixed(2) }} USD</span>
             </div>
-            <div class="payment-note">{{ $t('creditCardPaymentNote') || 'Your payment will be processed securely' }}</div>
+            <div class="payment-note">{{ $t('paypalPaymentNote') }}</div>
           </div>
         </div>
         
-        <!-- Credit Card Form -->
-        <div v-show="form.payment === 'Credit Card'" class="credit-card-container">
-          <div class="credit-card-form">
-            <div class="form-row">
-              <div class="form-group card-number-group">
-                <label for="cardNumber">
-                  <i class="fas fa-credit-card"></i>
-                  {{ $t('cardNumber') || 'Card Number' }}
-                </label>
-                <input 
-                  id="cardNumber"
-                  v-model="form.cardNumber" 
-                  type="text" 
-                  class="form-input card-input"
-                  :class="{ 'error': cardErrors.cardNumber }"
-                  placeholder="1234 5678 9012 3456"
-                  maxlength="19"
-                  @input="formatCardNumber"
-                  @blur="validateCardNumber"
-                />
-                <span v-if="cardErrors.cardNumber" class="error-message">{{ cardErrors.cardNumber }}</span>
-                <div class="card-type-indicator">
-                  <i v-if="detectedCardType" :class="getCardIcon()"></i>
+        <!-- PayPal Button Container -->
+        <div v-show="form.payment === 'PayPal'" class="paypal-container">
+          <div v-if="!paypalLoaded" class="paypal-loading">
+            Loading payment system...
           </div>
-          </div>
-            </div>
-            
-            <div class="form-row">
-              <div class="form-group">
-                <label for="expiryDate">
-                  <i class="fas fa-calendar-alt"></i>
-                  {{ $t('expiryDate') || 'Expiry Date' }}
-                </label>
-                <input 
-                  id="expiryDate"
-                  v-model="form.expiryDate" 
-                  type="text" 
-                  class="form-input card-input"
-                  :class="{ 'error': cardErrors.expiryDate }"
-                  placeholder="MM/YY"
-                  maxlength="5"
-                  @input="formatExpiryDate"
-                  @blur="validateExpiryDate"
-                />
-                <span v-if="cardErrors.expiryDate" class="error-message">{{ cardErrors.expiryDate }}</span>
-              </div>
-              
-              <div class="form-group">
-                <label for="cvv">
-                  <i class="fas fa-lock"></i>
-                  {{ $t('cvv') || 'CVV' }}
-                </label>
-                <input 
-                  id="cvv"
-                  v-model="form.cvv" 
-                  type="text" 
-                  class="form-input card-input"
-                  :class="{ 'error': cardErrors.cvv }"
-                  placeholder="123"
-                  maxlength="4"
-                  @input="formatCVV"
-                  @blur="validateCVV"
-                />
-                <span v-if="cardErrors.cvv" class="error-message">{{ cardErrors.cvv }}</span>
-              </div>
-            </div>
-            
-            <div class="form-row">
-              <div class="form-group">
-                <label for="cardholderName">
-                  <i class="fas fa-user"></i>
-                  {{ $t('cardholderName') || 'Cardholder Name' }}
-                </label>
-                <input 
-                  id="cardholderName"
-                  v-model="form.cardholderName" 
-                  type="text" 
-                  class="form-input card-input"
-                  :class="{ 'error': cardErrors.cardholderName }"
-                  placeholder="John Doe"
-                  @blur="validateCardholderName"
-                />
-                <span v-if="cardErrors.cardholderName" class="error-message">{{ cardErrors.cardholderName }}</span>
-              </div>
-            </div>
-          </div>
+          <div id="paypal-button-container"></div>
         </div>
         
         <!-- Confirm Booking Button -->
-        <button v-if="form.payment === 'Cash on Visit' || form.payment === 'Credit Card'" class="confirm-btn" type="submit">
+        <button v-if="form.payment === 'Cash on Visit'" class="confirm-btn" type="submit">
           {{ $t('confirmBooking') }}
+        </button>
+        
+        <!-- Debug Test Button -->
+        <button 
+          type="button" 
+          @click="testBookingData" 
+          class="debug-btn"
+          style="background: #ff6b6b; color: white; padding: 10px 20px; border: none; border-radius: 8px; margin-top: 20px; cursor: pointer;"
+        >
+          🐛 Test Booking Data
         </button>
       </form>
     </div>
@@ -290,74 +205,23 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, watch, onUnmounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { collection, doc, getDoc, addDoc, serverTimestamp, query, getDocs, where, orderBy, limit } from 'firebase/firestore'
 import { db } from '../firebase'
 import { useI18n } from 'vue-i18n'
-// Removed stockTechnicians import - only show registered technicians
+import { stockTechnicians } from '../assets/stockTechnicians'
+import emailjs from 'emailjs-com';
 import { auth } from '../firebase';
-import LocationMap from '../components/LocationMap.vue'
-import { getGovernmentNames, getDistrictsForGovernment } from '../data/egyptianLocations.js'
 
 const { t } = useI18n();
 const route = useRoute()
 const router = useRouter()
 const technician = ref({})
 const errorMsg = ref('')
-
+const paypalLoaded = ref(false)
 const technicianAvailability = ref(null)
 const dateAvailability = ref({})
-
-// Form data
-const form = ref({
-  date: '', // will be set on mount
-  time: '',
-  fullName: '',
-  phone: '',
-  email: '', // <-- Add email field
-  note: '',
-  city: 'Cairo',
-  area: 'Giza',
-  street: '',
-  building: '',
-  payment: 'Cash on Visit',
-  // Credit card fields
-  cardNumber: '',
-  expiryDate: '',
-  cvv: '',
-  cardholderName: ''
-})
-
-// Credit card validation
-const cardErrors = ref({
-  cardNumber: '',
-  expiryDate: '',
-  cvv: '',
-  cardholderName: ''
-})
-
-const detectedCardType = ref('')
-
-// Location data management
-const availableGovernorates = ref(getGovernmentNames())
-const availableCities = ref([])
-
-// Function to update available districts based on selected government
-function updateCities() {
-  if (form.value.city) {
-    availableCities.value = getDistrictsForGovernment(form.value.city);
-  } else {
-    availableCities.value = [];
-  }
-}
-
-// Watch for governorate changes to update cities
-watch(() => form.value.city, () => {
-  updateCities();
-  // Reset area when governorate changes
-  form.value.area = '';
-});
 
 // Date and time management
 const currentDateOffset = ref(0)
@@ -411,6 +275,21 @@ const visibleDates = computed(() => {
 const availableTimes = ref([])
 const selectedTimeIndex = ref(0)
 
+// Form data - moved before watch functions
+const form = ref({
+  date: '', // will be set on mount
+  time: '',
+  fullName: '',
+  phone: '',
+  email: '', // <-- Add email field
+  note: '',
+  city: 'Cairo',
+  area: 'Giza',
+  street: '',
+  building: '',
+  payment: 'PayPal'
+})
+
 // Function to pre-populate form with user data
 function populateFormWithUserData() {
   console.log('=== POPULATING FORM WITH USER DATA ===');
@@ -438,155 +317,6 @@ function populateFormWithUserData() {
   
   console.log('Final form data:', form.value);
   console.log('=== END FORM POPULATION ===');
-}
-
-// Credit Card Validation and Formatting Functions
-function formatCardNumber(event) {
-  let value = event.target.value.replace(/\D/g, '')
-  value = value.replace(/(\d{4})/g, '$1 ').trim()
-  form.value.cardNumber = value
-  detectCardType(value.replace(/\s/g, ''))
-}
-
-function validateCardNumber() {
-  const cardNumber = form.value.cardNumber.replace(/\s/g, '')
-  cardErrors.value.cardNumber = ''
-  
-  if (!cardNumber) {
-    cardErrors.value.cardNumber = 'Card number is required'
-    return false
-  }
-  
-  if (cardNumber.length < 13 || cardNumber.length > 19) {
-    cardErrors.value.cardNumber = 'Card number must be between 13 and 19 digits'
-    return false
-  }
-  
-  return true
-}
-
-function formatExpiryDate(event) {
-  let value = event.target.value.replace(/\D/g, '')
-  if (value.length >= 2) {
-    value = value.slice(0, 2) + '/' + value.slice(2, 4)
-  }
-  form.value.expiryDate = value
-}
-
-function validateExpiryDate() {
-  const expiry = form.value.expiryDate
-  cardErrors.value.expiryDate = ''
-  
-  if (!expiry) {
-    cardErrors.value.expiryDate = 'Expiry date is required'
-    return false
-  }
-  
-  const [month, year] = expiry.split('/')
-  const currentDate = new Date()
-  const currentYear = currentDate.getFullYear() % 100
-  const currentMonth = currentDate.getMonth() + 1
-  
-  if (!month || !year) {
-    cardErrors.value.expiryDate = 'Please enter a valid expiry date (MM/YY)'
-    return false
-  }
-  
-  const monthNum = parseInt(month)
-  const yearNum = parseInt(year)
-  
-  if (monthNum < 1 || monthNum > 12) {
-    cardErrors.value.expiryDate = 'Invalid month'
-    return false
-  }
-  
-  if (yearNum < currentYear || (yearNum === currentYear && monthNum < currentMonth)) {
-    cardErrors.value.expiryDate = 'Card has expired'
-    return false
-  }
-  
-  return true
-}
-
-function formatCVV(event) {
-  let value = event.target.value.replace(/\D/g, '')
-  form.value.cvv = value
-}
-
-function validateCVV() {
-  const cvv = form.value.cvv
-  cardErrors.value.cvv = ''
-  
-  if (!cvv) {
-    cardErrors.value.cvv = 'CVV is required'
-    return false
-  }
-  
-  if (cvv.length < 3 || cvv.length > 4) {
-    cardErrors.value.cvv = 'CVV must be 3 or 4 digits'
-    return false
-  }
-  
-  return true
-}
-
-function validateCardholderName() {
-  const name = form.value.cardholderName
-  cardErrors.value.cardholderName = ''
-  
-  if (!name) {
-    cardErrors.value.cardholderName = 'Cardholder name is required'
-    return false
-  }
-  
-  if (name.length < 2) {
-    cardErrors.value.cardholderName = 'Cardholder name must be at least 2 characters'
-    return false
-  }
-  
-  return true
-}
-
-function detectCardType(cardNumber) {
-  const patterns = {
-    visa: /^4/,
-    mastercard: /^5[1-5]/,
-    amex: /^3[47]/,
-    discover: /^6(?:011|5)/,
-    diners: /^3(?:0[0-5]|[68])/,
-    jcb: /^(?:2131|1800|35\d{3})/
-  }
-  
-  for (const [type, pattern] of Object.entries(patterns)) {
-    if (pattern.test(cardNumber)) {
-      detectedCardType.value = type
-      return
-    }
-  }
-  detectedCardType.value = ''
-}
-
-function getCardIcon() {
-  const icons = {
-    visa: 'fab fa-cc-visa',
-    mastercard: 'fab fa-cc-mastercard',
-    amex: 'fab fa-cc-amex',
-    discover: 'fab fa-cc-discover',
-    diners: 'fab fa-cc-diners-club',
-    jcb: 'fab fa-cc-jcb'
-  }
-  return icons[detectedCardType.value] || 'fas fa-credit-card'
-}
-
-
-
-function validateCreditCardForm() {
-  const isCardNumberValid = validateCardNumber()
-  const isExpiryValid = validateExpiryDate()
-  const isCVVValid = validateCVV()
-  const isNameValid = validateCardholderName()
-  
-  return isCardNumberValid && isExpiryValid && isCVVValid && isNameValid
 }
 
 // Function to get day name from date string
@@ -781,6 +511,15 @@ watch(() => technician.value.uid, async (newUid) => {
   }
 })
 
+// Watch for available times changes to reinitialize PayPal
+watch(() => availableTimes.value, () => {
+  if (form.value.payment === 'PayPal' && paypalLoaded.value) {
+    setTimeout(() => {
+      initializePayPalButton();
+    }, 100);
+  }
+})
+
 // Watch for technician availability changes to update available dates
 watch(() => technicianAvailability.value, async () => {
   // When availability changes, update the selected date if current date is no longer available
@@ -832,118 +571,355 @@ function nextDates() {
   currentDateOffset.value++
 }
 
-function handlePaymentMethodChange() {
-  // Clear any existing error messages
-  errorMsg.value = '';
-  
-  // Clear credit card errors when switching payment methods
-  if (form.value.payment === 'Credit Card') {
-    cardErrors.value = {
-      cardNumber: '',
-      expiryDate: '',
-      cvv: '',
-      cardholderName: ''
-    };
-  }
-}
-
-async function confirmBooking() {
-  // This function is for cash payments and credit card payments
-  if (form.value.payment !== 'Cash on Visit' && form.value.payment !== 'Credit Card') {
-    return;
-  }
-
-  // Validate credit card if payment method is Credit Card
-  if (form.value.payment === 'Credit Card') {
-    if (!validateCreditCardForm()) {
-      errorMsg.value = 'Please fix the credit card errors before proceeding.';
-    return;
-  }
-  }
-
-  // Validate that a date is selected
-  if (!form.value.date || availableDates.value.length === 0) {
-    errorMsg.value = 'Please select an available date for booking.';
+onMounted(async () => {
+  const id = route.query.techId
+  if (!id) {
+    errorMsg.value = 'Technician ID is missing. Please try again or contact support.';
     return;
   }
   
-  // Validate that a time is selected
-  if (!form.value.time || availableTimes.value.length === 0) {
-    errorMsg.value = 'Please select an available time slot for booking.';
-    return;
-  }
-
-  // Validate required fields before creating booking data
-  if (!technician.value.uid && !technician.value.id) {
-    errorMsg.value = 'Technician information is missing. Please try again.';
-    return;
-  }
-
-  if (!auth.currentUser?.uid) {
-    errorMsg.value = 'User authentication required. Please log in again.';
-    return;
-  }
-
-  if (!form.value.fullName || !form.value.email || !form.value.phone) {
-    errorMsg.value = 'Please fill in all required fields (name, email, phone).';
+  // Try to find in stockTechnicians first
+  const stock = stockTechnicians.find(t => t.id === id)
+  if (stock) {
+    technician.value = stock
+  } else {
+    // Try to fetch from Firestore (pendingTechnicians or technicians)
+    let docRef = doc(db, 'technicians', id);
+    let docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) {
+      // Try pendingTechnicians (if not yet approved)
+      docRef = doc(db, 'pendingTechnicians', id);
+      docSnap = await getDoc(docRef);
+    }
+    if (docSnap.exists()) {
+      const techData = docSnap.data();
+      technician.value = {
+        ...techData,
+        uid: id, // Ensure uid is set for consistency
+        name: techData.fullName || techData.name, // Map fullName to name for consistency
+        image: techData.idPhotoUrl || techData.profileImage || techData.image || '/images/Avatar.png' // Map image field
+      };
+      console.log('Technician data loaded:', technician.value);
+      console.log('Technician image:', technician.value.image);
+    } else {
+      errorMsg.value = 'Technician not found. Please try again or contact support.';
       return;
     }
+  }
+  
+  // Fetch technician availability first
+  if (technician.value.uid) {
+    await fetchTechnicianAvailability(technician.value.uid);
+    await updateDateAvailability();
+  }
+  
+  // Set default date to the first available date
+  if (availableDates.value.length > 0) {
+    form.value.date = availableDates.value[0];
+    // Initialize availability times for the default date
+    await updateAvailableTimes(form.value.date);
+  } else {
+    // No available dates found
+    errorMsg.value = 'This technician has not set their availability yet. Please contact them directly or try again later.';
+  }
+  
+  // Load PayPal script
+  loadPayPalScript();
+  populateFormWithUserData(); // Call the new function here
+})
 
-            if (!form.value.date || !form.value.time) {
-    errorMsg.value = 'Please select a date and time for your booking.';
-            return;
-          }
+// Watch for technician data changes to initialize PayPal when data is available
+watch(() => technician.value, (newTechnician) => {
+  if (newTechnician && (newTechnician.visitPrice || newTechnician.basePrice) && form.value.payment === 'PayPal') {
+    console.log('Technician data loaded, initializing PayPal...');
+    setTimeout(() => {
+      if (paypalLoaded.value) {
+        initializePayPalButton();
+      }
+    }, 100);
+  }
+}, { deep: true })
+
+// Watch for payment method changes
+watch(() => form.value.payment, (newPayment) => {
+  if (newPayment === 'PayPal') {
+    // Initialize PayPal button after a short delay to ensure script is loaded
+    setTimeout(() => {
+      if (paypalLoaded.value) {
+        initializePayPalButton();
+      }
+    }, 100);
+  }
+});
+
+function loadPayPalScript() {
+  if (window.paypal) {
+    paypalLoaded.value = true;
+    if (form.value.payment === 'PayPal') {
+      setTimeout(() => {
+        initializePayPalButton();
+      }, 100);
+    }
+    return;
+  }
+
+  const clientId = import.meta.env.VITE_PAYPAL_CLIENT_ID;
+  
+  // Use a test client ID if none is configured
+  const finalClientId = clientId && clientId !== 'YOUR_SANDBOX_CLIENT_ID' 
+    ? clientId 
+    : 'test'; // This will show the button for testing
+
+  const script = document.createElement('script');
+  script.src = `https://www.paypal.com/sdk/js?client-id=${finalClientId}&currency=USD&intent=capture`;
+  script.async = true;
+  script.onload = () => {
+    paypalLoaded.value = true;
+    if (form.value.payment === 'PayPal') {
+      // Add a small delay to ensure DOM is ready
+      setTimeout(() => {
+        initializePayPalButton();
+      }, 100);
+    }
+  };
+  script.onerror = () => {
+    console.error('Failed to load PayPal script');
+    errorMsg.value = 'Failed to load payment system. Please try again.';
+  };
+  document.head.appendChild(script);
+}
+
+function initializePayPalButton() {
+  console.log('Initializing PayPal button...');
+  console.log('PayPal available:', !!window.paypal);
+  console.log('Technician base price:', technician.value.basePrice);
+  
+  if (!window.paypal) {
+    console.log('PayPal not loaded yet, waiting...');
+    return;
+  }
+  
+  if (!technician.value.visitPrice && !technician.value.basePrice) {
+    console.log('No technician price available');
+    return;
+  }
+
+  // Check if times are available
+  if (availableTimes.value.length === 0) {
+    console.log('No available times for booking');
+    const container = document.getElementById('paypal-button-container');
+    if (container) {
+      container.innerHTML = '<div class="text-red-500 text-center p-4">No available time slots for the selected date. Please choose a different date.</div>';
+    }
+    return;
+  }
+
+  // Wait for next tick to ensure DOM is updated
+  setTimeout(() => {
+    // Clear existing buttons
+    const container = document.getElementById('paypal-button-container');
+    console.log('PayPal container found:', !!container);
+    
+    if (!container) {
+      console.error('PayPal container not found');
+      errorMsg.value = 'Payment system error. Please refresh the page and try again.';
+      return;
+    }
+    
+    // Check if container is visible
+    const containerParent = container.closest('.paypal-container');
+    if (containerParent && containerParent.style.display === 'none') {
+      console.log('PayPal container is hidden, waiting...');
+      setTimeout(() => {
+        initializePayPalButton();
+      }, 100);
+      return;
+    }
+    
+    container.innerHTML = '';
+
+    try {
+      window.paypal.Buttons({
+        createOrder: function(data, actions) {
+          // Convert visitPrice or basePrice to number (remove any currency symbols)
+          const priceString = technician.value.visitPrice || technician.value.basePrice;
+          const amount = parseFloat(priceString.replace(/[^\d.]/g, ''));
           
-  // Ensure all numeric values are valid numbers
-  const basePrice = parseFloat((technician.value.visitPrice || technician.value.basePrice || '0').replace(/[^\d.]/g, '')) || 0;
-  const adminAmount = Math.round(basePrice * 0.25 * 100) / 100; // Round to 2 decimal places
-  const technicianAmount = Math.round(basePrice * 0.75 * 100) / 100; // Round to 2 decimal places
-
+          // Convert EGP to USD (approximate rate: 1 USD = 31 EGP)
+          const usdAmount = (amount / 31).toFixed(2);
+          
+          return actions.order.create({
+            purchase_units: [{
+              amount: {
+                value: usdAmount,
+                currency_code: 'USD'
+              },
+              payee: {
+                email_address: 'elie1400674@gmail.com'
+              },
+              description: `Booking with ${technician.value.name} - ${form.value.date} at ${form.value.time}`
+            }]
+          });
+        },
+        onApprove: async (data, actions) => {
+          try {
+            console.log('PayPal payment approved, capturing order...');
+            
+            const order = await actions.order.capture();
+            console.log('Payment captured successfully:', order);
+            
+            // Extract payment details
+            const paymentAmount = parseFloat(order.purchase_units[0].amount.value);
+            const paypalOrderId = order.id;
+            
+            // Split the payment between accounts
+            const splitSuccess = await splitPaymentToAccounts(paypalOrderId, paymentAmount, technician.value.uid);
+            
+            if (splitSuccess) {
+              console.log('Payment split successfully between accounts');
+            } else {
+              console.warn('Payment split failed, but payment was successful');
+            }
+            
+            // Continue with existing booking logic
             const bookingData = {
               technicianId: technician.value.uid || technician.value.id,
-    technicianName: technician.value.name || 'Unknown Technician',
-    userId: auth.currentUser.uid,
-    userName: form.value.fullName.trim(),
-    userEmail: form.value.email.trim(),
-    userPhone: form.value.phone.trim(),
+              technicianName: technician.value.name,
+              userId: auth.currentUser?.uid, // Add current user's UID
+              userName: form.value.fullName,
+              userEmail: form.value.email,
+              userPhone: form.value.phone,
               date: form.value.date,
               time: form.value.time,
-    address: constructAddress(form.value) || 'Address not provided',
+              address: constructAddress(form.value),
               price: technician.value.visitPrice || technician.value.basePrice || 'N/A',
               note: form.value.note || '',
               payment: form.value.payment,
+              paymentDetails: {
+                paypalOrderId: paypalOrderId,
+                paypalPayerId: order.payer.payer_id,
+                amount: paymentAmount,
+                currency: order.purchase_units[0].amount.currency_code,
+                status: order.status,
+                captureId: order.purchase_units[0].payments.captures[0]?.id,
+                paymentMethod: 'PayPal'
+              },
               status: 'pending',
               createdAt: serverTimestamp(),
-    // Payment splitting data - ensure all are numbers
-    basePrice: basePrice,
-    adminAmount: adminAmount,
-    technicianAmount: technicianAmount,
-    paymentSplit: {
-      admin: adminAmount,
-      technician: technicianAmount,
-      total: basePrice
+              paymentSplit: splitSuccess
+            };
+            
+            console.log('Creating PayPal booking with data:', bookingData);
+            console.log('Complete form data:', form.value);
+            console.log('User email being saved:', bookingData.userEmail);
+            console.log('Form email value:', form.value.email);
+            console.log('Technician ID being saved:', bookingData.technicianId);
+            console.log('Technician UID:', technician.value.uid);
+            console.log('Technician ID:', technician.value.id);
+            console.log('Technician name:', technician.value.name);
+            console.log('Address being saved:', bookingData.address);
+            console.log('Address type:', typeof bookingData.address);
+            console.log('Address length:', bookingData.address ? bookingData.address.length : 'undefined');
+            
+            // Save booking to Firestore
+            const bookingRef = await addDoc(collection(db, 'bookings'), bookingData);
+            console.log('PayPal booking saved with ID:', bookingRef.id);
+            
+            // Update booking data with the Firestore ID
+            bookingData.id = bookingRef.id;
+            
+            // Send payment notifications
+            console.log('Sending payment notifications...');
+            await sendPaymentNotifications(
+              bookingData.paymentDetails,
+              technician.value.uid || technician.value.id,
+              technician.value.name
+            );
+
+            // Send booking request notifications to technician
+            console.log('Sending booking request notifications...');
+            await sendBookingRequestNotification(bookingData);
+            
+            // Send booking request email to technician
+            console.log('Sending booking request email...');
+            await sendBookingRequestEmail(bookingData);
+            
+            // Store booking data and redirect
+            localStorage.setItem('bookingData', JSON.stringify(bookingData));
+            console.log('PayPal booking completed successfully');
+            router.push('/bookingconfirmation');
+            
+          } catch (err) {
+            console.error('Error capturing PayPal payment:', err);
+            recordFailedTransaction(err);
+            alert('Payment failed. Please try again.');
+          }
+        },
+        onError: function(err) {
+          console.error('PayPal error:', err);
+          errorMsg.value = t('paypalPaymentFailed');
+          
+          // Record failed transaction for admin review
+          recordFailedTransaction(err);
+        }
+      }).render('#paypal-button-container');
+      
+      console.log('PayPal button rendered successfully');
+    } catch (error) {
+      console.error('Error initializing PayPal button:', error);
+      errorMsg.value = 'Payment system error. Please try again.';
     }
+  }, 100);
+}
+
+function handlePaymentMethodChange() {
+  if (form.value.payment === 'PayPal') {
+    // Add a longer delay to ensure DOM is fully updated
+    setTimeout(() => {
+      if (paypalLoaded.value) {
+        initializePayPalButton();
+      }
+    }, 200);
+  }
+}
+
+async function createBookingWithPayment(paymentDetails) {
+  try {
+    loading.value = true;
+    
+    // Create booking data
+  const bookingData = {
+    technicianId: technician.value.uid || technician.value.id,
+    technicianName: technician.value.name,
+    userId: auth.currentUser?.uid, // Add current user's UID
+    userName: form.value.fullName,
+    userEmail: form.value.email,
+    userPhone: form.value.phone,
+    date: form.value.date,
+    time: form.value.time,
+    address: constructAddress(form.value),
+    price: technician.value.visitPrice || technician.value.basePrice || 'N/A',
+    note: form.value.note || '',
+    payment: form.value.payment,
+    paymentDetails: {
+        ...paymentDetails,
+        paymentMethod: form.value.payment
+    },
+    status: 'pending',
+    createdAt: serverTimestamp()
   };
 
-  // Debug: Log the booking data to check for any undefined values
-  console.log('Booking data validation:');
-  console.log('- technicianId:', bookingData.technicianId);
-  console.log('- technicianName:', bookingData.technicianName);
-  console.log('- userId:', bookingData.userId);
-  console.log('- userName:', bookingData.userName);
-  console.log('- userEmail:', bookingData.userEmail);
-  console.log('- userPhone:', bookingData.userPhone);
-  console.log('- date:', bookingData.date);
-  console.log('- time:', bookingData.time);
-  console.log('- address:', bookingData.address);
-  console.log('- basePrice:', bookingData.basePrice, 'type:', typeof bookingData.basePrice);
-  console.log('- adminAmount:', bookingData.adminAmount, 'type:', typeof bookingData.adminAmount);
-  console.log('- technicianAmount:', bookingData.technicianAmount, 'type:', typeof bookingData.technicianAmount);
-
-  try {
-    console.log('Creating booking with payment splitting:', bookingData);
-    console.log('Payment split - Admin (25%):', adminAmount, 'EGP');
-    console.log('Payment split - Technician (75%):', technicianAmount, 'EGP');
+    console.log('Creating booking with payment details:', bookingData);
+    console.log('Complete form data:', form.value);
+    console.log('User email being saved:', bookingData.userEmail);
+    console.log('Form email value:', form.value.email);
+    console.log('Technician ID being saved:', bookingData.technicianId);
+    console.log('Technician UID:', technician.value.uid);
+    console.log('Technician ID:', technician.value.id);
+    console.log('Technician name:', technician.value.name);
+    console.log('Address being saved:', bookingData.address);
+    console.log('Address type:', typeof bookingData.address);
+    console.log('Address length:', bookingData.address ? bookingData.address.length : 'undefined');
 
     // Save booking to Firestore
     const bookingRef = await addDoc(collection(db, 'bookings'), bookingData);
@@ -952,8 +928,105 @@ async function confirmBooking() {
     // Update booking data with the Firestore ID
     bookingData.id = bookingRef.id;
 
-    // Process payment splitting
-    await processPaymentSplitting(bookingData);
+    // Send payment notifications for cash payments
+    if (form.value.payment === 'Cash on Visit') {
+      await sendPaymentNotifications(
+        bookingData.paymentDetails,
+        technician.value.uid || technician.value.id,
+        technician.value.name
+      );
+    }
+    
+    // Send booking request notifications
+    await sendBookingRequestNotification(bookingData);
+    
+    // Store booking data and redirect
+    localStorage.setItem('bookingData', JSON.stringify(bookingData));
+    router.push('/bookingconfirmation');
+    
+  } catch (error) {
+    console.error('Error creating booking:', error);
+    errorMsg.value = t('bookingError');
+  } finally {
+    loading.value = false;
+  }
+}
+
+function sendConfirmationEmail(userEmail, technicianName, date, time, payment) {
+  const data = {
+    to_email: userEmail,
+    technician_name: technicianName,
+    date,
+    time,
+    payment
+  };
+  console.log('EmailJS data:', data);
+  emailjs.send(
+    '123321',
+    'template_68btlks',
+    data,
+    'kGW9e5lc8iBvIT3Qw'
+  ).then((response) => {
+    console.log('Email sent!', response.status, response.text);
+  }, (err) => {
+    console.error('Failed to send email:', err);
+  });
+}
+
+async function confirmBooking() {
+  // This function is for cash payments
+  if (form.value.payment !== 'Cash on Visit') {
+    return;
+  }
+
+  // Validate that a date is selected
+  if (!form.value.date || availableDates.value.length === 0) {
+    errorMsg.value = 'Please select an available date for booking.';
+    return;
+  }
+
+  // Validate that a time is selected
+  if (!form.value.time || availableTimes.value.length === 0) {
+    errorMsg.value = 'Please select an available time slot for booking.';
+    return;
+  }
+
+  const bookingData = {
+    technicianId: technician.value.uid || technician.value.id,
+    technicianName: technician.value.name,
+    userId: auth.currentUser?.uid, // Add current user's UID
+    userName: form.value.fullName,
+    userEmail: form.value.email,
+    userPhone: form.value.phone,
+    date: form.value.date,
+    time: form.value.time,
+    address: constructAddress(form.value),
+    price: technician.value.visitPrice || technician.value.basePrice || 'N/A',
+    note: form.value.note || '',
+    payment: form.value.payment,
+    status: 'pending',
+    createdAt: serverTimestamp()
+  };
+
+  try {
+    console.log('Creating cash booking with data:', bookingData);
+    console.log('Complete form data:', form.value);
+    console.log('User email being saved:', bookingData.userEmail);
+    console.log('Form email value:', form.value.email);
+    console.log('Technician ID being saved:', bookingData.technicianId);
+    console.log('Technician UID:', technician.value.uid);
+    console.log('Technician ID:', technician.value.id);
+    console.log('Technician name:', technician.value.name);
+    console.log('Address being saved:', bookingData.address);
+    console.log('Address type:', typeof bookingData.address);
+    console.log('Address length:', bookingData.address ? bookingData.address.length : 'undefined');
+    
+    // Save booking to Firestore
+    const bookingRef = await addDoc(collection(db, 'bookings'), bookingData);
+    console.log('Cash booking saved with ID:', bookingRef.id);
+    
+    // Update booking data with the Firestore ID
+    bookingData.id = bookingRef.id;
     
     // Send confirmation email to customer
     if (form.value.email) {
@@ -973,173 +1046,94 @@ async function confirmBooking() {
       technicianName: technician.value.name,
       date: form.value.date,
       time: form.value.time,
-      payment: form.value.payment,
-      adminAmount: adminAmount,
-      technicianAmount: technicianAmount
+      payment: form.value.payment
     };
     localStorage.setItem('bookingData', JSON.stringify(confirmationData));
     
-    console.log('Booking completed successfully with payment splitting');
+    console.log('Cash booking completed successfully');
     router.push('/bookingconfirmation');
   } catch (e) {
     console.error('Booking Firestore error:', e);
-    console.error('Error details:', {
-      code: e.code,
-      message: e.message,
-      stack: e.stack
-    });
-    
-    // Provide more specific error messages
-    if (e.code === 'permission-denied') {
-      errorMsg.value = 'Permission denied. Please check your authentication.';
-    } else if (e.code === 'invalid-argument') {
-      errorMsg.value = 'Invalid data provided. Please check your booking information.';
-    } else if (e.code === 'unavailable') {
-      errorMsg.value = 'Service temporarily unavailable. Please try again.';
-    } else {
-      errorMsg.value = `Booking creation failed: ${e.message}`;
-    }
+    errorMsg.value = t('bookingCreationFailed');
   }
 }
 
-// Process payment splitting between admin and technician
-async function processPaymentSplitting(bookingData) {
+function recordFailedTransaction(error) {
+  console.error('PayPal transaction failed:', error);
+  const errorMessage = error.message || JSON.stringify(error);
+  const errorDetails = {
+    errorMessage: errorMessage,
+    errorCode: error.code,
+    errorDetails: error.details,
+    timestamp: serverTimestamp()
+  };
+
+  addDoc(collection(db, 'failedPayPalTransactions'), errorDetails)
+    .then(() => {
+      console.log('Failed PayPal transaction recorded successfully.');
+    })
+    .catch(err => {
+      console.error('Error recording failed PayPal transaction:', err);
+    });
+}
+
+// After successful PayPal payment, split the amount
+async function splitPaymentToAccounts(paypalOrderId, totalAmountUSD, technicianId) {
   try {
-    console.log('Processing payment splitting for booking:', bookingData.id);
+    console.log('Splitting payment:', totalAmountUSD, 'USD between accounts');
     
-    const { adminAmount, technicianAmount, basePrice } = bookingData;
-    
-    // Validate the data before processing
-    if (!bookingData.id || !bookingData.technicianId || !bookingData.userName) {
-      throw new Error('Missing required booking data for payment splitting');
+    // Get technician's PayPal email from their profile
+    let technicianPayPalEmail = '';
+    try {
+      const technicianDoc = await getDoc(doc(db, 'technicians', technicianId));
+      if (technicianDoc.exists()) {
+        const technicianData = technicianDoc.data();
+        technicianPayPalEmail = technicianData.paypalEmail || technicianData.email || '';
+        console.log('Technician PayPal email:', technicianPayPalEmail);
+      }
+    } catch (error) {
+      console.error('Error fetching technician PayPal email:', error);
     }
     
-    if (typeof adminAmount !== 'number' || typeof technicianAmount !== 'number' || typeof basePrice !== 'number') {
-      throw new Error('Invalid payment amounts for splitting');
+    if (!technicianPayPalEmail) {
+      console.error('No technician PayPal email found');
+      return false;
     }
     
-    // Add credits to admin
-    const adminCreditData = {
-      amount: adminAmount,
-      credits: adminAmount,
-      type: 'booking_payment',
-      bookingId: bookingData.id,
-      technicianId: bookingData.technicianId,
-      technicianName: bookingData.technicianName || 'Unknown Technician',
-      customerName: bookingData.userName,
-      customerEmail: bookingData.userEmail,
-      paymentMethod: bookingData.payment,
-      status: 'approved',
+    // Calculate split amounts (25% platform fee, 75% technician)
+    const platformFeeUSD = totalAmountUSD * 0.25; // 25% to platform
+    const technicianAmountUSD = totalAmountUSD * 0.75; // 75% to technician
+    
+    console.log('Platform fee (25%):', platformFeeUSD, 'USD');
+    console.log('Technician payment (75%):', technicianAmountUSD, 'USD');
+    
+    // Store split information directly in Firebase (client-side)
+    const splitRecord = {
+      paypalOrderId: paypalOrderId,
+      totalAmountUSD: totalAmountUSD,
+      platformFeeUSD: platformFeeUSD,
+      technicianAmountUSD: technicianAmountUSD,
+      platformAccount: "elie1400674@gmail.com", // Your platform account
+      technicianAccount: technicianPayPalEmail, // Technician's PayPal account
+      splitPercentage: {
+        platform: 25,
+        technician: 75
+      },
+      status: 'pending',
       createdAt: serverTimestamp(),
-      description: `25% of booking payment (${basePrice} EGP) from ${bookingData.userName}`
+      transactionType: 'payment_split'
     };
     
-    console.log('Creating admin credit record:', adminCreditData);
-    await addDoc(collection(db, 'adminCredits'), adminCreditData);
-    console.log('Admin credits added:', adminAmount, 'EGP');
+    // Add to paymentSplits collection
+    await addDoc(collection(db, 'paymentSplits'), splitRecord);
     
-    // Add credits to technician
-    const technicianCreditData = {
-      technicianId: bookingData.technicianId,
-      technicianName: bookingData.technicianName || 'Unknown Technician',
-      amount: technicianAmount,
-      credits: technicianAmount,
-      type: 'booking_payment',
-      bookingId: bookingData.id,
-      customerName: bookingData.userName,
-      customerEmail: bookingData.userEmail,
-      paymentMethod: bookingData.payment,
-      status: 'approved',
-      createdAt: serverTimestamp(),
-      description: `75% of booking payment (${basePrice} EGP) from ${bookingData.userName}`
-    };
-    
-    console.log('Creating technician credit record:', technicianCreditData);
-    await addDoc(collection(db, 'technicianCredits'), technicianCreditData);
-    console.log('Technician credits added:', technicianAmount, 'EGP');
-    
-    // Create payment split record
-    const paymentSplitData = {
-      bookingId: bookingData.id,
-      technicianId: bookingData.technicianId,
-      technicianName: bookingData.technicianName || 'Unknown Technician',
-      customerName: bookingData.userName,
-      customerEmail: bookingData.userEmail,
-      totalAmount: basePrice,
-      adminAmount: adminAmount,
-      technicianAmount: technicianAmount,
-      paymentMethod: bookingData.payment,
-      status: 'completed',
-      createdAt: serverTimestamp(),
-      description: `Payment split for booking ${bookingData.id}`
-    };
-    
-    console.log('Creating payment split record:', paymentSplitData);
-    await addDoc(collection(db, 'paymentSplits'), paymentSplitData);
-    console.log('Payment split record created');
-    
-    // Send admin notification about payment received
-    await sendAdminPaymentNotification(bookingData);
-    
-    console.log('Payment splitting completed successfully');
+    console.log('Payment split recorded successfully:', splitRecord);
     return true;
     
-    } catch (error) {
-    console.error('Error processing payment splitting:', error);
-    console.error('Error details:', {
-      code: error.code,
-      message: error.message,
-      stack: error.stack
-    });
-    throw error;
-  }
-}
-
-// Send admin notification about payment received
-async function sendAdminPaymentNotification(bookingData) {
-  try {
-    console.log('Sending admin payment notification...');
-    
-    const { adminAmount, technicianAmount, basePrice } = bookingData;
-    
-    const adminNotification = {
-      type: 'payment_received',
-      title: 'Payment Received from Booking',
-      message: `Payment of ${basePrice} EGP received from ${bookingData.userName}. Admin share: ${adminAmount} EGP, Technician share: ${technicianAmount} EGP`,
-      bookingId: bookingData.id,
-      technicianId: bookingData.technicianId,
-      technicianName: bookingData.technicianName,
-      customerName: bookingData.userName,
-      customerEmail: bookingData.userEmail,
-      paymentMethod: bookingData.payment,
-      totalAmount: basePrice,
-      adminAmount: adminAmount,
-      technicianAmount: technicianAmount,
-      recipientId: 'admin',
-      recipientType: 'admin',
-      status: 'unread',
-      createdAt: serverTimestamp(),
-      read: false
-    };
-    
-    await addDoc(collection(db, 'notifications'), adminNotification);
-    console.log('Admin payment notification sent successfully');
-    
   } catch (error) {
-    console.error('Error sending admin payment notification:', error);
+    console.error('Error splitting payment:', error);
+    return false;
   }
-}
-
-function sendConfirmationEmail(userEmail, technicianName, date, time, payment) {
-  const data = {
-    to_email: userEmail,
-    technician_name: technicianName,
-    date,
-    time,
-    payment
-  };
-  console.log('Email data:', data);
-  // Email functionality removed
 }
 
 // Send payment notifications to technician and admin
@@ -1154,6 +1148,7 @@ async function sendPaymentNotifications(paymentDetails, technicianId, technician
       paymentMethod: paymentDetails.paymentMethod,
       amount: paymentDetails.amount,
       currency: paymentDetails.currency,
+      paypalOrderId: paymentDetails.paypalOrderId,
       technicianId: technicianId,
       technicianName: technicianName,
       customerName: form.value.fullName,
@@ -1422,14 +1417,150 @@ async function sendBookingRequestEmail(bookingData) {
       subject: 'New Booking Request - BoltFix'
     };
     
-    // Email functionality removed
-    console.log('Booking request email template:', emailTemplate);
+    // Send email using EmailJS
+    const response = await emailjs.send(
+      import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_boltfix',
+      import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_booking_request',
+      emailTemplate,
+      import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'YOUR_EMAILJS_PUBLIC_KEY'
+    );
+    
+    console.log('Booking request email sent successfully:', response);
     return true;
     
   } catch (error) {
     console.error('Error sending booking request email:', error);
     return false;
   }
+}
+
+// Test notification function
+async function testNotification() {
+  try {
+    console.log('=== TESTING BOOKING REQUEST NOTIFICATION ===');
+    
+    const testBookingData = {
+      id: 'test-booking-id',
+      technicianId: 'test-technician-id',
+      technicianName: 'Maged Ishak',
+      userName: 'Test User',
+      userEmail: 'narutossj23@yahoo.com',
+      userPhone: '1234567890',
+      date: '2023-10-27',
+      time: '10:00 AM',
+      payment: 'PayPal',
+      status: 'pending'
+    };
+    
+    console.log('Test booking data:', testBookingData);
+    
+    // Test the notification function
+    const result = await sendBookingRequestNotification(testBookingData);
+    
+    if (result) {
+      alert('✅ Test notification sent successfully! Check console for details.');
+    } else {
+      alert('❌ Test notification failed! Check console for errors.');
+    }
+    
+  } catch (error) {
+    console.error('❌ Error in test notification:', error);
+    alert('❌ Test notification error: ' + error.message);
+  }
+}
+
+// Manual notification test function
+async function createManualNotification() {
+  try {
+    console.log('=== CREATING MANUAL NOTIFICATION ===');
+    
+    // Find Maged Ishak in the technicians collection
+    const techQuery = query(
+      collection(db, 'technicians'),
+      where('fullName', '==', 'Maged Ishak')
+    );
+    const techSnapshot = await getDocs(techQuery);
+    
+    if (techSnapshot.empty) {
+      alert('❌ Maged Ishak not found in technicians collection');
+      return;
+    }
+    
+    const techDoc = techSnapshot.docs[0];
+    const techData = techDoc.data();
+    const technicianUid = techDoc.id;
+    const technicianEmail = techData.email;
+    
+    console.log('Found technician:', { uid: technicianUid, email: technicianEmail, data: techData });
+    
+    // Create a test notification
+    const testNotification = {
+      type: 'booking_request',
+      title: 'Test Booking Request',
+      message: 'This is a test booking request notification',
+      bookingId: 'test-manual-booking',
+      technicianId: technicianUid,
+      technicianName: 'Maged Ishak',
+      technicianEmail: technicianEmail,
+      customerName: 'Test Customer',
+      customerEmail: 'test@example.com',
+      customerPhone: '1234567890',
+      bookingDate: '2023-10-27',
+      bookingTime: '10:00 AM',
+      paymentMethod: 'Cash',
+      status: 'pending',
+      recipientId: technicianUid,
+      recipientType: 'technician',
+      createdAt: serverTimestamp(),
+      read: false
+    };
+    
+    console.log('Creating manual notification:', testNotification);
+    
+    const notificationRef = await addDoc(collection(db, 'notifications'), testNotification);
+    console.log('Manual notification created with ID:', notificationRef.id);
+    
+    alert(`✅ Manual notification created successfully!\nTechnician UID: ${technicianUid}\nNotification ID: ${notificationRef.id}`);
+    
+  } catch (error) {
+    console.error('Manual notification error:', error);
+    alert('❌ Manual notification error: ' + error.message);
+  }
+}
+
+// Function to test booking data
+function testBookingData() {
+  console.log('=== TESTING BOOKING DATA ===');
+  console.log('Current form data:', form.value);
+  console.log('Technician data:', technician.value);
+  console.log('Auth current user:', auth.currentUser);
+  
+  // Test address construction
+  const testAddress = constructAddress(form.value);
+  console.log('Test constructed address:', testAddress);
+  
+  // Test booking data object
+  const testBookingData = {
+    technicianId: technician.value.uid || technician.value.id,
+    technicianName: technician.value.name,
+    userId: auth.currentUser?.uid,
+    userName: form.value.fullName,
+    userEmail: form.value.email,
+    userPhone: form.value.phone,
+    date: form.value.date,
+    time: form.value.time,
+    address: testAddress,
+    price: technician.value.visitPrice || technician.value.basePrice || 'N/A',
+    note: form.value.note || '',
+    payment: form.value.payment,
+    status: 'pending',
+    createdAt: new Date()
+  };
+  
+  console.log('Test booking data object:', testBookingData);
+  console.log('=== END TESTING BOOKING DATA ===');
+  
+  alert(`Test completed! Check console for details.\n\nUser Email: ${form.value.email}\nAddress: ${testAddress}\nPrice: ${testBookingData.price}`);
 }
 
 function constructAddress(formData) {
@@ -1462,104 +1593,6 @@ function constructAddress(formData) {
   
   return finalAddress;
 }
-
-// Handle location detection from LocationMap component
-function handleLocationDetected(locationData) {
-  console.log('Location detected in BookingPage:', locationData);
-  
-  if (locationData.addressDetails) {
-    // Auto-fill form fields with detected location details
-    const { city, area, street, building } = locationData.addressDetails;
-    
-    if (city) form.value.city = city;
-    if (area) form.value.area = area;
-    if (street) form.value.street = street;
-    if (building) form.value.building = building;
-    
-    console.log('Form auto-filled with detected location:', {
-      city: form.value.city,
-      area: form.value.area,
-      street: form.value.street,
-      building: form.value.building
-    });
-  }
-  
-  // Store coordinates for potential future use
-  if (locationData.latitude && locationData.longitude) {
-    console.log('Coordinates stored:', {
-      latitude: locationData.latitude,
-      longitude: locationData.longitude,
-      accuracy: locationData.accuracy
-    });
-  }
-}
-
-onMounted(async () => {
-  const id = route.query.techId || route.query.technicianId
-  if (!id) {
-    errorMsg.value = 'Technician ID is missing. Please try again or contact support.';
-    return;
-  }
-  
-  // No stock technicians - only show registered technicians
-  // Try to fetch from Firestore (pendingTechnicians or technicians)
-  let docRef = doc(db, 'technicians', id);
-  let docSnap = await getDoc(docRef);
-  if (!docSnap.exists()) {
-    // Try pendingTechnicians (if not yet approved)
-    docRef = doc(db, 'pendingTechnicians', id);
-    docSnap = await getDoc(docRef);
-  }
-  if (docSnap.exists()) {
-    const techData = docSnap.data();
-    technician.value = {
-      ...techData,
-      uid: id, // Ensure uid is set for consistency
-      name: techData.fullName || techData.name, // Map fullName to name for consistency
-      profilePhotoUrl: techData.profilePhotoUrl || techData.image || techData.idPhotoUrl || '/images/Avatar.png' // Map to profilePhotoUrl for template consistency
-    };
-    console.log('Technician data loaded:', technician.value);
-    console.log('Technician profile photo:', technician.value.profilePhotoUrl);
-  } else {
-    errorMsg.value = 'Technician not found. Please try again or contact support.';
-    return;
-  }
-  
-  // Fetch technician availability first
-  if (technician.value.uid) {
-    await fetchTechnicianAvailability(technician.value.uid);
-    await updateDateAvailability();
-  }
-  
-  // Set default date to the first available date
-  if (availableDates.value.length > 0) {
-    form.value.date = availableDates.value[0];
-    // Initialize availability times for the default date
-    await updateAvailableTimes(form.value.date);
-  } else {
-    // No available dates found
-    errorMsg.value = 'This technician has not set their availability yet. Please contact them directly or try again later.';
-  }
-  
-  populateFormWithUserData(); // Call the new function here
-  
-  // Initialize available cities for default governorate
-  updateCities();
-})
-
-// Cleanup function to prevent memory leaks
-onUnmounted(() => {
-  errorMsg.value = '';
-})
-
-// Watch for technician data changes
-watch(() => technician.value, (newTechnician) => {
-  // Check if times are available
-  if (availableTimes.value.length === 0) {
-    console.log('No available times for booking');
-    return;
-  }
-})
 </script>
 
 <style scoped>
@@ -1606,6 +1639,7 @@ watch(() => technician.value, (newTechnician) => {
   align-items: center;
   justify-content: center;
   margin-bottom: 3rem;
+
 }
 
 .progress-step {
@@ -1705,9 +1739,7 @@ watch(() => technician.value, (newTechnician) => {
 
 .date-navigation {
   display: flex;
-  flex-direction: row;
   align-items: center;
-  justify-content: space-between;
   gap: 1rem;
 }
 
@@ -1723,7 +1755,6 @@ watch(() => technician.value, (newTechnician) => {
   align-items: center;
   justify-content: center;
   transition: background 0.2s;
-  flex-shrink: 0;
 }
 
 .nav-arrow:hover {
@@ -1734,14 +1765,6 @@ watch(() => technician.value, (newTechnician) => {
   display: flex;
   gap: 1rem;
   flex: 1;
-  justify-content: center;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.date-slots::-webkit-scrollbar {
-  display: none;
 }
 
 .date-slot {
@@ -1867,9 +1890,9 @@ watch(() => technician.value, (newTechnician) => {
   color: #374151;
 }
 
-.payment-icon {
-  margin-left: 0.5rem;
-  color: #6b7280;
+.paypal-logo {
+  height: 20px;
+  margin-left: auto;
 }
 
 .payment-summary {
@@ -1904,8 +1927,8 @@ watch(() => technician.value, (newTechnician) => {
   font-style: italic;
 }
 
-/* Credit Card Container */
-.credit-card-container {
+/* PayPal Container */
+.paypal-container {
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
@@ -1913,27 +1936,11 @@ watch(() => technician.value, (newTechnician) => {
   margin-top: 1rem;
 }
 
-.credit-card-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.card-number-group {
-  position: relative;
-}
-
-.card-type-indicator {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
+.paypal-loading {
+  text-align: center;
+  padding: 1rem;
   color: #6b7280;
-  font-size: 1.2rem;
-}
-
-.card-input {
-  padding-right: 2.5rem;
+  font-style: italic;
 }
 
 /* Confirm Button */
@@ -1955,15 +1962,299 @@ watch(() => technician.value, (newTechnician) => {
   background: #6b5fa7;
 }
 
-/* Error styling */
-.error {
-  border-color: #dc2626 !important;
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
+/* Responsive Design */
+@media (max-width: 768px) {
+  .booking-page {
+    padding: 1rem 0 2rem 0;
+  }
+  
+  .page-title {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+  
+  .booking-card {
+    margin: 0 1rem;
+    padding: 1.5rem 1rem;
+    border-radius: 12px;
+  }
+  
+  .progress-indicator {
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .step-circle {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+  
+  .step-text {
+    font-size: 0.8rem;
+  }
+  
+  .progress-line {
+    width: 50px;
+    margin: 0;
+    align-self: flex-start;
+    margin-top: 20px;
+  }
+  
+  .technician-section {
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .technician-info {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .technician-photo {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .technician-details h3 {
+    font-size: 1.3rem;
+  }
+  
+  .available-appointments {
+    margin-left: 0;
+  }
+  
+  .appointment-title {
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+  
+  .date-navigation {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .date-slots {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .date-slot {
+    padding: 0.75rem;
+  }
+  
+  .nav-arrow {
+    align-self: center;
+  }
+  
+  .booking-form {
+    gap: 1.5rem;
+  }
+  
+  .form-section {
+    padding: 1.5rem;
+  }
+  
+  .section-title {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .form-group.full-width {
+    margin-top: 1rem;
+  }
+  
+  .form-input {
+    padding: 0.875rem 1rem;
+    font-size: 1rem;
+  }
+  
+  .form-input.textarea {
+    min-height: 80px;
+  }
+  
+  .payment-methods {
+    gap: 0.75rem;
+  }
+  
+  .payment-option {
+    padding: 0.875rem;
+  }
+  
+  .payment-summary {
+    padding: 1rem;
+  }
+  
+  .payment-amount {
+    font-size: 0.9rem;
+  }
+  
+  .amount {
+    font-size: 1rem;
+  }
+  
+  .paypal-container {
+    padding: 1rem;
+  }
+  
+  .confirm-btn {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1rem;
+    margin-top: 1.5rem;
+  }
 }
 
-.error-message {
-  color: #dc2626;
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
+@media (max-width: 480px) {
+  .booking-page {
+    padding: 0.5rem 0 1.5rem 0;
+  }
+  
+  .page-title {
+    font-size: 1.75rem;
+  }
+  
+  .booking-card {
+    margin: 0 0.5rem;
+    padding: 1rem 0.75rem;
+  }
+  
+  .technician-section {
+    padding: 1rem;
+  }
+  
+  .technician-photo {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .technician-details h3 {
+    font-size: 1.2rem;
+  }
+  
+  .form-section {
+    padding: 1rem;
+  }
+  
+  .section-title {
+    font-size: 1rem;
+  }
+  
+  .form-input {
+    padding: 0.75rem 0.875rem;
+    font-size: 0.95rem;
+  }
+  
+  .step-circle {
+    width: 35px;
+    height: 35px;
+    font-size: 0.9rem;
+  }
+  
+  .step-text {
+    font-size: 0.75rem;
+  }
+  
+  .progress-line {
+    width: 30px;
+    margin: 0;
+    align-self: flex-start;
+    margin-top: 17px;
+  }
+  
+  .date-slot {
+    padding: 0.5rem;
+  }
+  
+  .day-name {
+    font-size: 0.9rem;
+  }
+  
+  .date-number {
+    font-size: 0.8rem;
+  }
+  
+  .time-slot {
+    font-size: 0.8rem;
+  }
+  
+  .nav-arrow {
+    width: 35px;
+    height: 35px;
+  }
+  
+  .payment-option {
+    padding: 0.75rem;
+  }
+  
+  .payment-text {
+    font-size: 0.9rem;
+  }
+  
+  .paypal-logo {
+    height: 18px;
+  }
+}
+
+@media (max-width: 360px) {
+  .booking-card {
+    margin: 0 0.25rem;
+    padding: 0.75rem 0.5rem;
+  }
+  
+  .page-title {
+    font-size: 1.5rem;
+  }
+  
+  .technician-photo {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .technician-details h3 {
+    font-size: 1.1rem;
+  }
+  
+  .form-section {
+    padding: 0.75rem;
+  }
+  
+  .form-input {
+    padding: 0.625rem 0.75rem;
+    font-size: 0.9rem;
+  }
+  
+  .step-circle {
+    width: 30px;
+    height: 30px;
+    font-size: 0.8rem;
+  }
+  
+  .progress-line {
+    width: 25px;
+    margin: 0;
+    align-self: flex-start;
+    margin-top: 15px;
+  }
+  
+  .day-name {
+    font-size: 0.85rem;
+  }
+  
+  .date-number {
+    font-size: 0.75rem;
+  }
+  
+  .time-slot {
+    font-size: 0.75rem;
+  }
 }
 </style> 

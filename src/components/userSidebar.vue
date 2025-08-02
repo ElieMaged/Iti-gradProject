@@ -1,7 +1,7 @@
 <template>
   <div class="layout">
-    <div class="sidebar mx-20" v-if="user">
-      <a :href="`/profile-view/${user.uid}`" 
+    <div class="sidebar mx-20">
+      <a href="/profile-view" 
          class="sidebar-item" 
          :class="{ active: activeTab === 'profile' }"
          @click="handleNavigation">
@@ -32,15 +32,17 @@
         <i class="fas fa-calendar-alt"></i>
         <span>{{ $t('bookings') }}</span>
       </a>
+
+      <button @click="handleLogout" class="sidebar-item logout-btn">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>{{ $t('logout') }}</span>
+      </button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { auth } from '../firebase';
-import { onAuthStateChanged } from 'firebase/auth';
 
 const props = defineProps({
   activeTab: {
@@ -50,13 +52,6 @@ const props = defineProps({
 });
 
 const router = useRouter();
-const user = ref(null);
-
-onMounted(() => {
-  onAuthStateChanged(auth, (firebaseUser) => {
-    user.value = firebaseUser;
-  });
-});
 
 function handleNavigation(event) {
   // Prevent default behavior for href links
@@ -139,23 +134,19 @@ body {
 }
 
 .sidebar-item:hover {
-  background-color: var(--primary-color);
+  background-color: #c5b7e6;
   color: white;
 }
 
 .sidebar-item.active {
-  background-color: var(--primary-color);
+  background-color: var(--secondary);
   color: white;
 }
-.dark .sidebar-item.active {
-  background-color: #c5b7e6;
-  color: var(--primary-text-dark);
-}
-.dark .sidebar-item:hover {
-  background-color: #c5b7e6;
-  color: var(--primary-text-dark);
-}
 
+.dark .sidebar-item.active {
+  background-color: var(--icon-color);
+  color: var(--primary-text-dark);
+}
 
 .logout-btn {
   margin-top: 0.5rem;
@@ -165,66 +156,6 @@ body {
 .logout-btn:hover {
   background-color: #ef4444;
   color: white;
-}
-
-/* Mobile Responsive - Horizontal Layout */
-@media (max-width: 768px) {
-  .layout {
-    flex-direction: column;
-    max-height: 10vh;
-  }
-  
-  .sidebar {
-    width: 100vw;
-    flex-direction: row;
-    padding: 1rem;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin: 0;
-    box-sizing: border-box;
-  }
-  
-  .sidebar-item {
-    width: auto;
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-    border-radius: 8px;
-    min-width: fit-content;
-    margin: 0 20px;
-  }
-  
-  .sidebar-item span {
-    display: none;
-  }
-  
-  .sidebar-item i {
-    font-size: 1rem;
-  }
-  
-  .logout-btn {
-    margin-top: 0;
-  }
-}
-
-@media (max-width: 480px) {
-  .sidebar {
-    padding: 0.75rem;
-    gap: 0.25rem;
-  }
-  .layout {
-    margin-top: 30px;
-    max-height: 10vh;
-  }
-  .sidebar-item {
-    padding: 0.375rem 0.75rem;
-    font-size: 0.75rem;
-  }
-  
-  .sidebar-item i {
-    font-size: 0.875rem;
-  }
 }
 </style>
 

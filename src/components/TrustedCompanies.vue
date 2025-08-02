@@ -1,12 +1,16 @@
 <template>
-  <div class="trusted-section">
-    <div class="trusted-header">
+  <div class="trusted-section custom-container">
+    <div class="trusted-header mt-20">
       <hr class="trusted-line" />
-      <span class="trusted-text">{{ $t('trustedCompaniesText') }}</span>
+      <span class="trusted-text">{{ $t("trustedCompaniesText") }}</span>
       <hr class="trusted-line" />
     </div>
     <div class="trusted-logos">
-      <div class="trusted-logo-item" v-for="(company, idx) in companies" :key="idx">
+      <div
+        class="trusted-logo-item"
+        v-for="(company, idx) in companies"
+        :key="idx"
+      >
         <img :src="company.logo" :alt="company.name" class="trusted-logo-img" />
       </div>
     </div>
@@ -15,15 +19,14 @@
 
 <script>
 export default {
-  name: 'TrustedCompanies',
+  name: "TrustedCompanies",
   data() {
     return {
       companies: [
-        { logo: '/images/logo1.png' },
-        { logo: '/images/logo2.png' },
-        { logo: '/images/logo3.png' },
-        { logo: '/images/logo4.png' },
-        { logo: '/images/logo5.png' },
+        { logo: "/images/logo1.png" },
+        { logo: "/images/logo2.png" },
+        { logo: "/images/logo3.png" },
+        { logo: "/images/logo4.png" },
       ],
     };
   },
@@ -36,7 +39,6 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: #F4F4F5;
 }
 .dark .trusted-section {
   background-color: var(--primary-bg);
@@ -55,15 +57,17 @@ export default {
 .trusted-line {
   flex: 1;
   border: none;
-  border-top: 1px solid #bdbdbd;
+  border-top: 1px solid var(--text-gray);
+  background-color: var(--text-gray);
   height: 1px;
   margin: 0 16px;
 }
 .dark .trusted-line {
   border-top: 1px solid var(--primary-text);
+  background-color: var(--primary-text);
 }
 .trusted-text {
-  color: #8c8e90;
+  color: var(--text-gray);
   font-size: 20px;
   font-family: Outfit, sans-serif;
   font-weight: 500;
@@ -73,9 +77,8 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 40px;
+  gap: 30px;
   width: 100%;
-  max-width: 1100px;
 }
 .trusted-logo-item {
   display: flex;
@@ -89,27 +92,26 @@ export default {
   margin-bottom: 8px;
 }
 .trusted-logo-label {
-  color: #3d2c22;
+  /* color: #3d2c22; */
   font-size: 20px;
   font-family: Outfit, sans-serif;
   font-weight: 700;
 }
-
 /* Responsive design */
 @media (max-width: 1024px) {
   .trusted-header {
     padding-top: 30px;
     margin-bottom: 24px;
   }
-  
+
   .trusted-text {
     font-size: 18px;
   }
-  
+
   .trusted-logos {
     gap: 30px;
   }
-  
+
   .trusted-logo-img {
     width: 120px;
     height: 120px;
@@ -121,17 +123,17 @@ export default {
     padding-top: 20px;
     margin-bottom: 20px;
   }
-  
+
   .trusted-text {
     font-size: 16px;
   }
-  
+
   .trusted-logos {
     flex-wrap: wrap;
     justify-content: center;
     gap: 20px;
   }
-  
+
   .trusted-logo-img {
     width: 100px;
     height: 100px;
@@ -143,22 +145,22 @@ export default {
     padding-top: 15px;
     margin-bottom: 15px;
   }
-  
+
   .trusted-text {
     font-size: 14px;
   }
-  
+
   .trusted-line {
     margin: 0 8px;
   }
-  
+
   .trusted-logos {
     gap: 15px;
   }
-  
+
   .trusted-logo-img {
     width: 80px;
-    height: 80px;
+    height: 29px;
   }
 }
 </style>

@@ -1,12 +1,11 @@
 <template>
-  <div class="services-header">
-    <div class="custom-container">
-      <h2 class="commitment-title">{{ $t("servicesFeaturesTitle") }}</h2>
-      <p class="commitment-description">
-        {{ $t("servicesCommitmentDescription") }}
-      </p>
-    </div>
+  <div class="services-header m-20">
+    <h2 class="commitment-title">{{ $t("servicesFeaturesTitle") }}</h2>
+    <p class="commitment-description">
+      {{ $t("servicesCommitmentDescription") }}
+    </p>
   </div>
+
   <section class="services-features">
     <div class="services-container">
       <div
@@ -224,6 +223,7 @@ export default {
   .service-card {
     padding: 24px 16px;
     text-align: center;
+    max-width: 100%;
   }
 
   .service-title {

@@ -6,21 +6,7 @@
       <div id="admin-profile-wrapper">
         <div id="admin-profile-card">
           <h2 id="admin-profile-title">{{ $t('personalInformation') }}</h2>
-          
-          <!-- Loading State -->
-          <div v-if="loading" class="loading-state">
-            <div class="loading-spinner"></div>
-            <p>Loading profile information...</p>
-          </div>
-
-          <!-- Error State -->
-          <div v-else-if="error" class="error-state">
-            <p class="error-message">{{ error }}</p>
-            <button @click="fetchAdminProfile" class="retry-btn">Retry</button>
-          </div>
-
-          <!-- Profile Content -->
-          <div v-else-if="userData" id="admin-profile-content">
+          <div id="admin-profile-content">
             <div id="admin-profile-info">
               <div class="info-block" v-for="(value, label) in userInfo" :key="label">
                 <span class="info-label">{{ label }}</span>
@@ -28,8 +14,7 @@
               </div>
             </div>
             <div id="admin-profile-image">
-              <img v-if="userData.profileImageUrl" :src="userData.profileImageUrl" alt="Profile" class="profile-image" />
-              <i v-else class="fas fa-user" id="profile-icon"></i>
+              <i class="fas fa-user" id="profile-icon"></i>
             </div>
           </div>
         </div>
@@ -40,84 +25,31 @@
 
 <script>
 import AdminSidebar from '../../components/admin-sidebar.vue';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../../firebase';
-import { getAuth } from 'firebase/auth';
-
 export default {
   name: 'AdminProfile',
   components: { AdminSidebar },
   data() {
     return {
-      userData: null,
-      loading: true,
-      error: null
+      userData: {
+        fullName: 'Mohamed Ali Mohamed',
+        emailAddress: 'mohamed@gmail.com',
+        phoneNumber: '+20 011 555 2323',
+        gender: 'male',
+        nationalId: '60504441591478',
+        address: '15 El-Tahrir Street, Dokki, Giza, Egypt, 12611'
+      }
     };
   },
   computed: {
     userInfo() {
-      if (!this.userData) return {};
-      
       return {
-        [this.$t('fullName')]: this.userData.fullName || 'N/A',
-        [this.$t('emailAddress')]: this.userData.email || 'N/A',
-        [this.$t('phoneNumber')]: this.userData.phone || 'N/A',
-        [this.$t('gender')]: this.userData.gender ? this.$t(this.userData.gender) : 'N/A',
-        [this.$t('nationalId')]: this.userData.nationalId || 'N/A',
-        [this.$t('address')]: this.constructAddress(this.userData) || 'N/A'
+        [this.$t('fullName')]: this.userData.fullName,
+        [this.$t('emailAddress')]: this.userData.emailAddress,
+        [this.$t('phoneNumber')]: this.userData.phoneNumber,
+        [this.$t('gender')]: this.$t(this.userData.gender),
+        [this.$t('nationalId')]: this.userData.nationalId,
+        [this.$t('address')]: this.userData.address
       };
-    }
-  },
-  async mounted() {
-    await this.fetchAdminProfile();
-  },
-  methods: {
-    async fetchAdminProfile() {
-      try {
-        this.loading = true;
-        this.error = null;
-        
-        const auth = getAuth();
-        const currentUser = auth.currentUser;
-        
-        if (!currentUser) {
-          this.error = 'No authenticated user found';
-          return;
-        }
-        
-        console.log('🔍 Fetching admin profile for user:', currentUser.uid);
-        
-        const userDoc = doc(db, 'users', currentUser.uid);
-        const userSnapshot = await getDoc(userDoc);
-        
-        if (userSnapshot.exists()) {
-          this.userData = {
-            id: userSnapshot.id,
-            ...userSnapshot.data()
-          };
-          console.log('✅ Admin profile loaded:', this.userData);
-        } else {
-          this.error = 'Profile not found';
-          console.log('❌ Admin profile not found');
-        }
-      } catch (error) {
-        console.error('❌ Error fetching admin profile:', error);
-        this.error = 'Failed to load profile information';
-      } finally {
-        this.loading = false;
-      }
-    },
-    
-    constructAddress(userData) {
-      if (!userData) return '';
-      
-      const addressParts = [];
-      if (userData.street) addressParts.push(userData.street);
-      if (userData.building) addressParts.push(userData.building);
-      if (userData.area) addressParts.push(userData.area);
-      if (userData.city) addressParts.push(userData.city);
-      
-      return addressParts.join(', ') || 'N/A';
     }
   }
 };
@@ -161,55 +93,6 @@ export default {
 }
 .dark #admin-profile-title {
   color: var(--primary-color);
-}
-
-/* Loading and Error States */
-.loading-state, .error-state {
-  text-align: center;
-  padding: 2rem;
-}
-
-.loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #7c6bb0;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 1rem;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.error-message {
-  color: #dc3545;
-  margin-bottom: 1rem;
-}
-
-.retry-btn {
-  background-color: #7c6bb0;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.retry-btn:hover {
-  background-color: #6a5acd;
-}
-
-/* Profile Image */
-.profile-image {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 3px solid #7c6bb0;
 }
 
 /* RTL Support for Arabic */
