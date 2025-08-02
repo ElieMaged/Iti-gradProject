@@ -524,7 +524,6 @@ const messages = {
     // ServicesSection.vue
     servicesSectionTitle: "What Do You Need Fixed?",
     bookNow: "Book Now",
-    loginToBook: "Login to Book",
     loginRequiredToBook: "You need to be logged in to book a service. Would you like to go to the login page?",
     bookNowWithBestTechnicians: "Book Now With The Best Technicians!",
     bookingInformation: "Booking Information",
@@ -1429,6 +1428,7 @@ const messages = {
     enterYourEmail: "أدخل بريدك الإلكتروني",
     sendResetEmail: "إرسال رابط إعادة التعيين",
     cancel: "إلغاء",
+    loginToBook: "تسجيل الدخول للحجز",
     pleaseEnterEmail: "يرجى إدخال عنوان بريدك الإلكتروني",
     passwordResetEmailSent:
       "تم إرسال رابط إعادة تعيين كلمة المرور! تحقق من صندوق الوارد.",
