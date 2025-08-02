@@ -2,7 +2,7 @@
   <div class="plumbing-page">
 
     <!-- Hero Section -->
-    <section class="hero-section m-5" :style="heroBackgroundStyle">
+    <section class="hero-section" :style="heroBackgroundStyle">
       <div class="hero-overlay">
         <div class="hero-content">
           <h1 class="hero-title">{{ $t('carpentryTitle') }}</h1>
@@ -37,7 +37,6 @@
       <div class="container">
         <div class="section-header">
           <h2 class="section-title">{{ $t('meetTechniciansTeam') }}</h2>
-          <p class="section-description">{{ $t('carpentryTeamDescription') }}</p>
         </div>
 
         <div class="technicians-grid">
@@ -68,7 +67,6 @@
         </div>
       </div>
     </section>
-<EndCard />
 
   </div>
 </template>
@@ -78,7 +76,6 @@ import { ref, computed, onMounted } from 'vue'
 import { collection, getDocs } from 'firebase/firestore'
 import { db } from '../firebase'
 import { useRouter } from 'vue-router'
-import EndCard from '../components/EndCard.vue'
 import SearchBar from '../components/SearchBar.vue'
 import profile1 from '../assets/profile/1.jpg'
 import profile2 from '../assets/profile/2.png'
@@ -91,6 +88,16 @@ import profile8 from '../assets/profile/8.png'
 import plumbingBg from '../assets/Professions/Carpentry.jpg'
 
 const router = useRouter()
+const stockTechnicians = [
+  { id: 'stock-1', name: 'Ahmed Salah', image: profile1, bgColor: '#E8E4F3', price: 200, description: 'Experienced plumber with 10+ years in the field.', rating: 5 },
+  { id: 'stock-2', name: 'Mohammed Ali', image: profile2, bgColor: '#E3F2FD', price: 180, description: 'Expert in residential plumbing.', rating: 5 },
+  { id: 'stock-3', name: 'Omar Hassan', image: profile3, bgColor: '#FFF3E0', price: 220, description: 'Specialist in pipe installation and repair.', rating: 5 },
+  { id: 'stock-4', name: 'Youssef Ahmed', image: profile4, bgColor: '#F3E5F5', price: 210, description: 'Professional with a focus on customer satisfaction.', rating: 5 },
+  { id: 'stock-5', name: 'Karim Mahmoud', image: profile5, bgColor: '#E8F5E8', price: 190, description: 'Reliable and efficient plumbing solutions.', rating: 5 },
+  { id: 'stock-6', name: 'Hassan Ibrahim', image: profile6, bgColor: '#FFF8E1', price: 205, description: 'Expert in leak detection and repair.', rating: 5 },
+  { id: 'stock-7', name: 'Mahmoud Ali', image: profile7, bgColor: '#F1F8E9', price: 195, description: 'Specialist in bathroom and kitchen plumbing.', rating: 5 },
+  { id: 'stock-8', name: 'Ibrahim Hassan', image: profile8, bgColor: '#E0F2F1', price: 215, description: 'Trusted by hundreds of satisfied customers.', rating: 5 }
+]
 const firebaseTechnicians = ref([])
 const searchQuery = ref('')
 const filterOption = ref('')
@@ -104,15 +111,17 @@ async function fetchTechnicians() {
 onMounted(fetchTechnicians)
 
 const mergedTechnicians = computed(() => {
-  // Only include Firebase technicians - no stock technicians
-  const allTechs = []
+  // Avoid duplicate names/IDs with stock
+  const allTechs = [...stockTechnicians]
   firebaseTechnicians.value.forEach(fbTech => {
-    allTechs.push({
-      ...fbTech,
-      image: fbTech.profilePhotoUrl || fbTech.idPhotoUrl || profile1, // Use profile photo first, then ID photo as fallback
-      name: fbTech.fullName || fbTech.name,
-      price: fbTech.basePrice || fbTech.price
-    })
+    if (!allTechs.some(t => t.name === fbTech.name && t.price === fbTech.price)) {
+      allTechs.push({
+        ...fbTech,
+        image: fbTech.profilePhotoUrl || fbTech.idPhotoUrl || profile1, // Use profile photo first, then ID photo as fallback
+        name: fbTech.fullName || fbTech.name,
+        price: fbTech.basePrice || fbTech.price
+      })
+    }
   })
   return allTechs
 })
@@ -158,7 +167,11 @@ function viewProfile(id) {
 
 const heroBackgroundStyle = computed(() => {
   return {
-    backgroundImage: `linear-gradient(rgba(98, 84, 152, 0.7), rgba(98, 84, 152, 0.7)), url(${plumbingBg})`
+    backgroundImage: `linear-gradient(rgba(98, 84, 152, 0.7), rgba(98, 84, 152, 0.7)), url(${plumbingBg})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    width: '100%'
   }
 })
 </script>
@@ -173,16 +186,24 @@ const heroBackgroundStyle = computed(() => {
 /* Hero Section */
 .hero-section {
   position: relative;
-  height: 400px;
+  height: 300px;
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
+  width: 100%;
+  margin: 0;
+  padding: 0;
 }
 .hero-content {
   color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
 }
 .dark .hero-content {
   color: var(--primary-text) !important;
@@ -213,7 +234,7 @@ const heroBackgroundStyle = computed(() => {
 /* Technicians Section */
 .technicians-section {
   padding: 4rem 0;
-  background-color: #f8f9fa;
+  background-color: white;
 }
 .dark .technicians-section {
   background: var(--primary-bg) !important;

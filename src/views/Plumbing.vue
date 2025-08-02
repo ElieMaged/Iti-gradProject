@@ -2,7 +2,7 @@
   <div class="plumbing-page">
 
     <!-- Hero Section -->
-    <section class="hero-section m-5" :style="heroBackgroundStyle">
+    <section class="hero-section" :style="heroBackgroundStyle">
       <div class="hero-overlay">
         <div class="hero-content">
           <h1 class="hero-title">{{ $t('plumbingTitle') }}</h1>
@@ -37,7 +37,6 @@
       <div class="container">
         <div class="section-header">
           <h2 class="section-title">{{ $t('meetTechniciansTeam') }}</h2>
-          <p class="section-description">{{ $t('carpentryTeamDescription') }}</p>
         </div>
 
         <div class="technicians-grid">
@@ -72,10 +71,18 @@
           </div>
         </div>
 
-        <!-- Remove pagination controls -->
+        <!-- Pagination -->
+        <div class="pagination">
+          <button class="pagination-btn"><i class="fa-solid fa-chevron-left"></i></button>
+          <button class="pagination-btn active">1</button>
+          <button class="pagination-btn">2</button>
+          <button class="pagination-btn">3</button>
+          <span class="pagination-dots">...</span>
+          <button class="pagination-btn">10</button>
+          <button class="pagination-btn"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
       </div>
     </section>
-<EndCard />
 
   </div>
 </template>
@@ -85,7 +92,6 @@ import { ref, computed, onMounted } from 'vue'
 import { collection, getDocs } from 'firebase/firestore'
 import { db } from '../firebase'
 import { useRouter } from 'vue-router'
-import EndCard from '../components/EndCard.vue'
 import SearchBar from '../components/SearchBar.vue'
 import profile1 from '../assets/profile/1.jpg'
 import profile2 from '../assets/profile/2.png'
@@ -99,6 +105,12 @@ import plumbingBg from '../assets/Professions/Plumbing.jpg'
 
 const router = useRouter()
 const loading = ref(true)
+const stockTechnicians = [
+  // Example stock wall finishing technicians (update these as needed)
+  { id: 'stock-1', name: 'Ahmed Salah', image: profile1, bgColor: '#E8E4F3', price: 200, description: 'Experienced plumbing with 10+ years in the field.', rating: 5, specialization: 'plumbing' },
+  { id: 'stock-2', name: 'Mohammed Ali', image: profile2, bgColor: '#E3F2FD', price: 180, description: 'Expert in residential plumbing.', rating: 5, specialization: 'plumbing' },
+  // Add more stock wall finishing technicians as needed
+]
 const firebaseTechnicians = ref([])
 const searchQuery = ref('')
 const filterOption = ref('')
@@ -200,7 +212,11 @@ function viewProfile(id) {
 
 const heroBackgroundStyle = computed(() => {
   return {
-    backgroundImage: `linear-gradient(rgba(98, 84, 152, 0.7), rgba(98, 84, 152, 0.7)), url(${plumbingBg})`
+    backgroundImage: `linear-gradient(rgba(98, 84, 152, 0.7), rgba(98, 84, 152, 0.7)), url(${plumbingBg})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    width: '100%'
   }
 })
 </script>
@@ -215,19 +231,27 @@ const heroBackgroundStyle = computed(() => {
 /* Hero Section */
 .hero-section {
   position: relative;
-  height: 400px;
+  height: 300px;
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
+  width: 100%;
+  margin: 0;
+  padding: 0;
 }
 .dark .hero-content {
   color: var(--primary-text);
 }
 .hero-content {
   color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
 }
 
 .hero-title {
@@ -252,7 +276,7 @@ const heroBackgroundStyle = computed(() => {
 /* Technicians Section */
 .technicians-section {
   padding: 4rem 0;
-  background-color: #f8f9fa;
+  background-color: white;
 }
 .dark .technicians-section {
   background-color: var(--primary-bg);

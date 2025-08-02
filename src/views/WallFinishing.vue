@@ -2,7 +2,7 @@
   <div class="plumbing-page">
 
     <!-- Hero Section -->
-    <section class="hero-section m-5" :style="heroBackgroundStyle">
+    <section class="hero-section" :style="heroBackgroundStyle">
       <div class="hero-overlay">
         <div class="hero-content">
           <h1 class="hero-title">{{ $t('wallFinishingTitle') }}</h1>
@@ -37,7 +37,6 @@
       <div class="container">
         <div class="section-header">
           <h2 class="section-title">{{ $t('meetTechniciansTeam') }}</h2>
-          <p class="section-description">{{ $t('wallFinishingTeamDescription') }}</p>
         </div>
 
         <div class="technicians-grid">
@@ -79,10 +78,18 @@
           </div>
         </div>
 
-        <!-- Remove pagination controls -->
+        <!-- Pagination -->
+        <div class="pagination">
+          <button class="pagination-btn"><i class="fa-solid fa-chevron-left"></i></button>
+          <button class="pagination-btn active">1</button>
+          <button class="pagination-btn">2</button>
+          <button class="pagination-btn">3</button>
+          <span class="pagination-dots">...</span>
+          <button class="pagination-btn">10</button>
+          <button class="pagination-btn"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
       </div>
     </section>
-<EndCard />
 
   </div>
 </template>
@@ -92,7 +99,6 @@ import { ref, computed, onMounted } from 'vue'
 import { collection, getDocs } from 'firebase/firestore'
 import { db } from '../firebase'
 import { useRouter } from 'vue-router'
-import EndCard from '../components/EndCard.vue'
 import SearchBar from '../components/SearchBar.vue'
 import profile1 from '../assets/profile/1.jpg'
 import profile2 from '../assets/profile/2.png'
@@ -106,6 +112,105 @@ import plumbingBg from '../assets/Professions/Wall.jpg'
 
 const router = useRouter()
 const loading = ref(true)
+const stockTechnicians = [
+  // Example stock wall finishing technicians (update these as needed)
+  { 
+    id: 'stock-1', 
+    name: 'Ahmed Salah', 
+    image: profile1, 
+    bgColor: '#E8E4F3', 
+    price: 200, 
+    description: 'Experienced wall finisher with 10+ years in the field.', 
+    rating: 4.5, 
+    specialization: 'Wall Finishing',
+    area: 'Maadi',
+    yearsOfExperience: 10
+  },
+  { 
+    id: 'stock-2', 
+    name: 'Mohammed Ali', 
+    image: profile2, 
+    bgColor: '#E3F2FD', 
+    price: 180, 
+    description: 'Expert in residential wall finishing.', 
+    rating: 4.8, 
+    specialization: 'Wall Finishing',
+    area: 'Mokattam',
+    yearsOfExperience: 8
+  },
+  { 
+    id: 'stock-3', 
+    name: 'Hassan Mahmoud', 
+    image: profile3, 
+    bgColor: '#FFF3E0', 
+    price: 150, 
+    description: 'Professional wall finishing specialist.', 
+    rating: 4.2, 
+    specialization: 'Wall Finishing',
+    area: 'Shoubra',
+    yearsOfExperience: 5
+  },
+  { 
+    id: 'stock-4', 
+    name: 'Omar Khalil', 
+    image: profile4, 
+    bgColor: '#F3E5F5', 
+    price: 220, 
+    description: 'Master wall finisher with premium services.', 
+    rating: 4.9, 
+    specialization: 'Wall Finishing',
+    area: 'Embaba',
+    yearsOfExperience: 12
+  },
+  { 
+    id: 'stock-5', 
+    name: 'Youssef Ahmed', 
+    image: profile5, 
+    bgColor: '#E0F2F1', 
+    price: 160, 
+    description: 'Skilled wall finishing technician.', 
+    rating: 4.0, 
+    specialization: 'Wall Finishing',
+    area: 'Maadi',
+    yearsOfExperience: 3
+  },
+  { 
+    id: 'stock-6', 
+    name: 'Karim Hassan', 
+    image: profile6, 
+    bgColor: '#FFF8E1', 
+    price: 190, 
+    description: 'Experienced wall finishing expert.', 
+    rating: 4.6, 
+    specialization: 'Wall Finishing',
+    area: 'Mokattam',
+    yearsOfExperience: 7
+  },
+  { 
+    id: 'stock-7', 
+    name: 'Samir Ibrahim', 
+    image: profile7, 
+    bgColor: '#F1F8E9', 
+    price: 170, 
+    description: 'Professional wall finishing contractor.', 
+    rating: 4.3, 
+    specialization: 'Wall Finishing',
+    area: 'Shoubra',
+    yearsOfExperience: 6
+  },
+  { 
+    id: 'stock-8', 
+    name: 'Tarek Mohamed', 
+    image: profile8, 
+    bgColor: '#E8F5E8', 
+    price: 210, 
+    description: 'Expert wall finishing specialist.', 
+    rating: 4.7, 
+    specialization: 'Wall Finishing',
+    area: 'Embaba',
+    yearsOfExperience: 9
+  }
+]
 const firebaseTechnicians = ref([])
 const searchQuery = ref('')
 const filterOption = ref('')
@@ -130,22 +235,24 @@ async function fetchTechnicians() {
 onMounted(fetchTechnicians)
 
 const mergedTechnicians = computed(() => {
-  // Only include Firebase technicians - no stock technicians
-  const allTechs = []
+  // Only include stock wall finishing technicians
+  const allTechs = [...stockTechnicians.filter(t => t.specialization === 'Wall Finishing')]
   firebaseTechnicians.value.forEach(fbTech => {
-    // Use uploaded photo if available, fallback to placeholder
-    allTechs.push({
-      id: fbTech.id,
-      name: fbTech.fullName,
-      image: fbTech.profilePhotoUrl || fbTech.idPhotoUrl || profile1, // Use profile photo first, then ID photo as fallback
-      bgColor: '#E8E4F3', // or any default color
-      price: fbTech.basePrice,
-      description: fbTech.bio,
-      rating: fbTech.rating || 4.0, // Use actual rating if available
-      specialization: fbTech.specialization,
-      area: fbTech.area || fbTech.location || 'Cairo', // Use area/location if available
-      yearsOfExperience: fbTech.yearsOfExperience || 5 // Use actual years if available
-    })
+    if (!allTechs.some(t => t.name === fbTech.fullName && t.price == fbTech.basePrice)) {
+      // Use uploaded photo if available, fallback to placeholder
+      allTechs.push({
+        id: fbTech.id,
+        name: fbTech.fullName,
+        image: fbTech.profilePhotoUrl || fbTech.idPhotoUrl || profile1, // Use profile photo first, then ID photo as fallback
+        bgColor: '#E8E4F3', // or any default color
+        price: fbTech.basePrice,
+        description: fbTech.bio,
+        rating: fbTech.rating || 4.0, // Use actual rating if available
+        specialization: fbTech.specialization,
+        area: fbTech.area || fbTech.location || 'Cairo', // Use area/location if available
+        yearsOfExperience: fbTech.yearsOfExperience || 5 // Use actual years if available
+      })
+    }
   })
   return allTechs
 })
@@ -236,7 +343,11 @@ function viewProfile(id) {
 
 const heroBackgroundStyle = computed(() => {
   return {
-    backgroundImage: `linear-gradient(rgba(98, 84, 152, 0.7), rgba(98, 84, 152, 0.7)), url(${plumbingBg})`
+    backgroundImage: `linear-gradient(rgba(98, 84, 152, 0.7), rgba(98, 84, 152, 0.7)), url(${plumbingBg})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    width: '100%'
   }
 })
 </script>
@@ -251,19 +362,27 @@ const heroBackgroundStyle = computed(() => {
 /* Hero Section */
 .hero-section {
   position: relative;
-  height: 400px;
+  height: 300px;
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
+  width: 100%;
+  margin: 0;
+  padding: 0;
 }
 .dark .hero-content {
   color: var(--primary-text);
 }
 .hero-content {
   color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
 }
 
 .hero-title {
@@ -288,7 +407,7 @@ const heroBackgroundStyle = computed(() => {
 /* Technicians Section */
 .technicians-section {
   padding: 4rem 0;
-  background-color: #f8f9fa;
+  background-color: white;
 }
 .dark .technicians-section {
   background-color: var(--primary-bg);
