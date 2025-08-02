@@ -71,16 +71,7 @@
           </div>
         </div>
 
-        <!-- Pagination -->
-        <div class="pagination">
-          <button class="pagination-btn"><i class="fa-solid fa-chevron-left"></i></button>
-          <button class="pagination-btn active">1</button>
-          <button class="pagination-btn">2</button>
-          <button class="pagination-btn">3</button>
-          <span class="pagination-dots">...</span>
-          <button class="pagination-btn">10</button>
-          <button class="pagination-btn"><i class="fa-solid fa-chevron-right"></i></button>
-        </div>
+
       </div>
     </section>
 
@@ -105,18 +96,12 @@ import plumbingBg from '../assets/Professions/Plumbing.jpg'
 
 const router = useRouter()
 const loading = ref(true)
-const stockTechnicians = [
-  // Example stock wall finishing technicians (update these as needed)
-  { id: 'stock-1', name: 'Ahmed Salah', image: profile1, bgColor: '#E8E4F3', price: 200, description: 'Experienced plumbing with 10+ years in the field.', rating: 5, specialization: 'plumbing' },
-  { id: 'stock-2', name: 'Mohammed Ali', image: profile2, bgColor: '#E3F2FD', price: 180, description: 'Expert in residential plumbing.', rating: 5, specialization: 'plumbing' },
-  // Add more stock wall finishing technicians as needed
-]
+// Removed stock technicians - only show registered technicians
 const firebaseTechnicians = ref([])
 const searchQuery = ref('')
 const filterOption = ref('')
 const sortOption = ref('')
-const techniciansPerPage = 8;
-const currentPage = ref(1);
+// Removed pagination logic
 
 async function fetchTechnicians() {
   try {
@@ -422,58 +407,7 @@ const heroBackgroundStyle = computed(() => {
   background-color: #4a3f7a;
 }
 
-/* Pagination */
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.5rem;
-}
-.dark .pagination {
-  color: var(--primary-text);
-}
 
-.pagination-btn {
-  width: 40px;
-  height: 40px;
-  border: 1px solid #ddd;
-  background: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: 600;
-}
-.dark .pagination-btn {
-  background-color: var(--primary-color);
-  color: var(--primary-text);
-}
-.pagination-btn:hover {
-  border-color: var(--primary-color);
-  color: var(--primary-color);
-}
-.dark .pagination-btn:hover {
-  background-color: var(--primary-color);
-  color: var(--primary-text);
-}
-.pagination-btn.active {
-  background-color: var(--primary-color);
-  color: white;
-  border-color: var(--primary-color);
-}
-.dark .pagination-btn.active {
-  background-color: var(--primary-color);
-  color: var(--primary-text);
-}
-.pagination-dots {
-  color: #666;
-  font-weight: bold;
-}
-.dark .pagination-dots {
-  color: var(--primary-text);
-}
 /* Call to Action Section */
 .cta-section {
   position: relative;
