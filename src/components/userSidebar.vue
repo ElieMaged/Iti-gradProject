@@ -1,6 +1,6 @@
 <template>
   <div class="layout">
-    <div class="sidebar mx-20" v-if="user">
+    <div class="sidebar" style="margin-left: 80px; margin-right: 80px;" v-if="user">
       <a :href="`/profile-view/${user.uid}`" 
          class="sidebar-item" 
          :class="{ active: activeTab === 'profile' }"
@@ -182,7 +182,7 @@ body {
     align-items: center;
     flex-wrap: wrap;
     gap: 0.5rem;
-    margin: 0;
+    margin: 0 !important;
     box-sizing: border-box;
   }
   

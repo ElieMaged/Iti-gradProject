@@ -1,6 +1,6 @@
 <template>
   <div class="layout ">
-    <div class="sidebar mx-20">
+          <div class="sidebar" style="margin-left: 80px; margin-right: 80px;">
       <a href="/technicion-profile" 
          class="sidebar-item" 
          :class="{ active: activeMenu === 'technicianprofile' }"
@@ -300,7 +300,7 @@ body {
     align-items: center;
     flex-wrap: wrap;
     gap: 0.5rem;
-    margin: 0;
+    margin: 0 !important;
     box-sizing: border-box;
   }
   

@@ -893,7 +893,6 @@ onMounted(() => {
 
 .dashboard-main {
   flex: 1;
-  margin: 20px;
 }
 
 .dashboard-container {

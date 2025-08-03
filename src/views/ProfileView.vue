@@ -22,7 +22,7 @@
           <!-- Profile Content -->
           <div v-else>
             <div id="admin-profile-card">
-              <h2 id="admin-profile-title">{{ $t('personalInformation') }}</h2>
+              <h2 class="page-title">{{ $t('personalInformation') }}</h2>
               <div id="admin-profile-content">
                 <!-- Profile Image - Will be moved to top on mobile -->
                 <div id="admin-profile-image" class="profile-image-mobile">
@@ -225,14 +225,17 @@ onMounted(() => {
   background-color: var(--grey-bg);
 }
 
-#admin-profile-title {
-  font-size: 1.5rem;
-  font-weight: bold;
+/* Standardized Page Title Styles */
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
   color: var(--primary-color);
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
+  text-align: left;
+  font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
 }
 
-.dark #admin-profile-title {
+.dark .page-title {
   color: var(--primary-color);
 }
 
@@ -287,7 +290,7 @@ onMounted(() => {
     border-radius: 0.75rem;
   }
   
-  #admin-profile-title {
+  .page-title {
     font-size: 1.25rem;
     margin-bottom: 1rem;
   }
@@ -346,7 +349,7 @@ onMounted(() => {
     padding: 1rem;
   }
   
-  #admin-profile-title {
+  .page-title {
     font-size: 1.125rem;
   }
   

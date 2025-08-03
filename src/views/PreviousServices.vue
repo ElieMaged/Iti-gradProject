@@ -1,11 +1,11 @@
 <template>  
-  <div class="admin-dashboard-layout">
+  <div class="admin-dashboard-layout layout-container">
     <userSidebar :activeTab="activeTab" />
     <div class="previous-services-main mr-20 p-4">
       <div class="max-w-6xl mx-auto">
         <div class="mb-8">
-          <h1 class="text-3xl font-bold text-text-main ">{{ $t('previousServicesTitle') }}</h1>
-          <p class=" dark:text-gray-300">{{ $t('previousServicesDescription') }}</p>
+          <h1 class="page-title">{{ $t('previousServicesTitle') }}</h1>
+          <p class="page-description">{{ $t('previousServicesDescription') }}</p>
         </div>
         
         <!-- Loading State -->
@@ -394,23 +394,29 @@ onMounted(() => {
   border-color: var(--border-color);
 }
 
-/* Page Title and Description Styles */
-.text-3xl.font-bold.text-text-main {
-  color: var(--primary-color) !important;
-  font-weight: 600 !important;
+/* Standardized Page Title and Description Styles */
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 2rem;
+  text-align: left;
+  font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
 }
 
-.dark .text-3xl.font-bold.text-text-main {
-  color: var(--primary-color) !important;
+.dark .page-title {
+  color: var(--primary-color);
 }
 
-/* Description color */
-p.dark\\:text-gray-300 {
-  color: var(--primary-color) !important;
+.page-description {
+  color: var(--primary-color);
+  font-size: 1.1rem;
+  text-align: left;
+  font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
 }
 
-.dark p.dark\\:text-gray-300 {
-  color: var(--primary-color) !important;
+.dark .page-description {
+  color: var(--primary-color);
 }
 
 .dark .hover\:bg-gray-50:hover {
@@ -424,7 +430,9 @@ p.dark\\:text-gray-300 {
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
   background: #faf8fd;
 }
-
+.layout-container {
+  background-color: #faf8fd;
+}
 .dark .admin-dashboard-layout {
   background-color: var(--primary-bg);
 }
@@ -464,8 +472,14 @@ p.dark\\:text-gray-300 {
     margin-bottom: 1.5rem;
   }
   
-  .text-3xl {
+  .page-title {
     font-size: 1.5rem;
+  }
+  
+  .page-description {
+    color: var(--primary-color);
+    font-size: 1rem;
+    text-align: left;
   }
   
   .grid {
@@ -509,8 +523,14 @@ p.dark\\:text-gray-300 {
     padding: 0.75rem;
   }
   
-  .text-3xl {
+  .page-title {
     font-size: 1.25rem;
+  }
+  
+  .page-description {
+    color: var(--primary-color);
+    font-size: 0.875rem;
+    text-align: left;
   }
   
   .text-lg {

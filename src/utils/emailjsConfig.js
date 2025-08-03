@@ -1,9 +1,8 @@
 // EmailJS Configuration
 export const EMAILJS_CONFIG = {
-  serviceId: '123321', // This service has Gmail connection issues
-  // If the above service doesn't work, try creating a new Gmail service and use its ID here
-  templateId: 'template_rn9r37x',
-  publicKey: 'kGW9e5lc8iBvIT3Qw'
+  serviceId: import.meta.env.VITE_EMAILJS_SERVICE_ID || '123321',
+  templateId: import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_rn9r37x',
+  publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'kGW9e5lc8iBvIT3Qw'
 };
 
 // Initialize EmailJS

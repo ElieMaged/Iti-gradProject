@@ -255,7 +255,7 @@ export default {
 <template>
   <!-- Top Bar -->
   <div class=" w-full" id="contact-Nav">
-    <div class=" mx-20 flex flex-col sm:flex-row justify-between items-center py-2 gap-2">
+    <div class="flex flex-col sm:flex-row justify-between items-center py-2 gap-2" style="margin-left: 80px; margin-right: 80px;">
       <div class="flex flex-col sm:flex-row gap-2 items-center">
         <a href="tel:+12095551234" class="contact-links no-underline mx-1 flex items-center text-sm"><i
             class="fa-solid fa-phone px-2"></i>{{ $t('contactPhone') }}</a>
@@ -278,7 +278,7 @@ export default {
     </div>
   </div>
   <!-- Navbar -->
-  <nav :class="['mx-20 navbar py-3 flex justify-between items-center relative transition-all duration-300', isScrolled ? 'fixed-navbar' : '']">
+  <nav :class="['navbar py-3 flex justify-between items-center relative transition-all duration-300', isScrolled ? 'fixed-navbar' : '']" style="margin-left: 80px; margin-right: 80px;">
     <!-- Logo -->
     <div class="flex items-center gap-2 text-2xl font-bold">
       <img src="/logo/ace04d3b268cf810c91d002fdf7454a6ef778f27.png" alt="Logo" class="h-8" id="logo" />
@@ -497,7 +497,7 @@ export default {
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   margin: 0 !important;
-  padding: 0.75rem 5rem !important;
+  padding: 0.75rem 80px !important;
 }
 
 .dark .fixed-navbar {
@@ -728,6 +728,11 @@ body.navbar-fixed {
     padding: 0.5rem 0.5rem;
   }
 
+  #contact-Nav div[style*="margin-left: 80px"] {
+    margin-left: 1rem !important;
+    margin-right: 1rem !important;
+  }
+
   #contact-Nav .max-w-7xl {
     flex-direction: column;
     gap: 8px;
@@ -752,8 +757,14 @@ body.navbar-fixed {
     padding: 0.75rem 1rem;
   }
 
+  nav[style*="margin-left: 80px"] {
+    margin-left: 1rem !important;
+    margin-right: 1rem !important;
+  }
+
   .fixed-navbar {
     padding: 0.5rem 1rem !important;
+    margin: 0 1rem !important;
   }
 
   .hidden.md\:flex {
@@ -790,8 +801,19 @@ body.navbar-fixed {
     padding: 0.15rem 0.3rem;
   }
 
+  #contact-Nav div[style*="margin-left: 80px"] {
+    margin-left: 0.5rem !important;
+    margin-right: 0.5rem !important;
+  }
+
+  nav[style*="margin-left: 80px"] {
+    margin-left: 0.5rem !important;
+    margin-right: 0.5rem !important;
+  }
+
   .fixed-navbar {
     padding: 0.4rem 0.8rem !important;
+    margin: 0 0.5rem !important;
   }
 
   .services-color {
@@ -810,6 +832,11 @@ body.navbar-fixed {
     padding: 0.25rem 0.5rem;
   }
 
+  #contact-Nav div[style*="margin-left: 80px"] {
+    margin-left: 0.25rem !important;
+    margin-right: 0.25rem !important;
+  }
+
   #contact-Nav a {
     font-size: 0.7rem;
     padding: 0.1rem 0.2rem;
@@ -824,8 +851,14 @@ body.navbar-fixed {
     padding: 0.5rem 0.5rem;
   }
 
+  nav[style*="margin-left: 80px"] {
+    margin-left: 0.25rem !important;
+    margin-right: 0.25rem !important;
+  }
+
   .fixed-navbar {
     padding: 0.3rem 0.5rem !important;
+    margin: 0 0.25rem !important;
   }
 
   .services-color {

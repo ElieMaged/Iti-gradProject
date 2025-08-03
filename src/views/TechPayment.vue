@@ -1,5 +1,5 @@
 <template>
-  <div class="main-content">
+  <div class="main-content layout-container">
     <Sidebar
             :activeMenu="activeMenu"
             @navigate="handleSidebarNavigate"
@@ -226,7 +226,9 @@ export default {
   display: flex;
   min-height: 100vh;
 }
-
+.layout-container {
+  background-color: #faf8fd;
+}
 
 .payment-content {
   flex: 1;

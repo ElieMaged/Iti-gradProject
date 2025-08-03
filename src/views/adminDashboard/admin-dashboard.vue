@@ -519,7 +519,6 @@ export default {
 
 .dashboard-container {
   max-width: 80rem;
-  margin: 20px;
 }
 
 .title-search-row {
@@ -534,7 +533,7 @@ export default {
 .dashboard-title {
   font-size: clamp(1.5rem, 4vw, 2rem);
   font-weight: bold;
-  color: #7c6bb0;
+  color: var(--primary-color);
   margin-bottom: 0;
   flex-shrink: 0;
 }
@@ -1301,13 +1300,11 @@ export default {
   
   .dashboard-main {
     padding: 0.5rem;
-    margin: 20px;
   }
   
   .dashboard-container {
     padding: 0;
-    margin: 20px;
-    width: 90%;
+    width: 100%;
   }
   
   .dashboard-title {
