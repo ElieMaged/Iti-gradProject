@@ -117,7 +117,9 @@ export default {
     </div>
    </div>
                            <!-- About-3 -->
+
                  <div class="mt-4 mb-0 why-choose-us-title">
+
         <h1 class="text-center">{{ $t('whyChooseUsTitle') }}</h1>
         </div>
    <section class="services-features">
@@ -148,7 +150,7 @@ export default {
 
 <style scoped>
 .services-features {
-  padding: 20px 0;
+  padding: 40px 0;
   width: 100%;
   border-radius: 16px;
 }
@@ -173,7 +175,7 @@ export default {
   width: 1280px;
   margin: 0 auto;
   display: flex;
-  gap: 20px;
+  gap: 40px;
   justify-content: center;
   max-width: calc(100vw - 160px);
 }
@@ -339,8 +341,7 @@ export default {
   width: 1280px;
   margin: 0 auto;
   max-width: calc(100vw - 160px);
-  padding: 20px 0;
-  margin-bottom: 8px;
+  padding: 40px 0;
 }
 
 .dark .who-we-are-section {
@@ -401,7 +402,7 @@ export default {
   font-size: 18px;
   font-style: normal;
   font-weight: 500;
-  line-height: 24px; /* 144.444% */
+  line-height: 26px; /* 144.444% */
   margin-bottom: 0.5rem;
 }
 .dark .our-mission-title {
