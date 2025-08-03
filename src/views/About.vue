@@ -116,10 +116,10 @@ export default {
       <p class="text-lg">{{ $t(stat.label) }}</p>
     </div>
    </div>
-               <!-- About-3 -->
-      <div class="mt-20 mb-10">
-     <h1 class="text-center">{{ $t('whyChooseUsTitle') }}</h1>
-     </div>
+                           <!-- About-3 -->
+                 <div class="mt-0 mb-6 why-choose-us-title">
+        <h1 class="text-center">{{ $t('whyChooseUsTitle') }}</h1>
+        </div>
    <section class="services-features">
     <div class="services-container">
              <div v-for="(service, index) in services" :key="index" class="service-card">
@@ -148,7 +148,7 @@ export default {
 
 <style scoped>
 .services-features {
-  padding: 80px 0;
+  padding: 40px 0;
   width: 100%;
   border-radius: 16px;
 }
@@ -170,22 +170,22 @@ export default {
 
 
 .services-container {
-  width: 90%;
-  max-width: 1200px;
+  width: 1280px;
   margin: 0 auto;
   display: flex;
-  gap: 24px;
+  gap: 40px;
   justify-content: center;
+  max-width: calc(100vw - 160px);
 }
 
 .service-card {
   background: #fff;
   border-radius: 16px;
-  padding: 32px 24px;
+  padding: 40px 32px;
   text-align: left;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   flex: 1;
-  max-width: 280px;
+  max-width: 300px;
   transition: transform 0.2s;
   display: flex;
   flex-direction: column;
@@ -331,8 +331,15 @@ export default {
   background-color: var(--primary-bg);
 }
 .who-we-are-section {
-  padding: 4rem 0;
-  margin: 2rem 0;
+  padding: 2rem 0;
+  margin: 1rem 0;
+}
+
+.why-choose-us-title {
+  width: 1280px;
+  margin: 0 auto;
+  max-width: calc(100vw - 160px);
+  padding: 40px 0;
 }
 
 .dark .who-we-are-section {
@@ -341,16 +348,18 @@ export default {
 }
 
 .who-we-are-container {
-  max-width: 1200px;
+  width: 1280px;
   margin: 0 auto;
   display: flex;
-  gap: 3rem;
+  gap: 8rem;
   align-items: center;
-  padding: 0 2rem;
+  padding: 0;
+  max-width: calc(100vw - 160px);
 }
 
 .text-content {
   flex: 1;
+  max-width: 40%;
 }
 
 .who-we-are-title {
@@ -361,7 +370,7 @@ export default {
   font-style: normal;
   font-weight: 600;
   line-height: normal;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .dark .who-we-are-title {
@@ -391,7 +400,7 @@ export default {
   font-style: normal;
   font-weight: 500;
   line-height: 26px; /* 144.444% */
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 .dark .our-mission-title {
   color: var(--primary-text);
@@ -411,13 +420,14 @@ export default {
   flex: 1;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  max-width: 500px;
+  gap: 2rem;
+  max-width: 600px;
+  margin-left: auto;
 }
 
 .technician-img {
   width: 100%;
-  height: 150px;
+  height: 200px;
   object-fit: cover;
   border-radius: 0.5rem;
 }
@@ -522,6 +532,9 @@ export default {
   background-color: #FAE084;
   border-radius: 1rem;
   padding: 2rem;
+  width: 1280px;
+  margin: 0 auto;
+  max-width: calc(100vw - 160px);
 }
 
 .dark .about-2 {

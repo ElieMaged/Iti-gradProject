@@ -266,7 +266,6 @@ export default {
 .users-container {
   max-width: 80rem;
   margin: 0 auto;
-  padding: 0 1rem;
 }
 .dark .users-container {
   background-color: var(--primary-bg);

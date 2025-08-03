@@ -9,6 +9,15 @@
           </div>
           <form class="edit-profile-form" @submit.prevent="saveProfile">
             <div class="edit-profile-content">
+              <!-- Profile Image - Will be moved to top on mobile -->
+              <div class="edit-profile-image-section profile-image-mobile">
+                <div class="profile-image-container">
+                  <img v-if="profileImageUrl" :src="profileImageUrl" alt="Profile" class="profile-image" />
+                  <i v-else class="fas fa-user profile-image-placeholder"></i>
+                </div>
+                <button type="button" class="upload-btn" @click="triggerFileInput">{{ $t('uploadPhotoButton') }}</button>
+                <input ref="fileInput" type="file" accept="image/*" class="hidden-input" @change="onFileChange" />
+              </div>
               <div class="edit-profile-fields">
                 <div>
                   <label for="fullName">{{ $t('fullNameLabel') }}</label>
@@ -51,14 +60,6 @@
                   <label for="bio">{{ $t('aboutLabel') }}</label>
                   <textarea id="bio" v-model="form.bio" rows="3"></textarea>
                 </div>
-              </div>
-              <div class="edit-profile-image-section">
-                <div class="profile-image-container">
-                  <img v-if="profileImageUrl" :src="profileImageUrl" alt="Profile" class="profile-image" />
-                  <i v-else class="fas fa-user profile-image-placeholder"></i>
-                </div>
-                <button type="button" class="upload-btn" @click="triggerFileInput">{{ $t('uploadPhotoButton') }}</button>
-                <input ref="fileInput" type="file" accept="image/*" class="hidden-input" @change="onFileChange" />
               </div>
             </div>
             <div class="edit-profile-section">
@@ -562,6 +563,16 @@ onMounted(() => {
     align-self: center;
   }
   
+  /* Mobile: Image at top, fields below */
+  .profile-image-mobile {
+    order: -1;
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+  
   .profile-image-container {
     width: 100px;
     height: 100px;
@@ -569,6 +580,16 @@ onMounted(() => {
   
   .profile-image-placeholder {
     font-size: 2.5rem;
+  }
+  
+  /* Mobile: Image at top, fields below */
+  .profile-image-mobile {
+    order: -1;
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
   }
   
   .edit-profile-address {
@@ -654,6 +675,16 @@ onMounted(() => {
     font-size: 2rem;
   }
   
+  /* Mobile: Image at top, fields below */
+  .profile-image-mobile {
+    order: -1;
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+  
   .upload-btn {
     padding: 0.5rem 1rem;
     font-size: 0.875rem;
@@ -692,6 +723,16 @@ onMounted(() => {
   
   .profile-image-placeholder {
     font-size: 1.75rem;
+  }
+  
+  /* Mobile: Image at top, fields below */
+  .profile-image-mobile {
+    order: -1;
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
   }
   
   .upload-btn {

@@ -1,6 +1,6 @@
 <template>
   <div class="layout">
-    <div class="sidebar" style="margin-left: 80px;" v-if="user">
+    <div class="sidebar" style="margin-left: 80px; margin-right: 80px;" v-if="user">
       <a :href="`/profile-view/${user.uid}`" 
          class="sidebar-item" 
          :class="{ active: activeTab === 'profile' }"

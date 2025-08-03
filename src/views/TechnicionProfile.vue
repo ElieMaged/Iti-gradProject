@@ -14,6 +14,11 @@
         <div id="admin-profile-card">
           <h2 class="page-title">{{ $t('personalInformation') }}</h2>
           <div id="admin-profile-content">
+            <!-- Profile Image - Will be moved to top on mobile -->
+            <div id="admin-profile-image" class="profile-image-mobile">
+              <img v-if="profileImageUrl" :src="profileImageUrl" alt="Profile" class="w-full h-full object-cover rounded" />
+              <i v-else class="fas fa-user" id="profile-icon"></i>
+            </div>
             <div id="admin-profile-info">
               <div class="info-block">
                 <span class="info-label">{{ $t('fullName') }}</span>
@@ -56,10 +61,6 @@
                 <span class="info-value">{{ form.bio || 'Not provided' }}</span>
               </div>
             </div>
-                          <div id="admin-profile-image">
-                <img v-if="profileImageUrl" :src="profileImageUrl" alt="Profile" class="w-full h-full object-cover rounded" />
-                <i v-else class="fas fa-user" id="profile-icon"></i>
-              </div>
           </div>
         </div>
       </div>
@@ -368,10 +369,24 @@ export default {
     gap: 1.5rem;
   }
   
+  /* Mobile: Image at top, info below */
+  .profile-image-mobile {
+    order: -1;
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
   #admin-profile-image {
     width: 8rem;
     height: 8rem;
     margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #e5e7eb;
+    border-radius: 0.5rem;
   }
   
   #profile-icon {
@@ -421,6 +436,11 @@ export default {
   #admin-profile-image {
     width: 6rem;
     height: 6rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #e5e7eb;
+    border-radius: 0.5rem;
   }
   
   #profile-icon {
@@ -465,6 +485,11 @@ export default {
   #admin-profile-image {
     width: 5rem;
     height: 5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #e5e7eb;
+    border-radius: 0.5rem;
   }
   
   #profile-icon {
@@ -509,6 +534,11 @@ export default {
   #admin-profile-image {
     width: 4rem;
     height: 4rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #e5e7eb;
+    border-radius: 0.5rem;
   }
   
   #profile-icon {
@@ -553,6 +583,11 @@ export default {
   #admin-profile-image {
     width: 3.5rem;
     height: 3.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #e5e7eb;
+    border-radius: 0.5rem;
   }
   
   #profile-icon {
