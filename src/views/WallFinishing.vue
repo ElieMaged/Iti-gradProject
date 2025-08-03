@@ -123,7 +123,6 @@ async function fetchTechnicians() {
     loading.value = false
   }
 }
-
 onMounted(fetchTechnicians)
 
 const mergedTechnicians = computed(() => {

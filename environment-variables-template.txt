@@ -1,0 +1,23 @@
+# Environment Variables for Vercel Deployment
+# Copy these to your Vercel dashboard → Settings → Environment Variables
+
+# Firebase Configuration
+VITE_FIREBASE_API_KEY=AIzaSyCge8apwznA8qhYMAUSaUltkYMnmYbBKv4
+VITE_FIREBASE_AUTH_DOMAIN=iti-grad-a4054.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=iti-grad-a4054
+VITE_FIREBASE_STORAGE_BUCKET=iti-grad-a4054.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=486586289668
+VITE_FIREBASE_APP_ID=1:486586289668:web:daae46733ed16d2fe5ef51
+VITE_FIREBASE_MEASUREMENT_ID=G-K6004N4Y0B
+
+# EmailJS Configuration
+VITE_EMAILJS_PUBLIC_KEY=kGW9e5lc8iBvIT3Qw
+VITE_EMAILJS_SERVICE_ID=123321
+VITE_EMAILJS_TEMPLATE_ID=template_rn9r37x
+
+# Instructions:
+# 1. Go to your Vercel project dashboard
+# 2. Navigate to Settings → Environment Variables
+# 3. Add each variable above
+# 4. Set them for Production, Preview, and Development environments
+# 5. Deploy your project 
