@@ -62,6 +62,9 @@
           </div>
         </div>
         
+        <!-- Admin Role Manager -->
+        <AdminRoleManager />
+        
         <!-- Charts Row -->
         <div class="charts-grid">
           <!-- Attendance Comparison Chart -->
@@ -225,12 +228,13 @@
 
 <script>
 import AdminSidebar from '../../components/admin-sidebar.vue';
+import AdminRoleManager from '../../components/AdminRoleManager.vue';
 import { useI18n } from 'vue-i18n';
 import { auth } from '../../firebase'; // Added import for auth
 
 export default {
   name: 'AdminDashboard',
-  components: { AdminSidebar },
+  components: { AdminSidebar, AdminRoleManager },
   setup() {
     const { t } = useI18n();
     return { t };
