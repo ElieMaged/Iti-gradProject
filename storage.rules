@@ -5,5 +5,16 @@ service firebase.storage {
     match /team/{allPaths=**} {
       allow read: if true;
     }
+    
+    // Allow authenticated users to upload and read their own profile images
+    match /profile-images/{userId}/{allPaths=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Allow authenticated users to upload profile images with their UID in filename
+    match /profile-images/{fileName} {
+      allow read, write: if request.auth != null && 
+        fileName.matches(request.auth.uid + '_.*');
+    }
   }
 } 
