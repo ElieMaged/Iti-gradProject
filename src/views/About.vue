@@ -117,7 +117,9 @@ export default {
     </div>
    </div>
                            <!-- About-3 -->
-                 <div class="mt-0 mb-6 why-choose-us-title">
+
+                 <div class="mt-4 mb-0 why-choose-us-title">
+
         <h1 class="text-center">{{ $t('whyChooseUsTitle') }}</h1>
         </div>
                <!-- About-3 -->
@@ -350,7 +352,7 @@ export default {
 }
 
 .dark .who-we-are-section {
-  background-color: var(--primary-bg);
+  
   color: var(--primary-text);
 }
 
@@ -381,6 +383,7 @@ export default {
 }
 
 .dark .who-we-are-title {
+  
   color: var(--primary-text);
 }
 
@@ -392,7 +395,7 @@ export default {
   font-style: normal;
   font-weight: 400;
   line-height: 24px; /* 150% */
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .dark .who-we-are-desc {
@@ -546,7 +549,7 @@ export default {
 }
 
 .dark .about-2 {
-  background-color: var(--secondary-bg) !important;
+  background-color:#FFC230;
   color: var(--primary-text) !important;
 }
 
