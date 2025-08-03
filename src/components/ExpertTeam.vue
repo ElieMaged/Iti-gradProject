@@ -1,4 +1,4 @@
-<template>
+0<template>
   <section class="expert-team m-20">
     <div class="team-header">
       <div class="team-title-section">
@@ -17,21 +17,35 @@
 
     <div v-else class="team-cards">
       <div v-for="(member, index) in teamMembers.slice(currentIndex, currentIndex + 4)" :key="member.id" class="team-card">
-        <div class="member-image">
+        <!-- Top Section - Image Area -->
+        <div class="card-top-section">
           <img :src="member.image" :alt="member.name" class="member-photo" />
         </div>
-        <div class="member-info">
+        
+        <!-- Bottom Section - Information Area -->
+        <div class="card-bottom-section">
           <h3 class="member-name">{{ $t(member.name) }}</h3>
           <div class="member-specialization">{{ member.specialization }}</div>
-          <div class="member-location">{{ member.location }}</div>
-          <div class="member-rating">
-            <i v-for="star in Math.floor(member.rating || 5)" :key="star" class="fas fa-star"></i>
-          </div>
           <p class="member-description">{{ $t(member.description) }}</p>
-          <div class="member-experience">{{ member.experience }} {{ $t('yearsOfExperience') }}</div>
+          
+          <!-- Details Row -->
+          <div class="member-details">
+            <div class="detail-item rating-item">
+              <i class="fas fa-star"></i>
+              <span>{{ member.rating }}</span>
+            </div>
+            <div class="detail-item location-item">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>{{ member.location }}</span>
+            </div>
+            <div class="detail-item price-item">
+              <i class="fa-solid fa-dollar-sign"></i>
+              <span>{{ member.basePrice }} EGP</span>
+            </div>
+          </div>
+          
           <button class="view-profile-btn" @click="viewProfile(member)">
             {{ $t('viewProfile') }}
-            <i class="fas fa-arrow-right arrow-right"></i>
           </button>
         </div>
       </div>
@@ -140,7 +154,7 @@ export default {
     startAutoSlide() {
       this.autoSlideInterval = setInterval(() => {
         this.nextSlide();
-      }, 10000); // 10 seconds
+      }, 900000); // 10 seconds
     },
     stopAutoSlide() {
       if (this.autoSlideInterval) {
@@ -253,114 +267,173 @@ export default {
 
 .team-card {
   width: 300px;
-  background: linear-gradient(135deg, #f8f5ff 0%, #ffffff 100%);
+  background: #ffffff;
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(98, 83, 151, 0.1);
-  transition: transform 0.2s;
-  border: 1px solid var(--primary-color);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: none;
+  display: flex;
+  flex-direction: column;
 }
 
 .dark .team-card {
   background: var(--secondary-bg);
-  border: 1px solid var(--primary-color);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
 }
 
 .team-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-8px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
 }
 
-.member-image {
+/* Top Section - Image Area */
+.card-top-section {
   width: 100%;
-  height: 300px;
-  overflow: hidden;
+  height: 200px;
+  background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
 }
 
 .member-photo {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 20px 20px 0 0;
+  border-radius: 0;
 }
 
-.member-info {
+/* Bottom Section - Information Area */
+.card-bottom-section {
   padding: 24px 20px;
-  text-align: center;
+  background: #ffffff;
+  text-align: left;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 250px; /* Fixed height for bottom section */
+}
+
+.dark .card-bottom-section {
+  background: var(--secondary-bg);
 }
 
 .member-name {
-  font-size: 1.3rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  color: #333;
+  color: #333333;
   margin-bottom: 8px;
   font-family: Outfit, sans-serif;
+  line-height: 1.2;
+  flex-shrink: 0;
+  height: 40px; /* Fixed height for name */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dark .member-name {
+  color: var(--primary-text);
 }
 
 .member-specialization {
-  font-size: 0.9rem;
-  color: #625397;
-  margin-bottom: 4px;
-  font-weight: 600;
+  font-size: 1rem;
+  color: #7c6bb0;
+  margin-bottom: 5px;
+  font-weight: 500;
   font-family: Outfit, sans-serif;
-}
-
-.member-location {
-  font-size: 0.9rem;
-  color: #8c8e90;
-  margin-bottom: 8px;
-  font-family: Outfit, sans-serif;
-}
-
-.member-rating {
-  margin-bottom: 16px;
-  display: flex;
-  justify-content: center;
-  gap: 2px;
-  color: #f3d361;
-}
-
-.member-rating i {
-  color: #f3d361 !important;
-  font-size: 1.1rem;
+  flex-shrink: 0;
+  height: 25px; /* Fixed height for specialization */
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .member-description {
   font-size: 0.9rem;
-  color: #8c8e90;
-  line-height: 1.5;
-  margin-bottom: 20px;
+  color: #666666;
+  line-height: 1.4;
+  margin-bottom: 0px;
   font-family: Outfit, sans-serif;
+  flex: 1;
+  height: 60px; /* Fixed height for description */
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.member-experience {
+.dark .member-description {
+  color: var(--text-muted);
+}
+
+/* Details Row */
+.member-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 0 4px;
+  flex-shrink: 0;
+  height: 40px; /* Fixed height for details row */
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 0.9rem;
-  color: #8c8e90;
-  margin-bottom: 20px;
-  font-family: Outfit, sans-serif;
+  color: #333333;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.dark .detail-item {
+  color: var(--primary-text);
+}
+
+.detail-item i {
+  font-size: 0.8rem;
+  color: #666666;
+}
+
+/* Star icon - Rating (Yellow) */
+
+.fa-star  {
+  color: var(--color-secondary)!important;
+}
+
+/* Map marker icon - Location (Blue) */
+.fa-location-dot {
+  color: #4d7cfe !important;
+}
+
+/* Dollar sign icon - Price (Green) */
+.fa-dollar-sign{
+  color: #34c759 !important;
 }
 
 .view-profile-btn {
-  background: #625397;
-  color: #fff;
+  background: #7c6bb0;
+  color: #ffffff;
   border: none;
   border-radius: 25px;
-  padding: 10px 20px;
-  font-size: 0.9rem;
-  font-weight: 500;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: background 0.2s;
+  display: block;
   width: 100%;
+  text-align: center;
+  transition: background 0.3s ease;
+  font-family: Outfit, sans-serif;
+  flex-shrink: 0;
+  margin-top: auto; /* Push to bottom of flex container */
 }
 
 .view-profile-btn:hover {
-  background: #4e3b7a;
+  background: #5a4e99;
+  transform: translateY(-2px);
 }
 
 .view-profile-btn i {
@@ -568,6 +641,80 @@ export default {
   .slider-point {
     width: 10px;
     height: 10px;
+  }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .team-cards {
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+  
+  .team-card {
+    width: 100%;
+    max-width: 350px;
+  }
+  
+  .card-top-section {
+    height: 180px;
+  }
+  
+  .member-name {
+    font-size: 1.3rem;
+  }
+  
+  .member-specialization {
+    font-size: 0.9rem;
+  }
+  
+  .member-description {
+    font-size: 0.85rem;
+  }
+  
+  .detail-item {
+    font-size: 0.8rem;
+  }
+  
+  .view-profile-btn {
+    font-size: 0.9rem;
+    padding: 10px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .team-card {
+    max-width: 320px;
+  }
+  
+  .card-top-section {
+    height: 160px;
+  }
+  
+  .card-bottom-section {
+    padding: 20px 16px;
+  }
+  
+  .member-name {
+    font-size: 1.2rem;
+  }
+  
+  .member-specialization {
+    font-size: 0.85rem;
+  }
+  
+  .member-description {
+    font-size: 0.8rem;
+  }
+  
+  .detail-item {
+    font-size: 0.75rem;
+  }
+  
+  .view-profile-btn {
+    font-size: 0.85rem;
+    padding: 8px 16px;
   }
 }
 </style>
