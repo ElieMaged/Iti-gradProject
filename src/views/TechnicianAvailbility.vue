@@ -415,9 +415,6 @@ export default {
    margin-bottom: 2rem;
    font-family: Outfit, sans-serif;
  }
- .layout-container {
-  background-color: #faf8fd;
- }
 
 .dark .page-title {
   color: var(--primary-color);

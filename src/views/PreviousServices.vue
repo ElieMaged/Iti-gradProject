@@ -430,9 +430,6 @@ onMounted(() => {
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
   background: #faf8fd;
 }
-.layout-container {
-  background-color: #faf8fd;
-}
 .dark .admin-dashboard-layout {
   background-color: var(--primary-bg);
 }

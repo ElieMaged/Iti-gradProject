@@ -353,7 +353,7 @@ export default {
 }
 
 .dark .summary-value {
-  color: var(--white);
+  color: var(--secondary-bg);
 }
 
 /* Reviews Container */

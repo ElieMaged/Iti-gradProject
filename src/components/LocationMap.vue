@@ -34,9 +34,9 @@
           {{ isDetecting ? ($t('detecting') || 'Detecting...') : ($t('detectMyLocation') || 'Detect My Location') }}
         </button>
         <button 
-          @click="centerOnAddress" 
+          @click="detectUserLocation" 
           class="center-address-btn"
-          :disabled="!hasAddress"
+          :disabled="isDetecting"
         >
           <i class="fas fa-map-marker-alt"></i>
           {{ $t('centerOnAddress') || 'Center on Address' }}

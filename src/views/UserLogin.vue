@@ -414,9 +414,9 @@ aspect-ratio: 106.44/101.00;
 }
 
 .dark .form-input {
-  background-color: #374151;
+  background-color: var(--input-bg);
   border-color: #4b5563;
-  color: #f9fafb;
+  color: var(--text-muted);
 }
 
 .form-input:focus {
@@ -612,9 +612,9 @@ aspect-ratio: 106.44/101.00;
   transition: all 0.3s;
 }
 .dark .google-btn {
-  background-color: #374151;
+  background-color: var(--input-bg);
   border-color: #4b5563;
-  color: #f9fafb;
+  color: var(--grey-bg);
 }
 
 .google-btn:hover {
