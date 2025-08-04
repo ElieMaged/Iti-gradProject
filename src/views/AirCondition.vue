@@ -989,4 +989,36 @@ const heroBackgroundStyle = computed(() => {
   background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
   background-size: 200px 100%;
 }
+/* --- Dark Mode Technician Card Styles (matching allservices.vue) --- */
+.dark .team-card {
+  background: var(--secondary-bg);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  border: 1px solid var(--border-color, #333);
+}
+.dark .card-bottom-section {
+  background: var(--secondary-bg);
+}
+.dark .member-name {
+  color: var(--primary-text);
+}
+.dark .member-specialization {
+  color: #b6aaff;
+}
+.dark .member-description {
+  color: var(--text-muted);
+}
+.dark .member-details {
+  color: var(--primary-text);
+}
+.dark .detail-item {
+  color: var(--primary-text);
+}
+.dark .detail-item i {
+  color: var(--text-muted);
+}
+.dark .view-profile-btn {
+  background: var(--primary-color);
+  color: var(--primary-text);
+}
+
 </style>

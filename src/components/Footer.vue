@@ -70,6 +70,9 @@
 </template>
 
 <style lang="scss" scoped>
+.footer__main{
+  margin: 0 80px;
+}
 .footer {
   background: #6B5FA7;
   color: #fff;
@@ -81,7 +84,7 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    padding: 3rem 2rem 2rem 2rem;
+    padding: 3rem 0;
     gap: 2rem;
   }
 
@@ -261,6 +264,7 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 2.5rem;
+    padding: 2rem 0;
   }
 
   .footer__bottom {
@@ -280,7 +284,7 @@
 
 @media (max-width: 768px) {
   .footer {
-    padding: 3rem 1rem 1rem 1rem;
+    padding: 2rem 0;
   }
 
   .footer__main {

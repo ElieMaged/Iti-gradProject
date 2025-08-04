@@ -96,7 +96,7 @@ export default {
       <div class="text-content">
         <h1 class="who-we-are-title">{{ $t('whoAreWeTitle') }}</h1>
         <p class="who-we-are-desc">{{ $t('whoAreWeDesc') }}</p>
-        <p class="who-we-are-desc">We believe in professionalism, transparency, and building a strong community where service providers and customers can connect with ease.</p>
+        <p class="who-we-are-desc">{{ $t('whoAreWeDesc2') }}</p>
         <h2 class="our-mission-title">{{ $t('ourMissionTitle') }}</h2>
         <p class="our-mission-desc">{{ $t('ourMissionDesc') }}</p>
       </div>
@@ -118,9 +118,8 @@ export default {
    </div>
                            <!-- About-3 -->
 
-                 <div class="mt-4 mb-0 why-choose-us-title">
+                 <div class="mt-20 mb-0">
 
-        <h1 class="text-center">{{ $t('whyChooseUsTitle') }}</h1>
         </div>
                <!-- About-3 -->
       <div class="mt-10 mb-5">
@@ -368,7 +367,7 @@ export default {
 
 .text-content {
   flex: 1;
-  max-width: 40%;
+  max-width: 100%;
 }
 
 .who-we-are-title {

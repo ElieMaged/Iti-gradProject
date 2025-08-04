@@ -501,7 +501,7 @@ export default {
 }
 
 .dark .fixed-navbar {
-  background-color: rgba(28, 28, 28, 0.95) !important;
+  background-color: var(--primary-bg) !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
 }
