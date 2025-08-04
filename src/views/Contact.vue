@@ -163,7 +163,7 @@ export default {
     <div class="flex flex-col gap-5">
       <div>
         <h2 class="title text-7xl font-semibold">{{ $t('contactUs') }}</h2>
-        <p class="text-large text-xl leading-relaxed">{{ $t('contactIntro') }}<br>We're here to help and answer any questions you might have.</p>
+        <p class="text-large text-xl leading-relaxed">{{ $t('contactIntro') }}<br>{{  $t('contactIntro2') }}</p>
       </div>
 
       <div class="flex flex-col md:grid md:grid-cols-2 gap-4">
