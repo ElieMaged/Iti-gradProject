@@ -14,9 +14,17 @@
                   <div class="profile-image-container">
                     <img v-if="profileImageUrl" :src="profileImageUrl" alt="Profile" class="profile-image" />
                     <i v-else class="fas fa-user profile-image-placeholder"></i>
+                    <div v-if="uploading" class="upload-overlay">
+                      <i class="fas fa-spinner fa-spin"></i>
+                    </div>
                   </div>
-                  <button type="button" class="upload-btn" @click="triggerFileInput">{{ $t('uploadPhotoButton') }}</button>
+                  <button type="button" class="upload-btn" @click="triggerFileInput" :disabled="uploading">
+                    {{ uploading ? $t('uploading') : $t('uploadPhotoButton') }}
+                  </button>
                   <input ref="fileInput" type="file" accept="image/*" class="hidden-input" @change="onFileChange" />
+                  <div v-if="selectedFile" class="preview-info">
+                    <small>File selected: {{ selectedFile.name }}</small>
+                  </div>
                 </div>
                 <div class="edit-profile-fields">
                 <div>
@@ -59,7 +67,9 @@
               </div>
             </div>
             <div class="edit-profile-actions">
-              <button type="submit" class="save-btn">{{ $t('saveChangesButton') }}</button>
+              <button type="submit" class="save-btn" :disabled="uploading || saving">
+                {{ saving ? $t('saving') : $t('saveChangesButton') }}
+              </button>
           </div>
           </form>
         </div>
@@ -70,7 +80,7 @@
 
 <script >
 import { auth, db } from '../firebase';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
@@ -86,6 +96,9 @@ export default {
       loading: true,
       error: '',
       profileImageUrl: '',
+      uploading: false,
+      saving: false,
+      selectedFile: null,
       form: {
         fullName: '',
         email: '',
@@ -101,6 +114,9 @@ export default {
   async mounted() {
     await this.loadUserData();
   },
+  beforeUnmount() {
+    // Clean up any resources if needed
+  },
   methods: {
     handleSidebarNavigate(route) {
       this.$router.push(route);
@@ -108,6 +124,13 @@ export default {
     async loadUserData() {
       try {
         this.loading = true;
+        
+        // Check if user is authenticated
+        if (!auth.currentUser) {
+          this.$router.push('/userlogin');
+          return;
+        }
+        
         const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
         if (userDoc.exists()) {
           const userData = userDoc.data();
@@ -131,30 +154,120 @@ export default {
       }
     },
     triggerFileInput() {
-      this.$refs.fileInput.click();
+      if (this.$refs.fileInput) {
+        this.$refs.fileInput.click();
+      }
     },
     onFileChange(e) {
       const file = e.target.files[0];
-      if (file) {
+      if (!file) return;
+
+      // Validate file type and size
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+      
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        alert('Image size should be less than 5MB');
+        return;
+      }
+
+      // Store the selected file without preview
+      this.selectedFile = file;
+      console.log('File selected:', file.name);
+    },
+    async uploadImageToStorage() {
+      if (!this.selectedFile) {
+        console.log('No file selected, returning existing URL:', this.profileImageUrl);
+        return this.profileImageUrl; // Return existing URL if no new file
+      }
+
+      // Check if user is authenticated
+      if (!auth.currentUser) {
+        throw new Error('User not authenticated');
+      }
+
+      try {
+        this.uploading = true;
+        console.log('Starting image upload...');
+        
+        // Convert file to base64 for storage in Firestore
         const reader = new FileReader();
-        reader.onload = (e) => {
-          this.profileImageUrl = e.target.result;
-        };
-        reader.readAsDataURL(file);
+        return new Promise((resolve, reject) => {
+          reader.onload = async (event) => {
+            try {
+              const base64Data = event.target.result;
+              console.log('File converted to base64');
+              
+              // Store the base64 data directly in Firestore
+              // This avoids Firebase Storage CORS issues
+              resolve(base64Data);
+            } catch (error) {
+              reject(error);
+            }
+          };
+          reader.onerror = () => reject(new Error('Failed to read file'));
+          reader.readAsDataURL(this.selectedFile);
+        });
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        throw new Error(`Failed to upload image: ${error.message}`);
+      } finally {
+        this.uploading = false;
       }
     },
     async saveProfile() {
       try {
+        this.saving = true;
+        console.log('Starting profile save...');
+        
+        // Check if user is authenticated
+        if (!auth.currentUser) {
+          console.log('User not authenticated, redirecting...');
+          this.$router.push('/userlogin');
+          return;
+        }
+        
+        // Upload image if a new one was selected
+        let finalImageUrl = this.profileImageUrl;
+        if (this.selectedFile) {
+          console.log('File selected, converting to base64...');
+          finalImageUrl = await this.uploadImageToStorage();
+          console.log('Final image data length:', finalImageUrl ? finalImageUrl.length : 0);
+        } else {
+          console.log('No new file selected, keeping existing image data');
+        }
+        
+        // Update user document
+        console.log('Updating user document in Firestore...');
         const userRef = doc(db, 'users', auth.currentUser.uid);
-        await updateDoc(userRef, {
+        const updateData = {
           ...this.form,
-          profileImageUrl: this.profileImageUrl,
+          profileImageUrl: finalImageUrl,
           updatedAt: new Date()
-        });
+        };
+        console.log('Update data:', updateData);
+        
+        await updateDoc(userRef, updateData);
+        console.log('User document updated successfully');
+        
+        // Update local state
+        this.profileImageUrl = finalImageUrl;
+        this.selectedFile = null;
+        
+        // Clear the file input
+        if (this.$refs.fileInput) {
+          this.$refs.fileInput.value = '';
+        }
+        
+        console.log('Profile saved successfully!');
         alert('Profile saved successfully!');
       } catch (error) {
         console.error('Error saving profile:', error);
-        alert('Failed to save profile. Please try again.');
+        alert(`Failed to save profile: ${error.message}`);
+      } finally {
+        this.saving = false;
       }
     }
   }
@@ -287,6 +400,7 @@ export default {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  position: relative;
 }
 .dark .profile-image-container {
   background: var(--input-bg);
@@ -303,6 +417,19 @@ export default {
 .dark .profile-image-placeholder {
   color: var(--text-muted);
 }
+.upload-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+}
 .upload-btn {
   background: #7c6bb0;
   color: #fff;
@@ -314,19 +441,34 @@ export default {
   cursor: pointer;
   transition: background 0.2s;
 }
+.upload-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
 .dark .upload-btn {
   background: var(--primary);
   color: var(--primary-text);
 }
-.upload-btn:hover {
+.dark .upload-btn:disabled {
+  background: var(--text-muted);
+}
+.upload-btn:hover:not(:disabled) {
   background: #5a4e99;
 }
-.dark .upload-btn:hover {
+.dark .upload-btn:hover:not(:disabled) {
   background: var(--primary);
   color: var(--primary-text);
 }
 .hidden-input {
   display: none;
+}
+.preview-info {
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+.dark .preview-info {
+  color: var(--text-muted);
 }
 .edit-profile-actions {
   display: flex;
@@ -344,14 +486,21 @@ export default {
   cursor: pointer;
   transition: background 0.2s;
 }
+.save-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
 .dark .save-btn {
   background: var(--primary);
   color: var(--primary-text);
 }
-.save-btn:hover {
+.dark .save-btn:disabled {
+  background: var(--text-muted);
+}
+.save-btn:hover:not(:disabled) {
   background: #5a4e99;
 }
-.dark .save-btn:hover {
+.dark .save-btn:hover:not(:disabled) {
   background: var(--primary);
   color: var(--primary-text);
 }

@@ -77,7 +77,7 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const activeTab = ref('profile');
-const profileImageUrl = ref('https://randomuser.me/api/portraits/men/32.jpg');
+const profileImageUrl = ref('');
 const loading = ref(true);
 const error = ref(null);
 const form = ref({

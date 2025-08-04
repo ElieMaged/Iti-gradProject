@@ -1,5 +1,5 @@
 <template>
-    <div class="end-card m-20" :style="{ backgroundImage: `url(${backgroundImage})` }">
+    <div class="end-card mx-[80px]" :style="{ backgroundImage: `url(${backgroundImage})` }">
         <div class="end-content">
             <h2 class="end-title">{{ $t('endCardTitle') }} <!-- We're Here to Help You. --></h2>
             <p class="end-description">{{ $t('endCardDescription') }} <!-- We're here to help you achieve your goals... --></p>
@@ -23,7 +23,7 @@ const backgroundImage = endImage
     background-repeat: no-repeat;
     height: 400px;
     border-radius: 20px;
-    margin: 5rem;
+    margin: 80px;
     display: flex;
     align-items: center;
     justify-content: center;
