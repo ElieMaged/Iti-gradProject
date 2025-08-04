@@ -140,6 +140,7 @@
       </div>
       
       <!-- Reviews Section -->
+      <hr class="reviews-divider" />
       <div class="reviews-section">
         <div class="reviews-header">
           <h2 class="reviews-title">{{ $t('reviews') }}</h2>
@@ -834,8 +835,9 @@ onMounted(async () => {
 
 /* Main Content */
 .main-content {
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width: 1280px;
+  margin-left: 80px;
+  margin-right: 80px;
   padding: 2rem;
 }
 
@@ -845,17 +847,17 @@ onMounted(async () => {
 }
 
 .page-title h1 {
-  font-size: 2.5rem;
+  font-size: 2.2rem;
   font-weight: bold;
-  color: #929394;
+  color: #625397;
   margin: 0;
 }
 
 /* Content Grid */
 .content-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 2rem;
+  grid-template-columns: 2.5fr 2fr;
+  gap: 3.5rem;
   margin-bottom: 3rem;
 }
 
@@ -946,11 +948,11 @@ onMounted(async () => {
 
 .skills-section {
   border-top: 1px solid #e5e7eb;
-  padding-top: 1.5rem;
+  padding-top: 1rem;
 }
 
 .skills-title {
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: bold;
   color: #1f2937;
   margin: 0 0 1rem 0;
@@ -1085,7 +1087,7 @@ onMounted(async () => {
 
 .visit-price {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   margin-bottom: 2rem;
   padding: 1rem;
@@ -1100,6 +1102,7 @@ onMounted(async () => {
 
 .price-value {
   font-weight: bold;
+  align-items: center;
   color: #625397;
   font-size: 1.1rem;
 }
@@ -1136,15 +1139,17 @@ onMounted(async () => {
 
 /* Reviews Section */
 .reviews-section {
-  margin-top: 3rem;
+  max-width: 1280px;
+  
+  margin-top:1rem;
 }
 
 .reviews-title {
   font-size: 2rem;
   font-weight: bold;
-  color: #1f2937;
+  color: #625397;
   text-align: center;
-  margin: 0 0 2rem 0;
+  margin: 0 0 0 0;
 }
 
 .reviews-container {
@@ -1156,6 +1161,8 @@ onMounted(async () => {
 .review-card {
   background: white;
   border-radius: 12px;
+  max-width: 1280px;
+  
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   padding: 1.5rem;
 }
@@ -1236,6 +1243,10 @@ onMounted(async () => {
   background: #f8f9fa;
   border-radius: 6px;
   border-left: 3px solid #625397;
+  
+}
+.fa-star {
+  color: #fbbf24 !important;
 }
 
 /* Review Form */
@@ -1452,7 +1463,7 @@ onMounted(async () => {
 .review-author {
   display: block;
   font-weight: 600;
-  color: #374151;
+  color: #6b7280;
   font-size: 0.875rem;
 }
 
@@ -1593,79 +1604,6 @@ onMounted(async () => {
   .technician-specialization {
     font-size: 0.9rem;
   }
-  
-  .technician-details {
-    margin: 1rem 0;
-    width: 100%;
-  }
-  
-  .detail-item {
-    padding: 0.375rem 0;
-    font-size: 0.9rem;
-    width: 100%;
-  }
-  
-  .skills-title {
-    font-size: 1.1rem;
-  }
-  
-  .skills-list {
-    gap: 0.5rem;
-    width: 100%;
-  }
-  
-  .skill-item {
-    padding: 0.5rem;
-    font-size: 0.85rem;
-    width: 100%;
-  }
-  
-  .booking-title {
-    font-size: 1.25rem;
-  }
-  
-  .section-subtitle {
-    font-size: 1rem;
-  }
-  
-  .date-options {
-    gap: 0.5rem;
-    width: 100%;
-  }
-  
-  .date-option {
-    padding: 0.5rem;
-    font-size: 0.8rem;
-  }
-  
-  .time-slot {
-    padding: 0.5rem;
-    font-size: 0.8rem;
-  }
-  
-  .visit-price {
-    padding: 0.75rem;
-    width: 100%;
-  }
-  
-  .price-label {
-    font-size: 0.9rem;
-  }
-  
-  .price-value {
-    font-size: 1rem;
-  }
-  
-  .book-now-btn {
-    padding: 0.75rem;
-    font-size: 1rem;
-    width: 100%;
-  }
-  
-  .date-nav-btn {
-    padding: 0.5rem;
-    font-size: 0.8rem;
-  }
 }
 
 @media (max-width: 600px) {
@@ -1768,8 +1706,8 @@ onMounted(async () => {
   }
   
   .date-nav-btn {
-    padding: 0.375rem;
-    font-size: 0.7rem;
+    padding: 0.5rem;
+    font-size: 0.8rem;
   }
 }
 
@@ -1850,12 +1788,12 @@ onMounted(async () => {
   
   .date-option {
     padding: 0.25rem;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
   }
   
   .time-slot {
     padding: 0.25rem;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
   }
   
   .visit-price {
@@ -2183,26 +2121,31 @@ onMounted(async () => {
 }
 
 .dark .reviews-section {
+  
   box-shadow: 0 4px 6px rgba(0,0,0,0.2);
 }
+.dark .review-card {
+  background: var(--secondary-bg);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
+
 
 .dark .reviews-title {
   color: var(--primary-text);
 }
 
 .dark .review-item {
-  background: var(--input-bg);
+  background: var(--secondary-bg);
   border-color: var(--border-color);
   color: var(--primary-text-dark);
 }
 
 .dark .review-header {
   border-bottom-color: var(--border-color);
-  color: var(--primary-text-dark);
+  color: var(--text-muted);
 }
 
 .dark .reviewer-name {
-  color: var(--primary-text);
+color: #ddd7d7 ;
 }
 
 .dark .review-date {
@@ -2210,7 +2153,11 @@ onMounted(async () => {
 }
 
 .dark .review-text {
-  color: var(--primary-text-dark);
+  color:  var(--primary-text);
+}
+
+.dark .review-author {
+   color: var(--text-muted);
 }
 
 .dark .fa-star {
@@ -2218,6 +2165,13 @@ onMounted(async () => {
 }
 
 .dark .star-empty {
-  color: var(--border-color);
+  color:  var(--primary-text);
 }
-</style> 
+/* Divider before reviews section */
+.reviews-divider {
+  border: none;
+  border-top: 3px solid #e5e7eb;
+  margin: 2rem 0 2rem 0;
+  width: 100%;
+}
+</style>

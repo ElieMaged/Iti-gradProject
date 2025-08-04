@@ -110,7 +110,7 @@ export default {
     </div>
   </div>
      <!-- About-2 -->
-   <div class="container flex flex-col md:flex-row gap-10 md:gap-15 text-center about-2 p-8">
+   <div class="container flex flex-col md:flex-row gap-10 md:gap-15 text-center about-2 p-6">
     <div v-for="(stat, index) in stats" :key="index" class="flex-1">
       <h2 class="text-4xl font-bold mb-2 counter-number">{{ stat.current }}{{ stat.suffix }}</h2>
       <p class="text-lg">{{ $t(stat.label) }}</p>
@@ -122,6 +122,10 @@ export default {
 
         <h1 class="text-center">{{ $t('whyChooseUsTitle') }}</h1>
         </div>
+               <!-- About-3 -->
+      <div class="mt-10 mb-5">
+     <h1 class="text-center">{{ $t('whyChooseUsTitle') }}</h1>
+     </div>
    <section class="services-features">
     <div class="services-container">
              <div v-for="(service, index) in services" :key="index" class="service-card">
@@ -150,6 +154,7 @@ export default {
 
 <style scoped>
 .services-features {
+  padding: 40px 0;
   padding: 40px 0;
   width: 100%;
   border-radius: 16px;
@@ -342,6 +347,8 @@ export default {
   margin: 0 auto;
   max-width: calc(100vw - 160px);
   padding: 40px 0;
+  padding: 2rem 0;
+  margin: 1rem 0;
 }
 
 .dark .who-we-are-section {
@@ -471,7 +478,7 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 300px;
+  height: 250px;
   color: white;
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
   font-size: 3rem;
@@ -538,6 +545,7 @@ export default {
   width: 1280px;
   margin: 0 auto;
   max-width: calc(100vw - 160px);
+  padding: 1.5rem;
 }
 
 .dark .about-2 {

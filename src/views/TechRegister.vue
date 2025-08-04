@@ -114,10 +114,11 @@
             >
               <option value="" disabled selected>{{ $t('specialization') }}</option>
               <option value="Plumbing">{{ $t('plumbing') }}</option>
-              <option value="Electricity">{{ $t('electricity') }}</option>
+              <option value="Electricity">{{ $t('electricityTitle') }}</option>
               <option value="Carpentry">{{ $t('carpentry') }}</option>
               <option value="Wall Finishing">{{ $t('wallFinishing') }}</option>
               <option value="Air Conditioning">{{ $t('airConditioning') }}</option>
+              <option value="Electrical Appliances">{{ $t('electricalApplianceTechnician') }}</option>
             </select>
           </div>
 

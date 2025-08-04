@@ -34,52 +34,66 @@
 
     <!-- Meet Our Technicians Team Section -->
     <section class="technicians-section">
-      <div class="container">
         <div class="section-header">
           <h2 class="section-title">{{ $t('meetTechniciansTeam') }}</h2>
         </div>
 
-        <div class="technicians-grid">
+        <div class="team-cards">
           <!-- Loading Skeleton Cards -->
-          <div v-if="loading" v-for="n in 8" :key="`skeleton-${n}`" class="technician-card skeleton-card">
-            <div class="skeleton-image"></div>
-            <div class="technician-info">
+          <div v-if="loading" v-for="n in 8" :key="`skeleton-${n}`" class="team-card skeleton-card">
+            <div class="card-top-section skeleton-image"></div>
+            <div class="card-bottom-section">
               <div class="skeleton-name"></div>
-              <div class="skeleton-rating">
-                <div class="skeleton-star" v-for="star in 5" :key="star"></div>
-              </div>
+              <div class="member-specialization"></div>
               <div class="skeleton-description"></div>
-              <div class="skeleton-description short"></div>
-              <div class="skeleton-button"></div>
-              <div class="skeleton-button"></div>
+              <div class="member-details">
+                <div class="detail-item rating-item">
+                  <i class="fa-solid fa-star"></i>
+                  <span class="skeleton-description short"></span>
+                </div>
+                <div class="detail-item location-item">
+                  <i class="fa-solid fa-location-dot"></i>
+                  <span class="skeleton-description short"></span>
+                </div>
+                <div class="detail-item price-item">
+                  <i class="fa-solid fa-dollar-sign"></i>
+                  <span class="skeleton-description short"></span>
+                </div>
+              </div>
+              <button class="view-profile-btn skeleton-button"></button>
             </div>
           </div>
 
           <!-- Actual Technician Cards -->
-          <div v-else v-for="technician in displayedTechnicians" :key="technician.id" class="technician-card">
-            <div class="technician-image" :style="{ backgroundColor: technician.bgColor }">
-              <img :src="technician.image" :alt="technician.name" />
+          <div v-else v-for="technician in displayedTechnicians" :key="technician.id" class="team-card">
+            <!-- Top Section - Image Area -->
+            <div class="card-top-section">
+              <img :src="technician.image" :alt="technician.name" class="member-photo" />
             </div>
-            <div class="technician-info">
-              <h3 class="technician-name">{{ technician.name }}</h3>
-              <div class="rating">
-                <i 
-                  v-for="n in 5" 
-                  :key="n" 
-                  class="fa-solid fa-star"
-                  :class="{ 'filled': n <= Math.round(technician.rating), 'empty': n > Math.round(technician.rating) }"
-                  :style="{ color: n <= Math.round(technician.rating) ? '#FFC230' : '#ddd' }"
-                ></i>
-                <span class="rating-text">({{ technician.rating }})</span>
+            <!-- Bottom Section - Information Area -->
+            <div class="card-bottom-section">
+              <h3 class="member-name">{{ technician.name }}</h3>
+              <div class="member-specialization">{{ technician.specialization }}</div>
+              <p class="member-description">{{ $t('technicianDescription') }}</p>
+              <!-- Details Row -->
+              <div class="member-details">
+                <div class="detail-item rating-item">
+                  <i class="fa-solid fa-star"></i>
+                  <span>{{ technician.rating }}</span>
+                </div>
+                <div class="detail-item location-item">
+                  <i class="fa-solid fa-location-dot"></i>
+                  <span>{{ technician.area || technician.location || 'Cairo' }}</span>
+                </div>
+                <div class="detail-item price-item">
+                  <i class="fa-solid fa-dollar-sign"></i>
+                  <span>{{ technician.price }} EGP</span>
+                </div>
               </div>
-              <p class="technician-description">{{ $t('technicianDescription') }}</p>
-                              <button class="view-profile-btn" @click="viewProfile(technician.id)">{{ $t('viewProfile') }}</button>
+              <button class="view-profile-btn" @click="viewProfile(technician)">{{ $t('viewProfile') }}</button>
             </div>
           </div>
         </div>
-
-
-      </div>
     </section>
 
   </div>
@@ -126,24 +140,21 @@ async function fetchTechnicians() {
 onMounted(fetchTechnicians)
 
 const mergedTechnicians = computed(() => {
-  // Only include stock wall finishing technicians
-  const allTechs = [...stockTechnicians.filter(t => t.specialization === 'Wall Finishing')]
+  // Only include Firebase technicians, no stock technicians
+  const allTechs = []
   firebaseTechnicians.value.forEach(fbTech => {
-    if (!allTechs.some(t => t.name === fbTech.fullName && t.price == fbTech.basePrice)) {
-      // Use uploaded photo if available, fallback to placeholder
-      allTechs.push({
-        id: fbTech.id,
-        name: fbTech.fullName,
-        image: fbTech.profilePhotoUrl || fbTech.idPhotoUrl || profile1, // Use profile photo first, then ID photo as fallback
-        bgColor: '#E8E4F3', // or any default color
-        price: fbTech.basePrice,
-        description: fbTech.bio,
-        rating: fbTech.rating || 4.0, // Use actual rating if available
-        specialization: fbTech.specialization,
-        area: fbTech.area || fbTech.location || 'Cairo', // Use area/location if available
-        yearsOfExperience: fbTech.yearsOfExperience || 5 // Use actual years if available
-      })
-    }
+    allTechs.push({
+      id: fbTech.id,
+      name: fbTech.fullName,
+      image: fbTech.profilePhotoUrl || fbTech.idPhotoUrl || profile1, // Use profile photo first, then ID photo as fallback
+      bgColor: '#E8E4F3', // or any default color
+      price: fbTech.basePrice,
+      description: fbTech.bio,
+      rating: fbTech.rating || 4.0, // Use actual rating if available
+      specialization: fbTech.specialization,
+      area: fbTech.area || fbTech.location || 'Cairo', // Use area/location if available
+      yearsOfExperience: fbTech.yearsOfExperience || 5 // Use actual years if available
+    })
   })
   return allTechs
 })
@@ -226,8 +237,27 @@ function onSort(option) {
   sortOption.value = option
 }
 
-function viewProfile(id) {
-  router.push({ name: 'TechnicianProfile', params: { id } })
+function viewProfile(member) {
+  if (!member || !member.id) {
+    alert('Technician profile data is missing or invalid.');
+    return;
+  }
+  router.push({
+    path: `/technician/${member.id}`,
+    query: {
+      name: member.name || '',
+      specialization: member.specialization || '',
+      rating: member.rating || '',
+      experience: member.experience || '',
+      basePrice: member.basePrice || member.price || '',
+      bio: member.description || '',
+      location: member.location || '',
+      phone: member.phone || '',
+      email: member.email || '',
+      status: member.status || '',
+      image: member.image || ''
+    }
+  });
 }
 
 
@@ -242,10 +272,10 @@ const heroBackgroundStyle = computed(() => {
   }
 })
 </script>
-
 <style scoped>
 .plumbing-page {
   width: 100%;
+  overflow-x: hidden;
 }
 .dark .hero-section {
   background-color: var(--primary-bg);
@@ -299,14 +329,10 @@ const heroBackgroundStyle = computed(() => {
 .technicians-section {
   padding: 4rem 0;
   background-color: white;
+  margin: 0 80px;
 }
 .dark .technicians-section {
   background-color: var(--primary-bg);
-}
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem;
 }
 .dark .container {
   background-color: var(--primary-bg);
@@ -337,127 +363,167 @@ const heroBackgroundStyle = computed(() => {
 .dark .section-description {
   color: var(--primary-text);
 }
-.technicians-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
-  margin-bottom: 3rem;
-  grid-auto-rows: 1fr;
-  justify-items: center;
-}
-.dark .technicians-grid {
-  background-color: var(--primary-bg);
-}
-.technician-card {
-  background: white;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  min-height: 420px;
+
+/* --- Team Card Styles (copied from Plumbing.vue) --- */
+.team-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
   width: 100%;
-  max-width: 340px;
+  margin: 0 !important;
+  margin-bottom: 30px;
+  box-sizing: border-box;
+}
+.container {
+  width: 100%;
+  padding: 0;
+  max-width: 1180px;
+  margin: 0px;
+  align-items: center;
+  box-sizing: border-box;
+}
+.team-card {
+  width: 24%;
+  min-width: 240px;
+  background: #ffffff;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: none;
   display: flex;
   flex-direction: column;
 }
-.dark .technician-card {
-  background-color: var(--secondary-bg);
-  color: var(--primary-text);
+.team-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
 }
-.technician-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
-.technician-image {
-  height: 300px;
+.card-top-section {
+  width: 100%;
+  height: 200px;
+  background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
 }
-.dark .technician-image {
-  background-color: var(--secondary-bg);
-  color: var(--primary-text);
-}
-.technician-image img {
+.member-photo {
   width: 100%;
   height: 100%;
-  border-radius: 8px;
   object-fit: cover;
+  border-radius: 0;
 }
-.dark .technician-image img {
-  background-color: var(--secondary-bg);
-  color: var(--primary-text);
+.card-bottom-section {
+  padding: 16px 20px;
+  background: #ffffff;
+  text-align: left;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 250px;
 }
-.technician-info {
-  padding: 1.5rem;
+.member-name {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #333333;
+  margin-bottom: 8px;
+  font-family: Outfit, sans-serif;
+  line-height: 1.2;
+  flex-shrink: 0;
+  height: 20px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-
-.technician-name {
-  font-size: 1.3rem;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 0.5rem;
+.member-specialization {
+  font-size: 1rem;
+  color: #7c6bb0;
+  font-weight: 500;
+  font-family: Outfit, sans-serif;
+  flex-shrink: 0;
+  height: 20px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.dark .technician-name {
-  color: var(--primary-text);
+.member-description {
+  font-size: 0.9rem;
+  color: #666666;
+  line-height: 1.4;
+  margin-bottom: 0px;
+  font-family: Outfit, sans-serif;
+  flex: 1;
+  height: 60px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.rating {
+.member-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4px;
+  flex-shrink: 0;
+  height: 35px; /* Fixed height for details row */
+}
+.detail-item {
   display: flex;
   align-items: center;
-  gap: 0.2rem;
-  margin-bottom: 0.5rem;
-}
-
-.rating .fa-star {
-  font-size: 1rem;
-  transition: color 0.2s ease;
-}
-
-.rating .fa-star.filled {
-  color: #FFC230 !important;
-}
-
-.rating .fa-star.empty {
-  color: #ddd !important;
-}
-
-.rating-text {
+  gap: 6px;
   font-size: 0.9rem;
-  color: #666;
-  margin-left: 0.5rem;
+  color: #333333;
+  font-weight: 500;
+  flex-shrink: 0;
 }
-
-.dark .rating-text {
-  color: var(--primary-text);
+.detail-item i {
+  font-size: 0.8rem;
+  color: #666666;
 }
-.technician-description {
-  color: #666;
-  font-size: 0.95rem;
-  line-height: 1.5;
-  margin-bottom: 1.5rem;
+.fa-star  {
+  color: var(--color-secondary)!important;
 }
-.dark .technician-description {
-  color: var(--primary-text);
+.fa-location-dot {
+  color: #4d7cfe !important;
+}
+.fa-dollar-sign{
+  color: #34c759 !important;
 }
 .view-profile-btn {
-  background-color: var(--primary-color);
-  color: white;
+  background: #7c6bb0;
+  color: #ffffff;
   border: none;
-  padding: 0.75rem 1.5rem;
   border-radius: 25px;
+  padding: 12px 24px;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  display: block;
   width: 100%;
-  margin-bottom: 0.5rem; /* Added margin to separate buttons */
-}
-.dark .view-profile-btn {
-  background-color: var(--primary-color);
-  color: var(--primary-text);
+  text-align: center;
+  transition: background 0.3s ease;
+  font-family: Outfit, sans-serif;
+  flex-shrink: 0;
+  margin-top: auto;
 }
 .view-profile-btn:hover {
-  background-color: #4a3f7a;
+  background: #5a4e99;
+  transform: translateY(-2px);
+}
+@media (max-width: 1200px) {
+  .team-card {
+    width: 31%;
+  }
+}
+@media (max-width: 900px) {
+  .team-card {
+    width: 47%;
+  }
+}
+@media (max-width: 600px) {
+  .team-card {
+    width: 100%;
+    max-width: 100%;
+  }
 }
 
 
@@ -538,6 +604,62 @@ const heroBackgroundStyle = computed(() => {
 .dark .cta-btn:hover i {
   color: var(--primary-text);
 }
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.5rem;
+  }
+  
+  .section-title {
+    font-size: 2rem;
+  }
+  
+  .technicians-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .cta-title {
+    font-size: 2.5rem;
+  }
+  
+  .container {
+    padding: 0 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 2rem;
+  }
+  
+  .section-title {
+    font-size: 1.8rem;
+  }
+  
+  .technicians-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .cta-title {
+    font-size: 2rem;
+  }
+  
+  .cta-description {
+    font-size: 1rem;
+  }
+  
+  .pagination {
+    gap: 0.25rem;
+  }
+  
+  .pagination-btn {
+    width: 35px;
+    height: 35px;
+    font-size: 0.9rem;
+  }
+}
+
 /* Enhanced Responsive Design */
 @media (max-width: 1200px) {
   .hero-section {
@@ -841,6 +963,13 @@ const heroBackgroundStyle = computed(() => {
   .technician-card,
   .view-profile-btn {
     transition: none;
+  }
+  
+  .skeleton-image,
+  .skeleton-name,
+  .skeleton-description,
+  .skeleton-button {
+    animation: none;
   }
 }
 

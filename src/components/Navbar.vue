@@ -266,7 +266,7 @@ export default {
             class="fa-solid fa-map-marker-alt px-2"></i>{{ $t('contactAddress') }}</a>
       </div>
       <div class="flex gap-2">
-        <a href="#" class="flex items-center justify-center rounded-full social-media-links w-7 h-7"><i
+        <a href="#" class="flex items-center justify-center rounded-full social-media-links w-7 h-7" :aria-label="$t('facebook')"><i
             class="fa-brands fa-facebook-f secondary-color"></i></a>
         <a href="#" class="flex items-center justify-center rounded-full social-media-links w-7 h-7"><i
             class="fa-brands fa-x-twitter secondary-color"></i></a>
@@ -315,7 +315,7 @@ export default {
           <router-link to="/electricity">{{ $t('navElectricity') }}</router-link>
           <router-link to="/wallfinishing">{{ $t('navWallFinishing') }}</router-link>
           <router-link to="/carpentry">{{ $t('navCarpentry') }}</router-link>
-          <router-link to="/elecTechnicians">{{ $t('navElectricityTechnicians') }}</router-link>
+          <router-link to="/elecTechnicians">{{ $t('electricalApplianceTechnician') }}</router-link>
         </div>
       </li>
     </ul>
