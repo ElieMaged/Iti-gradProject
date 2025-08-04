@@ -482,6 +482,7 @@ const messages = {
     contactUs: "Contact Us",
     contactIntro:
       "Email, call, or complete the form to learn how BoltFix can solve your messaging problem",
+    contactIntro2: "We're here to help and answer any questions you might have.",
     phone: "Phone",
     whatsapp: "Whatsapp",
     facebook: "Facebook",
@@ -1766,6 +1767,7 @@ const messages = {
     contactUs: "تواصل معنا",
     contactIntro:
       "راسلنا عبر البريد الإلكتروني أو اتصل بنا أو أكمل النموذج لمعرفة كيف يمكن لـ BoltFix حل مشكلتك.",
+    contactIntro2: "نحن هنا لمساعدتك والإجابة على أي أسئلة قد تكون لديك.",
     phone: "الهاتف",
     whatsapp: "واتساب",
     facebook: "فيسبوك",

@@ -1969,9 +1969,10 @@ watch(() => technician.value, (newTechnician) => {
 
 /* Dark Mode Styles */
 .dark .booking-page {
-  background: var(--primary-bg, #181824);
+   background: #2D2E30;
   color: var(--primary-text, #e5e7eb);
 }
+
 
 .dark .header {
   background: transparent;
@@ -1982,7 +1983,7 @@ watch(() => technician.value, (newTechnician) => {
 }
 
 .dark .booking-card {
-  background: var(--secondary-bg, #23233a);
+  background: #2D2E30;
   color: var(--primary-text, #e5e7eb);
   box-shadow: 0 4px 20px rgba(0,0,0,0.3);
 }
@@ -2020,7 +2021,7 @@ watch(() => technician.value, (newTechnician) => {
 }
 
 .dark .technician-section {
-  background: var(--input-bg, #23233a);
+  background: #484B4D;
   color: var(--primary-text, #e5e7eb);
 }
 
@@ -2047,11 +2048,12 @@ watch(() => technician.value, (newTechnician) => {
 .dark .date-slot {
   background: var(--secondary-bg, #23233a);
   color: var(--primary-text, #e5e7eb);
-  border-color: var(--border-color, #35355a);
+  border-color: var(--border-color, #7B6FA8);
 }
 
 .dark .day-name {
-  color: var(--primary-text, #e5e7eb);
+  color: #aaaaaa
+  
 }
 
 .dark .date-number {
@@ -2063,7 +2065,8 @@ watch(() => technician.value, (newTechnician) => {
 }
 
 .dark .form-section {
-  background: var(--input-bg, #23233a);
+    background: #484B4D;
+
   color: var(--primary-text, #e5e7eb);
 }
 
@@ -2072,13 +2075,13 @@ watch(() => technician.value, (newTechnician) => {
 }
 
 .dark .form-group label {
-  color: var(--primary-text, #e5e7eb);
+  color: #aaaaaa;
 }
 
 .dark .form-input {
-  background: var(--secondary-bg, #23233a);
-  color: var(--primary-text, #e5e7eb);
-  border-color: var(--border-color, #35355a);
+  background:#484B4D;
+  color: #aaaaaa;
+  border-color: #e0e0e0;
 }
 
 .dark .form-input:focus {
@@ -2087,7 +2090,7 @@ watch(() => technician.value, (newTechnician) => {
 }
 
 .dark .form-input.textarea {
-  background: var(--secondary-bg, #23233a);
+ background: #484B4D;
   color: var(--primary-text, #e5e7eb);
 }
 
@@ -2146,4 +2149,14 @@ watch(() => technician.value, (newTechnician) => {
   background: #7c6bb1;
   color: #fff;
 }
+
+/* Dark mode for map itself */
+.dark .map-container iframe,
+.dark .map-container .leaflet-container,
+.dark .map-container .gm-style {
+  background: #484B4D;
+  color:#484B4D;
+  border-color: #35355a !important;
+}
+
 </style> 
