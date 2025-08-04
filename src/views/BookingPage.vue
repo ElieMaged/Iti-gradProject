@@ -1966,4 +1966,184 @@ watch(() => technician.value, (newTechnician) => {
   font-size: 0.875rem;
   margin-top: 0.25rem;
 }
+
+/* Dark Mode Styles */
+.dark .booking-page {
+  background: var(--primary-bg, #181824);
+  color: var(--primary-text, #e5e7eb);
+}
+
+.dark .header {
+  background: transparent;
+}
+
+.dark .page-title {
+  color: var(--primary, #a89af7);
+}
+
+.dark .booking-card {
+  background: var(--secondary-bg, #23233a);
+  color: var(--primary-text, #e5e7eb);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.dark .error-message {
+  background: #2d2323;
+  color: #f87171;
+  border-color: #f87171;
+}
+
+.dark .progress-indicator {
+  background: transparent;
+}
+
+.dark .step-circle {
+  background: var(--border-color, #35355a);
+  color: var(--primary-text, #e5e7eb);
+}
+
+.dark .progress-step.active .step-circle {
+  background: var(--primary, #a89af7);
+  color: #181824;
+}
+
+.dark .step-text {
+  color: var(--text-muted, #b3b3c6);
+}
+
+.dark .progress-step.active .step-text {
+  color: var(--primary, #a89af7);
+}
+
+.dark .progress-line {
+  background: var(--border-color, #35355a);
+}
+
+.dark .technician-section {
+  background: var(--input-bg, #23233a);
+  color: var(--primary-text, #e5e7eb);
+}
+
+.dark .technician-photo {
+  border-color: var(--primary, #a89af7);
+}
+
+.dark .technician-details h3 {
+  color: var(--primary-text, #e5e7eb);
+}
+
+.dark .technician-role {
+  color: var(--text-muted, #b3b3c6);
+}
+
+.dark .available-appointments {
+  background: transparent;
+}
+
+.dark .appointment-title {
+  color: var(--primary-text, #e5e7eb);
+}
+
+.dark .date-slot {
+  background: var(--secondary-bg, #23233a);
+  color: var(--primary-text, #e5e7eb);
+  border-color: var(--border-color, #35355a);
+}
+
+.dark .day-name {
+  color: var(--primary-text, #e5e7eb);
+}
+
+.dark .date-number {
+  color: var(--primary, #a89af7);
+}
+
+.dark .time-slot {
+  color: var(--text-muted, #b3b3c6);
+}
+
+.dark .form-section {
+  background: var(--input-bg, #23233a);
+  color: var(--primary-text, #e5e7eb);
+}
+
+.dark .section-title {
+  color: var(--primary-text, #e5e7eb);
+}
+
+.dark .form-group label {
+  color: var(--primary-text, #e5e7eb);
+}
+
+.dark .form-input {
+  background: var(--secondary-bg, #23233a);
+  color: var(--primary-text, #e5e7eb);
+  border-color: var(--border-color, #35355a);
+}
+
+.dark .form-input:focus {
+  border-color: var(--primary, #a89af7);
+  box-shadow: 0 0 0 3px rgba(168, 154, 247, 0.1);
+}
+
+.dark .form-input.textarea {
+  background: var(--secondary-bg, #23233a);
+  color: var(--primary-text, #e5e7eb);
+}
+
+.dark .payment-methods {
+  background: transparent;
+}
+
+.dark .payment-option {
+  background: var(--secondary-bg, #23233a);
+  color: var(--primary-text, #e5e7eb);
+  border-color: var(--border-color, #35355a);
+}
+
+.dark .payment-option:hover {
+  border-color: var(--primary, #a89af7);
+}
+
+.dark .payment-text {
+  color: var(--primary-text, #e5e7eb);
+}
+
+.dark .payment-icon {
+  color: var(--primary, #a89af7);
+}
+
+.dark .payment-summary {
+  background: var(--secondary-bg, #23233a);
+  border-color: var(--border-color, #35355a);
+  color: var(--primary-text, #e5e7eb);
+}
+
+.dark .amount {
+  color: var(--primary, #a89af7);
+}
+
+.dark .payment-note {
+  color: var(--text-muted, #b3b3c6);
+}
+
+.dark .credit-card-container {
+  background: var(--secondary-bg, #23233a);
+  border-color: var(--border-color, #35355a);
+  color: var(--primary-text, #e5e7eb);
+}
+
+.dark .card-type-indicator {
+  color: var(--primary, #a89af7);
+}
+
+.dark .confirm-btn {
+  background: var(--primary, #a89af7);
+  color: var(--primary-text, #181824);
+}
+
+.dark .confirm-btn:hover {
+  background: #7c6bb1;
+  color: #fff;
+}
 </style> 
