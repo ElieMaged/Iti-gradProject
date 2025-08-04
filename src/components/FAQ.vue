@@ -106,18 +106,13 @@ export default {
 <style scoped>
 .faq {
   background: #f4f4f5;
-  padding: 80px 0;
-  width: 100%;
+  margin: 0 80px;
 }
 .dark .faq {
-  background: var(--color-black);
+  background: var(--primary-bg);
   color: var(--primary-text);
 }
-.faq-content {
-  width: 90%;
-  max-width: 1200px;
-  margin: 0 auto 40px auto;
-}
+
 
 .faq-header {
   display: flex;
@@ -146,7 +141,6 @@ export default {
   color: var(--primary-text);
 }
 .faq-intro {
-  margin-left: auto;
   border-radius: 8px;
   flex: 0 1 auto;
   display: flex;
@@ -167,8 +161,6 @@ export default {
   color: var(--black-gray);
 }
 .faq-container {
-  max-width: 1280px;
-  margin: 0 auto 40px auto;
   display: flex;
   flex-direction: row;
   gap: 40px;

@@ -551,10 +551,10 @@ watch(() => formData.confirmPassword, (newConfirmPassword) => {
 // Check if password meets all requirements
 const isPasswordValid = computed(() => {
   return passwordValidation.length && 
-         passwordValidation.uppercase && 
-         passwordValidation.lowercase && 
-         passwordValidation.number && 
-         passwordValidation.special;
+    passwordValidation.uppercase && 
+    passwordValidation.lowercase && 
+    passwordValidation.number && 
+    passwordValidation.special;
 });
 
 function triggerFileInput() {
