@@ -326,6 +326,99 @@ function goHome() {
   background: #6b5fa7;
 }
 
+/* Dark Mode Styles */
+.dark .confirmation-page {
+  background: var(--primary-bg);
+  color: var(--primary-text);
+}
+
+.dark .page-title {
+  color: var(--primary-color);
+}
+
+.dark .confirmation-card {
+  background: var(--secondary-bg);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.dark .step-circle {
+  background: var(--input-border);
+  color: var(--primary-text);
+}
+
+.dark .progress-step.active .step-circle {
+  background: var(--primary-color);
+}
+
+.dark .step-text {
+  color: var(--text-muted);
+}
+
+.dark .progress-step.active .step-text {
+  color: var(--primary-color);
+}
+
+.dark .progress-line {
+  background: var(--input-border);
+}
+
+.dark .success-title {
+  color: var(--primary-color);
+}
+
+.dark .success-description {
+  color: var(--text-muted);
+}
+
+.dark .next-steps-section {
+  background: var(--grey-bg);
+}
+
+.dark .section-title {
+  color: var(--primary-color);
+}
+
+.dark .next-steps-description {
+  color: var(--primary-text);
+}
+
+.dark .booking-summary-section {
+  background: var(--grey-bg);
+}
+
+.dark .summary-item {
+  border-bottom-color: var(--input-border);
+}
+
+.dark .summary-label {
+  color: var(--primary-text);
+}
+
+.dark .summary-value {
+  color: var(--text-muted);
+}
+
+.dark .total-amount-section {
+  border-top-color: var(--input-border);
+}
+
+.dark .total-amount {
+  color: var(--primary-text);
+}
+
+.dark .back-to-home-btn {
+  background: var(--primary-color);
+}
+
+.dark .back-to-home-btn:hover {
+  background: var(--sidebar);
+}
+
+/* Dark mode transitions */
+* {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .confirmation-page {

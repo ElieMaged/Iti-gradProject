@@ -1969,7 +1969,7 @@ watch(() => technician.value, (newTechnician) => {
 
 /* Dark Mode Styles */
 .dark .booking-page {
-   background: #2D2E30;
+   background: var(--primary-bg, #181824);
   color: var(--primary-text, #e5e7eb);
 }
 
