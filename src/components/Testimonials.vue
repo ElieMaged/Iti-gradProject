@@ -65,7 +65,7 @@ export default {
   width: 100%;
 }
 .dark .testimonials {
-  background-color: var(--color-black);
+  background-color: var(--primary-bg);
   color: var(--primary-text);
 }
 .testimonials-header {

@@ -117,7 +117,7 @@ export default {
   background-color: var(--primary-text);
 }
 .dark .services-section {
-  background: var(--color-black);
+  background: var(--primary-bg);
   color: var(--primary-text);
 }
 @media (max-width: 1000px) {
