@@ -118,9 +118,8 @@ export default {
    </div>
                            <!-- About-3 -->
 
-                 <div class="mt-4 mb-0 why-choose-us-title">
+                 <div class="mt-20 mb-0">
 
-        <h1 class="text-center">{{ $t('whyChooseUsTitle') }}</h1>
         </div>
                <!-- About-3 -->
       <div class="mt-10 mb-5">
@@ -368,7 +367,7 @@ export default {
 
 .text-content {
   flex: 1;
-  max-width: 40%;
+  max-width: 100%;
 }
 
 .who-we-are-title {
