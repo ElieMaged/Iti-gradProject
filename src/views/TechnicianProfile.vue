@@ -22,7 +22,7 @@
         <div class="technician-info-card">
           <div class="profile-section">
             <div class="profile-picture">
-              <img :src="technician.profilePhotoUrl || technician.idPhotoUrl || '/images/Avatar.png'" :alt="technician.name" />
+              <img :src="technician.profilePhotoUrl || technician.profilePhotoUrl || '/images/Avatar.png'" :alt="technician.name" />
             </div>
             <div class="profile-details">
               <h2 class="technician-name">{{ technician.name || technician.fullName }}</h2>

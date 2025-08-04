@@ -4,9 +4,11 @@
             :activeMenu="activeMenu"
             @navigate="handleSidebarNavigate"
         />
+        <div class="container">
     <div class="payment-content p-4 mr-20">
-      <h1 class="page-title">{{ $t('payment') }}</h1>  
+      <h1 class="page-title lg:ml-15">{{ $t('payment') }}</h1>  
       <div class="payment-balance-card">
+
         <div class="balance-labels">
           <span class="current-balance-label">{{ $t('currentBalance') }}</span>
           <span class="pending-label">{{ $t('pending') }}</span>
@@ -40,7 +42,7 @@
           <button class="withdraw-btn" type="submit" @click.prevent="handleWithdraw">{{ $t('withdraw') }}</button>
         </form>
       </div>
-      
+    </div>
       <!-- Recent Transactions -->
       <div class="transactions-section" v-if="recentTransactions.length > 0">
         <h3 class="transactions-title">{{ $t('recentTransactions') || 'Recent Transactions' }}</h3>
