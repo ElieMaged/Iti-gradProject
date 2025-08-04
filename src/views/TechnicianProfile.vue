@@ -158,17 +158,11 @@
             <div v-else-if="reviews.find(r => r.userEmail === auth.currentUser?.email)" class="review-notice">
               {{ $t('thankYouForReview') }}
             </div>
-             <div v-else-if="!userBookings.some(booking => booking.technicianId === route.params.id && (booking.status === 'completed' || booking.status === 'upcoming'))" class="review-notice">
-              {{ $t('bookingRequiredToReview') }}
-            </div>
-             <div v-else class="review-notice">
-               {{ $t('loginToLeaveReview') }}
-            </div>
           </div>
         </div>
 
         <!-- Review Submission Form -->
-        <div v-if="showReviewForm" class="review-form">
+        <div class="review-form">
           <h3>{{ $t('writeReview') }}</h3>
           <div class="star-rating-input">
             <label>{{ $t('rating') }}:</label>
@@ -838,7 +832,7 @@ onMounted(async () => {
   max-width: 1280px;
   margin-left: 80px;
   margin-right: 80px;
-  padding: 2rem;
+  padding: 0rem;
 }
 
 .page-title {
@@ -1251,10 +1245,13 @@ onMounted(async () => {
 
 /* Review Form */
 .review-form {
-  background: #f8f9fa;
-  border-radius: 8px;
+  background: #ffffff;
   padding: 1.5rem;
   margin-bottom: 2rem;
+  /* border: 1px solid #d1d5db; */
+  border-radius: 20px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  
 }
 
 .review-form h3 {
@@ -1922,14 +1919,15 @@ onMounted(async () => {
 }
 
 /* Dark Mode Styles */
+
 .dark .technician-profile-page {
-  background-color: var(--primary-bg);
+  background-color: #2D2E30;
   color: var(--primary-text);
 }
 
 .dark .loading-container,
 .dark .error-container {
-  background-color: var(--primary-bg);
+  background-color: #2D2E30;
   color: var(--primary-text);
 }
 
@@ -1945,10 +1943,14 @@ onMounted(async () => {
 .dark .header-contact-bar {
   background: linear-gradient(135deg, #f59e0b, #f97316);
 }
-
+.dark .review-form {
+  background-color: var(--secondary-bg);
+  color: white;
+}
 .dark .review-card{
   background: var(--input-bg);
   box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  color: white;
 }
 .dark .main-nav {
   background: var(--secondary-bg);
@@ -1957,6 +1959,14 @@ onMounted(async () => {
 
 .dark .logo-text {
   color: var(--primary-text);
+}
+
+.dark h3 {
+  color: white;
+}
+
+.dark label {
+  color: white;
 }
 
 .dark .nav-link {
@@ -1976,7 +1986,7 @@ onMounted(async () => {
 }
 
 .dark .main-content {
-  background-color: var(--primary-bg);
+  background-color: #2D2E30;
 }
 
 .dark .page-title h1 {
