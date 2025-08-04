@@ -120,7 +120,6 @@ export default {
 
                  <div class="mt-20 mb-0">
 
-        <h1 class="text-center">{{ $t('whyChooseUsTitle') }}</h1>
         </div>
                <!-- About-3 -->
       <div class="mt-10 mb-5">
