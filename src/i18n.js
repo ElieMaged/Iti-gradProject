@@ -506,6 +506,7 @@ const messages = {
     whoAreWeTitle: "Who Are We?",
     whoAreWeDesc:
       "At BoltFix, we're redefining how home maintenance is done. As Egypt's trusted platform for reliable repair and installation services, we connect you with skilled, verified technicians across plumbing, electrical, carpentry, appliance repair, and more — all with a click. Our mission is simple: to bring professionalism, transparency, and peace of mind to every home. Whether it's a quick fix or a big job, we make sure it's done right, on time, and with care.",
+      whoAreWeDesc2:"We believe in professionalism, transparency, and building a strong community where service providers and customers can connect with ease.",
     ourMissionTitle: "Our Mission",
     ourMissionDesc:
       "Our mission at BoltFix is to simplify access to trusted home repair services by empowering skilled technicians and delivering a seamless, dependable experience for every customer. We aim to raise the standard of home maintenance in Egypt through speed, honesty, and quality — ensuring that every task, big or small, is completed with precision, professionalism, and care.",
@@ -1789,6 +1790,7 @@ const messages = {
     whoAreWeTitle: "من نحن؟",
     whoAreWeDesc:
       "في BoltFix، نعيد تعريف كيفية صيانة المنازل. كمنصة موثوقة في مصر لخدمات الإصلاح والتركيب، نربطك بفنيين مهرة وموثوقين في السباكة والكهرباء والنجارة وإصلاح الأجهزة والمزيد — بضغطة زر. مهمتنا بسيطة: تقديم الاحترافية والشفافية وراحة البال لكل منزل. سواء كانت مهمة سريعة أو كبيرة، نضمن إنجازها بشكل صحيح وفي الوقت المناسب وبعناية.",
+      whoAreWeDesc2:"نحن نؤمن بالاحترافية والشفافية وبناء مجتمع قوي حيث يمكن لمقدمي الخدمات والعملاء التواصل بسهولة.",
     ourMissionTitle: "مهمتنا",
     ourMissionDesc:
       "مهمتنا في BoltFix هي تبسيط الوصول إلى خدمات الإصلاح المنزلية الموثوقة من خلال تمكين الفنيين المهرة وتقديم تجربة سلسة وموثوقة لكل عميل. نهدف إلى رفع مستوى صيانة المنازل في مصر من خلال السرعة والصدق والجودة — لضمان إنجاز كل مهمة، كبيرة أو صغيرة، بدقة واحترافية وعناية.",

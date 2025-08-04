@@ -96,7 +96,7 @@ export default {
       <div class="text-content">
         <h1 class="who-we-are-title">{{ $t('whoAreWeTitle') }}</h1>
         <p class="who-we-are-desc">{{ $t('whoAreWeDesc') }}</p>
-        <p class="who-we-are-desc">We believe in professionalism, transparency, and building a strong community where service providers and customers can connect with ease.</p>
+        <p class="who-we-are-desc">{{ $t('whoAreWeDesc2') }}</p>
         <h2 class="our-mission-title">{{ $t('ourMissionTitle') }}</h2>
         <p class="our-mission-desc">{{ $t('ourMissionDesc') }}</p>
       </div>
