@@ -57,28 +57,67 @@
            </div>
          </div>
          
-         <div class="technicians-grid">
-          <div 
-            v-for="(technician, idx) in filteredTechnicians" 
-            :key="technician.id" 
-            class="technician-card"
-            @click="viewTechnicianDetails(technician)"
-          >
-            <div class="technician-image">
-              <img :src="technician.image || '/images/Avatar.png'" :alt="technician.name" />
-            </div>
-            <div class="technician-info">
-              <h3 class="technician-name">{{ technician.name }}</h3>
-              <div class="rating">
-                <i class="fa-solid fa-star" v-for="n in 5" :key="n"></i>
-              </div>
-              <p class="technician-description">{{ technician.description }}</p>
-              <button class="view-profile-btn" @click.stop="viewTechnicianDetails(technician)">
-                {{ $t('viewTechnician') }}
-              </button>
-            </div>
-          </div>
-        </div>
+         <div class="team-cards">
+           <div 
+             v-for="(technician, idx) in paginatedTechnicians" 
+             :key="technician.id" 
+             class="team-card"
+             @click="viewTechnicianDetails(technician)"
+           >
+             <div class="card-top-section">
+               <img :src="technician.image || '/images/Avatar.png'" :alt="technician.name" class="member-photo" />
+             </div>
+             <div class="card-bottom-section">
+               <h3 class="member-name">{{ technician.name }}</h3>
+               <div class="member-specialization">{{ technician.specialization }}</div>
+               <p class="member-description">{{ technician.description }}</p>
+               <div class="member-details">
+                 <div class="detail-item rating-item">
+                   <i class="fas fa-star"></i>
+                   <span>{{ technician.rating }}</span>
+                 </div>
+                 <div class="detail-item location-item">
+                   <i class="fas fa-map-marker-alt"></i>
+                   <span>{{ technician.location || 'Cairo' }}</span>
+                 </div>
+                 <div class="detail-item price-item">
+                   <i class="fa-solid fa-dollar-sign"></i>
+                   <span>{{ technician.price }} EGP</span>
+                 </div>
+               </div>
+               <button class="view-profile-btn" @click.stop="viewProfile(technician)">
+                 {{ $t('viewProfile') || 'View Profile' }}
+               </button>
+             </div>
+           </div>
+         </div>
+
+         <!-- Pagination Controls -->
+         <div v-if="totalPages > 1" class="pagination">
+           <button 
+             class="pagination-btn" 
+             :disabled="currentPage === 1" 
+             @click="goToPage(currentPage - 1)"
+           >
+             &laquo;
+           </button>
+           <button 
+             v-for="page in totalPages" 
+             :key="page" 
+             class="pagination-btn" 
+             :class="{ active: page === currentPage }" 
+             @click="goToPage(page)"
+           >
+             {{ page }}
+           </button>
+           <button 
+             class="pagination-btn" 
+             :disabled="currentPage === totalPages" 
+             @click="goToPage(currentPage + 1)"
+           >
+             &raquo;
+           </button>
+         </div>
 
         <!-- No Results Message -->
         <div v-if="filteredTechnicians.length === 0 && !loading" class="no-results">
@@ -91,60 +130,6 @@
         </div>
       </div>
     </section>
-
-    <!-- Technician Details Modal -->
-    <div v-if="selectedTechnician" class="modal-overlay" @click="closeModal">
-      <div class="modal-content" @click.stop>
-        <button class="modal-close" @click="closeModal">
-          <i class="fas fa-times"></i>
-        </button>
-        <div class="modal-body">
-          <img :src="selectedTechnician.image || '/images/Avatar.png'" :alt="selectedTechnician.name" class="modal-image" />
-          <div class="modal-info">
-            <h2>{{ selectedTechnician.name }}</h2>
-            <p class="modal-description">{{ selectedTechnician.description }}</p>
-            <div class="modal-meta">
-              <div class="meta-item">
-                <i class="fas fa-star"></i>
-                <span>{{ selectedTechnician.rating || '4.8' }} {{ $t('rating') || 'Rating' }}</span>
-              </div>
-              <div class="meta-item">
-                <i class="fas fa-map-marker-alt"></i>
-                <span>{{ selectedTechnician.location || 'Cairo' }} {{ $t('location') || 'Location' }}</span>
-              </div>
-              <div class="meta-item">
-                <i class="fas fa-money-bill"></i>
-                <span>{{ selectedTechnician.price || '200' }} EGP {{ $t('perHour') || 'per hour' }}</span>
-              </div>
-              <div class="meta-item">
-                <i class="fas fa-clock"></i>
-                <span>{{ selectedTechnician.yearsOfExperience || '5' }} {{ $t('yearsExperience') || 'years experience' }}</span>
-              </div>
-            </div>
-            <div class="modal-skills">
-              <h4>{{ $t('skills') || 'Skills' }}</h4>
-              <div class="skills-grid">
-                <span 
-                  v-for="skill in selectedTechnician.skills" 
-                  :key="skill" 
-                  class="skill-tag"
-                >
-                  {{ skill }}
-                </span>
-              </div>
-            </div>
-            <div class="modal-actions">
-              <button class="service-btn" @click.stop="viewTechnicianDetails(technician)">
-                {{ $t('viewTechnician') }}
-              </button>
-              <button class="modal-btn secondary" @click="closeModal">
-                {{ $t('close') }}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -160,7 +145,9 @@ import { db } from '../firebase.js';
       selectedTechnician: null,
       loading: true,
       technicians: [],
-             servicesList: [
+      currentPage: 1,
+      techniciansPerPage: 12, // 3 rows x 4 cards
+      servicesList: [
          {
            id: 'plumbing',
            title: 'plumbingServiceTitle',
@@ -209,8 +196,6 @@ import { db } from '../firebase.js';
   computed: {
     filteredTechnicians() {
       let filtered = this.technicians;
-
-      // Filter by search query
       if (this.searchQuery) {
         const query = this.searchQuery.toLowerCase();
         filtered = filtered.filter(technician => 
@@ -220,8 +205,15 @@ import { db } from '../firebase.js';
           technician.location?.toLowerCase().includes(query)
         );
       }
-
       return filtered;
+    },
+    paginatedTechnicians() {
+      const start = (this.currentPage - 1) * this.techniciansPerPage;
+      const end = start + this.techniciansPerPage;
+      return this.filteredTechnicians.slice(start, end);
+    },
+    totalPages() {
+      return Math.ceil(this.filteredTechnicians.length / this.techniciansPerPage) || 1;
     }
   },
   methods: {
@@ -314,10 +306,37 @@ import { db } from '../firebase.js';
     },
     clearSearch() {
       this.searchQuery = '';
+      this.currentPage = 1;
     },
-    viewTechnicianDetails(technician) {
-      this.selectedTechnician = technician;
+    goToPage(page) {
+      if (page >= 1 && page <= this.totalPages) {
+        this.currentPage = page;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     },
+viewProfile(member) {
+  if (!member || !member.id) {
+    alert('Technician profile data is missing or invalid.');
+    return;
+  }
+  this.$router.push({
+    path: `/technician/${member.id}`,
+    query: {
+      name: member.name || '',
+      specialization: member.specialization || '',
+      rating: member.rating || '',
+      experience: member.experience || '',
+      basePrice: member.basePrice || member.price || '',
+      bio: member.description || '',
+      location: member.location || '',
+      phone: member.phone || '',
+      email: member.email || '',
+      status: member.status || '',
+      image: member.image || '',
+    }
+  });
+},
+
     closeModal() {
       this.selectedTechnician = null;
     },
@@ -370,7 +389,7 @@ import { db } from '../firebase.js';
 }
 
 .dark .services-overview-section {
-  background: var(--secondary-bg);
+  background: var(--primary-bg);
 }
 
 .services-overview-container {
@@ -568,14 +587,10 @@ import { db } from '../firebase.js';
   100% { transform: rotate(360deg); }
 }
 
-/* Services Section */
-.services-section {
-  padding: 3rem 2rem;
-}
+
 
 .services-container {
-  max-width: 1200px;
-  margin: 0 auto;
+  margin: 0 80px;
 }
 
 .services-header {
@@ -586,7 +601,7 @@ import { db } from '../firebase.js';
 .services-title {
   font-size: 2.5rem;
   font-weight: 700;
-  margin-bottom: 0.5rem;
+  margin: 2rem 0;
   font-family: Outfit, sans-serif;
 }
 
@@ -605,130 +620,211 @@ import { db } from '../firebase.js';
   color: var(--text-muted);
 }
 
-.technicians-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
-  margin-bottom: 3rem;
-  grid-auto-rows: 1fr;
-  justify-items: center;
-}
 
-.dark .technicians-grid {
-  background-color: var(--primary-bg);
-}
-
-.technician-card {
-  background: white;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  min-height: 420px;
-  width: 100%;
-  max-width: 340px;
+/* --- ExpertTeam Card Styles for All Services --- */
+.team-cards {
   display: flex;
-  flex-direction: column;
-  cursor: pointer;
+  gap: 15px;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
 }
 
-.dark .technician-card {
-  background-color: var(--secondary-bg);
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2rem;
+}
+.pagination-btn {
+  background: #fff;
+  color: #625397;
+  border: 1px solid #d1c4e9;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.pagination-btn.active,
+.pagination-btn:hover {
+  background: #7c6bb0;
+  color: #fff;
+}
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.dark .pagination-btn {
+  background: var(--secondary-bg);
+  color: var(--primary-text);
+  border: 1px solid var(--border-color, #333);
+}
+.dark .pagination-btn.active,
+.dark .pagination-btn:hover {
+  background: var(--primary-color);
   color: var(--primary-text);
 }
 
-.technician-card:hover {
-  transform: translateY(-5px);
+.team-card {
+  width: 24%;
+  background: #ffffff;
+  border-radius: 20px;
+  overflow: hidden;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+  cursor: pointer;
 }
-
-.technician-image {
-  height: 300px;
+.dark .team-card {
+  background: var(--secondary-bg);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  border: 1px solid var(--border-color, #333);
+}
+.team-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+}
+.card-top-section {
+  width: 100%;
+  height: 200px;
+  background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
 }
-
-.dark .technician-image {
-  background-color: var(--secondary-bg);
-  color: var(--primary-text);
-}
-
-.technician-image img {
+.member-photo {
   width: 100%;
   height: 100%;
-  border-radius: 8px;
   object-fit: cover;
+  border-radius: 0;
 }
-
-.dark .technician-image img {
-  background-color: var(--secondary-bg);
+.card-bottom-section {
+  padding: 16px 20px;
+  background: #ffffff;
+  text-align: left;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 250px;
+}
+.dark .card-bottom-section {
+  background: var(--secondary-bg);
+}
+.member-name {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #333333;
+  margin-bottom: 8px;
+  font-family: Outfit, sans-serif;
+  line-height: 1.2;
+  flex-shrink: 0;
+  height: 20px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dark .member-name {
   color: var(--primary-text);
 }
-
-.technician-info {
-  padding: 1.5rem;
+.member-specialization {
+  font-size: 1rem;
+  color: #7c6bb0;
+  font-weight: 500;
+  font-family: Outfit, sans-serif;
+  flex-shrink: 0;
+  height: 20px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-
-.technician-name {
-  font-size: 1.3rem;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 0.5rem;
+.dark .member-specialization {
+  color: #b6aaff;
 }
-
-.dark .technician-name {
+.member-description {
+  font-size: 0.9rem;
+  color: #666666;
+  line-height: 1.4;
+  margin-bottom: 0px;
+  font-family: Outfit, sans-serif;
+  flex: 1;
+  height: 20px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dark .member-description {
+  color: var(--text-muted);
+}
+.member-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4px;
+  flex-shrink: 0;
+  height: 35px;
+}
+.dark .member-details {
   color: var(--primary-text);
 }
-
-.rating {
-  margin-bottom: 1rem;
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: #333333;
+  font-weight: 500;
+  flex-shrink: 0;
 }
-
-.dark .rating {
+.dark .detail-item {
   color: var(--primary-text);
 }
-
-.rating i {
-  color: #FFC230;
-  margin-right: 0.2rem;
+.detail-item i {
+  font-size: 0.8rem;
+  color: #666666;
 }
-
-.dark .rating i {
-  color: var(--primary-text);
+.dark .detail-item i {
+  color: var(--text-muted);
 }
-
-.technician-description {
-  color: #666;
-  font-size: 0.95rem;
-  line-height: 1.5;
-  margin-bottom: 1.5rem;
+.fa-star  {
+  color: var(--color-secondary)!important;
 }
-
-.dark .technician-description {
-  color: var(--primary-text);
+.fa-location-dot {
+  color: #4d7cfe !important;
 }
-
+.fa-dollar-sign{
+  color: #34c759 !important;
+}
 .view-profile-btn {
-  background-color: var(--primary-color);
-  color: white;
+  background: #7c6bb0;
+  color: #ffffff;
   border: none;
-  padding: 0.75rem 1.5rem;
   border-radius: 25px;
+  padding: 12px 24px;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  display: block;
   width: 100%;
-  margin-bottom: 0.5rem;
+  text-align: center;
+  transition: background 0.3s ease;
+  font-family: Outfit, sans-serif;
+  flex-shrink: 0;
+  margin-top: auto;
 }
-
 .dark .view-profile-btn {
-  background-color: var(--primary-color);
+  background: var(--primary-color);
   color: var(--primary-text);
 }
-
 .view-profile-btn:hover {
-  background-color: #4a3f7a;
+  background: #5a4e99;
+  transform: translateY(-2px);
 }
 
 /* No Results */
