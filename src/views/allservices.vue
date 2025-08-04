@@ -384,7 +384,6 @@ viewProfile(member) {
 
 /* Services Overview Section */
 .services-overview-section {
-  padding: 4rem 2rem;
   background: white;
 }
 
@@ -394,7 +393,7 @@ viewProfile(member) {
 
 .services-overview-container {
   max-width: 1200px;
-  margin: 0 auto;
+  margin: 0 80px;
 }
 
 .services-overview-header {

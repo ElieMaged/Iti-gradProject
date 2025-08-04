@@ -93,7 +93,7 @@ body {
 .dark body,
 .dark .sidebar,
 .dark .navbar {
-  background: var(--color-black);
+  background: var(--primary-bg);
   color: var(--primary-text);
 }
 
