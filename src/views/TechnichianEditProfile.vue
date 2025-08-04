@@ -36,10 +36,11 @@
                   <select id="specialization" v-model="form.specialization" required>
                     <option value="">{{ $t('selectSpecialization') }}</option>
                     <option value="Plumbing">{{ $t('specializationPlumbing') }}</option>
-                    <option value="Electricity">{{ $t('specializationElectrician') }}</option>
+                    <option value="Electricity">{{ $t('electricityTitle') }}</option>
                     <option value="Carpentry">{{ $t('specializationCarpentry') }}</option>
                     <option value="Painting">{{ $t('specializationPainting') }}</option>
                     <option value="Air Conditioning">{{ $t('specializationACTechnician') }}</option>
+                    <option value="Electrical Appliances">{{ $t('electricalApplianceTechnician') }}</option>
                   </select>
                 </div>
                 <div>

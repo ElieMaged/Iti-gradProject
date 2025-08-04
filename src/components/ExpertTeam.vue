@@ -1,5 +1,5 @@
 0<template>
-  <section class="expert-team m-20">
+  <section class="expert-team" >
     <div class="team-header">
       <div class="team-title-section">
         <h2 class="team-title">{{ $t('meetOurExpertTechnicians') || 'Meet Our Expert Technicians' }}</h2>
@@ -169,7 +169,7 @@ export default {
     viewProfile(member) {
       // Navigate to technician profile with the specific technician's ID and all available data
       this.$router.push({
-        path: `/texhView/${member.id}`,
+        path: `/technician/${member.id}`,
         query: { 
           name: member.name,
           specialization: member.specialization,
@@ -190,7 +190,9 @@ export default {
 </script>
 
 <style scoped>
-
+.expert-team {
+  margin: 40px 80px;
+}
 .team-header {
   display: flex;
   justify-content: space-between;
@@ -309,7 +311,7 @@ export default {
 
 /* Bottom Section - Information Area */
 .card-bottom-section {
-  padding: 24px 20px;
+  padding: 16px 20px;
   background: #ffffff;
   text-align: left;
   flex: 1;
@@ -323,16 +325,16 @@ export default {
 }
 
 .member-name {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-weight: 700;
   color: #333333;
   margin-bottom: 8px;
   font-family: Outfit, sans-serif;
   line-height: 1.2;
   flex-shrink: 0;
-  height: 40px; /* Fixed height for name */
+  height: 20px; /* Fixed height for name */
   overflow: hidden;
-  text-overflow: ellipsis;
+  text-overflow:ellipsis;
 }
 
 .dark .member-name {
@@ -342,11 +344,10 @@ export default {
 .member-specialization {
   font-size: 1rem;
   color: #7c6bb0;
-  margin-bottom: 5px;
   font-weight: 500;
   font-family: Outfit, sans-serif;
   flex-shrink: 0;
-  height: 25px; /* Fixed height for specialization */
+  height: 20px; /* Fixed height for specialization */
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -372,10 +373,9 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
   padding: 0 4px;
   flex-shrink: 0;
-  height: 40px; /* Fixed height for details row */
+  height: 35px; /* Fixed height for details row */
 }
 
 .detail-item {

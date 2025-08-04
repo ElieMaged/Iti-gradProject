@@ -39,18 +39,33 @@
           <h2 class="section-title">{{ $t('meetTechniciansTeam') }}</h2>
         </div>
 
-        <div class="technicians-grid">
-          <div class="technician-card" v-for="technician in filteredTechnicians" :key="technician.id">
-            <div class="technician-image" :style="{ backgroundColor: technician.bgColor }">
-              <img :src="technician.image" :alt="technician.name" />
+        <div class="team-cards">
+          <div v-for="technician in filteredTechnicians" :key="technician.id" class="team-card">
+            <!-- Top Section - Image Area -->
+            <div class="card-top-section">
+              <img :src="technician.image" :alt="technician.name" class="member-photo" />
             </div>
-            <div class="technician-info">
-              <h3 class="technician-name">{{ technician.name }}</h3>
-              <div class="rating">
-                <i class="fa-solid fa-star" v-for="n in 5" :key="n"></i>
+            <!-- Bottom Section - Information Area -->
+            <div class="card-bottom-section">
+              <h3 class="member-name">{{ technician.name }}</h3>
+              <div class="member-specialization">{{ technician.specialization }}</div>
+              <p class="member-description">{{ $t('technicianDescription') }}</p>
+              <!-- Details Row -->
+              <div class="member-details">
+                <div class="detail-item rating-item">
+                  <i class="fa-solid fa-star"></i>
+                  <span>{{ technician.rating || 4.0 }}</span>
+                </div>
+                <div class="detail-item location-item">
+                  <i class="fa-solid fa-location-dot"></i>
+                  <span>{{ technician.area || technician.location || 'Cairo' }}</span>
+                </div>
+                <div class="detail-item price-item">
+                  <i class="fa-solid fa-dollar-sign"></i>
+                  <span>{{ technician.price }} EGP</span>
+                </div>
               </div>
-              <p class="technician-description">{{ $t('technicianDescription') }}</p>
-              <button class="view-profile-btn" @click="viewProfile(technician.id)">{{ $t('viewProfile') }}</button>
+              <button class="view-profile-btn" @click="viewProfile(technician)">{{ $t('viewProfile') }}</button>
             </div>
           </div>
         </div>
@@ -88,6 +103,7 @@ const sortOption = ref('')
 async function fetchTechnicians() {
   const querySnapshot = await getDocs(collection(db, 'technicians'))
   firebaseTechnicians.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+  .filter(tech => tech.specialization === 'Air Conditioning' || tech.specialization === 'AC Technician') // Only include air conditioning technicians
 }
 
 onMounted(fetchTechnicians)
@@ -142,8 +158,28 @@ function onSort(option) {
   sortOption.value = option
 }
 
-function viewProfile(id) {
-  router.push({ name: 'TechnicianProfile', params: { id } })
+
+function viewProfile(member) {
+  if (!member || !member.id) {
+    alert('Technician profile data is missing or invalid.');
+    return;
+  }
+  router.push({
+    path: `/technician/${member.id}`,
+    query: {
+      name: member.name || '',
+      specialization: member.specialization || '',
+      rating: member.rating || '',
+      experience: member.experience || '',
+      basePrice: member.basePrice || member.price || '',
+      bio: member.description || '',
+      location: member.location || '',
+      phone: member.phone || '',
+      email: member.email || '',
+      status: member.status || '',
+      image: member.image || ''
+    }
+  });
 }
 
 const heroBackgroundStyle = computed(() => {
@@ -160,8 +196,11 @@ const heroBackgroundStyle = computed(() => {
 <style scoped>
 .plumbing-page {
   width: 100%;
+  overflow-x: hidden;
 }
-
+.dark .hero-section {
+  background-color: var(--primary-bg);
+}
 /* Hero Section */
 .hero-section {
   position: relative;
@@ -177,7 +216,9 @@ const heroBackgroundStyle = computed(() => {
   margin: 0;
   padding: 0;
 }
-
+.dark .hero-content {
+  color: var(--primary-text);
+}
 .hero-content {
   color: white;
   display: flex;
@@ -192,7 +233,9 @@ const heroBackgroundStyle = computed(() => {
   margin-bottom: 1rem;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
-
+.dark .hero-title {
+  color: var(--primary-text);
+}
 .breadcrumbs {
   font-size: 1.1rem;
   opacity: 0.9;
@@ -207,26 +250,30 @@ const heroBackgroundStyle = computed(() => {
 .technicians-section {
   padding: 4rem 0;
   background-color: white;
+  margin: 0 80px;
 }
-
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem;
+.dark .technicians-section {
+  background-color: var(--primary-bg);
 }
-
+.dark .container {
+  background-color: var(--primary-bg);
+}
 .section-header {
   text-align: center;
   margin-bottom: 3rem;
 }
-
+.dark .section-header {
+  color: var(--primary-text);
+}
 .section-title {
   font-size: 2.5rem;
   font-weight: bold;
   color: #333;
   margin-bottom: 1rem;
 }
-
+.dark .section-title {
+  color: var(--primary-text);
+}
 .section-description {
   font-size: 1.1rem;
   color: #666;
@@ -234,91 +281,171 @@ const heroBackgroundStyle = computed(() => {
   margin: 0 auto;
   line-height: 1.6;
 }
-
-.technicians-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
-  margin-bottom: 3rem;
-  grid-auto-rows: 1fr;
-  justify-items: center;
+.dark .section-description {
+  color: var(--primary-text);
 }
 
-.technician-card {
-  background: white;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  min-height: 420px;
+/* --- Team Card Styles (copied from Plumbing.vue) --- */
+.team-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
   width: 100%;
-  max-width: 340px;
+  margin: 0 !important;
+  margin-bottom: 30px;
+  box-sizing: border-box;
+}
+.container {
+  width: 100%;
+  padding: 0;
+  max-width: 1180px;
+  margin: 0px;
+  align-items: center;
+  box-sizing: border-box;
+}
+.team-card {
+  width: 24%;
+  min-width: 240px;
+  background: #ffffff;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: none;
   display: flex;
   flex-direction: column;
 }
-
-.technician-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+.team-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
 }
-
-.technician-image {
-  height: 300px;
+.card-top-section {
+  width: 100%;
+  height: 200px;
+  background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
 }
-
-.technician-image img {
+.member-photo {
   width: 100%;
   height: 100%;
-  border-radius: 8px;
   object-fit: cover;
+  border-radius: 0;
 }
-
-.technician-info {
-  padding: 1.5rem;
+.card-bottom-section {
+  padding: 16px 20px;
+  background: #ffffff;
+  text-align: left;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 250px;
 }
-
-.technician-name {
-  font-size: 1.3rem;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 0.5rem;
+.member-name {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #333333;
+  margin-bottom: 8px;
+  font-family: Outfit, sans-serif;
+  line-height: 1.2;
+  flex-shrink: 0;
+  height: 20px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-
-.rating {
-  margin-bottom: 1rem;
+.member-specialization {
+  font-size: 1rem;
+  color: #7c6bb0;
+  font-weight: 500;
+  font-family: Outfit, sans-serif;
+  flex-shrink: 0;
+  height: 20px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-
-.rating i {
-  color: #FFC230;
-  margin-right: 0.2rem;
+.member-description {
+  font-size: 0.9rem;
+  color: #666666;
+  line-height: 1.4;
+  margin-bottom: 0px;
+  font-family: Outfit, sans-serif;
+  flex: 1;
+  height: 60px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-
-.technician-description {
-  color: #666;
-  font-size: 0.95rem;
-  line-height: 1.5;
-  margin-bottom: 1.5rem;
+.member-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4px;
+  flex-shrink: 0;
+  height: 35px; /* Fixed height for details row */
 }
-
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: #333333;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+.detail-item i {
+  font-size: 0.8rem;
+  color: #666666;
+}
+.fa-star  {
+  color: var(--color-secondary)!important;
+}
+.fa-location-dot {
+  color: #4d7cfe !important;
+}
+.fa-dollar-sign{
+  color: #34c759 !important;
+}
 .view-profile-btn {
-  background-color: var(--primary-color);
-  color: white;
+  background: #7c6bb0;
+  color: #ffffff;
   border: none;
-  padding: 0.75rem 1.5rem;
   border-radius: 25px;
+  padding: 12px 24px;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  display: block;
   width: 100%;
+  text-align: center;
+  transition: background 0.3s ease;
+  font-family: Outfit, sans-serif;
+  flex-shrink: 0;
+  margin-top: auto;
 }
-
 .view-profile-btn:hover {
-  background-color: #4a3f7a;
+  background: #5a4e99;
+  transform: translateY(-2px);
 }
-
+@media (max-width: 1200px) {
+  .team-card {
+    width: 31%;
+  }
+}
+@media (max-width: 900px) {
+  .team-card {
+    width: 47%;
+  }
+}
+@media (max-width: 600px) {
+  .team-card {
+    width: 100%;
+    max-width: 100%;
+  }
+}
 
 
 /* Call to Action Section */
@@ -332,27 +459,35 @@ const heroBackgroundStyle = computed(() => {
   justify-content: center;
   text-align: center;
 }
-
+.dark .cta-section {
+  background-color: var(--primary-bg);
+}
 .cta-content {
   color: white;
   max-width: 600px;
   padding: 0 2rem;
 }
-
+.dark .cta-content {
+  color: var(--primary-text);
+}
 .cta-title {
   font-size: 3rem;
   font-weight: bold;
   margin-bottom: 1rem;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
-
+.dark .cta-title {
+  color: var(--primary-text);
+}
 .cta-description {
   font-size: 1.2rem;
   margin-bottom: 2rem;
   line-height: 1.6;
   opacity: 0.9;
 }
-
+.dark .cta-description {
+  color: var(--primary-text);
+}
 .cta-btn {
   background-color: var(--primary-color);
   color: white;
@@ -367,19 +502,29 @@ const heroBackgroundStyle = computed(() => {
   align-items: center;
   gap: 0.5rem;
 }
-
+.dark .cta-btn {
+  background-color: var(--primary-color);
+  color: var(--primary-text);
+}
 .cta-btn:hover {
   background-color: #4a3f7a;
 }
-
+.dark .cta-btn:hover {
+  background-color: var(--primary-color);
+  color: var(--primary-text);
+}     
 .cta-btn i {
   transition: transform 0.3s ease;
 }
-
+.dark .cta-btn i {
+  color: var(--primary-text);
+} 
 .cta-btn:hover i {
   transform: translateX(5px);
 }
-
+.dark .cta-btn:hover i {
+  color: var(--primary-text);
+}
 /* Responsive Design */
 @media (max-width: 768px) {
   .hero-title {
@@ -740,5 +885,108 @@ const heroBackgroundStyle = computed(() => {
   .view-profile-btn {
     transition: none;
   }
+  
+  .skeleton-image,
+  .skeleton-name,
+  .skeleton-description,
+  .skeleton-button {
+    animation: none;
+  }
+}
+
+/* Skeleton Loading Animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.skeleton-card {
+  pointer-events: none;
+}
+
+.skeleton-image {
+  height: 300px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+.dark .skeleton-image {
+  background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+  background-size: 200px 100%;
+}
+
+.skeleton-name {
+  height: 24px;
+  width: 70%;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.dark .skeleton-name {
+  background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+  background-size: 200px 100%;
+}
+
+.skeleton-rating {
+  display: flex;
+  gap: 0.2rem;
+  margin-bottom: 1rem;
+}
+
+.skeleton-star {
+  width: 16px;
+  height: 16px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 2px;
+}
+
+.dark .skeleton-star {
+  background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+  background-size: 200px 100%;
+}
+
+.skeleton-description {
+  height: 16px;
+  width: 100%;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.skeleton-description.short {
+  width: 60%;
+}
+
+.dark .skeleton-description {
+  background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+  background-size: 200px 100%;
+}
+
+.skeleton-button {
+  height: 44px;
+  width: 100%;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 25px;
+  margin-bottom: 0.5rem;
+}
+
+.dark .skeleton-button {
+  background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+  background-size: 200px 100%;
 }
 </style>
