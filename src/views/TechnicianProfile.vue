@@ -125,7 +125,7 @@
       
       <!-- Reviews Section -->
       <hr class="reviews-divider" />
-      <div class="reviews-section">
+      <div v-if="hasBookingWithTechnician" class="reviews-section">
         <div class="reviews-header">
           <h2 class="reviews-title">{{ $t('reviews') }}</h2>
           <div v-if="!showReviewForm" class="review-actions">
@@ -146,7 +146,7 @@
         </div>
 
         <!-- Review Submission Form -->
-        <div class="review-form">
+        <div v-if="showReviewForm" class="review-form">
           <h3>{{ $t('writeReview') }}</h3>
           <div class="star-rating-input">
             <label>{{ $t('rating') }}:</label>
@@ -238,7 +238,7 @@
             <p>{{ $t('noReviewsYet') }}</p>
             <p v-if="canReview">{{ $t('beFirstToReview') }}</p>
              <p v-else-if="!auth.currentUser">{{ $t('loginToLeaveReview') }}</p>
-             <p v-else-if="!userBookings.some(booking => booking.technicianId === route.params.id && (booking.status === 'completed' || booking.status === 'upcoming'))">{{ $t('bookingRequiredToReview') }}</p>
+             <p v-else-if="!userBookings.some(booking => booking.technicianId === route.params.id && booking.status === 'completed')">{{ $t('bookingRequiredToReview') }}</p>
             <p v-else>{{ $t('loginToLeaveReview') }}</p>
            </div>
           </div>
@@ -535,17 +535,26 @@ const canReview = computed(() => {
   )
   
   // Check if user has a booking with this technician
-  const hasBooking = userBookings.value.some(booking => 
-    booking.technicianId === route.params.id && 
-    (booking.status === 'completed' || booking.status === 'upcoming')
+  const hasBooking = userBookings.value.some(booking =>
+    booking.technicianId === route.params.id &&
+    booking.status === 'completed'
   )
   
-  // User can review if they haven't already reviewed AND they have a booking with this technician
+  // User can review if they haven't already reviewed AND they have a completed booking with this technician
   return !existingReview && hasBooking
 })
 
 const isValidReview = computed(() => {
   return newReview.value.rating > 0 && newReview.value.text.trim().length >= 10
+})
+
+const hasBookingWithTechnician = computed(() => {
+  if (!auth.currentUser) return false
+  
+  // Check if user has any booking with this technician
+  return userBookings.value.some(booking =>
+    booking.technicianId === route.params.id
+  )
 })
 
 // Methods
