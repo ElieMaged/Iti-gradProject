@@ -180,7 +180,7 @@ export default {
   margin: 0 80px;
   display: flex;
   gap: 40px;
-  justify-content: center;
+  justify-content: space-between;
 }
 
 .service-card {
@@ -256,16 +256,8 @@ export default {
   transition: background 0.2s;
 
 }
-.dark .get-started-btn {
-  color: var(--primary-text);
-}
-.get-started-btn:hover {
-  border: 1px solid var(--primary-color);
-}
 
-.get-started-btn i {
-  font-size: 0.8rem;
-}
+
 
 /* Responsive design */
 @media (max-width: 1024px) {
