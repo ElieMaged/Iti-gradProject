@@ -665,17 +665,13 @@ onMounted(() => {
 }
 
 .booking-status {
-  background: #dbeafe;
-  color: #1e40af;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
+  color: #16a34a;
+  font-size: 0.9rem;
   font-weight: 600;
 }
 
 .dark .booking-status {
-  background: #1e40af;
-  color: #dbeafe;
+  color: #22c55e;
 }
 
 @media (max-width: 768px) {
