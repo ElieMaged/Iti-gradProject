@@ -279,7 +279,7 @@ export default {
           id="complaint"
           rows="4"
           :class="[
-            'w-full bg-gray-50 border text-gray-900 text-xl rounded-lg focus:ring-blue-500 focus:border-blue-500 block md:w-150 p-3 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500',
+            'w-full  border text-gray-900 text-xl rounded-lg focus:ring-blue-500 focus:border-blue-500 block md:w-150 p-3 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500',
             formErrors.complaint ? 'border-red-500' : 'border-gray-300'
           ]"
           :placeholder="$t('myComplaintIs')" 
@@ -319,7 +319,6 @@ export default {
 
 input,
 textarea {
-  background-color: #EAEAEA;
   border-radius: 5rem;
 }
 
