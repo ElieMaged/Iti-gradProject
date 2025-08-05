@@ -177,7 +177,7 @@ export default {
 
 .services-container {
   width: auto;
-  margin: 0 80px;
+  margin: 0 80px.who-we-are-container;
   display: flex;
   gap: 40px;
   justify-content: center;
@@ -356,7 +356,7 @@ export default {
 
 .who-we-are-container {
   width: auto;
-  margin: 0 auto;
+  margin: 0 80px;
   display: flex;
   gap: 8rem;
   align-items: center;
