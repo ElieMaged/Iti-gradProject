@@ -106,14 +106,19 @@ export default {
 <style scoped>
 .faq {
   background: #f4f4f5;
-  margin: 0 80px;
 }
 .dark .faq {
   background: var(--primary-bg);
   color: var(--primary-text);
 }
+.faq-content {
+  
+  margin: 20px 80px;
+}
 
-
+.faq-container{
+  margin: 0 80px;
+}
 .faq-header {
   display: flex;
   flex-direction: row;

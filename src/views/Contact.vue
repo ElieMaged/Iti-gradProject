@@ -159,7 +159,7 @@ export default {
 </script>
 
 <template>
-  <div class="flex flex-col lg:flex-row gap-32 justify-center items-center min-h-[calc(100vh-100px)] px-20 py-10">
+  <div class="contatct flex flex-col lg:flex-row gap-32 justify-center items-center min-h-[calc(100vh-100px)]">
     <div class="flex flex-col gap-5">
       <div>
         <h2 class="title text-7xl font-semibold">{{ $t('contactUs') }}</h2>
@@ -310,6 +310,9 @@ export default {
 </template>
 
 <style scoped>
+.contatct {
+  margin: 20px 80px;
+}
 .title {
   color: #625397;
 }

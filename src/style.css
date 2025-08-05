@@ -35,6 +35,13 @@ html {
 
 body {
   box-sizing: border-box;
+  background-color: #f4f4f5;
+}
+.home-page {
+  background-color: #f4f4f5;
+}
+.dark .home-page {
+  background-color: var(--primary-bg);
 }
 
 /* Custom CSS Variables for backward compatibility */

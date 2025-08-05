@@ -58,7 +58,8 @@ export default {
 <style scoped>
 .about-us {
   background: #f3d361;
-  padding: 80px 0;
+  padding: 40px 0;
+
   width: 100%;
   position: relative;
 }
@@ -67,6 +68,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 60px;
+  margin: 0 80px;
 }
 
 .about-content {

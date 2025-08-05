@@ -2,7 +2,7 @@
   <section class="pt-10">
     <div class="custom-container flex items-center justify-between">
       <div
-        class="text-container w-1/2 max-w-xl mx-20"
+        class="text-container "
         :class="{ 'text-right': isRTL }"
       >
         <h1 class="font-extrabold text-gray-900 leading-tight">
@@ -22,7 +22,7 @@
         </div>
       </div>
       <div class="imag-container w-2/4 min-w[300px] h-[552px]">
-        <img class="w-full h-full" src="../assets/home/image.png" alt="hero" />
+        <img class="w-full" src="../assets/home/image.png" alt="hero" />
       </div>
     </div>
   </section>
@@ -67,6 +67,11 @@ section {
     #f4f3f8,
     #ff000024 136%
   );
+  overflow:auto;
+  height: auto;
+}
+.custom-container {
+  margin: 30px 80px 80px 80px;
 }
 .dark section {
   background: none;
@@ -126,8 +131,52 @@ p {
   background: #4e3b7a;
   color: var(--white);
 }
+.text-container {
+  width: 50%;
+  max-width: 600px;
+}
 
 /* Responsive styles for tablet and mobile only */
+@media (max-width: 1024px) {
+  .section {
+    padding: 80px 0;
+    min-height: 1160px;
+  }
+  .custom-container {
+    flex-direction: column !important;
+    gap: 1.5rem !important;
+    align-items: center !important;
+    height: auto;
+  }
+  .text-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 0 20px 0 !important;
+    text-align: center !important;
+  }
+  .imag-container {
+    width: 100% !important;
+    min-width: 200px !important;
+    margin-top: 0 !important;
+    height: auto !important;
+  }
+  h1 {
+    font-size: 38px;
+    line-height: 48px;
+    width: 100%;
+    margin-bottom: 15px;
+  }
+  p {
+    font-size: 16px;
+    line-height: 24px;
+  }
+  #service-btn {
+    width: 100%;
+    font-size: 16px;
+    line-height: 30px;
+    padding: 10px 0;
+  }
+}
 @media (max-width: 900px) {
   .text-container {
     width: 100%;
