@@ -160,7 +160,7 @@ export default {
 
 <template>
   <div class="contatct flex flex-col lg:flex-row gap-78 items-center min-h-[calc(100vh-100px)]">
-    <div class="flex flex-col gap-5">
+    <div class="flex flex-col gap-5 contact-info">
       <div>
         <h2 class="title text-7xl font-semibold">{{ $t('contactUs') }}</h2>
         <p class="text-large text-xl leading-relaxed">{{ $t('contactIntro') }}<br>{{  $t('contactIntro2') }}</p>
@@ -316,8 +316,12 @@ export default {
 }
 .title {
   color: #625397;
+  font-size: 3rem;
+  margin-bottom: 1rem;
 }
-
+.contact-info{
+  padding-bottom: 50px;
+}
 input,
 textarea {
   background-color: var(--color-gray-50) !important;

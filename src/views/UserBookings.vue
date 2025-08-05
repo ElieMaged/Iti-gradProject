@@ -377,6 +377,12 @@ onMounted(() => {
 .table-row:last-child {
   border-bottom: none;
 }
+.booking-table th,
+.booking-table td {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
 
 .table-row:hover {
   background-color: #f1f3f5;
