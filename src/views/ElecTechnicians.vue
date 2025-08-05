@@ -34,7 +34,6 @@
 
     <!-- Meet Our Technicians Team Section -->
     <section class="technicians-section">
-      <div class="container">
         <div class="section-header">
           <h2 class="section-title">{{ $t('meetTechniciansTeam') }}</h2>
         </div>
@@ -96,9 +95,6 @@
             </div>
           </div>
         </div>
-
-
-      </div>
     </section>
 <EndCard />
 
@@ -305,6 +301,7 @@ const heroBackgroundStyle = computed(() => {
   padding: 4rem 0;
   background-color: white;
   margin: 0 80px;
+  width: auto;
 }
 .dark .technicians-section {
   background-color: var(--primary-bg);
@@ -345,7 +342,7 @@ const heroBackgroundStyle = computed(() => {
   flex-wrap: wrap;
   gap: 15px;
   justify-content: center;
-  width: 100%;
+  width: auto;
   margin: 0 !important;
   margin-bottom: 30px;
   box-sizing: border-box;
@@ -353,7 +350,6 @@ const heroBackgroundStyle = computed(() => {
 .container {
   width: 100%;
   padding: 0;
-  max-width: 1180px;
   margin: 0px;
   align-items: center;
   box-sizing: border-box;

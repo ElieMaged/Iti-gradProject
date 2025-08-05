@@ -110,7 +110,7 @@ export default {
     </div>
   </div>
      <!-- About-2 -->
-   <div class="container flex flex-col md:flex-row gap-10 md:gap-15 text-center about-2 p-6">
+   <div class="flex flex-col md:flex-row gap-10 md:gap-15 text-center about-2 p-6">
     <div v-for="(stat, index) in stats" :key="index" class="flex-1">
       <h2 class="text-4xl font-bold mb-2 counter-number">{{ stat.current }}{{ stat.suffix }}</h2>
       <p class="text-lg">{{ $t(stat.label) }}</p>
@@ -176,12 +176,11 @@ export default {
 
 
 .services-container {
-  width: 1280px;
-  margin: 0 auto;
+  width: auto;
+  margin: 0 80px;
   display: flex;
   gap: 40px;
-  justify-content: center;
-  max-width: calc(100vw - 160px);
+  justify-content: space-between;
 }
 
 .service-card {
@@ -257,16 +256,8 @@ export default {
   transition: background 0.2s;
 
 }
-.dark .get-started-btn {
-  color: var(--primary-text);
-}
-.get-started-btn:hover {
-  border: 1px solid var(--primary-color);
-}
 
-.get-started-btn i {
-  font-size: 0.8rem;
-}
+
 
 /* Responsive design */
 @media (max-width: 1024px) {
@@ -356,8 +347,8 @@ export default {
 }
 
 .who-we-are-container {
-  width: 1280px;
-  margin: 0 auto;
+  width: auto;
+  margin: 0 80px;
   display: flex;
   gap: 8rem;
   align-items: center;
@@ -541,10 +532,9 @@ export default {
   background-color: #FAE084;
   border-radius: 1rem;
   padding: 2rem;
-  width: 1280px;
-  margin: 0 auto;
-  max-width: calc(100vw - 160px);
+  width: auto;
   padding: 1.5rem;
+  margin: 0 80px;
 }
 
 .dark .about-2 {

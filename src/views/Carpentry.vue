@@ -34,7 +34,6 @@
 
     <!-- Meet Our Technicians Team Section -->
     <section class="technicians-section">
-      <div class="container">
         <div class="section-header">
           <h2 class="section-title">{{ $t('meetTechniciansTeam') }}</h2>
         </div>
@@ -69,9 +68,6 @@
             </div>
           </div>
         </div>
-
-
-      </div>
     </section>
 
   </div>
