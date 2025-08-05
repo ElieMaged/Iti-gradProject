@@ -5,20 +5,21 @@
       <h1 class="page-title">{{ $t('completeYourBooking') }}</h1>
     </div>
 
+    <!-- Progress Indicator -->
+    <div class="progress-indicator">
+      <div class="progress-step">
+        <div class="step-circle">1</div>
+        <span class="step-text">{{ $t('detailsAndPayment') }}</span>
+      </div>
+      <div class="progress-line"></div>
+      <div class="progress-step active">
+        <div class="step-circle">2</div>
+        <span class="step-text">{{ $t('confirmation') }}</span>
+      </div>
+    </div>
+
     <!-- Main Confirmation Card -->
     <div class="confirmation-card">
-      <!-- Progress Indicator -->
-      <div class="progress-indicator">
-        <div class="progress-step">
-          <div class="step-circle">1</div>
-          <span class="step-text">{{ $t('detailsAndPayment') }}</span>
-        </div>
-        <div class="progress-line"></div>
-        <div class="progress-step active">
-          <div class="step-circle">2</div>
-          <span class="step-text">{{ $t('confirmation') }}</span>
-        </div>
-      </div>
 
       <!-- Success Section -->
       <div class="success-section">
@@ -140,7 +141,6 @@ function goHome() {
   align-items: center;
   justify-content: center;
   margin-bottom: 3rem;
-  gap: 2rem;
 }
 
 .progress-step {
@@ -179,10 +179,12 @@ function goHome() {
 }
 
 .progress-line {
-  width: 300px;
+  width: 400px;
   height: 2px;
   background: #e5e7eb;
-  margin: 0rem;
+  margin: 0;
+  align-self: flex-start;
+  margin-top: 24px;
 }
 
 /* Success Section */
@@ -341,25 +343,30 @@ function goHome() {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
+.dark .progress-indicator {
+  background: transparent;
+}
+
 .dark .step-circle {
-  background: var(--input-border);
-  color: var(--primary-text);
+  background: var(--border-color, #35355a);
+  color: var(--primary-text, #e5e7eb);
 }
 
 .dark .progress-step.active .step-circle {
-  background: var(--primary-color);
+  background: var(--primary, #a89af7);
+  color: #181824;
 }
 
 .dark .step-text {
-  color: var(--text-muted);
+  color: var(--text-muted, #b3b3c6);
 }
 
 .dark .progress-step.active .step-text {
-  color: var(--primary-color);
+  color: var(--primary, #a89af7);
 }
 
 .dark .progress-line {
-  background: var(--input-border);
+  background: var(--border-color, #35355a);
 }
 
 .dark .success-title {
