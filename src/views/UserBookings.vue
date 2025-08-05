@@ -312,6 +312,11 @@ onMounted(() => {
   color: #333;
   margin: 0;
 }
+
+.dark .bookings-header h2 {
+  color: var(--text-main) !important;
+}
+
 .dark .bookings-header {
  color: var(--primary-color);
 }
@@ -350,8 +355,14 @@ onMounted(() => {
   padding: 1rem 1.5rem;
   border-bottom: 1px solid #e5e7eb;
 }
+
 .dark .table-header {
   background: var(--secondary-bg);
+  color: var(--text-main) !important;
+}
+
+.dark .table-header th {
+  color: var(--text-main) !important;
 }
 
 .table-header th {
