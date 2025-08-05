@@ -5,22 +5,22 @@
       <h1 class="page-title">{{ $t('completeYourBooking') }}</h1>
     </div>
 
+    <!-- Progress Indicator -->
+    <div class="progress-indicator">
+      <div class="progress-step active">
+        <div class="step-circle">1</div>
+        <span class="step-text">{{ $t('detailsAndPayment') }}</span>
+      </div>
+      <div class="progress-line"></div>
+      <div class="progress-step">
+        <div class="step-circle">2</div>
+        <span class="step-text">{{ $t('confirmation') }}</span>
+      </div>
+    </div>
+
     <!-- Main Booking Card -->
     <div class="booking-card">
       <div v-if="errorMsg" class="error-message">{{ errorMsg }}</div>
-      
-      <!-- Progress Indicator -->
-      <div class="progress-indicator">
-        <div class="progress-step active">
-          <div class="step-circle">1</div>
-          <span class="step-text">{{ $t('detailsAndPayment') }}</span>
-        </div>
-        <div class="progress-line"></div>
-        <div class="progress-step">
-          <div class="step-circle">2</div>
-          <span class="step-text">{{ $t('confirmation') }}</span>
-        </div>
-      </div>
 
       <!-- Technician Details Section -->
       <div class="technician-section">
