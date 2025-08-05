@@ -253,7 +253,7 @@ viewProfile(member) {
 }
 
 .services-overview-container {
-  max-width: 1200px;
+  width: auto;
   margin: 0 80px;
 }
 
