@@ -371,6 +371,58 @@ textarea {
   }
 }
 
+/* Tablet Responsive Design */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .contatct {
+    margin: 0 40px 20px 40px !important;
+    gap: 3rem;
+  }
+  
+  .title {
+    font-size: 3rem;
+  }
+  
+  .text-large {
+    font-size: 1.25rem;
+  }
+  
+  .text-xl {
+    font-size: 1.25rem;
+  }
+  
+  .flex.flex-col.md\:grid.md\:grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+  }
+  
+  .text-6xl {
+    font-size: 4rem;
+  }
+  
+  form {
+    gap: 1.5rem;
+  }
+  
+  .mb-3 {
+    margin-bottom: 1.5rem;
+  }
+  
+  .block.mb-2 {
+    margin-bottom: 0.75rem;
+    font-size: 1.25rem;
+  }
+  
+  input, textarea {
+    padding: 1rem;
+    font-size: 1.25rem;
+  }
+  
+  button {
+    padding: 1rem 2rem;
+    font-size: 1.25rem;
+  }
+}
+
 @media (max-width: 768px) {
   .flex.flex-col.lg\:flex-row {
     margin: 1rem;

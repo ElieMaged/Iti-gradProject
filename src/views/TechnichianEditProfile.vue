@@ -61,11 +61,6 @@
                   <label for="bio">{{ $t('aboutLabel') }}</label>
                   <textarea id="bio" v-model="form.bio" rows="3"></textarea>
                 </div>
-              </div>
-            </div>
-            <div class="edit-profile-section">
-              <h3>{{ $t('addressInformation') }}</h3>
-              <div class="edit-profile-address">
                 <div>
                   <label for="city">{{ $t('cityLabel') }}</label>
                   <select id="city" v-model="form.government">
