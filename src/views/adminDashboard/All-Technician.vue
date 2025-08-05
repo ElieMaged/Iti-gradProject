@@ -221,6 +221,17 @@ export default {
     margin-top: 70px;
     padding: 0.25rem;
   }
+  
+  .table-header th,
+  .table-row td {
+    padding: 0.25rem 0.25rem;
+    font-size: 0.7rem;
+  }
+  
+  .technician-avatar {
+    width: 2rem;
+    height: 2rem;
+  }
 }
 
 @media (max-width: 360px) {
@@ -231,6 +242,7 @@ export default {
 .technicians-main {
   flex: 1;
   padding: 2.5rem;
+  font-size: 1.2em;
 }
 .dark .technicians-main {
   background-color: var(--primary-bg);
@@ -501,6 +513,7 @@ export default {
 @media (max-width: 768px) {
   .technicians-main {
     padding: 1rem;
+    font-size: 1.2em;
   }
   .subtitle-search-row {
     flex-direction: column;
@@ -517,6 +530,36 @@ export default {
   .table-header th,
   .table-row td {
     padding: 0.5rem 0.5rem;
+  }
+  
+  /* Improved mobile table responsiveness */
+  .technicians-table {
+    min-width: 600px;
+  }
+  
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .technician-cell {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+  
+  .technician-avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  
+  .action-cell {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .action-btn {
+    padding: 0.2rem;
   }
 }
 </style>

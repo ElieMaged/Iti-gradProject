@@ -253,7 +253,7 @@ viewProfile(member) {
 }
 
 .services-overview-container {
-  max-width: 1200px;
+  width: auto;
   margin: 0 80px;
 }
 
@@ -290,7 +290,7 @@ viewProfile(member) {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
   gap: 32px;
-  width: 100%;
+  width: auto;
 }
 
 .service-overview-card {

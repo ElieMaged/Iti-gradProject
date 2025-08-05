@@ -192,6 +192,7 @@ export default {
 <style scoped>
 .expert-team {
   margin: 40px 80px;
+  width: auto;
 }
 .team-header {
   display: flex;
@@ -250,7 +251,7 @@ export default {
 .team-cards {
   display: flex;
   gap: 20px;
-  justify-content: center;
+  justify-content: space-between;
   width: 100%;
   margin-bottom: 30px;
 }
