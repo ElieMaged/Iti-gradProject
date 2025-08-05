@@ -1695,4 +1695,11 @@ body {
         margin: 0.5rem;
     }
 }
+h3 {
+  color: #374151 !important;
+}
+
+.dark h3 {
+  color: white !important;
+}
 </style> 

@@ -55,26 +55,10 @@
             </div>
           </div>
 
-          <div class="skills-section">
-            <h3 class="skills-title">{{ $t('technicianSkills') }}</h3>
-            <ul class="skills-list">
-              <li v-for="skill in technician.skills" :key="skill" class="skill-item">{{ skill }}</li>
-              <li v-if="!technician.skills || technician.skills.length === 0" class="skill-item">
-                {{ $t('pipeInstallationRepair') }}
-              </li>
-              <li v-if="!technician.skills || technician.skills.length === 0" class="skill-item">
-                {{ $t('drainCleaningUnclogging') }}
-              </li>
-              <li v-if="!technician.skills || technician.skills.length === 0" class="skill-item">
-                {{ $t('fixtureInstallation') }}
-              </li>
-              <li v-if="!technician.skills || technician.skills.length === 0" class="skill-item">
-                {{ $t('gasPiping') }}
-              </li>
-              <li v-if="!technician.skills || technician.skills.length === 0" class="skill-item">
-                {{ $t('pumpValveReplacement') }}
-              </li>
-            </ul>
+          <!-- Bio Section -->
+          <div class="bio-section" v-if="technician.bio">
+            <h3 class="bio-title">{{ $t('aboutTechnician') }}</h3>
+            <p class="bio-content">{{ technician.bio }}</p>
           </div>
           </div>
 
@@ -940,28 +924,23 @@ onMounted(async () => {
   font-size: 1.2rem;
 }
 
-.skills-section {
+.bio-section {
   border-top: 1px solid #e5e7eb;
   padding-top: 1rem;
+  margin-top: 1rem;
 }
 
-.skills-title {
+.bio-title {
   font-size: 1rem;
   font-weight: bold;
   color: #1f2937;
   margin: 0 0 1rem 0;
 }
 
-.skills-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.skill-item {
+.bio-content {
   color: #6b7280;
-  margin-bottom: 0.5rem;
-  line-height: 1.5;
+  line-height: 1.6;
+  margin: 0;
 }
 
 /* Booking Info Card */
@@ -2015,11 +1994,11 @@ onMounted(async () => {
   color: var(--primary-text);
 }
 
-.dark .skills-title {
+.dark .bio-title {
   color: var(--primary-text);
 }
 
-.dark .skill-item {
+.dark .bio-content {
   color: var(--primary-text);
 }
 
