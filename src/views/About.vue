@@ -581,11 +581,6 @@ export default {
     padding: 0 1rem;
   }
   
-  .who-we-are-title {
-    
-    background-color: black;
-  }
-  
   .image-grid {
     max-width: 100%;
   }

@@ -312,7 +312,7 @@ export default {
 <style scoped>
 .contatct {
   width: auto;
-  margin: 20px 80px;
+  margin: 0 80px 20px 80px !important;
 }
 .title {
   color: #625397;
