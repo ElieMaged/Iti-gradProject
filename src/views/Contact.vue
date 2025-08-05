@@ -312,7 +312,7 @@ export default {
 <style scoped>
 .contatct {
   width: auto;
-  margin: 80px 80px;
+  margin: 0 80px 20px 80px !important;
 }
 .title {
   color: #625397;
@@ -320,7 +320,7 @@ export default {
 
 input,
 textarea {
-  background-color: #EAEAEA !important;
+  background-color: var(--color-gray-50) !important;
   border-radius: 5rem;
 }
 
