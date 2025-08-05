@@ -38,39 +38,39 @@
             <div class="profile-info">
               <!-- View Mode -->
               <div v-if="!isEditing">
-                <div class="profile-info-block">
+                <div class="profile-info-block mb-4">
                   <div class="profile-label">Full Name</div>
                   <div class="profile-value">{{ technician.fullName }}</div>
                 </div>
-                <div class="profile-info-block">
+                <div class="profile-info-block mb-4">
                   <div class="profile-label">Email Address</div>
                   <div class="profile-value">{{ technician.email }}</div>
                 </div>
-                <div class="profile-info-block">
+                <div class="profile-info-block mb-4">
                   <div class="profile-label">Specialization</div>
                   <div class="profile-value">{{ technician.specialization }}</div>
                 </div>
-                <div class="profile-info-block">
+                <div class="profile-info-block mb-4">
                   <div class="profile-label">Experience</div>
                   <div class="profile-value">{{ technician.experience }} years</div>
                 </div>
-                <div class="profile-info-block">
+                <div class="profile-info-block mb-4">
                   <div class="profile-label">Location</div>
                   <div class="profile-value">{{ technician.government }}, {{ technician.district }}</div>
                 </div>
-                <div class="profile-info-block">
+                <div class="profile-info-block mb-4">
                   <div class="profile-label">Base Price</div>
                   <div class="profile-value">${{ technician.basePrice }}</div>
                 </div>
-                <div class="profile-info-block">
+                <div class="profile-info-block mb-4">
                   <div class="profile-label">Willing to Travel</div>
                   <div class="profile-value">{{ technician.willingToTravel === 'yes' ? 'Yes' : 'No' }}</div>
                 </div>
-                <div class="profile-info-block">
+                <div class="profile-info-block mb-4">
                   <div class="profile-label">About</div>
                   <div class="profile-value">{{ technician.bio || 'No bio available' }}</div>
                 </div>
-                <div class="profile-info-block">
+                <div class="profile-info-block mb-4">
                   <div class="profile-label">Status</div>
                   <div class="profile-value">
                     <span :class="[
@@ -146,9 +146,19 @@
               <button class="delete-btn" @click="handleDelete">Delete Account</button>
             </div>
             <div class="profile-photo-col">
-              <img :src="technician.idPhotoUrl || 'https://randomuser.me/api/portraits/men/1.jpg'" 
-                   alt="Technician Photo" 
-                   class="profile-photo" />
+              <div class="photo-section">
+                <h3 class="photo-title">Profile Picture</h3>
+                <img :src="technician.profilePhotoUrl || 'https://randomuser.me/api/portraits/men/1.jpg'"
+                     alt="Profile Picture"
+                     class="profile-photo profile-picture" />
+              </div>
+              <div class="photo-section">
+                <h3 class="photo-title">ID Photo</h3>
+                <img :src="technician.idPhotoUrl || 'https://randomuser.me/api/portraits/men/1.jpg'"
+                     alt="ID Photo"
+                     class="profile-photo id-photo"
+                     @click="openIdPhotoModal" />
+              </div>
             </div>
           </div>
 
@@ -158,6 +168,35 @@
             <p>The technician you're looking for doesn't exist.</p>
             <button @click="$router.push('/all-technician')" class="back-btn">Back to Technicians</button>
           </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- ID Photo Full Screen Modal -->
+    <div v-if="showIdPhotoModal" class="modal-overlay" @click="closeIdPhotoModal">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>ID Photo - Full Screen View</h3>
+          <button class="close-btn" @click="closeIdPhotoModal">&times;</button>
+        </div>
+        <div class="modal-body"
+             @wheel="handleWheel"
+             @mousedown="handleMouseDown"
+             @mousemove="handleMouseMove"
+             @mouseup="handleMouseUp"
+             @mouseleave="handleMouseUp">
+          <img :src="technician.idPhotoUrl || 'https://randomuser.me/api/portraits/men/1.jpg'"
+               alt="ID Photo Full Screen"
+               class="full-screen-image"
+               :style="{
+                 transform: `scale(${zoomLevel}) translate(${position.x}px, ${position.y}px)`,
+                 cursor: isDragging ? 'grabbing' : 'grab'
+               }" />
+        </div>
+        <div class="modal-controls">
+          <button @click="zoomIn" class="control-btn">Zoom In (+)</button>
+          <button @click="zoomOut" class="control-btn">Zoom Out (-)</button>
+          <button @click="resetZoom" class="control-btn">Reset</button>
         </div>
       </div>
     </div>
@@ -178,7 +217,12 @@ export default {
       error: null,
       isEditing: false,
       saving: false,
-      editData: {}
+      editData: {},
+      showIdPhotoModal: false,
+      zoomLevel: 1,
+      position: { x: 0, y: 0 },
+      isDragging: false,
+      dragStart: { x: 0, y: 0 }
     };
   },
   async mounted() {
@@ -308,6 +352,56 @@ export default {
       if (!timestamp) return 'N/A';
       const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
       return date.toLocaleDateString();
+    },
+    
+    openIdPhotoModal() {
+      this.showIdPhotoModal = true;
+      this.zoomLevel = 1;
+      this.position = { x: 0, y: 0 };
+    },
+    
+    closeIdPhotoModal() {
+      this.showIdPhotoModal = false;
+    },
+    
+    zoomIn() {
+      this.zoomLevel = Math.min(this.zoomLevel + 0.2, 3);
+    },
+    
+    zoomOut() {
+      this.zoomLevel = Math.max(this.zoomLevel - 0.2, 0.5);
+    },
+    
+    resetZoom() {
+      this.zoomLevel = 1;
+      this.position = { x: 0, y: 0 };
+    },
+    
+    handleMouseDown(event) {
+      this.isDragging = true;
+      this.dragStart = {
+        x: event.clientX - this.position.x,
+        y: event.clientY - this.position.y
+      };
+    },
+    
+    handleMouseMove(event) {
+      if (this.isDragging) {
+        this.position = {
+          x: event.clientX - this.dragStart.x,
+          y: event.clientY - this.dragStart.y
+        };
+      }
+    },
+    
+    handleMouseUp() {
+      this.isDragging = false;
+    },
+    
+    handleWheel(event) {
+      event.preventDefault();
+      const zoomFactor = event.deltaY < 0 ? 0.1 : -0.1;
+      this.zoomLevel = Math.min(Math.max(this.zoomLevel + zoomFactor, 0.5), 3);
     }
   }
 };
@@ -324,11 +418,12 @@ export default {
 .technician-profile-bg {
   flex: 1;
   padding: 2.5rem;
+
 }
 
 .technician-profile-main {
   max-width: 80rem;
-  margin: 0 auto;
+  margin-right: 80px;
 }
 
 .technician-profile-container {
@@ -547,15 +642,44 @@ export default {
 
 .profile-photo-col {
   display: flex;
+  flex-direction: row;
+  gap: 2rem;
   justify-content: center;
+  align-items: center;
+}
+
+.photo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.photo-title {
+  font-weight: 600;
+  color: #6b7280;
+  font-size: 1rem;
+  margin: 0;
 }
 
 .profile-photo {
-  width: 200px;
+  width: 300px;
   height: 200px;
-  border-radius: 50%;
+  border-radius: 0;
   object-fit: cover;
   border: 4px solid #e5e7eb;
+}
+
+.id-photo {
+  border-radius: 0;
+  width: 300px;
+  height: 200px;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+.profile-picture {
+  border-radius: 0;
 }
 
 .delete-btn {
@@ -606,6 +730,7 @@ export default {
 @media (max-width: 768px) {
   .technician-profile-bg {
     padding: 1rem;
+    margin: 0;
   }
   
   .header-row {
@@ -628,9 +753,111 @@ export default {
     grid-template-columns: 1fr;
   }
   
-  .profile-photo {
-    width: 150px;
-    height: 150px;
+  .profile-photo-col {
+    flex-direction: column;
   }
+  
+  .profile-photo {
+    width: 250px;
+    height: 160px;
+  }
+  
+  .id-photo {
+    width: 250px;
+    height: 160px;
+  }
+}
+
+/* Full Screen Image Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #333;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  color: #333;
+}
+
+.modal-body {
+  padding: 1rem;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+.full-screen-image {
+  max-width: 100%;
+  max-height: 70vh;
+  transition: transform 0.2s ease;
+  user-select: none;
+}
+
+.modal-controls {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-top: 1px solid #eee;
+}
+
+.control-btn {
+  background: #7c6bb0;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.control-btn:hover {
+  background: #6b5fa7;
 }
 </style>

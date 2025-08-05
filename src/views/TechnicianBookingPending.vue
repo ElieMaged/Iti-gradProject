@@ -909,10 +909,13 @@ onMounted(() => {
   border: none;
   padding: 0.3rem 0.8rem;
   border-radius: 0.5rem;
-  margin-right: 0.5rem;
+  margin-right: 0.75rem;
+  margin-bottom: 0.5rem;
   cursor: pointer;
   font-size: 0.9rem;
   transition: background 0.2s;
+  min-width: 70px;
+  text-align: center;
 }
 
 .dark .accept-btn {
@@ -939,6 +942,8 @@ onMounted(() => {
   cursor: pointer;
   font-size: 0.9rem;
   transition: background 0.2s;
+  min-width: 70px;
+  text-align: center;
 }
 
 .dark .reject-btn {

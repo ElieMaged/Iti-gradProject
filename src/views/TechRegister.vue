@@ -1073,11 +1073,11 @@ body {
     margin-bottom: 1.5rem;
     padding-bottom: 0.5rem;
     border-bottom: 2px solid rgba(107, 79, 161, 0.2);
-    color: var(--primary-text, #1f2937);
+    color: var(--text-main, #1f2937);
 }
 
 .dark .section-title {
-  color: var(--primary-text, var(--primary-color));
+  color: var(--text-main);
   border-bottom-color: rgba(107, 79, 161, 0.3);
 }
 
