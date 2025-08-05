@@ -110,7 +110,7 @@ export default {
     </div>
   </div>
      <!-- About-2 -->
-   <div class="container flex flex-col md:flex-row gap-10 md:gap-15 text-center about-2 p-6">
+   <div class="flex flex-col md:flex-row gap-10 md:gap-15 text-center about-2 p-6">
     <div v-for="(stat, index) in stats" :key="index" class="flex-1">
       <h2 class="text-4xl font-bold mb-2 counter-number">{{ stat.current }}{{ stat.suffix }}</h2>
       <p class="text-lg">{{ $t(stat.label) }}</p>
@@ -176,12 +176,11 @@ export default {
 
 
 .services-container {
-  width: 1280px;
-  margin: 0 auto;
+  width: auto;
+  margin: 0 80px;
   display: flex;
   gap: 40px;
   justify-content: center;
-  max-width: calc(100vw - 160px);
 }
 
 .service-card {
@@ -356,7 +355,7 @@ export default {
 }
 
 .who-we-are-container {
-  width: 1280px;
+  width: auto;
   margin: 0 auto;
   display: flex;
   gap: 8rem;
@@ -541,10 +540,9 @@ export default {
   background-color: #FAE084;
   border-radius: 1rem;
   padding: 2rem;
-  width: 1280px;
-  margin: 0 auto;
-  max-width: calc(100vw - 160px);
+  width: auto;
   padding: 1.5rem;
+  margin: 0 80px;
 }
 
 .dark .about-2 {
