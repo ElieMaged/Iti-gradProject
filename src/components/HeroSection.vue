@@ -43,7 +43,6 @@ export default {
 
 .hero-banner {
   width: 100%;
-  max-width: 1200px;
   margin: 0 auto;
   background: #2c2c2c;
   border-radius: 20px;

@@ -113,7 +113,6 @@ export default {
   padding: 40px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   position: relative;
-  max-width: 1200px;
 }
 .dark .testimonial-card {
   background-color: transparent;
