@@ -159,7 +159,7 @@ export default {
 </script>
 
 <template>
-  <div class="contatct flex flex-col lg:flex-row gap-32 justify-center items-center min-h-[calc(100vh-100px)]">
+  <div class="contatct flex flex-col lg:flex-row gap-78 items-center min-h-[calc(100vh-100px)]">
     <div class="flex flex-col gap-5">
       <div>
         <h2 class="title text-7xl font-semibold">{{ $t('contactUs') }}</h2>
@@ -279,7 +279,7 @@ export default {
           id="complaint"
           rows="4"
           :class="[
-            'w-full  border text-gray-900 text-xl rounded-lg focus:ring-blue-500 focus:border-blue-500 block md:w-150 p-3 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500',
+            'w-full bg-gray-50 border text-gray-900 text-xl rounded-lg focus:ring-blue-500 focus:border-blue-500 block md:w-150 p-3 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500',
             formErrors.complaint ? 'border-red-500' : 'border-gray-300'
           ]"
           :placeholder="$t('myComplaintIs')" 
@@ -311,7 +311,8 @@ export default {
 
 <style scoped>
 .contatct {
-  margin: 20px 80px;
+  width: auto;
+  margin: 80px 80px;
 }
 .title {
   color: #625397;
@@ -343,6 +344,10 @@ button:active {
 textarea {
   background-color: var(--input-bg) !important;
   color: var(--primary-text-dark) !important;
+}
+
+.dark label {
+  color: var(--text-main) !important;
 }
 
 /* Responsive Design */
