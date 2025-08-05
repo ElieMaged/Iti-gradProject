@@ -76,8 +76,6 @@ export default {
 
 <style scoped>
 .how-it-works {
-  width: 100%;
-  max-width: 1100px;
   margin: 20px 80px;
   margin-bottom: 60px;
   text-align: center;

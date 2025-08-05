@@ -107,10 +107,9 @@ export default {
 
 .services-container {
   background: var(--primary-color);
-  width: 90%;
   margin: 0 auto;
   max-width: 1280px;
-  margin: 0 auto;
+  margin: 0 80px;
   display: flex;
   gap: 24px;
   justify-content: center;

@@ -79,9 +79,9 @@ export default {
   max-width: 500px;
 }
 
-.about-title {
-  font-size: 2.5rem;
-  font-weight: 700;
+.aboutus-title {
+  font-size: 3.5rem;
+  font-weight: 800;
   color: #333;
   line-height: 1.2;
   margin-bottom: 24px;

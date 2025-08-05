@@ -34,15 +34,15 @@ export default {
 <style scoped>
 .hero-section {
   padding: 0;
-  width: 100%;
   min-height: 700px;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin: 0 80px;
 }
 
 .hero-banner {
-  width: 90%;
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   background: #2c2c2c;

@@ -15,7 +15,6 @@ import ChatbotIcon from '../components/chatbotIcon.vue';
 <template>
   <div class="home-page">
     <Hero />
-    <TrustedCompanies />
     <ServicesSection />
     <HowItWorks />
     <ExpertTeam />
