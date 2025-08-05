@@ -24,7 +24,7 @@
       <!-- Success Section -->
       <div class="success-section">
                  <div class="success-icon">
-                  <img class="stary" src="../../public/images/star-circle.png" alt="">
+                  <i class="fa-regular fa-circle-check stary"></i>
          </div>
         <div class="success-message">
           <h2 class="success-title">Request Submitted</h2>
@@ -503,6 +503,7 @@ function goHome() {
 .stary {
   height:5rem;
   width: 100%;
+  color: var(--color-success);
 }
 @media (max-width: 480px) {
   .confirmation-card {

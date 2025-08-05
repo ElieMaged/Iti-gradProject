@@ -1921,7 +1921,7 @@ onMounted(async () => {
 /* Dark Mode Styles */
 
 .dark .technician-profile-page {
-  background-color: #2D2E30;
+  background-color: va  r(--primary-bg);
   color: var(--primary-text);
 }
 
@@ -1985,9 +1985,6 @@ onMounted(async () => {
   color: var(--primary);
 }
 
-.dark .main-content {
-  background-color: #2D2E30;
-}
 
 .dark .page-title h1 {
   color: var(--primary-color);
