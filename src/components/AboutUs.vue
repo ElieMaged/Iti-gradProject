@@ -69,6 +69,7 @@ export default {
   align-items: center;
   gap: 60px;
   margin: 0 80px;
+  width: auto;
 }
 
 .about-content {

@@ -72,6 +72,7 @@ section {
 }
 .custom-container {
   margin: 30px 80px 80px 80px;
+  width: auto;
 }
 .dark section {
   background: none;
