@@ -58,7 +58,8 @@ export default {
 <style scoped>
 .about-us {
   background: #f3d361;
-  padding: 80px 0;
+  padding: 40px 0;
+
   width: 100%;
   position: relative;
 }
@@ -67,6 +68,8 @@ export default {
   display: flex;
   align-items: center;
   gap: 60px;
+  margin: 0 80px;
+  width: auto;
 }
 
 .about-content {
@@ -77,9 +80,9 @@ export default {
   max-width: 500px;
 }
 
-.about-title {
-  font-size: 2.5rem;
-  font-weight: 700;
+.aboutus-title {
+  font-size: 3.5rem;
+  font-weight: 800;
   color: #333;
   line-height: 1.2;
   margin-bottom: 24px;

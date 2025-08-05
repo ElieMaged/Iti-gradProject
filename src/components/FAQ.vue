@@ -23,7 +23,7 @@
         />
       </div>
       <!-- Left Side - FAQ Accordion -->
-      <div class="faq-accordion custom-container">
+      <div class="faq-accordion">
         <div
           v-for="(item, index) in faqItems"
           :key="index"
@@ -106,14 +106,19 @@ export default {
 <style scoped>
 .faq {
   background: #f4f4f5;
-  margin: 0 80px;
 }
 .dark .faq {
   background: var(--primary-bg);
   color: var(--primary-text);
 }
+.faq-content {
+  
+  margin: 20px 80px;
+}
 
-
+.faq-container{
+  margin: 0 80px;
+}
 .faq-header {
   display: flex;
   flex-direction: row;
@@ -123,7 +128,7 @@ export default {
 }
 
 .faq-title-box {
-  padding: 20px 30px;
+  padding: 20px 30px 20px 0;
   display: inline-block;
   max-width: 426px;
   flex: 0 1 auto;
@@ -150,7 +155,7 @@ export default {
 
 .faq-intro p {
   color: var(--text-gray);
-  padding: 20px 30px;
+  padding: 20px 0 20px 0;
   font-family: Outfit, sans-serif;
   font-size: 16px;
   font-weight: 400;

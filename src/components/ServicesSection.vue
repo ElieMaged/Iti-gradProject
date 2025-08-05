@@ -1,120 +1,393 @@
 <template>
   <section class="services-section py-28">
     <div class="custom-container">
-      <div class="">
-        <h2 class="services-title">{{ $t("servicesSectionTitle") }}</h2>
-        <hr class="services-divider" />
-        <div class="services-grid">
-          <div
-            v-for="(service, idx) in services"
-            :key="idx"
-            class="service-card"
-          >
-            <img
-              :src="service.image"
-              :alt="service.title"
-              class="service-image"
-            />
-            <div class="service-content">
-              <h3 class="service-title">{{ $t(service.title) }}</h3>
-              <p class="service-desc">{{ $t(service.desc) }}</p>
-              <button
-                class="service-btn"
-                @click="$router.push(service.route || '#')"
-              >
-                {{ $t("bookNow") }}
-                <span class="arrow"
-                  ><svg
-                    width="13"
-                    height="12"
-                    viewBox="0 0 13 12"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M10.3717 8.07225C10.3783 8.58189 10.7968 9.0004 11.3065 9.00702C11.8161 9.01364 12.2239 8.60586 12.2173 8.09622L12.1269 1.13614C12.1203 0.626497 11.7017 0.207986 11.1921 0.201368L4.23203 0.110977C3.72238 0.104357 3.3146 0.512138 3.32122 1.02178C3.32784 1.53142 3.74635 1.94993 4.25599 1.95655L8.98828 2.01801L0.667927 10.3384C0.312237 10.694 0.319825 11.2783 0.684875 11.6434C1.04993 12.0084 1.6342 12.016 1.98989 11.6603L10.3102 3.33997L10.3717 8.07225Z"
-                      fill="black"
-                    />
-                  </svg>
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+       <div class="services-overview-grid">
+           <div 
+             v-for="service in servicesList" 
+             :key="service.id" 
+             class="service-overview-card"
+           >
+             <img :src="service.image" :alt="service.title" class="service-overview-image" />
+             <div class="service-overview-content">
+               <h3 class="service-overview-name">{{ $t(service.title) || service.title }}</h3>
+               <p class="service-overview-desc">{{ $t(service.description) || service.description }}</p>
+               <button class="service-overview-btn" @click="navigateToService(service.route)">
+                 {{ $t('bookNow') || 'Book Now' }}
+                 <span class="arrow">→</span>
+               </button>
+             </div>
+           </div>
+         </div>
     </div>
   </section>
 </template>
 
 <script>
-import "../style.css";
-export default {
-  name: "ServicesSection",
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { db } from '../firebase.js';
+
+    export default {
+  name: 'AllServices',
   data() {
     return {
-      services: [
-        {
-          title: "plumbingServiceTitle",
-          title: "Plumbing",
-          route: "/plumbing",
-
-          image: "/images/servicesImages/plumbing.png",
-          desc: "plumbingServiceDesc",
-        },
-        {
-          title: "carpentryServiceTitle",
-
-          title: "Carpentry",
-          route: "/carpentry",
-
-          image: "/images/servicesImages/Carpentry.png",
-          desc: "carpentryServiceDesc",
-        },
-        {
-          title: "electricityServiceTitle",
-
-          title: "Electricity",
-          route: "/electricity",
-
-          image: "/images/servicesImages/Electrecity.png",
-          desc: "electricityServiceDesc",
-        },
-        {
-          title: "acTechniciansServiceTitle",
-
-          title: "AC Technicians",
-          route: "/aircondition",
-
-          image: "/images/servicesImages/Ac Technicions.png",
-          desc: "acTechniciansServiceDesc",
-        },
-        {
-          title: "applianceRepairServiceTitle",
-
-          title: "Electrical Appliance Repair",
-          route: "/elecTechnicians",
-
-          image: "/images/servicesImages/electrical appliance repair.png",
-          desc: "applianceRepairServiceDesc",
-        },
-        {
-          title: "wallFinishingServiceTitle",
-
-          title: "Wall finishing",
-          route: "/wallfinishing",
-
-          image: "/images/servicesImages/wall finishing.png",
-          desc: "wallFinishingServiceDesc",
-        },
-      ],
+      searchQuery: '',
+      selectedTechnician: null,
+      loading: true,
+      technicians: [],
+      currentPage: 1,
+      techniciansPerPage: 12, // 3 rows x 4 cards
+      servicesList: [
+         {
+           id: 'plumbing',
+           title: 'plumbingServiceTitle',
+           description: 'plumbingServiceDesc',
+           route: '/plumbing',
+           image: '/images/servicesImages/plumbing.png'
+         },
+         {
+           id: 'carpentry',
+           title: 'carpentryServiceTitle',
+           description: 'carpentryServiceDesc',
+           route: '/carpentry',
+           image: '/images/servicesImages/Carpentry.png'
+         },
+         {
+           id: 'electrical',
+           title: 'electricityServiceTitle',
+           description: 'electricityServiceDesc',
+           route: '/electricity',
+           image: '/images/servicesImages/Electrecity.png'
+         },
+         {
+           id: 'acTechnicians',
+           title: 'acTechniciansServiceTitle',
+           description: 'acTechniciansServiceDesc',
+           route: '/aircondition',
+           image: '/images/servicesImages/Ac Technicions.png'
+         },
+         {
+           id: 'applianceRepair',
+           title: 'applianceRepairServiceTitle',
+           description: 'applianceRepairServiceDesc',
+           route: '/elecTechnicians',
+           image: '/images/servicesImages/electrical appliance repair.png'
+         },
+         {
+           id: 'wallFinishing',
+           title: 'wallFinishingServiceTitle',
+           description: 'wallFinishingServiceDesc',
+           route: '/wallfinishing',
+           image: '/images/servicesImages/wall finishing.png'
+         }
+       ]
     };
   },
+  computed: {
+    filteredTechnicians() {
+      let filtered = this.technicians;
+      if (this.searchQuery) {
+        const query = this.searchQuery.toLowerCase();
+        filtered = filtered.filter(technician => 
+          technician.name.toLowerCase().includes(query) ||
+          technician.description.toLowerCase().includes(query) ||
+          technician.skills?.some(skill => skill.toLowerCase().includes(query)) ||
+          technician.location?.toLowerCase().includes(query)
+        );
+      }
+      return filtered;
+    },
+    paginatedTechnicians() {
+      const start = (this.currentPage - 1) * this.techniciansPerPage;
+      const end = start + this.techniciansPerPage;
+      return this.filteredTechnicians.slice(start, end);
+    },
+    totalPages() {
+      return Math.ceil(this.filteredTechnicians.length / this.techniciansPerPage) || 1;
+    }
+  },
+  methods: {
+    async fetchTechnicians() {
+      try {
+        this.loading = true;
+        
+        // Fetch from Firebase technicians collection
+        const techniciansCollection = collection(db, 'technicians');
+        const techniciansSnapshot = await getDocs(techniciansCollection);
+        
+        const firebaseTechnicians = [];
+        techniciansSnapshot.forEach(doc => {
+          const data = doc.data();
+          console.log('Technician data:', { id: doc.id, ...data });
+          
+          // Include all technicians regardless of status for now
+          // You can add status filtering later if needed
+          firebaseTechnicians.push({
+            id: doc.id,
+            name: data.fullName || data.name || 'Unknown Technician',
+            image: data.profilePhotoUrl || data.idPhotoUrl || data.profileImage || '/images/Avatar.png',
+            description: data.bio || data.description || 'Professional technician with years of experience.',
+            rating: data.averageRating || 4.5,
+            price: data.basePrice || data.hourlyRate || 200,
+            location: data.government || data.location || 'Cairo',
+            yearsOfExperience: data.yearsOfExperience || 5,
+            skills: data.skills || ['General Repair'],
+            specialization: data.specialization || 'General',
+            phone: data.phone || '',
+            gender: data.gender || 'Male',
+            nationality: data.nationality || 'Egyptian'
+          });
+        });
+
+        // Also check pendingTechnicians collection for any approved technicians
+        try {
+          const pendingTechniciansCollection = collection(db, 'pendingTechnicians');
+          const pendingSnapshot = await getDocs(pendingTechniciansCollection);
+          
+          pendingSnapshot.forEach(doc => {
+            const data = doc.data();
+            console.log('Pending technician data:', { id: doc.id, ...data });
+            
+            // Only include if they have some approval status or are active
+            if (data.status === 'approved' || data.status === 'active' || !data.status) {
+              firebaseTechnicians.push({
+                id: doc.id,
+                name: data.fullName || data.name || 'Unknown Technician',
+                image: data.profilePhotoUrl || data.idPhotoUrl || data.profileImage || '/images/Avatar.png',
+                description: data.bio || data.description || 'Professional technician with years of experience.',
+                rating: data.averageRating || 4.5,
+                price: data.basePrice || data.hourlyRate || 200,
+                location: data.government || data.location || 'Cairo',
+                yearsOfExperience: data.yearsOfExperience || 5,
+                skills: data.skills || ['General Repair'],
+                specialization: data.specialization || 'General',
+                phone: data.phone || '',
+                gender: data.gender || 'Male',
+                nationality: data.nationality || 'Egyptian'
+              });
+            }
+          });
+        } catch (pendingError) {
+          console.log('Error fetching pending technicians:', pendingError);
+        }
+
+        console.log('Firebase technicians found:', firebaseTechnicians.length);
+        
+        // Use only Firebase technicians
+        this.technicians = firebaseTechnicians;
+        console.log('Using Firebase technicians');
+      } catch (error) {
+        console.error('Error fetching technicians:', error);
+        // Handle Firebase errors gracefully
+        if (error.code === 'permission-denied') {
+          console.log('Firebase permissions not configured');
+        } else if (error.code === 'unavailable') {
+          console.log('Firebase service unavailable');
+        } else if (error.code === 'not-found') {
+          console.log('Firebase collection not found');
+        } else {
+          console.log('Firebase error occurred');
+        }
+        // No fallback to stock data - technicians array will remain empty
+        this.technicians = [];
+      } finally {
+        this.loading = false;
+      }
+    },
+    clearSearch() {
+      this.searchQuery = '';
+      this.currentPage = 1;
+    },
+    goToPage(page) {
+      if (page >= 1 && page <= this.totalPages) {
+        this.currentPage = page;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    },
+viewProfile(member) {
+  if (!member || !member.id) {
+    alert('Technician profile data is missing or invalid.');
+    return;
+  }
+  this.$router.push({
+    path: `/technician/${member.id}`,
+    query: {
+      name: member.name || '',
+      specialization: member.specialization || '',
+      rating: member.rating || '',
+      experience: member.experience || '',
+      basePrice: member.basePrice || member.price || '',
+      bio: member.description || '',
+      location: member.location || '',
+      phone: member.phone || '',
+      email: member.email || '',
+      status: member.status || '',
+      image: member.image || '',
+    }
+  });
+},
+
+    closeModal() {
+      this.selectedTechnician = null;
+    },
+
+    viewTechnicianDetails(technician) {
+      this.selectedTechnician = technician;
+    },
+    navigateToService(route) {
+      this.$router.push(route);
+    }
+  },
+  async mounted() {
+    await this.fetchTechnicians();
+  }
 };
 </script>
 
 <style scoped>
+.services-overview-section {
+  background: white;
+}
+
+.dark .services-overview-section {
+  background: var(--primary-bg);
+}
+
+.services-overview-container {
+  max-width: 1200px;
+  margin: 0 80px;
+}
+
+.services-overview-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.services-overview-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #333;
+  font-family: Outfit, sans-serif;
+}
+
+.dark .services-overview-title {
+  color: var(--primary-text);
+}
+
+.services-overview-subtitle {
+  font-size: 1.1rem;
+  color: #666;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.dark .services-overview-subtitle {
+  color: var(--text-muted);
+}
+
+.services-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 32px;
+  width: auto;
+}
+
+.service-overview-card {
+  background: #fff;
+  border-radius: 18px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.dark .service-overview-card {
+  background: var(--secondary-bg);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.service-overview-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.dark .service-overview-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+.service-overview-image {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.service-overview-content {
+  padding: 24px 20px 20px 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.service-overview-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  font-family: Outfit, sans-serif;
+}
+
+.service-overview-desc {
+  font-size: 0.98rem;
+  color: var(--text-muted);
+  margin-bottom: 18px;
+  flex: 1;
+}
+
+.service-overview-btn {
+  background: #625397;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  min-width: 80px;
+  max-width: 120px;
+  transition: background 0.2s;
+}
+
+.dark .service-overview-btn {
+  background: var(--primary-color);
+  color: var(--primary-text);
+}
+
+.service-overview-btn:hover {
+  background: #4e3b7a;
+}
+
+.dark .service-overview-btn:hover {
+  background: var(--primary-color);
+  color: var(--primary-text);
+}
+
+.arrow {
+  margin-left: 6px;
+  transform: rotate(-45deg);
+}
+
 .services-section {
   background-color: var(--primary-text);
+}
+.custom-container {
+  margin: 0 80px;
 }
 .dark .services-section {
   background: var(--primary-bg);

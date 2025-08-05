@@ -76,10 +76,8 @@ export default {
 
 <style scoped>
 .how-it-works {
-  width: 90%;
-  max-width: 1100px;
-  margin: 120px auto 120px auto;
-  padding: 40px 0;
+  margin: 20px 80px;
+  margin-bottom: 60px;
   text-align: center;
 }
 

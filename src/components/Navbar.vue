@@ -715,7 +715,20 @@ body.navbar-fixed {
 }
 
 /* Responsive Styles */
+
 @media (max-width: 1024px) {
+  /* Hide desktop nav and login/register on iPad and below */
+  ul.md\:flex,
+  .md\:flex.items-center.gap-2,
+  .hidden.md\:flex,
+  .hidden.md\:flex.items-center.gap-2 {
+    display: none !important;
+  }
+  /* Show hamburger menu on iPad and below */
+  .md\:hidden,
+  button.md\:hidden {
+    display: block !important;
+  }
   .container {
     max-width: 100vw;
     padding-left: 0.5rem;

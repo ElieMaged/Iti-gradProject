@@ -192,6 +192,7 @@ export default {
 <style scoped>
 .expert-team {
   margin: 40px 80px;
+  width: auto;
 }
 .team-header {
   display: flex;
