@@ -59,7 +59,7 @@ watch(
 
 <style scoped>
 section {
-  width: 100%;
+  width: auto;
   position: relative;
   background: radial-gradient(
     circle at 0% 3%,
@@ -67,11 +67,11 @@ section {
     #f4f3f8,
     #ff000024 136%
   );
-  overflow:auto;
+  overflow: hidden;
   height: auto;
 }
 .custom-container {
-  margin: 30px 80px 80px 80px;
+  margin: 20px 80px 90px 80px;
   width: auto;
 }
 .dark section {
