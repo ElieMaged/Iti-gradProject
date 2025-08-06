@@ -248,7 +248,6 @@ onMounted(() => {
 }
 
 .booking-container {
-  max-width: 80rem;
   margin: 0 auto;
 }
 
@@ -480,18 +479,10 @@ onMounted(() => {
 
 .table-row {
   border-bottom: 1px solid #e5e7eb;
-  transition: background-color 0.2s;
 }
 
 .dark .table-row {
   border-bottom-color: var(--border-color);
-}
-
-.table-row:hover {
-  background: #ede7f6;
-}
-
-.dark .table-row:hover {
   background: var(--input-bg);
 }
 

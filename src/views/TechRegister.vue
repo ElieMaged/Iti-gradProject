@@ -188,20 +188,9 @@
               required
             >
               <option value="" disabled selected>{{ $t('government') }}</option>
-              <option value="Cairo">{{ $t('cairo') }}</option>
-              <option value="Giza">{{ $t('giza') }}</option>
-              <option value="Alexandria">{{ $t('alexandria') }}</option>
-              <option value="Qalyubia">{{ $t('qalyubia') }}</option>
-              <option value="Sharqia">{{ $t('sharqia') }}</option>
-              <option value="Gharbia">{{ $t('gharbia') }}</option>
-              <option value="Monufia">{{ $t('monufia') }}</option>
-              <option value="Beheira">{{ $t('beheira') }}</option>
-              <option value="Ismailia">{{ $t('ismailia') }}</option>
-              <option value="Port Said">{{ $t('portSaid') }}</option>
-              <option value="Suez">{{ $t('suez') }}</option>
-              <option value="Dakahlia">{{ $t('dakahlia') }}</option>
-              <option value="Kafr El Sheikh">{{ $t('kafrElSheikh') }}</option>
-              <option value="Damietta">{{ $t('damietta') }}</option>
+              <option v-for="gov in governmentOptions" :key="gov" :value="gov">
+                {{ $t(gov) }}
+              </option>
             </select>
           </div>
 
@@ -212,50 +201,14 @@
               v-model="formData.district" 
               class="form-input" 
               required
+              :disabled="!formData.government"
             >
               <option value="" disabled selected>{{ $t('districtArea') }}</option>
-              <option value="Nasr City">{{ $t('nasrCity') }}</option>
-              <option value="Maadi">{{ $t('maadi') }}</option>
-              <option value="Dokki">{{ $t('dokki') }}</option>
-              <option value="Heliopolis">{{ $t('heliopolis') }}</option>
-              <option value="Zamalek">{{ $t('zamalek') }}</option>
-              <option value="Garden City">{{ $t('gardenCity') }}</option>
-              <option value="Mohandessin">{{ $t('mohandessin') }}</option>
-              <option value="Agouza">{{ $t('agouza') }}</option>
-              <option value="6th of October">{{ $t('sixthOfOctober') }}</option>
-              <option value="Sheikh Zayed">{{ $t('sheikhZayed') }}</option>
-              <option value="Smart Village">{{ $t('smartVillage') }}</option>
-              <option value="New Cairo">{{ $t('newCairo') }}</option>
-              <option value="Shoubra">{{ $t('shoubra') }}</option>
-              <option value="Ain Shams">{{ $t('ainShams') }}</option>
-              <option value="Matareya">{{ $t('matareya') }}</option>
-              <option value="El Marg">{{ $t('elMarg') }}</option>
-              <option value="El Salam">{{ $t('elSalam') }}</option>
-              <option value="El Nozha">{{ $t('elNozha') }}</option>
-              <option value="El Sharabiya">{{ $t('elSharabiya') }}</option>
-              <option value="El Basatin">{{ $t('elBasatin') }}</option>
-              <option value="El Mokattam">{{ $t('elMokattam') }}</option>
-              <option value="El Sayeda Zeinab">{{ $t('elSayedaZeinab') }}</option>
-              <option value="El Khalifa">{{ $t('elKhalifa') }}</option>
-              <option value="El Darb El Ahmar">{{ $t('elDarbElAhmar') }}</option>
-              <option value="El Gamaleya">{{ $t('elGamaleya') }}</option>
-              <option value="El Zeinhom">{{ $t('elZeinhom') }}</option>
-              <option value="El Maadi">{{ $t('elMaadi') }}</option>
-              <option value="El Tahrir">{{ $t('elTahrir') }}</option>
-              <option value="El Kasr El Aini">{{ $t('elKasrElAini') }}</option>
-              <option value="El Manial">{{ $t('elManial') }}</option>
-              <option value="El Giza">{{ $t('elGiza') }}</option>
-              <option value="El Haram">{{ $t('elHaram') }}</option>
-              <option value="El Omraniya">{{ $t('elOmraniya') }}</option>
-              <option value="El Warraq">{{ $t('elWarraq') }}</option>
-              <option value="El Imbaba">{{ $t('elImbaba') }}</option>
-              <option value="El Agouza">{{ $t('elAgouza') }}</option>
-              <option value="El Mohandessin">{{ $t('elMohandessin') }}</option>
-              <option value="El Dokki">{{ $t('elDokki') }}</option>
-              <option value="El Zamalek">{{ $t('elZamalek') }}</option>
-              <option value="El Garden City">{{ $t('elGardenCity') }}</option>
-              <option value="El Downtown">{{ $t('elDowntown') }}</option>
+              <option v-for="district in districtOptions" :key="district" :value="district">
+                {{ $t(district) }}
+              </option>
             </select>
+
           </div>
 
           <div class="form-group">
@@ -490,6 +443,8 @@ import { useI18n } from 'vue-i18n';
 import emailjs from '@emailjs/browser';
 import { EMAILJS_CONFIG } from '../utils/emailjsConfig';
 
+import { getGovernmentNames, getDistrictsForGovernment } from '../data/egyptianLocations';
+// ...existing imports
 
 
 const { t } = useI18n();
@@ -524,6 +479,11 @@ const formData = reactive({
   paypalEmail: '' // New field for PayPal email
 });
 
+const governmentOptions = getGovernmentNames();
+const districtOptions = computed(() => {
+  return formData.government ? getDistrictsForGovernment(formData.government) : [];
+});
+watch(() => formData.government, () => { formData.district = ''; })
 // Password validation
 const passwordValidation = reactive({
   length: false,

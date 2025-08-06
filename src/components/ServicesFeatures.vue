@@ -70,10 +70,10 @@ export default {
 
 .services-header {
   text-align: center;
-  margin-bottom: 60px;
+  margin-bottom: 40px;
   color: var(--primary-text-dark);
   padding: 20px;
-  margin-top: 60px;
+  margin-top: 40px;
   margin-bottom: 20px;
 }
 .dark .services-header {
@@ -82,7 +82,7 @@ export default {
 
 .commitment-title {
   font-family: Outfit, sans-serif;
-  font-size: 3.5rem;
+  font-size: 40px;
   font-style: normal;
   font-weight: 600;
   line-height: 1.2;

@@ -1,4 +1,5 @@
 <template>
+
   <div class="admin-dashboard-layout">
     <Sidebar :activeMenu="activeMenu" @navigate="handleSidebarNavigate" />
     <div class="edit-profile-main mr-20 p-4">
@@ -61,11 +62,6 @@
                   <label for="bio">{{ $t('aboutLabel') }}</label>
                   <textarea id="bio" v-model="form.bio" rows="3"></textarea>
                 </div>
-              </div>
-            </div>
-            <div class="edit-profile-section">
-              <h3>{{ $t('addressInformation') }}</h3>
-              <div class="edit-profile-address">
                 <div>
                   <label for="city">{{ $t('cityLabel') }}</label>
                   <select id="city" v-model="form.government">
@@ -283,7 +279,6 @@ onMounted(() => {
   background: var(--grey-bg);
 }
 .edit-profile-wrapper {
-  max-width: 1000px;
   margin: 0 auto;
 }
 .edit-profile-card {
@@ -291,6 +286,7 @@ onMounted(() => {
   border-radius: 1rem;
   box-shadow: 0 10px 15px rgba(0,0,0,0.08);
   padding: 2rem;
+  width: auto;
 }
 .page-title {
   color: var(--primary-color);

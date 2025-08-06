@@ -578,7 +578,6 @@ export default {
   .who-we-are-container {
     flex-direction: column;
     gap: 2rem;
-    padding: 0 1rem;
   }
   
   .image-grid {

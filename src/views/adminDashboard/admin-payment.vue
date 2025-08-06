@@ -895,9 +895,7 @@ onMounted(() => {
   flex: 1;
 }
 
-.dashboard-container {
-  max-width: 80rem;
-}
+
 
 .dashboard-header {
   display: flex;

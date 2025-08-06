@@ -444,7 +444,7 @@ window.createTestNotification = createTestNotification;
   top: 100%;
   right: 0;
   width: 350px;
-  max-height: 400px;
+  max-height: auto;
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 8px;

@@ -499,16 +499,13 @@ export default {
   padding: 2.5rem;
 }
 
-.pending-container {
-  max-width: 80rem;
-  margin: 0 auto;
-}
 
 .pending-title {
   font-size: 2rem;
   font-weight: bold;
   color: #7c6bb0;
   margin-bottom: 0;
+  width: auto;
 }
 .dark .pending-title {
   color: var(--primary-color);
