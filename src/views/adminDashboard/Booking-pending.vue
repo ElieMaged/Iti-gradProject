@@ -40,7 +40,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(booking, index) in filteredBookings" :key="booking.id" class="table-row">
+              <tr v-for="(booking, index) in paginatedBookings" :key="booking.id" class="table-row">
                 <td>{{ booking.userName }}</td>
                 <td>{{ booking.userEmail }}</td>
                 <td>{{ booking.technicianName || booking.technicianId }}</td>
@@ -54,12 +54,17 @@
             </tbody>
           </table>
         </div>
+        <pagination
+          v-if="totalPages > 1"
+          :total-pages="totalPages"
+          :initial-page="currentPage"
+          @page-changed="handlePageChange"
+        />
 
         <!-- Empty State -->
         <div v-else class="empty-state">
           <p>{{ $t('noPendingBookingsFound') }}</p>
         </div>
-        <pagination />
       </div>
     </div>
   </div>
@@ -83,7 +88,9 @@ export default {
       searchQuery: '',
       bookings: [],
       loading: true,
-      error: null
+      error: null,
+      currentPage: 1,
+      bookingsPerPage: 15
     };
   },
   computed: {
@@ -93,6 +100,16 @@ export default {
         Object.values(b).some(val => String(val).toLowerCase().includes(q))
       );
     },
+    
+    paginatedBookings() {
+      const startIndex = (this.currentPage - 1) * this.bookingsPerPage;
+      const endIndex = startIndex + this.bookingsPerPage;
+      return this.filteredBookings.slice(startIndex, endIndex);
+    },
+    
+    totalPages() {
+      return Math.ceil(this.filteredBookings.length / this.bookingsPerPage);
+    }
   },
   async mounted() {
     await this.fetchBookings();
@@ -136,6 +153,17 @@ export default {
       } finally {
         this.loading = false;
       }
+    },
+    
+    handlePageChange(page) {
+      this.currentPage = page;
+      // Scroll to top of table when changing pages
+      this.$nextTick(() => {
+        const tableWrapper = this.$el.querySelector('.table-wrapper');
+        if (tableWrapper) {
+          tableWrapper.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
     }
   }
 };
@@ -421,6 +449,13 @@ export default {
   .table-row td {
     padding: 0.5rem 0.5rem;
   }
+}
+
+/* Pagination styles */
+.pagination-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
 }
 </style>
   
