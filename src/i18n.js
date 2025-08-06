@@ -4,9 +4,9 @@ const messages = {
   en: {
     // Navbar
 
-    contactPhone: "+1 209-555-1234",
+    contactPhone: "+2 209-555-124",
     contactEmail: "Boltfix@gmail.com",
-    contactAddress: "123 Main St, Anytown, USA",
+    contactAddress: "123 Main St, Cairo, Egypt",
     navHome: "Home",
     navAbout: "About us",
     navServices: "Services",
@@ -211,13 +211,13 @@ const messages = {
     transactionRecorded: "Transaction recorded for admin review",
     creditsUpdated: "Credits updated successfully",
     // PayPal Payout
-    paypalPayoutToTechnician: "PayPal Payout to Technician",
+    paypalPayoutToTechnician: "Payout to Technician",
     availableCredits: "Available Credits",
     selectTechnician: "Select Technician",
     chooseTechnician: "Choose a technician...",
     payoutAmount: "Amount (EGP)",
     enterAmountEGP: "Enter amount in EGP",
-    payoutReason: "Reason (Optional)",
+    payoutReason: "Bank Number",
     payoutReasonPlaceholder: "e.g., Bonus, Commission, etc.",
     paypalFee: "PayPal Fee",
     totalDeduction: "Total Deduction",
@@ -487,7 +487,6 @@ const messages = {
     contactUs: "Contact Us",
     contactIntro:
       "Email, call, or complete the form to learn how BoltFix can solve your messaging problem",
-    contactIntro2: "We're here to help and answer any questions you might have.",
     phone: "Phone",
     whatsapp: "Whatsapp",
     facebook: "Facebook",
@@ -511,8 +510,7 @@ const messages = {
     aboutUsTitle: "About Us",
     whoAreWeTitle: "Who Are We?",
     whoAreWeDesc:
-      "At BoltFix, we're redefining how home maintenance is done. As Egypt's trusted platform for reliable repair and installation services, we connect you with skilled, verified technicians across plumbing, electrical, carpentry, appliance repair, and more — all with a click. Our mission is simple: to bring professionalism, transparency, and peace of mind to every home. Whether it's a quick fix or a big job, we make sure it's done right, on time, and with care.",
-      whoAreWeDesc2:"We believe in professionalism, transparency, and building a strong community where service providers and customers can connect with ease.",
+      "At BoltFix, we're redefining how home maintenance is done. As Egypt's trusted platform for reliable repair and installation services, we connect you with skilled, verified technicians across plumbing, electrical, carpentry, appliance repair, and more — all with a click. Our mission is simple: to bring professionalism, transparency, and peace of mind to every home. Whether it's a quick fix or a big job, we make sure it's done right, on time, and with care., ",
     ourMissionTitle: "Our Mission",
     ourMissionDesc:
       "Our mission at BoltFix is to simplify access to trusted home repair services by empowering skilled technicians and delivering a seamless, dependable experience for every customer. We aim to raise the standard of home maintenance in Egypt through speed, honesty, and quality — ensuring that every task, big or small, is completed with precision, professionalism, and care.",
@@ -1252,9 +1250,9 @@ const messages = {
     settings: 'الإعدادات',
     logout: 'تسجيل الخروج',
     // Navbar
-    contactPhone: "+1 209-555-1234", // You can localize the number if needed
+    contactPhone: "+2 209-555-124", // You can localize the number if needed
     contactEmail: "Boltfix@gmail.com",
-    contactAddress: "١٢٣ شارع الرئيسي، أي مدينة، الولايات المتحدة",
+    contactAddress: "١٢٣ شارع الرئيسي، القاهرة، مصر",
     navHome: "الرئيسية",
     navAbout: "من نحن",
     navServices: "الخدمات",
@@ -1567,12 +1565,12 @@ const messages = {
     chooseTechnician: "اختر فني...",
     payoutAmount: "المبلغ (جنيه مصري)",
     enterAmountEGP: "أدخل المبلغ بالجنيه المصري",
-    payoutReason: "السبب (اختياري)",
+    payoutReason: "رقم حساب البنك",
     payoutReasonPlaceholder: "مثال: مكافأة، عمولة، إلخ",
     paypalFee: "رسوم PayPal",
     totalDeduction: "إجمالي الخصم",
     remainingCredits: "الرصيد المتبقي",
-    sendPaypalPayout: "إرسال تحويل PayPal",
+    sendPaypalPayout: "إرسال تحويل ",
     processing: "جاري المعالجة...",
     payoutInitiated: "تم بدء التحويل بنجاح",
     payoutFailed: "فشل في بدء التحويل",
@@ -1783,6 +1781,13 @@ const messages = {
     technicianDescription:
       "فني ماهر ذو سجل قوي في رضا العملاء. محترف وجاهز لخدمتك.",
     viewProfile: "عرض الملف الشخصي",
+    meetOurExpertTechnicians: " تعرف على فنيينا المحترفين",
+    ourTechniciansSubtitle:
+      "احترافية مضمونة فنيونا مؤهلون ومستعدون لخدمتك فورًا..",
+    ourTechniciansDescription:
+      "اختر الخبير المثالي لك من بين نخبة من المتخصصين — تصفح ملفاتهم وتعرف على خبراتهم.",
+    
+    
     // Pagination
     page1: "١",
     page2: "٢",
@@ -1792,8 +1797,7 @@ const messages = {
     // Contact
     contactUs: "تواصل معنا",
     contactIntro:
-      "راسلنا عبر البريد الإلكتروني أو اتصل بنا أو أكمل النموذج لمعرفة كيف يمكن لـ BoltFix حل مشكلتك.",
-    contactIntro2: "نحن هنا لمساعدتك والإجابة على أي أسئلة قد تكون لديك.",
+      "اتصل بنا عبر البريد الإلكتروني أو الهاتف أو من خلال النموذج لتتعرف على كيف يمكن لـ BoltFix أن يقدّم الحل لمشكلتك. نحن هنا لمساعدتك والإجابة على أي استفسار قد يكون لديك.",
     phone: "الهاتف",
     whatsapp: "واتساب",
     facebook: "فيسبوك",
@@ -1814,14 +1818,15 @@ const messages = {
     airConditioning: "تكييف الهواء",
     electricalWiring: "تمديدات كهربائية",
     // About.vue
+
     aboutUsTitle: "من نحن",
     whoAreWeTitle: "من نحن؟",
     whoAreWeDesc:
-      "في BoltFix، نعيد تعريف كيفية صيانة المنازل. كمنصة موثوقة في مصر لخدمات الإصلاح والتركيب، نربطك بفنيين مهرة وموثوقين في السباكة والكهرباء والنجارة وإصلاح الأجهزة والمزيد — بضغطة زر. مهمتنا بسيطة: تقديم الاحترافية والشفافية وراحة البال لكل منزل. سواء كانت مهمة سريعة أو كبيرة، نضمن إنجازها بشكل صحيح وفي الوقت المناسب وبعناية.",
-      whoAreWeDesc2:"نحن نؤمن بالاحترافية والشفافية وبناء مجتمع قوي حيث يمكن لمقدمي الخدمات والعملاء التواصل بسهولة.",
+      "في BoltFix،نُعيد تعريف طريقة تنفيذ خدمات الصيانة المنزلية. كمنصة موثوقة في مصر لتقديم خدمات الإصلاح والتركيب، نوصلك بفنيين مهرة ومعتمدين في مجالات السباكة، والكهرباء، والنجارة، وصيانة الأجهزة، وغير ذلك بكبسة زر واحدة. مهمتنا بسيطة: تقديم خدمات تتسم بالاحترافية والشفافية .",
     ourMissionTitle: "مهمتنا",
     ourMissionDesc:
-      "مهمتنا في BoltFix هي تبسيط الوصول إلى خدمات الإصلاح المنزلية الموثوقة من خلال تمكين الفنيين المهرة وتقديم تجربة سلسة وموثوقة لكل عميل. نهدف إلى رفع مستوى صيانة المنازل في مصر من خلال السرعة والصدق والجودة — لضمان إنجاز كل مهمة، كبيرة أو صغيرة، بدقة واحترافية وعناية.",
+      "مهمتنا في BoltFix هي تبسيط الوصول إلى خدمات الصيانة المنزلية الموثوقة من خلال تمكين الفنيين المهرة وتقديم تجربة سلسة وموثوقة لكل عميل. نهدف إلى رفع مستوى خدمات الصيانة في مصر من خلال السرعة، والشفافية، والجودة لضمان إنجاز كل مهمة، سواء كانت صغيرة أو كبيرة، بدقة واحترافية واهتمام.",
+
     teamMembers: "أكثر من 150 عضوًا في الفريق",
     winningAwards: "أكثر من 100 جائزة",
     completeProjects: "أكثر من 700 مشروع مكتمل",
@@ -1864,8 +1869,8 @@ const messages = {
     "Electrical Appliance Repair": "إصلاح الأجهزة الكهربائية",
     "Wall finishing": "تشطيب الجدران",
     // HowItWorks.vue
-    howItWorksTitle: "كيف تعمل",
-    howItWorksSubtitle: "عملية عملنا",
+    howItWorksTitle: "كيف يعمل BoltFix",
+    howItWorksSubtitle: " طريقة الاستخدام",
     // ExpertTeam.vue
     expertTeamTitle: "التنظيف الفعال يتطلب فريق خبراء",
     expertTeamSubtitle: "فريق الخبراء",
@@ -2016,6 +2021,24 @@ const messages = {
     electricalApplianceTechnician: "فني الأجهزة الكهربائية",
     
     
+    // Pending Application
+    applicationPending: "الطلب قيد الانتظار",
+    underReview: "قيد المراجعة",
+    applicationUnderReview:
+      "طلب الانضمام كفني قيد المراجعة لدى الإدارة، وسنقوم بإبلاغك قريبًا..",
+    whatHappensNext: "ما الخطوة التالية؟",
+    adminReviewStep: "يتم الآن فحص طلبك والتأكد من صحة بياناتك ومؤهلاتك.",
+    approvalNotificationStep:
+      "تابع بريدك الإلكتروني، القرار في الطريق!",
+    accessGrantedStep: "إذا تم قبول الطلب، ستحصل على صلاحيات كاملة كفني.",
+    needHelp: "تحتاج مساعدة؟?",
+    contactSupport: "عندك سؤال؟ فريق الدعم جاهز لمساعدتك..",
+    goToHomepage: "الانتقال إلى الصفحة الرئيسية",
+    briefDescription: "نبذة مختصرة",
+    haveAccount: "هل لديك حساب؟",
+    password: "كلمة المرور",
+    confirmPassword: "تأكيد كلمة المرور",
+
     // Admin Users Management
     userManagement: "إدارة المستخدمين",
     allRegularUsers: "جميع المستخدمين العاديين",

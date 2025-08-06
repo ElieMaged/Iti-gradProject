@@ -3,11 +3,9 @@
     <div class="loading-spinner"></div>
     <p>{{ $t('loading') }}</p>
   </div>
-  
   <div v-else-if="error" class="error-container">
     <p class="error-message">{{ error }}</p>
   </div>
-  
   <div v-else-if="technician" class="technician-profile-page">
     <!-- Main content area -->
     <div class="main-content">
@@ -15,19 +13,17 @@
       <div class="page-title">
         <h1>{{ $t('bookNowWithBestTechnicians') }}</h1>
       </div>
-
       <!-- Main content grid -->
       <div class="content-grid">
         <!-- Left section - Technician Info Card -->
         <div class="technician-info-card">
           <div class="profile-section">
             <div class="profile-picture">
-              <img :src="technician.profilePhotoUrl || technician.profilePhotoUrl || '/images/Avatar.png'" :alt="technician.name" />
+              <img :src="technician.profilePhotoUrl || '/images/Avatar.png'" :alt="technician.name" />
             </div>
             <div class="profile-details">
               <h2 class="technician-name">{{ technician.name || technician.fullName }}</h2>
               <p class="technician-specialization">{{ getSpecializationTranslation(technician.specialization) }}</p>
-              
               <div class="technician-details">
                 <div class="detail-item">
                   <span class="detail-label">{{ $t('location') }}:</span>
@@ -46,7 +42,6 @@
                   <span class="detail-value">{{ technician.experience || technician.yearsOfExperience || $t('defaultExperience') }} {{ $t('years') }}</span>
                 </div>
               </div>
-
               <div class="rating-section">
                 <div class="rating-stars">
                   <i v-for="n in 5" :key="n" class="fas fa-star star-filled"></i>
@@ -54,20 +49,17 @@
               </div>
             </div>
           </div>
-
           <!-- Bio Section -->
           <div class="bio-section" v-if="technician.bio">
             <h3 class="bio-title">{{ $t('aboutTechnician') }}</h3>
             <p class="bio-content">{{ technician.bio }}</p>
           </div>
-          </div>
-
+        </div> <!-- close .technician-info-card -->
         <!-- Right section - Booking Information -->
         <div class="booking-info-card">
-                     <h3 class="booking-title">{{ $t('bookingInformation') }}</h3>
-          
+          <h3 class="booking-title">{{ $t('bookingInformation') }}</h3>
           <div class="appointment-section">
-                         <h4 class="section-subtitle">{{ $t('availableAppointment') }}</h4>
+            <h4 class="section-subtitle">{{ $t('availableAppointment') }}</h4>
             <div class="date-selector">
               <button class="date-nav-btn" @click="previousDates">
                 <i class="fas fa-chevron-left"></i>
@@ -75,7 +67,7 @@
               <div class="date-options">
                 <div v-if="visibleDates.length > 0" v-for="date in visibleDates" :key="date" class="date-option" :class="{ 'selected': selectedDate === date }" @click="selectDate(date)">
                   {{ date }}
-        </div>
+                </div>
                 <div v-else-if="!loading && availableDates.length === 0" class="date-option unavailable">
                   {{ $t('noAvailableDates') }}
                 </div>
@@ -86,32 +78,29 @@
               <button class="date-nav-btn" @click="nextDates">
                 <i class="fas fa-chevron-right"></i>
               </button>
-      </div>
-      
+            </div>
             <div class="time-slots">
               <div v-if="loading || !technicianAvailability" class="time-slot loading">
                 {{ $t('loadingAvailability') }}
-          </div>
+              </div>
               <div v-else-if="selectedDate && availableTimeSlots.length > 0" v-for="timeSlot in availableTimeSlots" :key="timeSlot" class="time-slot">
                 {{ timeSlot }}
-            </div>
+              </div>
               <div v-else-if="selectedDate && availableTimeSlots.length === 0" class="time-slot unavailable">
                 {{ $t('noAvailableTimeSlots') }}
-          </div>
+              </div>
               <div v-else-if="availableDates.length === 0" class="time-slot unavailable">
                 {{ $t('technicianNotSetAvailability') }}
-          </div>
+              </div>
               <div v-else class="time-slot">
                 {{ $t('selectDateToSeeSlots') }}
+              </div>
+            </div>
           </div>
-        </div>
-          </div>
-
           <div class="visit-price">
             <span class="price-label">{{ $t('visitPrice') }}:</span>
             <span class="price-value">{{ technician.basePrice || technician.visitPrice || '300' }} EGP</span>
           </div>
-
           <button 
             @click="bookNow" 
             class="book-now-btn"
@@ -120,17 +109,16 @@
           >
             {{ auth.currentUser ? $t('bookNow') : $t('loginToBook') || 'Login to Book' }}
           </button>
-        </div>
-      </div>
-      
+        </div> <!-- close .booking-info-card -->
+      </div> <!-- close .content-grid -->
       <!-- Reviews Section -->
       <hr class="reviews-divider" />
-      <div v-if="hasBookingWithTechnician" class="reviews-section">
+      <div class="reviews-section">
         <div class="reviews-header">
           <h2 class="reviews-title">{{ $t('reviews') }}</h2>
-          <div v-if="!showReviewForm" class="review-actions">
+          <div v-if="!showReviewForm">
             <button 
-              v-if="canReview" 
+              v-if="hasBookingWithTechnician && canReview" 
               @click="showReviewForm = true" 
               class="add-review-btn"
             >
@@ -142,11 +130,13 @@
             <div v-else-if="reviews.find(r => r.userEmail === auth.currentUser?.email)" class="review-notice">
               {{ $t('thankYouForReview') }}
             </div>
+            <div v-else-if="hasBookingWithTechnician && !canReview" class="review-notice">
+              {{ $t('bookingRequiredToReview') }}
+            </div>
           </div>
         </div>
-
         <!-- Review Submission Form -->
-        <div v-if="showReviewForm" class="review-form">
+        <div v-if="showReviewForm && hasBookingWithTechnician && canReview" class="review-form">
           <h3>{{ $t('writeReview') }}</h3>
           <div class="star-rating-input">
             <label>{{ $t('rating') }}:</label>
@@ -201,7 +191,6 @@
             </button>
           </div>
         </div>
-
         <!-- Reviews List -->
         <div class="reviews-list">
           <div v-if="reviewsLoading" class="loading-state">
@@ -236,17 +225,14 @@
           <div v-else class="empty-reviews">
             <div class="empty-icon">⭐</div>
             <p>{{ $t('noReviewsYet') }}</p>
-            <p v-if="canReview">{{ $t('beFirstToReview') }}</p>
-             <p v-else-if="!auth.currentUser">{{ $t('loginToLeaveReview') }}</p>
-             <p v-else-if="!userBookings.some(booking => booking.technicianId === route.params.id && booking.status === 'completed')">{{ $t('bookingRequiredToReview') }}</p>
-            <p v-else>{{ $t('loginToLeaveReview') }}</p>
-           </div>
+            <p v-if="hasBookingWithTechnician && canReview">{{ $t('beFirstToReview') }}</p>
+            <p v-else-if="!auth.currentUser">{{ $t('loginToLeaveReview') }}</p>
+            <p v-else-if="!hasBookingWithTechnician">{{ $t('bookingRequiredToReview') }}</p>
           </div>
         </div>
-      </div>
-
-
-  </div>
+      </div> <!-- close .reviews-section -->
+    </div> <!-- close .main-content -->
+  </div> <!-- close .technician-profile-page -->
 </template>
 
 <script setup>
@@ -826,6 +812,8 @@ onMounted(async () => {
   margin-right: 80px;
   padding: 0rem;
 }
+
+
 
 .page-title {
   text-align: left;
@@ -1590,109 +1578,97 @@ onMounted(async () => {
     font-size: 0.9rem;
   }
 }
-
+@media (min-width:600px) {
+  .main-content {
+    margin-left: 80px;
+    margin-right: 80px;
+  }
+}
 @media (max-width: 600px) {
   .main-content {
     padding: 0.5rem;
-    width: 100%;
   }
-  
-  .page-title h1 {
-    font-size: 1.5rem;
+  .content-grid {
+    flex-direction: column;
+    gap: 1rem;
   }
-  
-  .technician-info-card {
-    padding: 0.75rem;
-    width: 100%;
-  }
-  
+  .technician-info-card,
   .booking-info-card {
-    padding: 0.75rem;
     width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    margin: 0 0 1rem 0;
   }
-  
   .profile-section {
+    flex-direction: column;
+    align-items: flex-start;
     width: 100%;
   }
-  
   .profile-picture {
-    width: 100px;
-    height: 100px;
+    width: 60px;
+    height: 60px;
+    margin-bottom: 0.5rem;
   }
-  
   .profile-details {
     width: 100%;
+    font-size: 1rem;
   }
-  
   .technician-name {
     font-size: 1.1rem;
   }
-  
   .technician-specialization {
-    font-size: 0.8rem;
+    font-size: 0.95rem;
   }
-  
   .detail-item {
-    padding: 0.25rem 0;
-    font-size: 0.8rem;
-    width: 100%;
+    font-size: 0.95rem;
   }
-  
-  .skills-title {
+  .bio-title {
     font-size: 1rem;
   }
-  
-  .skill-item {
-    padding: 0.375rem;
-    font-size: 0.75rem;
-    width: 100%;
+  .bio-content {
+    font-size: 0.95rem;
   }
-  
   .booking-title {
     font-size: 1.1rem;
   }
-  
   .section-subtitle {
-    font-size: 0.9rem;
+    font-size: 1rem;
   }
-  
-  .date-options {
-    gap: 0.25rem;
-    width: 100%;
-  }
-  
-  .date-option {
-    padding: 0.375rem;
-    font-size: 0.75rem;
-  }
-  
+  .date-option,
   .time-slot {
-    padding: 0.375rem;
-    font-size: 0.75rem;
+    font-size: 0.95rem;
+    padding: 0.4rem;
   }
-  
   .visit-price {
-    padding: 0.5rem;
-    width: 100%;
+    font-size: 1rem;
   }
-  
-  .price-label {
-    font-size: 0.8rem;
-  }
-  
+  .price-label,
   .price-value {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
   }
-  
   .book-now-btn {
-    padding: 0.5rem;
-    font-size: 0.9rem;
-    width: 100%;
+    font-size: 1rem;
+    padding: 0.6rem;
   }
-  
   .date-nav-btn {
-    padding: 0.5rem;
-    font-size: 0.8rem;
+    font-size: 1rem;
+    padding: 0.4rem;
+  }
+  .reviews-section {
+    padding: 0.5rem 0;
+  }
+  .reviews-title {
+    font-size: 1.2rem;
+  }
+  .review-form,
+  .review-card {
+    font-size: 1rem;
+  }
+  .star-button {
+    font-size: 1.2rem;
+  }
+  .char-count {
+    font-size: 0.85rem;
   }
 }
 
@@ -1909,7 +1885,7 @@ onMounted(async () => {
 /* Dark Mode Styles */
 
 .dark .technician-profile-page {
-  background-color: va  r(--primary-bg);
+  background-color: var(--primary-bg);
   color: var(--primary-text);
 }
 
