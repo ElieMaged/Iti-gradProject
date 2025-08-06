@@ -539,6 +539,10 @@ body.navbar-fixed {
   height: 52px;
   transition: width 0.2s, height 0.2s;
 }
+.navbar{
+  justify-content: space-between;
+  width: auto;
+}
 
 #login-btn {
   border: 1px solid #6B4FA1;

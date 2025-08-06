@@ -808,8 +808,8 @@ onMounted(async () => {
 
 /* Main Content */
 .main-content {
-  max-width: auto;
-
+  margin-left: 80px;
+  margin-right: 80px;
   padding: 0rem;
 }
 
@@ -825,6 +825,7 @@ onMounted(async () => {
   font-weight: bold;
   color: #625397;
   margin: 0;
+  margin-top: 20px;
 }
 
 /* Content Grid */
