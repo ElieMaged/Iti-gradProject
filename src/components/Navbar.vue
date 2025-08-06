@@ -307,7 +307,7 @@ export default {
           <i class="fa fa-chevron-down services-dropdown-arrow ml-1"></i>
         </span>
         <div
-          :class="['services-dropdown', isMobile ? 'static mt-2 relative w-full' : 'absolute left-0 mt-2 shadow-lg rounded z-50']"
+          :class="['services-dropdown', isMobile ? ' mt-2 relative w-full' : 'absolute left-0 mt-2 shadow-lg rounded z-50']"
           v-show="true" @mouseenter="!isMobile && showDropdown"> <router-link to="/allservices">{{ $t('allServices') }}</router-link>
           <router-link to="/plumbing">{{ $t('navPlumbing') }}</router-link>
 
