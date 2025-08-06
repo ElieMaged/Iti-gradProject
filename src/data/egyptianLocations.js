@@ -477,3 +477,29 @@ export const getDistrictsForGovernment = (government) => {
 
   return districts[government] || []
 } 
+export const governmentNamesAr = {
+  'Cairo': 'القاهرة',
+  'Giza': 'الجيزة',
+  'Alexandria': 'الإسكندرية',
+  // ...add all others
+};
+
+export const districtsAr = {
+  'Cairo': {
+    'Ain Shams': 'عين شمس',
+    'Al Mokattam': 'المقطم',
+    'Al Sharabiya': 'الشرابية',
+    'Al Shorouk': 'الشروق', 
+    'Al Zaitoun': 'الزيتون',
+    'Amreya': 'العامرية',
+    'Bab Al Sharia': 'باب الشعرية',
+    'Boulaq': 'بولاق',
+    'El Basatin': 'البساتين',
+    'El Darb El Ahmar': 'الدرب الأحمر',
+  },
+  'Giza': {
+    '6th of October': '٦ أكتوبر',
+    // ...add all Giza districts
+  },
+  
+};
