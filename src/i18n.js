@@ -932,6 +932,21 @@ const messages = {
     wallFinishingServiceTitle: 'Wall Finishing',
     wallFinishingServiceDesc: 'High-quality painting and finishing services for walls and ceilings',
     
+    // Missing technician names and descriptions
+    "Mohamed ahmed hassan": "Mohamed Ahmed Hassan",
+    "professional plumbing technician for all plumbing malfunctions": "Professional plumbing technician for all plumbing malfunctions",
+    "Cairo": "Cairo",
+    "EGP": "EGP",
+    "salah mohamed": "Salah Mohamed",
+    "expert carpentry": "Expert carpentry",
+    "Sharqia": "Sharqia",
+    "Elie Maged": "Elie Maged",
+    "Wall Finishing": "Wall Finishing",
+    "Professional wall finisher": "Professional wall finisher",
+    "Alexandria": "Alexandria",
+    "Air Conditioning": "Air Conditioning",
+    "Air Conditioning Experta": "Air Conditioning Experta",
+    
     // Service descriptions for overview section
     plumbingServiceTitle: 'Plumbing',
     plumbingServiceDesc: 'Professional plumbing services including repairs, installations, and maintenance',
@@ -1276,6 +1291,18 @@ const messages = {
     saving: 'جاري الحفظ...',
     logout: 'تسجيل الخروج',
     loginRegister: 'تسجيل الدخول/إنشاء حساب',
+
+    // Missing keys for Arabic locale
+    "professional plumbing technician for all plumbing malfunctions": "فني سباكة محترف لجميع أعطال السباكة",
+    "Cairo": "القاهرة",
+    "EGP": "جنيه مصري",
+    "expert carpentry": "نجارة خبيرة",
+    "Sharqia": "الشرقية",
+    "Wall Finishing": "تشطيب الجدران",
+    "Professional wall finisher": "فني تشطيب محترف",
+    "Alexandria": "الإسكندرية",
+    "Air Conditioning": "تكييف الهواء",
+    "Air Conditioning Experta": "خبير تكييف الهواء",
     
     // Welcome Page
     welcomeToBoltfix: 'مرحباً بك في Boltfix',
