@@ -78,7 +78,7 @@ export default {
   data() {
     return {
       activeMenu: 'technicianprofile',
-      profileImageUrl: 'https://randomuser.me/api/portraits/men/32.jpg',
+      profileImageUrl: '/images/Avatar.png',
       loading: true,
       error: '',
       form: {
@@ -118,8 +118,7 @@ export default {
         this.form.government = data.government || '';
         this.form.district = data.district || '';
         this.form.willingToTravel = data.willingToTravel || '';
-        this.profileImageUrl = data.idPhotoUrl || this.profileImageUrl;
-      } else {
+this.profileImageUrl = data.profilePhotoUrl || this.profileImageUrl;      } else {
         this.error = 'Technician profile not found.';
       }
       // Fetch all bookings for this technician (except cancelled)
