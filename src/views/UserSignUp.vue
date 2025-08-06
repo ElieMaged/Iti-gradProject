@@ -19,6 +19,7 @@ const age = ref('');
 const address = ref('');
 const area = ref('');
 const city = ref('');
+const phone = ref('');
 const error = ref('');
 const errors = ref({});
 const showTermsModal = ref(false);
@@ -129,6 +130,11 @@ const validateForm = () => {
     errors.value.city = 'City is required';
   }
 
+  // Phone validation
+  if (!validateRequired(phone.value, 'phone')) {
+    errors.value.phone = 'Phone number is required';
+  }
+
   return Object.keys(errors.value).length === 0;
 };
 
@@ -157,6 +163,7 @@ const handleRegister = async () => {
       address: address.value,
       area: area.value,
       city: city.value,
+      phone: phone.value,
       role: 'user',
       createdAt: new Date(),
       updatedAt: new Date()
@@ -252,6 +259,21 @@ const closeTermsModal = () => {
           required 
         />
         <p v-if="errors.email" class="error-message">{{ errors.email }}</p>
+      </div>
+
+      <!-- phone -->
+      <div class="form-group">
+        <label for="phone" class="form-label">{{ $t('phone') }}</label>
+        <input 
+          type="text" 
+          id="phone" 
+          v-model="phone" 
+          class="form-input" 
+          :class="{ 'error': errors.phone }"
+          :placeholder="$t('phone')" 
+          required 
+        />
+        <p v-if="errors.phone" class="error-message">{{ errors.phone }}</p>
       </div>
 
       <!-- gender -->

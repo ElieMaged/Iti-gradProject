@@ -167,8 +167,8 @@ export default {
                  avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
                  role: data.role || 'user',
                  specialization: 'N/A',
-                 location: 'N/A',
-                 contact: 'N/A'
+                 location: [data.address, data.area, data.city].filter(Boolean).join(', ') || 'N/A',
+                 contact: data.phone || 'N/A'
                };
              })
              .filter(user => user.role === 'user'); // Only show users with 'user' role
