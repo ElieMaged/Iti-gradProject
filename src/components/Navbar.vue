@@ -307,7 +307,7 @@ export default {
           <i class="fa fa-chevron-down services-dropdown-arrow ml-1"></i>
         </span>
         <div
-          :class="['services-dropdown', isMobile ? ' mt-2 relative w-full' : 'absolute left-0 mt-2 shadow-lg rounded z-50']"
+          :class="['services-dropdown', isMobile ? 'static mt-2 w-full' : 'absolute left-0 mt-2 shadow-lg rounded z-50']"
           v-show="true" @mouseenter="!isMobile && showDropdown"> <router-link to="/allservices">{{ $t('allServices') }}</router-link>
           <router-link to="/plumbing">{{ $t('navPlumbing') }}</router-link>
 
@@ -774,14 +774,10 @@ body.navbar-fixed {
     padding: 0.75rem 1rem;
   }
 
-  nav[style*="margin-left: 80px"] {
-    margin-left: 1rem !important;
-    margin-right: 1rem !important;
-  }
+
 
   .fixed-navbar {
     padding: 0.5rem 1rem !important;
-    margin: 0 1rem !important;
   }
 
   .hidden.md\:flex {
@@ -823,14 +819,10 @@ body.navbar-fixed {
     margin-right: 0.5rem !important;
   }
 
-  nav[style*="margin-left: 80px"] {
-    margin-left: 0.5rem !important;
-    margin-right: 0.5rem !important;
-  }
+
 
   .fixed-navbar {
     padding: 0.4rem 0.8rem !important;
-    margin: 0 0.5rem !important;
   }
 
   .services-color {
@@ -868,14 +860,9 @@ body.navbar-fixed {
     padding: 0.5rem 0.5rem;
   }
 
-  nav[style*="margin-left: 80px"] {
-    margin-left: 0.25rem !important;
-    margin-right: 0.25rem !important;
-  }
 
   .fixed-navbar {
     padding: 0.3rem 0.5rem !important;
-    margin: 0 0.25rem !important;
   }
 
   .services-color {
