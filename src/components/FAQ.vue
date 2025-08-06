@@ -113,7 +113,7 @@ export default {
 }
 .faq-content {
   
-  margin: 20px 80px;
+  margin: 0px 80px;
 }
 
 .faq-container{
@@ -125,6 +125,7 @@ export default {
   gap: 150px;
   align-items: flex-start;
   justify-content: space-between;
+  margin-top: 48px;
 }
 
 .faq-title-box {
@@ -137,7 +138,7 @@ export default {
   color: var(--primary-text);
 }
 .faq-title {
-  font-size: 38px;
+  font-size: 40px;
   font-weight: 600;
   color: var(--black-text);
   font-family: Outfit, sans-serif;

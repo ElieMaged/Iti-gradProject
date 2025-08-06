@@ -1,5 +1,5 @@
 <template>
-  <section class="testimonials pt-14">
+  <section class="testimonials pt-2">
     <div class="testimonials-container custom-container">
       <!-- Header Section -->
       <div class="testimonials-header">
@@ -86,7 +86,7 @@ export default {
   justify-content: center;
   font-family: Outfit, sans-serif;
   border-radius: 12px;
-  font-size: 48px;
+  font-size: 40px;
   font-weight: 600;
   font-family: Outfit, sans-serif;
   display: flex;
