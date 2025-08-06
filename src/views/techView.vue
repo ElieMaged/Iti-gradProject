@@ -195,6 +195,11 @@ onMounted(async () => {
         loading.value = false
       }
     }
+    catch (e) {
+      console.error('Error fetching technician:', e)
+      error.value = 'Error fetching technician data.'
+      loading.value = false
+    }
   }
   await fetchReviews()
 })

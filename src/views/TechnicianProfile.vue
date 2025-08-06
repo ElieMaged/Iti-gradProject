@@ -1108,7 +1108,6 @@ onMounted(async () => {
 
 /* Reviews Section */
 .reviews-section {
-  max-width: 1280px;
   
   margin-top:1rem;
 }
@@ -1130,8 +1129,6 @@ onMounted(async () => {
 .review-card {
   background: white;
   border-radius: 12px;
-  max-width: 1280px;
-  
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   padding: 1.5rem;
 }
