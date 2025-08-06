@@ -808,8 +808,8 @@ onMounted(async () => {
 
 /* Main Content */
 .main-content {
-  margin-left: 80px;
-  margin-right: 80px;
+  max-width: auto;
+
   padding: 0rem;
 }
 
@@ -825,7 +825,6 @@ onMounted(async () => {
   font-weight: bold;
   color: #625397;
   margin: 0;
-  margin-top: 20px;
 }
 
 /* Content Grid */
@@ -1488,120 +1487,661 @@ onMounted(async () => {
 
 @media (max-width: 1024px) {
   .main-content {
-    padding: 1.5rem;
-    margin-left: 0;
-    margin-right: 0;
-    max-width: 100vw;
+    padding: 1rem;
   }
+  
   .content-grid {
     grid-template-columns: 1fr;
-    gap: 2rem;
+    gap: 1.5rem;
   }
-  .technician-info-card,
-  .booking-info-card {
+  
+  .technician-info-card {
+    padding: 1.5rem;
     width: 100%;
-    padding: 1.2rem;
-    border-radius: 10px;
-    margin-bottom: 1.2rem;
-    box-sizing: border-box;
   }
+  
+  .booking-info-card {
+    padding: 1.5rem;
+    width: 100%;
+  }
+  
   .profile-section {
     flex-direction: column;
-    align-items: center;
-    gap: 1.2rem;
+    text-align: center;
+    gap: 1rem;
     width: 100%;
   }
+  
+  .profile-picture {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .technician-name {
+    font-size: 1.5rem;
+  }
+  
+  .technician-specialization {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 0.75rem;
+    width: 100%;
+  }
+  
+  .page-title {
+    margin-bottom: 2rem;
+    width: 100%;
+  }
+  
+  .page-title h1 {
+    font-size: 1.75rem;
+  }
+  
+  .technician-info-card {
+    padding: 1rem;
+    border-radius: 8px;
+    width: 100%;
+  }
+  
+  .booking-info-card {
+    padding: 1rem;
+    border-radius: 8px;
+    width: 100%;
+  }
+  
+  .profile-section {
+    width: 100%;
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  
   .profile-picture {
     width: 120px;
     height: 120px;
   }
+  
+  .profile-details {
+    width: 100%;
+  }
+  
   .technician-name {
-    font-size: 1.3rem;
+    font-size: 1.25rem;
+  }
+  
+  .technician-specialization {
+    font-size: 0.9rem;
+  }
+}
+@media (min-width:600px) {
+  .main-content {
+    margin-left: 80px;
+    margin-right: 80px;
+  }
+}
+@media (max-width: 600px) {
+  .main-content {
+    padding: 0.5rem;
+  }
+  .content-grid {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .technician-info-card,
+  .booking-info-card {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    margin: 0 0 1rem 0;
+  }
+  .profile-section {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+  }
+  .profile-picture {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 0.5rem;
+  }
+  .profile-details {
+    width: 100%;
+    font-size: 1rem;
+  }
+  .technician-name {
+    font-size: 1.1rem;
   }
   .technician-specialization {
+    font-size: 0.95rem;
+  }
+  .detail-item {
+    font-size: 0.95rem;
+  }
+  .bio-title {
     font-size: 1rem;
+  }
+  .bio-content {
+    font-size: 0.95rem;
+  }
+  .booking-title {
+    font-size: 1.1rem;
+  }
+  .section-subtitle {
+    font-size: 1rem;
+  }
+  .date-option,
+  .time-slot {
+    font-size: 0.95rem;
+    padding: 0.4rem;
+  }
+  .visit-price {
+    font-size: 1rem;
+  }
+  .price-label,
+  .price-value {
+    font-size: 0.95rem;
+  }
+  .book-now-btn {
+    font-size: 1rem;
+    padding: 0.6rem;
+  }
+  .date-nav-btn {
+    font-size: 1rem;
+    padding: 0.4rem;
   }
   .reviews-section {
     padding: 0.5rem 0;
   }
   .reviews-title {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
   }
   .review-form,
   .review-card {
     font-size: 1rem;
-    padding: 0.8rem;
+  }
+  .star-button {
+    font-size: 1.2rem;
+  }
+  .char-count {
+    font-size: 0.85rem;
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 480px) {
   .main-content {
-    padding: 0.5rem;
-    margin-left: 0;
-    margin-right: 0;
+    padding: 0.25rem;
+    width: 100%;
   }
+  
+  .page-title {
+    margin-bottom: 1.5rem;
+    width: 100%;
+  }
+  
   .page-title h1 {
-    font-size: 1.2rem;
+    font-size: 1.25rem;
   }
-  .technician-info-card,
+  
+  .technician-info-card {
+    padding: 0.5rem;
+    width: 100%;
+  }
+  
   .booking-info-card {
     padding: 0.5rem;
-    border-radius: 6px;
     width: 100%;
-    margin-bottom: 1rem;
   }
+  
   .profile-section {
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
     width: 100%;
   }
+  
+  .profile-picture {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .profile-details {
+    width: 100%;
+  }
+  
+  .technician-name {
+    font-size: 1rem;
+  }
+  
+  .technician-specialization {
+    font-size: 0.75rem;
+  }
+  
+  .detail-item {
+    padding: 0.125rem 0;
+    font-size: 0.75rem;
+    width: 100%;
+  }
+  
+  .skills-title {
+    font-size: 0.9rem;
+  }
+  
+  .skill-item {
+    padding: 0.25rem;
+    font-size: 0.7rem;
+    width: 100%;
+  }
+  
+  .booking-title {
+    font-size: 1rem;
+  }
+  
+  .section-subtitle {
+    font-size: 0.8rem;
+  }
+  
+  .date-options {
+    gap: 0.125rem;
+    width: 100%;
+  }
+  
+  .date-option {
+    padding: 0.25rem;
+    font-size: 0.65rem;
+  }
+  
+  .time-slot {
+    padding: 0.25rem;
+    font-size: 0.65rem;
+  }
+  
+  .visit-price {
+    padding: 0.375rem;
+    width: 100%;
+  }
+  
+  .price-label {
+    font-size: 0.75rem;
+  }
+  
+  .price-value {
+    font-size: 0.8rem;
+  }
+  
+  .book-now-btn {
+    padding: 0.375rem;
+    font-size: 0.8rem;
+    width: 100%;
+  }
+  
+  .date-nav-btn {
+    padding: 0.25rem;
+    font-size: 0.6rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .main-content {
+    padding: 0.125rem;
+    width: 100%;
+  }
+  
+  .page-title h1 {
+    font-size: 1.1rem;
+  }
+  
+  .technician-info-card {
+    padding: 0.375rem;
+    width: 100%;
+  }
+  
+  .booking-info-card {
+    padding: 0.375rem;
+    width: 100%;
+  }
+  
+  .profile-section {
+    width: 100%;
+  }
+  
   .profile-picture {
     width: 70px;
     height: 70px;
   }
-  .technician-name {
-    font-size: 1rem;
+  
+  .profile-details {
+    width: 100%;
   }
+  
+  .technician-name {
+    font-size: 0.9rem;
+  }
+  
   .technician-specialization {
-    font-size: 0.85rem;
+    font-size: 0.7rem;
+  }
+  
+  .detail-item {
+    padding: 0.1rem 0;
+    font-size: 0.7rem;
+    width: 100%;
+  }
+  
+  .skills-title {
+    font-size: 0.8rem;
+  }
+  
+  .skill-item {
+    padding: 0.2rem;
+    font-size: 0.65rem;
+    width: 100%;
+  }
+  
+  .booking-title {
+    font-size: 0.9rem;
+  }
+  
+  .section-subtitle {
+    font-size: 0.75rem;
+  }
+  
+  .date-option {
+    padding: 0.2rem;
+    font-size: 0.65rem;
+  }
+  
+  .time-slot {
+    padding: 0.2rem;
+    font-size: 0.65rem;
+  }
+  
+  .visit-price {
+    padding: 0.25rem;
+    width: 100%;
+  }
+  
+  .price-label {
+    font-size: 0.7rem;
+  }
+  
+  .price-value {
+    font-size: 0.75rem;
+  }
+  
+  .book-now-btn {
+    padding: 0.25rem;
+    font-size: 0.75rem;
+    width: 100%;
+  }
+  
+  .date-nav-btn {
+    padding: 0.2rem;
+    font-size: 0.55rem;
   }
 }
 
-@media (max-width: 400px) {
-  .main-content {
-    padding: 0.25rem;
-  }
-  .profile-picture {
-    width: 50px;
-    height: 50px;
-  }
-  .technician-name {
-    font-size: 0.85rem;
-  }
-  .technician-specialization {
-    font-size: 0.7rem;
-  }
-  .detail-item {
-    font-size: 0.7rem;
-  }
-  .bio-title,
-  .bio-content,
-  .booking-title,
-  .section-subtitle,
-  .date-option,
-  .time-slot,
-  .visit-price,
-  .price-label,
-  .price-value,
-  .book-now-btn,
-  .date-nav-btn,
-  .reviews-title,
-  .review-form,
-  .review-card,
-  .star-button,
-  .char-count {
-    font-size: 0.7rem;
-  }
+/* Dark Mode Styles */
+
+.dark .technician-profile-page {
+  background-color: var(--primary-bg);
+  color: var(--primary-text);
+}
+
+.dark .loading-container,
+.dark .error-container {
+  background-color: #2D2E30;
+  color: var(--primary-text);
+}
+
+.dark .loading-spinner {
+  border-color: var(--border-color);
+  border-top-color: var(--primary);
+}
+
+.dark .error-message {
+  color: #f87171;
+}
+
+.dark .header-contact-bar {
+  background: linear-gradient(135deg, #f59e0b, #f97316);
+}
+.dark .review-form {
+  background-color: var(--secondary-bg);
+  color: white;
+}
+.dark .review-card{
+  background: var(--input-bg);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  color: white;
+}
+.dark .main-nav {
+  background: var(--secondary-bg);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.dark .logo-text {
+  color: var(--primary-text);
+}
+
+.dark h3 {
+  color: white;
+}
+
+.dark label {
+  color: white;
+}
+
+.dark .nav-link {
+  color: var(--text-muted);
+}
+
+.dark .nav-link:hover {
+  color: var(--primary);
+}
+
+.dark .nav-icon {
+  color: var(--text-muted);
+}
+
+.dark .nav-icon:hover {
+  color: var(--primary);
+}
+
+
+.dark .page-title h1 {
+  color: var(--primary-color);
+}
+
+.dark .technician-info-card {
+  background: var(--secondary-bg);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+
+.dark .technician-name {
+  color: var(--primary-text);
+}
+
+.dark .technician-specialization {
+  color: var(--text-muted);
+}
+
+.dark .detail-item {
+  border-bottom-color: var(--border-color);
+}
+
+.dark .detail-label {
+  color: var(--text-muted);
+}
+
+.dark .detail-value {
+  color: var(--primary-text);
+}
+
+.dark .bio-title {
+  color: var(--primary-text);
+}
+
+.dark .bio-content {
+  color: var(--primary-text);
+}
+
+.dark .booking-info-card {
+  background: var(--secondary-bg);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+
+.dark .booking-title {
+  color: var(--primary-text);
+}
+
+.dark .section-subtitle {
+  color: var(--primary-text);
+}
+
+.dark .date-option {
+  background: var(--input-bg);
+  color: var(--primary-text-dark);
+}
+
+.dark .date-option:hover {
+  background: var(--border-color);
+}
+
+.dark .date-option.selected {
+  background: var(--primary);
+  color: var(--primary-text);
+}
+
+.dark .date-option.unavailable {
+  background: #7f1d1d;
+  color: #fecaca;
+  border-color: #ef4444;
+}
+
+.dark .date-option.loading {
+  background: var(--input-bg);
+  color: var(--text-muted);
+  border-color: var(--border-color);
+}
+
+.dark .time-slot {
+  background: var(--input-bg);
+  color: var(--text-muted);
+}
+
+.dark .time-slot.unavailable {
+  background-color: #7f1d1d;
+  color: #fecaca;
+  border-color: #ef4444;
+}
+
+.dark .time-slot.loading {
+  background-color: var(--input-bg);
+  color: var(--text-muted);
+  border-color: var(--border-color);
+}
+.dark .review-actions{
+  background: var(--icon-color);
+  color: var(--primary-text-dark);
+}
+.dark .visit-price {
+  background: var(--input-bg);
+  color: var(--text-muted);
+}
+
+.dark .price-label {
+  color: var(--primary-text-dark);
+}
+
+.dark .price-value {
+  color: var(--primary);
+}
+
+.dark .book-now-btn {
+  background: var(--primary);
+  color: var(--primary-text);
+}
+
+.dark .book-now-btn:hover {
+  background: var(--secondary);
+}
+
+.dark .book-now-btn:disabled,
+.dark .book-now-btn.disabled {
+  background: var(--text-muted);
+  color: var(--border-color);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.dark .book-now-btn:disabled:hover,
+.dark .book-now-btn.disabled:hover {
+  background: var(--text-muted);
+}
+
+.dark .date-nav-btn {
+  background: var(--input-bg);
+  color: var(--primary-text-dark);
+  border-color: var(--border-color);
+}
+
+.dark .date-nav-btn:hover {
+  background: var(--icon-color);
+}
+
+.dark .reviews-section {
+  
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+.dark .review-card {
+  background: var(--secondary-bg);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
+
+
+.dark .reviews-title {
+  color: var(--primary-text);
+}
+
+.dark .review-item {
+  background: var(--secondary-bg);
+  border-color: var(--border-color);
+  color: var(--primary-text-dark);
+}
+
+.dark .review-header {
+  border-bottom-color: var(--border-color);
+  color: var(--text-muted);
+}
+
+.dark .reviewer-name {
+color: #ddd7d7 ;
+}
+
+.dark .review-date {
+  color: var(--text-muted);
+}
+
+.dark .review-text {
+  color:  var(--primary-text);
+}
+
+.dark .review-author {
+   color: var(--text-muted);
+}
+
+.dark .fa-star {
+  color: #fbbf24 !important;
+}
+
+.dark .star-empty {
+  color:  var(--primary-text);
+}
+/* Divider before reviews section */
+.reviews-divider {
+  border: none;
+  border-top: 3px solid #e5e7eb;
+  margin: 2rem 0 2rem 0;
+  width: 100%;
 }
 </style>
