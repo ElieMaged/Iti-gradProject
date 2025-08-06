@@ -45,12 +45,12 @@
               </tr>
             </thead>
             <tbody>
-              <tr 
-                v-for="(technician, index) in filteredTechnicians" 
-                :key="technician.id" 
+              <tr
+                v-for="(technician, index) in paginatedTechnicians"
+                :key="technician.id"
                 class="table-row"
               >
-                <td>{{ index + 1 }}</td>
+                <td>{{ (currentPage - 1) * techniciansPerPage + index + 1 }}</td>
                 <td class="technician-cell">
                   <img :src="technician.avatar" :alt="technician.name" class="technician-avatar">
                   {{ technician.name }}
@@ -72,6 +72,12 @@
             </tbody>
           </table>
         </div>
+        <pagination
+          v-if="totalPages > 1"
+          :total-pages="totalPages"
+          :initial-page="currentPage"
+          @page-changed="handlePageChange"
+        />
 
         <!-- Empty State -->
         <div v-else class="empty-state">
@@ -84,17 +90,20 @@
 
 <script>
 import AdminSidebar from '../../components/admin-sidebar.vue';
+import Pagination from '../../components/pagination.vue';
 import { collection, getDocs, doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 
 export default {
-  components: { AdminSidebar },
+  components: { AdminSidebar, Pagination },
   data() {
     return {
       searchQuery: '',
       technicians: [],
       loading: true,
-      error: null
+      error: null,
+      currentPage: 1,
+      techniciansPerPage: 15
     };
   },
   computed: {
@@ -107,6 +116,16 @@ export default {
         technician.specialization?.toLowerCase().includes(q) ||
         technician.location?.toLowerCase().includes(q)
       );
+    },
+    
+    paginatedTechnicians() {
+      const startIndex = (this.currentPage - 1) * this.techniciansPerPage;
+      const endIndex = startIndex + this.techniciansPerPage;
+      return this.filteredTechnicians.slice(startIndex, endIndex);
+    },
+    
+    totalPages() {
+      return Math.ceil(this.filteredTechnicians.length / this.techniciansPerPage);
     }
   },
   async mounted() {
@@ -184,6 +203,17 @@ export default {
         console.error('❌ Error deleting technician:', error);
         alert(this.$t('failedToDeleteTechnician'));
       }
+    },
+    
+    handlePageChange(page) {
+      this.currentPage = page;
+      // Scroll to top of table when changing pages
+      this.$nextTick(() => {
+        const tableWrapper = this.$el.querySelector('.table-wrapper');
+        if (tableWrapper) {
+          tableWrapper.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
     }
   }
 };
@@ -561,5 +591,12 @@ export default {
   .action-btn {
     padding: 0.2rem;
   }
+}
+
+/* Pagination styles */
+.pagination-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
 }
 </style>
