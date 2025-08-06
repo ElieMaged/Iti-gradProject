@@ -182,6 +182,11 @@ const messages = {
     phoneNumber: "Phone Number",
     totalAmount: "Total Amount",
     egp: "EGP",
+    //Expert Team
+    meetOurExpertTechnicians: "Meet Our Expert Technicians",
+    ourTechniciansSubtitle: "Our technicians are highly skilled and ready to help you.",
+    ourTechniciansDescription:
+      "Browse our team of professionals and view their profiles to find the right expert for your needs.",
     // Admin Payment Management
     paymentManagement: "Payment Management",
     totalRevenue: "Total Revenue",
@@ -206,13 +211,13 @@ const messages = {
     transactionRecorded: "Transaction recorded for admin review",
     creditsUpdated: "Credits updated successfully",
     // PayPal Payout
-    paypalPayoutToTechnician: "PayPal Payout to Technician",
+    paypalPayoutToTechnician: "Payout to Technician",
     availableCredits: "Available Credits",
     selectTechnician: "Select Technician",
     chooseTechnician: "Choose a technician...",
     payoutAmount: "Amount (EGP)",
     enterAmountEGP: "Enter amount in EGP",
-    payoutReason: "Reason (Optional)",
+    payoutReason: "Bank Number",
     payoutReasonPlaceholder: "e.g., Bonus, Commission, etc.",
     paypalFee: "PayPal Fee",
     totalDeduction: "Total Deduction",
@@ -946,6 +951,10 @@ const messages = {
     pending: 'Pending',
     withdrawFunds: 'Withdraw Funds',
     amount: 'Amount',
+    bankName: 'Bank Name',
+    accountNumber: 'Account Number',
+    enterBankName: 'Enter bank name',
+    enterAccountNumber: 'Enter account number',
     paypalEmail:'Age',
     
     // Technician Reviews Page
@@ -1276,7 +1285,12 @@ const messages = {
     userDescription: 'انضم إلينا الآن لحجز فنيين موثوقين بالقرب منك. سنربطك بالمحترفين في بضع نقرات فقط.',
     technicianDescription: 'سجل لتقديم خدماتك والوصول إلى المزيد من العملاء في منطقتك. أنشئ ملفك الشخصي وابدأ في استقبال الحجوزات.',
     getStarted: 'ابدأ الآن',
-    // Admin Edit Profile
+    //expert team
+    meetOurExpertTeam: 'تعرف على فريقنا الخبير',
+    meetOurExpertTechnicians: 'تعرف على فنيينا الخبراء',
+    ourTechniciansSubtitle: 'فنيونا ذوو مهارات عالية ومستعدون لمساعدتك.',
+    ourTechniciansDescription:"تصفح فريقنا من المحترفين واطلع على ملفاتهم الشخصية للعثور على الخبير المناسب لاحتياجاتك."  ,
+      // Admin Edit Profile
     editProfile: 'تعديل الملف الشخصي',
     fullName: 'الاسم الكامل',
     emailAddress: 'البريد الإلكتروني',
@@ -1410,6 +1424,9 @@ const messages = {
     selectDateToSeeSlots: "اختر تاريخاً لرؤية المواعيد المتاحة",
     visitPrice: "سعر الزيارة",
     airCondition: "تكييف الهواء",
+    airConditionInstallation: "تركيب تكييف الهواء",
+    airConditionRepair: "إصلاح تكييف الهواء",
+
     // Service descriptions for overview section
     plumbingServiceTitle: "السباكة",
     plumbingServiceDesc: "خدمات سباكة احترافية تشمل الإصلاح والتركيب والصيانة",
@@ -1548,12 +1565,12 @@ const messages = {
     chooseTechnician: "اختر فني...",
     payoutAmount: "المبلغ (جنيه مصري)",
     enterAmountEGP: "أدخل المبلغ بالجنيه المصري",
-    payoutReason: "السبب (اختياري)",
+    payoutReason: "رقم حساب البنك",
     payoutReasonPlaceholder: "مثال: مكافأة، عمولة، إلخ",
     paypalFee: "رسوم PayPal",
     totalDeduction: "إجمالي الخصم",
     remainingCredits: "الرصيد المتبقي",
-    sendPaypalPayout: "إرسال تحويل PayPal",
+    sendPaypalPayout: "إرسال تحويل ",
     processing: "جاري المعالجة...",
     payoutInitiated: "تم بدء التحويل بنجاح",
     payoutFailed: "فشل في بدء التحويل",
@@ -1628,6 +1645,15 @@ const messages = {
     successful: "نجاح",
     edit: "تعديل",
     paypalUpdated: "تم تحديث PayPal",
+    // Tech Payment Arabic
+    currentBalance: "الرصيد الحالي",
+    withdrawFunds: "سحب الأموال",
+    amount: "المبلغ",
+    bankName: "اسم البنك",
+    accountNumber: "رقم الحساب",
+    enterBankName: "أدخل اسم البنك",
+    enterAccountNumber: "أدخل رقم الحساب",
+    withdraw: "سحب",
     // TechRegister
     location: "الموقع",
     government: "الحكومة",
@@ -1991,6 +2017,9 @@ const messages = {
     actions: "الإجراءات",
     editBooking: "تعديل الحجز",
     deleteBooking: "حذف الحجز",
+
+    electricalApplianceTechnician: "فني الأجهزة الكهربائية",
+    
     
     // Pending Application
     applicationPending: "الطلب قيد الانتظار",

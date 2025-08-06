@@ -1,6 +1,7 @@
 <template>
-  <section class="services-section py-28">
+  <section class="services-section py-16">
     <div class="custom-container">
+      <h3 class="services-title">Our Services</h3>
        <div class="services-overview-grid">
            <div 
              v-for="service in servicesList" 
@@ -403,8 +404,8 @@ viewProfile(member) {
   }
 }
 .services-title {
-  font-size: 44px;
-  font-weight: 600;
+  font-size: 40px;
+  font-weight: 550;
   text-align: center;
   margin-bottom: 40px;
   font-family: Outfit, sans-serif;

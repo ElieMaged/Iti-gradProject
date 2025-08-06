@@ -210,15 +210,13 @@ onMounted(() => {
   background-color: var(--primary-bg);
 }
 
-#admin-profile-wrapper {
-  max-width: 1000px;
-}
 
 #admin-profile-card {
   background-color: white;
   border-radius: 1rem;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
   padding: 2rem;
+  width: auto;
 }
 
 .dark #admin-profile-card {

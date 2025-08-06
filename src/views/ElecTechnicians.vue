@@ -132,6 +132,7 @@ async function fetchTechnicians() {
     const querySnapshot = await getDocs(collection(db, 'technicians'))
     firebaseTechnicians.value = querySnapshot.docs
       .map(doc => ({ id: doc.id, ...doc.data() }))
+      .filter(tech => tech.specialization === 'Electrical Appliances') // Only include registered technicians
   } catch (error) {
     console.error('Error fetching technicians:', error)
   } finally {

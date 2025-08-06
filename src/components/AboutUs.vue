@@ -57,8 +57,8 @@ export default {
 
 <style scoped>
 .about-us {
-  background: #f3d361;
-  padding: 40px 0;
+  background: #fae084;
+  padding: 16px 0;
 
   width: 100%;
   position: relative;
@@ -175,7 +175,7 @@ export default {
   object-fit: cover;
 }
 .dark .about-us {
-  background-color: var(--secondary);
+  background-color: #f4c03dea;
 }
 @media (max-width: 1000px) {
   .about-container {
@@ -201,9 +201,9 @@ export default {
 }
 
 .about-title {
-  font-size: 3.5rem;
+  font-size: 3rem;
   font-weight: 700;
-  color: #333;
+  color: #1f1f1f;
   line-height: 1.2;
   margin-bottom: 24px;
   font-family: Outfit, sans-serif;
@@ -220,7 +220,7 @@ export default {
   font-family: Outfit, sans-serif;
 }
 .dark .about-description {
-  color: var(--primary-text);
+  color: #555; 
 }
 .about-features {
   display: flex;
@@ -257,7 +257,7 @@ export default {
 .feature-title {
   font-size: 1.2rem;
   font-weight: 600;
-  color: #333;
+  color: #1f1f1f;
   margin-bottom: 8px;
   font-family: Outfit, sans-serif;
 }
@@ -269,10 +269,10 @@ export default {
   font-family: Outfit, sans-serif;
 }
 .dark .feature-title {
-  color: var(--primary-text);
+ color: #1f1f1f;
 }
 .dark .feature-description {
-  color: var(--primary-text);
+  color: #555;
 }
 
 .about-btn {

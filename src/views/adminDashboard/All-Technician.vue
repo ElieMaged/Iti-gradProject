@@ -130,7 +130,7 @@ export default {
           return {
             id: doc.id,
             name: data.fullName || 'Unknown',
-            avatar: data.idPhotoUrl || 'https://randomuser.me/api/portraits/men/1.jpg',
+            avatar: data.profilePhotoUrl || 'https://randomuser.me/api/portraits/men/1.jpg',
             specialization: data.specialization || 'N/A',
             location: `${data.government || 'N/A'}, ${data.district || 'N/A'}`,
             email: data.email || 'N/A',
