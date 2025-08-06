@@ -68,7 +68,7 @@
 <script>
 import AdminSidebar from '../../components/admin-sidebar.vue';
 import Pagination from '../../components/pagination.vue';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 
 export default {
@@ -103,9 +103,34 @@ export default {
         this.loading = true;
         this.error = null;
         const snapshot = await getDocs(collection(db, 'bookings'));
-        this.bookings = snapshot.docs
-          .map(doc => ({ id: doc.id, ...doc.data() }))
-          .filter(booking => booking.status && booking.status.toLowerCase() === 'pending');
+        const now = new Date();
+        const pending = [];
+        for (const docSnap of snapshot.docs) {
+          const booking = { id: docSnap.id, ...docSnap.data() };
+          if (booking.status && booking.status.toLowerCase() === 'pending') {
+            // Parse booking date and time
+            let bookingDate = new Date(booking.date);
+            // If time is present, try to parse it for more accuracy
+            if (booking.time) {
+              // Example: '4 - 5 pm' or '16:00'
+              const timeMatch = booking.time.match(/(\d{1,2})(?::(\d{2}))?\s*-\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i);
+              if (timeMatch) {
+                let hour = parseInt(timeMatch[1]);
+                let minute = timeMatch[2] ? parseInt(timeMatch[2]) : 0;
+                const ampm = timeMatch[5];
+                if (ampm && ampm.toLowerCase() === 'pm' && hour < 12) hour += 12;
+                bookingDate.setHours(hour, minute, 0, 0);
+              }
+            }
+            if (bookingDate < now) {
+              // Move to completed
+              await updateDoc(doc(db, 'bookings', booking.id), { status: 'completed' });
+            } else {
+              pending.push(booking);
+            }
+          }
+        }
+        this.bookings = pending;
       } catch (e) {
         this.error = 'Failed to fetch bookings';
       } finally {
