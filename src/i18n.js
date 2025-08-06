@@ -948,6 +948,10 @@ const messages = {
     pending: 'Pending',
     withdrawFunds: 'Withdraw Funds',
     amount: 'Amount',
+    bankName: 'Bank Name',
+    accountNumber: 'Account Number',
+    enterBankName: 'Enter bank name',
+    enterAccountNumber: 'Enter account number',
     paypalEmail:'Age',
     
     // Technician Reviews Page
@@ -1630,6 +1634,15 @@ const messages = {
     successful: "نجاح",
     edit: "تعديل",
     paypalUpdated: "تم تحديث PayPal",
+    // Tech Payment Arabic
+    currentBalance: "الرصيد الحالي",
+    withdrawFunds: "سحب الأموال",
+    amount: "المبلغ",
+    bankName: "اسم البنك",
+    accountNumber: "رقم الحساب",
+    enterBankName: "أدخل اسم البنك",
+    enterAccountNumber: "أدخل رقم الحساب",
+    withdraw: "سحب",
     // TechRegister
     location: "الموقع",
     government: "الحكومة",

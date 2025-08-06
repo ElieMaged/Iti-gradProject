@@ -18,27 +18,24 @@
           <span class="pending-amount">{{ pendingBalance }} EGP</span>
         </div>
       </div>
-      <div class="payment-method-card">
-        <div class="payment-method-header">
-          <span class="payment-method-title">{{ $t('yourPaymentMethod') }}</span>
-          <button class="edit-btn">{{ $t('edit') }}</button>
-        </div>
-        <div class="payment-method-type">{{ $t('paypal') }}</div>
-        <div class="payment-method-email">{{ technicianEmail || 'exampletech@gmail.com' }}</div>
-      </div>
+
       <div class="withdraw-card">
         <div class="withdraw-title">{{ $t('withdrawFunds') }}</div>
         <form class="withdraw-form">
-          <div class="withdraw-fields">
-            <div class="withdraw-field">
-              <label>{{ $t('amount') }}</label>
-              <input type="number" :placeholder="$t('enterAmount')" v-model="withdrawAmount" />
-            </div>
-            <div class="withdraw-field">
-              <label>{{ $t('paypalEmail') }}</label>
-                <input type="email" :placeholder="$t('exampleEmail')" v-model="withdrawEmail" />
-            </div>
-          </div>
+                     <div class="withdraw-fields">
+             <div class="withdraw-field">
+               <label>{{ $t('amount') }}</label>
+               <input type="number" :placeholder="$t('enterAmount')" v-model="withdrawAmount" />
+             </div>
+                           <div class="withdraw-field">
+                <label>{{ $t('bankName') }}</label>
+                <input type="text" :placeholder="$t('enterBankName')" v-model="bankName" />
+              </div>
+              <div class="withdraw-field">
+                <label>{{ $t('accountNumber') }}</label>
+                <input type="text" :placeholder="$t('enterAccountNumber')" v-model="accountNumber" />
+              </div>
+           </div>
           <button class="withdraw-btn" type="submit" @click.prevent="handleWithdraw">{{ $t('withdraw') }}</button>
         </form>
       </div>
@@ -80,7 +77,8 @@ export default {
       pendingBalance: 0,
       technicianEmail: '',
       withdrawAmount: '',
-      withdrawEmail: '',
+      bankName: '',
+      accountNumber: '',
       recentTransactions: [],
       loading: true
     }
@@ -187,8 +185,8 @@ export default {
     },
     
     async handleWithdraw() {
-      if (!this.withdrawAmount || !this.withdrawEmail) {
-        alert('Please enter both amount and PayPal email');
+      if (!this.withdrawAmount || !this.bankName || !this.accountNumber) {
+        alert('Please enter amount, bank name, and account number');
         return;
       }
       
@@ -206,13 +204,15 @@ export default {
       // Here you would implement the withdrawal logic
       console.log('Processing withdrawal:', {
         amount: amount,
-        email: this.withdrawEmail,
+        bankName: this.bankName,
+        accountNumber: this.accountNumber,
         currentBalance: this.currentBalance
       });
       
       alert('Withdrawal request submitted successfully');
       this.withdrawAmount = '';
-      this.withdrawEmail = '';
+      this.bankName = '';
+      this.accountNumber = '';
     }
   },
   
@@ -317,65 +317,7 @@ export default {
 .dark .pending-amount {
   color: var(--primary-text) !important;
 }
-.payment-method-card {
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  padding: 28px 40px 24px 40px;
-  margin: 0 0 32px 48px;
-  max-width: 900px;
-}
-.dark .payment-method-card {
-  background: var(--secondary-bg);
-  color: var(--primary-text) !important;
-}
-.payment-method-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-.payment-method-title {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #222;
-}
-.dark .payment-method-title {
-  color: var(--primary-text) !important;
-}
-.edit-btn {
-  background: #948AB8;
-  color: #fff;
-  border: none;
-  border-radius: 12px;
-  padding: 6px 24px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.dark .edit-btn {
-  background: var(--primary-text) !important;
-}
-.edit-btn:hover {
-  background: #625397;
-}
-.payment-method-type {
-  color: #948AB8;
-  font-weight: 600;
-  font-size: 1.1rem;
-  margin-bottom: 2px;
-}
-.dark .payment-method-type {
-  color: var(--primary-text) !important;
-}
-.payment-method-email {
-  color: #222;
-  font-size: 1.1rem;
-}
-.dark .payment-method-email {
-  color: var(--primary-text) !important;
-}
+
 .withdraw-card {
   background: #fff;
   border-radius: 18px;
@@ -406,7 +348,8 @@ export default {
   color: var(--primary-text) !important;
 }
 .withdraw-fields {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 18px;
   margin-bottom: 10px;
 }
@@ -443,7 +386,7 @@ export default {
   color: var(--primary-text) !important;
 }
 .withdraw-btn {
-  background: #625397;
+  background: var(--primary-color);
   color: #fff;
   border: none;
   border-radius: 25px;
@@ -455,13 +398,15 @@ export default {
   transition: background 0.2s;
 }
 .dark .withdraw-btn {
-  background: var(--primary-text) !important;
+  background: var(--primary-color) !important;
 }
 .withdraw-btn:hover {
-  background: #948AB8;
+  background: var(--primary-color);
+  opacity: 0.9;
 }
 .dark .withdraw-btn:hover {
-  background: var(--primary-text) !important;
+  background: var(--primary-color) !important;
+  opacity: 0.9;
 }
 
 
@@ -472,14 +417,13 @@ export default {
 
   
   .payment-balance-card,
-  .payment-method-card,
   .withdraw-card {
     padding: 1.5rem;
     margin: 0 0 1.5rem 0;
   }
   
   .withdraw-fields {
-    flex-direction: column;
+    grid-template-columns: 1fr;
     gap: 1rem;
   }
 }
@@ -503,7 +447,6 @@ export default {
   }
   
   .payment-balance-card,
-  .payment-method-card,
   .withdraw-card {
     margin: 0 0 24px 0;
     max-width: 100%;
@@ -542,7 +485,6 @@ export default {
   }
   
   .payment-balance-card,
-  .payment-method-card,
   .withdraw-card {
     padding: 12px 6px 10px 6px;
     border-radius: 12px;
@@ -554,10 +496,7 @@ export default {
     width: 100%;
   }
   
-  .edit-btn {
-    padding: 4px 12px;
-    font-size: 0.95rem;
-  }
+
   
   .current-balance-label,
   .pending-label {
@@ -571,11 +510,7 @@ export default {
     padding-right: 8px;
   }
   
-  .payment-method-header {
-    flex-direction: column;
-    gap: 0.5rem;
-    align-items: flex-start;
-  }
+
 }
 
 @media (max-width: 600px) {
@@ -591,7 +526,6 @@ export default {
   }
   
   .payment-balance-card,
-  .payment-method-card,
   .withdraw-card {
     padding: 8px 2px 6px 2px;
     border-radius: 10px;
@@ -602,10 +536,7 @@ export default {
     font-size: 0.9rem;
   }
   
-  .edit-btn {
-    padding: 2px 8px;
-    font-size: 0.85rem;
-  }
+
   
   .current-balance-label,
   .pending-label {
@@ -827,7 +758,6 @@ export default {
   }
   
   .payment-balance-card,
-  .payment-method-card,
   .withdraw-card {
     padding: 6px 1px 4px 1px;
     border-radius: 8px;
@@ -838,10 +768,7 @@ export default {
     font-size: 0.85rem;
   }
   
-  .edit-btn {
-    padding: 2px 6px;
-    font-size: 0.8rem;
-  }
+
   
   .current-balance-label,
   .pending-label {
@@ -855,14 +782,8 @@ export default {
     padding-right: 2px;
   }
   
-  .payment-method-title,
-  .withdraw-title {
+    .withdraw-title {
     font-size: 1rem;
-  }
-  
-  .payment-method-type,
-  .payment-method-email {
-    font-size: 0.9rem;
   }
 }
 
@@ -877,7 +798,6 @@ export default {
   }
   
   .payment-balance-card,
-  .payment-method-card,
   .withdraw-card {
     padding: 4px 0.5px 2px 0.5px;
     border-radius: 6px;
@@ -888,10 +808,7 @@ export default {
     font-size: 0.8rem;
   }
   
-  .edit-btn {
-    padding: 1px 4px;
-    font-size: 0.75rem;
-  }
+
   
   .current-balance-label,
   .pending-label {
@@ -905,30 +822,21 @@ export default {
     padding-right: 1px;
   }
   
-  .payment-method-title,
-  .withdraw-title {
+    .withdraw-title {
     font-size: 0.9rem;
-  }
-  
-  .payment-method-type,
-  .payment-method-email {
-    font-size: 0.8rem;
   }
 }
 .payment-balance-card,
-.payment-method-card,
 .withdraw-card {
   transition: box-shadow 0.2s, border 0.2s;
   border: 1.5px solid #ececec;
 }
 .payment-balance-card:hover,
-.payment-method-card:hover,
 .withdraw-card:hover {
   box-shadow: 0 4px 16px rgba(98,83,151,0.10);
   border: 1.5px solid #948AB8;
 }
 .payment-balance-card:not(:last-child),
-.payment-method-card:not(:last-child),
 .withdraw-card:not(:last-child) {
   border-bottom: 1px solid #ececec;
 }
@@ -936,7 +844,6 @@ export default {
   border: 1.5px solid #948AB8;
   background: #f5f5fa;
 }
-.edit-btn:focus,
 .withdraw-btn:focus {
   outline: 2px solid #948AB8;
 }
