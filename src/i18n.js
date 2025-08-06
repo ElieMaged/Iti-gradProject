@@ -182,6 +182,11 @@ const messages = {
     phoneNumber: "Phone Number",
     totalAmount: "Total Amount",
     egp: "EGP",
+    //Expert Team
+    meetOurExpertTechnicians: "Meet Our Expert Technicians",
+    ourTechniciansSubtitle: "Our technicians are highly skilled and ready to help you.",
+    ourTechniciansDescription:
+      "Browse our team of professionals and view their profiles to find the right expert for your needs.",
     // Admin Payment Management
     paymentManagement: "Payment Management",
     totalRevenue: "Total Revenue",
@@ -1282,7 +1287,12 @@ const messages = {
     userDescription: 'انضم إلينا الآن لحجز فنيين موثوقين بالقرب منك. سنربطك بالمحترفين في بضع نقرات فقط.',
     technicianDescription: 'سجل لتقديم خدماتك والوصول إلى المزيد من العملاء في منطقتك. أنشئ ملفك الشخصي وابدأ في استقبال الحجوزات.',
     getStarted: 'ابدأ الآن',
-    // Admin Edit Profile
+    //expert team
+    meetOurExpertTeam: 'تعرف على فريقنا الخبير',
+    meetOurExpertTechnicians: 'تعرف على فنيينا الخبراء',
+    ourTechniciansSubtitle: 'فنيونا ذوو مهارات عالية ومستعدون لمساعدتك.',
+    ourTechniciansDescription:"تصفح فريقنا من المحترفين واطلع على ملفاتهم الشخصية للعثور على الخبير المناسب لاحتياجاتك."  ,
+      // Admin Edit Profile
     editProfile: 'تعديل الملف الشخصي',
     fullName: 'الاسم الكامل',
     emailAddress: 'البريد الإلكتروني',
@@ -1416,6 +1426,9 @@ const messages = {
     selectDateToSeeSlots: "اختر تاريخاً لرؤية المواعيد المتاحة",
     visitPrice: "سعر الزيارة",
     airCondition: "تكييف الهواء",
+    airConditionInstallation: "تركيب تكييف الهواء",
+    airConditionRepair: "إصلاح تكييف الهواء",
+
     // Service descriptions for overview section
     plumbingServiceTitle: "السباكة",
     plumbingServiceDesc: "خدمات سباكة احترافية تشمل الإصلاح والتركيب والصيانة",
@@ -1999,6 +2012,9 @@ const messages = {
     actions: "الإجراءات",
     editBooking: "تعديل الحجز",
     deleteBooking: "حذف الحجز",
+
+    electricalApplianceTechnician: "فني الأجهزة الكهربائية",
+    
     
     // Admin Users Management
     userManagement: "إدارة المستخدمين",

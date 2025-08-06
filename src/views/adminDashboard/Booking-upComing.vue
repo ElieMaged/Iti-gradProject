@@ -160,7 +160,6 @@ const filteredBookings = computed(() => {
 }
 
 .booking-container {
-  max-width: 80rem;
   margin: 0 auto;
 }
 .dark .booking-container {

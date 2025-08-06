@@ -2,7 +2,7 @@
   <div class="admin-dashboard-layout layout-container">
     <userSidebar :activeTab="activeTab" />
     <div class="previous-services-main mr-20 p-4">
-      <div class="max-w-6xl mx-auto">
+      <div class="">
         <div class="mb-8">
           <h1 class="page-title">{{ $t('previousServicesTitle') }}</h1>
           <p class="page-description">{{ $t('previousServicesDescription') }}</p>
@@ -439,6 +439,7 @@ onMounted(() => {
   min-height: 100vh;
   font-family: sans-serif;
   flex: 1;
+  width: auto;
 }
 
 .dark .previous-services-main {

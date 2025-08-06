@@ -521,10 +521,6 @@ export default {
   color: var(--primary-text);
 }
 
-.dashboard-container {
-  max-width: 80rem;
-}
-
 .title-search-row {
   display: flex;
   align-items: center;

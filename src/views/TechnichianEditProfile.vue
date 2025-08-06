@@ -1,4 +1,5 @@
 <template>
+
   <div class="admin-dashboard-layout">
     <Sidebar :activeMenu="activeMenu" @navigate="handleSidebarNavigate" />
     <div class="edit-profile-main mr-20 p-4">
@@ -278,7 +279,6 @@ onMounted(() => {
   background: var(--grey-bg);
 }
 .edit-profile-wrapper {
-  max-width: 1000px;
   margin: 0 auto;
 }
 .edit-profile-card {
@@ -286,6 +286,7 @@ onMounted(() => {
   border-radius: 1rem;
   box-shadow: 0 10px 15px rgba(0,0,0,0.08);
   padding: 2rem;
+  width: auto;
 }
 .page-title {
   color: var(--primary-color);

@@ -417,12 +417,11 @@ export default {
 
 .technician-profile-bg {
   flex: 1;
-  padding: 2.5rem;
+  padding: 2rem 0;
 
 }
 
 .technician-profile-main {
-  max-width: 80rem;
   margin-right: 80px;
 }
 
@@ -431,6 +430,7 @@ export default {
   border-radius: 0.75rem;
   padding: 2rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  width: auto;
 }
 
 .header-row {

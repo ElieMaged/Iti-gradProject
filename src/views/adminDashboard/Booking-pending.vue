@@ -134,7 +134,6 @@ export default {
   background-color: var(--primary-bg);
 }
 .booking-container {
-  max-width: 80rem;
   margin: 0 auto;
 }
 .dark .booking-container {

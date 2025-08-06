@@ -4,9 +4,8 @@
             :activeMenu="activeMenu"
             @navigate="handleSidebarNavigate"
         />
-        <div class="container">
     <div class="payment-content p-4 mr-20">
-      <h1 class="page-title lg:ml-15">{{ $t('payment') }}</h1>  
+      <h1 class="page-title">{{ $t('payment') }}</h1>  
       <div class="payment-balance-card">
 
         <div class="balance-labels">
@@ -57,7 +56,6 @@
         </div>
       </div>
     </div>
-  </div>
 </template>
 
 <script>
@@ -231,7 +229,7 @@ export default {
 
 .payment-content {
   flex: 1;
-  padding: 32px 0 0 0;
+  width: auto;
 }
 .payment-page {
   background: #f5f5f7;
@@ -257,8 +255,7 @@ export default {
   border-radius: 18px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
   padding: 32px 40px 24px 40px;
-  margin: 0 0 32px 48px;
-  max-width: 900px;
+  margin-bottom: 20px;
 }
 .dark .payment-balance-card {
   background: var(--secondary-bg);
@@ -323,8 +320,6 @@ export default {
   border-radius: 18px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
   padding: 28px 40px 24px 40px;
-  margin: 0 0 32px 48px;
-  max-width: 900px;
 }
 .dark .withdraw-card {
   background: var(--secondary-bg);

@@ -1,12 +1,12 @@
 0<template>
-  <section class="expert-team" >
+<section class="expert-team" :dir="$i18n.locale === 'ar' ? 'rtl' : 'ltr'" :lang="$i18n.locale">
     <div class="team-header">
       <div class="team-title-section">
-        <h2 class="team-title">{{ $t('meetOurExpertTechnicians') || 'Meet Our Expert Technicians' }}</h2>
+        <h2 class="team-title">{{ $t('meetOurExpertTechnicians') }}</h2>
       </div>
       <div class="team-subtitle-section">
-        <h3 class="team-subtitle">{{ $t('ourTechniciansSubtitle') || 'Our technicians are highly skilled and ready to help you.' }}</h3>
-        <p class="team-description">{{ $t('ourTechniciansDescription') || 'Browse our team of professionals and view their profiles to find the right expert for your needs.' }}</p>
+        <h3 class="team-subtitle">{{ $t('ourTechniciansSubtitle') }}</h3>
+        <p class="team-description">{{ $t('ourTechniciansDescription') }}</p>
       </div>
     </div>
 
@@ -25,7 +25,7 @@
         <!-- Bottom Section - Information Area -->
         <div class="card-bottom-section">
           <h3 class="member-name">{{ $t(member.name) }}</h3>
-          <div class="member-specialization">{{ member.specialization }}</div>
+          <div class="member-specialization">{{ $t(member.specialization) }}</div>
           <p class="member-description">{{ $t(member.description) }}</p>
           
           <!-- Details Row -->
@@ -36,11 +36,11 @@
             </div>
             <div class="detail-item location-item">
               <i class="fas fa-map-marker-alt"></i>
-              <span>{{ member.location }}</span>
+              <span>{{ $t(member.location) }}</span>
             </div>
             <div class="detail-item price-item">
               <i class="fa-solid fa-dollar-sign"></i>
-              <span>{{ member.basePrice }} EGP</span>
+              <span>{{ member.basePrice }} {{ $t('EGP') }}</span>
             </div>
           </div>
           
@@ -717,5 +717,24 @@ export default {
     font-size: 0.85rem;
     padding: 8px 16px;
   }
+}
+/* RTL support for Arabic */
+[dir="rtl"] .expert-team {
+  direction: rtl;
+  text-align: right;
+}
+[dir="rtl"] .team-header,
+[dir="rtl"] .team-title-section,
+[dir="rtl"] .team-subtitle-section,
+[dir="rtl"] .team-cards,
+[dir="rtl"] .team-card,
+[dir="rtl"] .card-bottom-section {
+  text-align: right;
+}
+[dir="rtl"] .member-details {
+  flex-direction: row-reverse;
+}
+[dir="rtl"] .slider-points {
+  flex-direction: row-reverse;
 }
 </style>

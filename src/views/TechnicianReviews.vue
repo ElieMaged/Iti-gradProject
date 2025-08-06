@@ -284,9 +284,6 @@ export default {
   background-color: var(--primary-bg);
 }
 
-#admin-profile-wrapper {
-  max-width: 1000px;
-}
 
 #admin-profile-card {
   background-color: white;
