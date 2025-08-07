@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, reactive, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { auth, db } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
@@ -7,214 +7,148 @@ import { doc, setDoc } from 'firebase/firestore';
 import { ensureUserRole, fetchUserRole } from '../utils/userRole';
 import { sendWelcomeEmail } from '../utils/emailService';
 import { useI18n } from 'vue-i18n';
-import { computed, watch, reactive, onMounted } from 'vue';
-import emailjs from '@emailjs/browser';
 import { getGovernmentNames, getDistrictsForGovernment, governmentNamesAr, districtsAr } from '../data/egyptianLocations';
 
+const { t, locale } = useI18n();
+const router = useRouter();
+
 const formData = reactive({
-  fullName: '',
+  firstName: '',
+  lastName: '',
   email: '',
-  phoneNumber: '',
+  phone: '',
   password: '',
-  confirmPassword: '',
-  specialization: '',
-  experience: '',
-  bio: '',
-  basePrice: '',
+  confirmPass: '',
+  gender: '',
+  age: '',
   government: '',
   district: '',
-  willingToTravel: '',
-  confirmInfo: false,
   agreeTerms: false,
-  idPhotoBase64: null, // New field to store Base64 string
-  profilePhotoBase64: null, // New field to store profile picture Base64 string
-  paypalEmail: '' // New field for PayPal email
 });
-const { t, locale } = useI18n();
-const email = ref('');
-const password = ref('');
-const confirmPass = ref('');
-const firstName = ref('');
-const lastName = ref('');
-const gender = ref('');
-const age = ref('');
-const address = ref('');
-const area = ref('');
-const city = ref('');
-const phone = ref('');
+
 const error = ref('');
 const errors = ref({});
 const showTermsModal = ref(false);
-const router = useRouter();
-const cityOptions = computed(() => {
-  if (!selectedDistrict.value) return [];
-  return getCitiesForDistrict(selectedDistrict.value);
-});
+
 const governmentOptions = getGovernmentNames();
 const districtOptions = computed(() => {
   return formData.government ? getDistrictsForGovernment(formData.government) : [];
 });
-watch(() => formData.government, () => { formData.district = ''; })
+watch(() => formData.government, () => { formData.district = ''; });
 
 // Validation functions
-const validateEmail = (email) => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-};
-
-const validatePassword = (password) => {
-  return password.length >= 8;
-};
-
+const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+const validatePassword = (password) => password.length >= 8;
 const validateAge = (age) => {
   const ageNum = parseInt(age);
   return ageNum >= 18 && ageNum <= 120;
 };
-
-const validateRequired = (value, fieldName) => {
-  // Handle different data types
-  if (value === null || value === undefined) {
-    return false;
-  }
-  
-  // For strings, check if trimmed length is greater than 0
-  if (typeof value === 'string') {
-    return value.trim().length > 0;
-  }
-  
-  // For numbers, check if it's not 0 and not NaN
-  if (typeof value === 'number') {
-    return value !== 0 && !isNaN(value);
-  }
-  
-  // For other types, check if the value exists
-  return Boolean(value);
-};
-
-const validateName = (name) => {
-  return name.length >= 2 && /^[a-zA-Z\s]+$/.test(name);
-};
+const validateName = (name) => name.length >= 2 && /^[a-zA-Z\s]+$/.test(name);
+const validateRequired = (value) => value !== null && value !== undefined && String(value).trim().length > 0;
 
 // Main validation function
 const validateForm = () => {
   errors.value = {};
 
-  // First Name validation
-  if (!validateRequired(firstName.value, 'firstName')) {
-    errors.value.firstName = 'First name is required';
-  } else if (!validateName(firstName.value)) {
-    errors.value.firstName = 'First name must be at least 2 characters and contain only letters';
+  if (!validateRequired(formData.firstName)) {
+    errors.value.firstName = t('firstNameRequired');
+  } else if (!validateName(formData.firstName)) {
+    errors.value.firstName = t('firstNameInvalid');
   }
 
-  // Last Name validation
-  if (!validateRequired(lastName.value, 'lastName')) {
-    errors.value.lastName = 'Last name is required';
-  } else if (!validateName(lastName.value)) {
-    errors.value.lastName = 'Last name must be at least 2 characters and contain only letters';
+  if (!validateRequired(formData.lastName)) {
+    errors.value.lastName = t('lastNameRequired');
+  } else if (!validateName(formData.lastName)) {
+    errors.value.lastName = t('lastNameInvalid');
   }
 
-  // Email validation
-  if (!validateRequired(email.value, 'email')) {
-    errors.value.email = 'Email is required';
-  } else if (!validateEmail(email.value)) {
-    errors.value.email = 'Please enter a valid email address';
+  if (!validateRequired(formData.email)) {
+    errors.value.email = t('emailRequired');
+  } else if (!validateEmail(formData.email)) {
+    errors.value.email = t('emailInvalid');
   }
 
-  // Password validation
-  if (!validateRequired(password.value, 'password')) {
-    errors.value.password = 'Password is required';
-  } else if (!validatePassword(password.value)) {
-    errors.value.password = 'Password must be at least 8 characters long';
+  if (!validateRequired(formData.password)) {
+    errors.value.password = t('passwordRequired');
+  } else if (!validatePassword(formData.password)) {
+    errors.value.password = t('passwordInvalid');
   }
 
-  // Confirm Password validation
-  if (!validateRequired(confirmPass.value, 'confirmPass')) {
-    errors.value.confirmPass = 'Please confirm your password';
-  } else if (password.value !== confirmPass.value) {
-    errors.value.confirmPass = 'Passwords do not match';
+  if (!validateRequired(formData.confirmPass)) {
+    errors.value.confirmPass = t('confirmPasswordRequired');
+  } else if (formData.password !== formData.confirmPass) {
+    errors.value.confirmPass = t('passwordsDontMatch');
   }
 
-  // Gender validation
-  if (!validateRequired(gender.value, 'gender')) {
-    errors.value.gender = 'Please select your gender';
+  if (!validateRequired(formData.gender)) {
+    errors.value.gender = t('genderRequired');
   }
 
-  // Age validation
-  if (!validateRequired(age.value, 'age')) {
-    errors.value.age = 'Age is required';
-  } else if (!validateAge(age.value)) {
-    errors.value.age = 'Age must be between 18 and 120';
+  if (!validateRequired(formData.age)) {
+    errors.value.age = t('ageRequired');
+  } else if (!validateAge(formData.age)) {
+    errors.value.age = t('ageInvalid');
   }
 
-  // Address validation
-  if (!validateRequired(address.value, 'address')) {
-    errors.value.address = 'Address is required';
+  if (!validateRequired(formData.government)) {
+    errors.value.government = t('governmentRequired');
   }
 
-  // Area validation
-  if (!validateRequired(area.value, 'area')) {
-    errors.value.area = 'Area is required';
+  if (!validateRequired(formData.district)) {
+    errors.value.district = t('districtRequired');
   }
 
-  // City validation
-  if (!validateRequired(city.value, 'city')) {
-    errors.value.city = 'City is required';
+  if (!validateRequired(formData.phone)) {
+    errors.value.phone = t('phoneRequired');
   }
 
-  // Phone validation
-  if (!validateRequired(phone.value, 'phone')) {
-    errors.value.phone = 'Phone number is required';
+  if (!formData.agreeTerms) {
+    errors.value.agreeTerms = t('mustAgreeTerms');
   }
 
   return Object.keys(errors.value).length === 0;
 };
 
-
-
 const handleRegister = async () => {
   error.value = '';
-  
-  // Validate form
+
   if (!validateForm()) {
     return;
   }
 
   try {
     // Create user account with Firebase Auth
-    const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
-    
+    const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+
     // Create user document in Firestore
     const userDoc = {
-      fullName: `${firstName.value} ${lastName.value}`,
-      firstName: firstName.value,
-      lastName: lastName.value,
-      email: email.value,
-      gender: gender.value,
-      age: parseInt(age.value),
-      address: getGovernmentNames()[formData.government]+getDistrictsForGovernment(formData.government)[formData.district] || '',
-      area: getDistrictsForGovernment(formData.government)[formData.district] || '',
-      city: getGovernmentNames()[formData.government] || '',
-      phone: phone.value,
+      fullName: `${formData.firstName} ${formData.lastName}`,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      gender: formData.gender,
+      age: parseInt(formData.age),
+      address: `${getGovernmentNames()[formData.government] || formData.government} - ${getDistrictsForGovernment(formData.government)[formData.district] || formData.district}`,
+      area: getDistrictsForGovernment(formData.government)[formData.district] || formData.district,
+      city: getGovernmentNames()[formData.government] || formData.government,
+      phone: formData.phone,
       role: 'user',
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
     await setDoc(doc(db, 'users', userCredential.user.uid), userDoc);
-    
-    // Enforce persistent admin role for elie1400674@gmail.com
+
     await ensureUserRole(userCredential.user);
     await fetchUserRole(userCredential.user);
-    
-    // Send welcome email using EmailJS
+
     try {
-      await sendWelcomeEmail(email.value, firstName.value, lastName.value);
+      await sendWelcomeEmail(formData.email, formData.firstName, formData.lastName);
     } catch (emailError) {
       console.error('Email sending failed:', emailError);
-      // Don't fail the registration if email fails
     }
-    
-    router.push('/'); // Redirect to home page after registration
+
+    router.push('/');
   } catch (err) {
     console.error('Registration error:', err);
     error.value = err.message;
@@ -228,10 +162,6 @@ const openTermsModal = () => {
 const closeTermsModal = () => {
   showTermsModal.value = false;
 };
-
-
-
-
 </script>
 
 <template>
@@ -253,7 +183,7 @@ const closeTermsModal = () => {
         <input 
           type="text" 
           id="firstName" 
-          v-model="firstName" 
+          v-model="formData.firstName" 
           class="form-input" 
           :class="{ 'error': errors.firstName }"
           :placeholder="$t('firstName')" 
@@ -268,7 +198,7 @@ const closeTermsModal = () => {
         <input 
           type="text" 
           id="lastName" 
-          v-model="lastName" 
+          v-model="formData.lastName" 
           class="form-input" 
           :class="{ 'error': errors.lastName }"
           :placeholder="$t('lastName')" 
@@ -283,7 +213,7 @@ const closeTermsModal = () => {
         <input 
           type="email" 
           id="email" 
-          v-model="email" 
+          v-model="formData.email" 
           class="form-input" 
           :class="{ 'error': errors.email }"
           :placeholder="$t('email')" 
@@ -298,7 +228,7 @@ const closeTermsModal = () => {
         <input 
           type="text" 
           id="phone" 
-          v-model="phone" 
+          v-model="formData.phone" 
           class="form-input" 
           :class="{ 'error': errors.phone }"
           :placeholder="$t('phone')" 
@@ -312,7 +242,7 @@ const closeTermsModal = () => {
         <label for="gender" class="form-label">{{ $t('gender') }}</label>
         <select 
           id="gender" 
-          v-model="gender" 
+          v-model="formData.gender" 
           class="form-input" 
           :class="{ 'error': errors.gender }"
           required
@@ -331,7 +261,7 @@ const closeTermsModal = () => {
         <input 
           type="number" 
           id="age" 
-          v-model="age" 
+          v-model="formData.age" 
           min="18" 
           max="120"
           class="form-input" 
@@ -383,7 +313,7 @@ const closeTermsModal = () => {
         <input 
           type="password" 
           id="password" 
-          v-model="password" 
+          v-model="formData.password" 
           class="form-input" 
           :class="{ 'error': errors.password }"
           :placeholder="$t('password')" 
@@ -398,7 +328,7 @@ const closeTermsModal = () => {
         <input 
           type="password" 
           id="confirmPass" 
-          v-model="confirmPass" 
+          v-model="formData.confirmPass" 
           class="form-input" 
           :class="{ 'error': errors.confirmPass }"
           :placeholder="$t('confirmPassword')" 
