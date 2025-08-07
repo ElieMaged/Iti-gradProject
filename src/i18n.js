@@ -3,6 +3,7 @@ import { createI18n } from "vue-i18n";
 const messages = {
   en: {
     hello: "Hello",
+    addressPlaceholder:"Address",
     //welcome page
     welcomeToBoltfix: "Welcome to BoltFix",
   chooseYourRole: "Choose your role to get started",
@@ -2363,7 +2364,7 @@ terms: {
     paymentMethod: 'طريقة الدفع',
     backToHome: 'العودة للرئيسية',
     whatHappensNext: 'ماذا يحدث بعد ذلك؟',
-    
+    addressPlaceholder:"العنوان",
     // Admin Sidebar
     allServices: 'جميع الخدمات',
     myProfile: 'ملفي الشخصي',

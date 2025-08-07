@@ -375,12 +375,12 @@ const userName = computed(() => {
       </button>
       <NotificationBell v-if="user" />
         <template v-if="user">
-          <span class="flex items-center gap-2 rounded bg-gray-100 cursor-pointer" @click="handleProfileClick">
-              <span class="text-gray-700 font-semibold px-3 py-1">
+          <span class="flex items-center gap-2 rounded cursor-pointer " style="color: #8c8e90;"  @click="handleProfileClick">
+              <span class=" font-semibold px-1 py-1">
               {{ $t('hello') }} {{ userName }}
-              <span class="text-xs text-gray-500 ml-2">({{ getRoleDisplayText() }})</span>
+              <span class="text-xs text-gray-500">({{ getRoleDisplayText() }})</span>
             </span>
-            <i class="fas fa-user-circle  text-2xl px-3 navbar-icon"></i>
+            <i class="fas fa-user-circle  text-2xl pr-1 navbar-icon"></i>
           </span>
           <button :class="loginButtonClass" id="login-btn" @click="logout">
             {{ $t('logout') }}
