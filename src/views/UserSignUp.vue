@@ -191,7 +191,7 @@ const handleRegister = async () => {
       email: email.value,
       gender: gender.value,
       age: parseInt(age.value),
-      address: getDistrictsForGovernment(formData.government)[formData.district] || '',
+      address: getGovernmentNames()[formData.government]+getDistrictsForGovernment(formData.government)[formData.district] || '',
       area: getDistrictsForGovernment(formData.government)[formData.district] || '',
       city: getGovernmentNames()[formData.government] || '',
       phone: phone.value,
