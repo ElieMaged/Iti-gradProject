@@ -1936,6 +1936,19 @@ watch(() => technician.value, (newTechnician) => {
   padding-right: 2.5rem;
 }
 
+/* Dropdown Icons */
+       .form-input[type="select"],
+       select.form-input {
+         appearance: none;
+         -webkit-appearance: none;
+         -moz-appearance: none;
+         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+         background-position: right 5px center;
+         background-repeat: no-repeat;
+         background-size: 20px 16px;
+         padding-right: 3rem;
+       }
+
 /* Confirm Button */
 .confirm-btn {
   background: #7c6bb1;
@@ -2093,6 +2106,18 @@ watch(() => technician.value, (newTechnician) => {
  background: #484B4D;
   color: var(--primary-text, #e5e7eb);
 }
+
+       .dark .form-input[type="select"],
+       .dark select.form-input {
+         appearance: none;
+         -webkit-appearance: none;
+         -moz-appearance: none;
+         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23aaaaaa' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+         background-position: right 5px center;
+         background-repeat: no-repeat;
+         background-size: 20px 16px;
+         padding-right: 3rem;
+       }
 
 .dark .payment-methods {
   background: transparent;
