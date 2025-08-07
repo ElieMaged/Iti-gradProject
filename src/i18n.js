@@ -2,6 +2,27 @@ import { createI18n } from "vue-i18n";
 
 const messages = {
   en: {
+    //welcome page
+    welcomeToBoltfix: "Welcome to BoltFix",
+  chooseYourRole: "Choose your role to get started",
+  registerAsUser: "Register as User",
+  registerAsTechnician: "Register as Technician",
+  userDescription: "Find and book trusted technicians for all your home needs.",
+  technicianDescription: "Join BoltFix and grow your business by serving more customers.",
+  browseSkilledTechnicians: "Browse skilled technicians",
+  bookAppointmentsEasily: "Book appointments easily",
+  trackYourBookings: "Track your bookings",
+  leaveReviewsRatings: "Leave reviews & ratings",
+  setYourOwnRates: "Set your own rates",
+  flexibleSchedule: "Flexible schedule",
+  buildYourReputation: "Build your reputation",
+  securePayments: "Secure payments",
+  getStarted: "Get Started",
+  popular: "Popular",
+  earnMoney: "Earn Money",
+  or: "or",
+  alreadyHaveAccount: "Already have an account?",
+  signIn: "Log In",
     // terms
     agreeTermsAndConditions: "I agree to the Terms & Conditions",
     termsAndConditions: "Terms and Conditions",
@@ -1305,7 +1326,28 @@ terms: {
   },
 
   ar: {
-
+    //welcome page
+    welcomeToBoltfix: "مرحبًا بك في بولت فيكس",
+  chooseYourRole: "اختر دورك",
+  registerAsUser: "سجل كمستخدم",
+  registerAsTechnician: "سجل كفني",
+  userDescription: "انضم إلى بولت فيكس واحصل على خدمات الصيانة بسهولة.",
+  technicianDescription: "انضم إلى بولت فيكس وابدأ في كسب المال من مهاراتك.",
+  browseSkilledTechnicians: "تصفح الفنيين المهرة",
+  bookAppointmentsEasily: "احجز المواعيد بسهولة",
+  trackYourBookings: "تتبع حجوزاتك",
+  leaveReviewsRatings: "اترك تقييمات ومراجعات",
+  setYourOwnRates: "حدد أسعارك الخاصة",
+  flexibleSchedule: "جدول مرن",
+  buildYourReputation: "بناء سمعتك",
+  securePayments: "مدفوعات آمنة",
+  leaveReviewsRatings: "اترك تقييمات ومراجعات",
+  getStarted: "ابدأ الآن",
+  popular: "الأكثر شيوعًا",
+  earnMoney: "كسب المال",
+  or: "أو",
+  alreadyHaveAccount: "لديك حساب بالفعل؟",
+  signIn: "تسجيل الدخول",
     //terms
     agreeTermsAndConditions: "أوافق على الشروط والأحكام",
     termsAndConditions: "الشروط والأحكام",

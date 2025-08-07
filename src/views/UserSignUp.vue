@@ -21,6 +21,7 @@ const formData = reactive({
   confirmPass: '',
   gender: '',
   age: '',
+  address: '', // <-- add this line
   government: '',
   district: '',
   agreeTerms: false,
@@ -106,6 +107,10 @@ const validateForm = () => {
     errors.value.agreeTerms = t('mustAgreeTerms');
   }
 
+  if (!validateRequired(formData.address)) {
+    errors.value.address = t('addressRequired');
+  }
+
   return Object.keys(errors.value).length === 0;
 };
 
@@ -128,7 +133,7 @@ const handleRegister = async () => {
       email: formData.email,
       gender: formData.gender,
       age: parseInt(formData.age),
-      address: `${getGovernmentNames()[formData.government] || formData.government} - ${getDistrictsForGovernment(formData.government)[formData.district] || formData.district}`,
+      address: formData.address,
       area: getDistrictsForGovernment(formData.government)[formData.district] || formData.district,
       city: getGovernmentNames()[formData.government] || formData.government,
       phone: formData.phone,
@@ -336,6 +341,21 @@ const closeTermsModal = () => {
         />
         <p v-if="errors.confirmPass" class="error-message">{{ errors.confirmPass }}</p>
       </div>
+
+      <!-- Address (Street/Building/etc.) -->
+      <div class="form-group full-width">
+  <label for="address" class="form-label">{{ $t('address') }}</label>
+  <input
+    type="text"
+    id="address"
+    v-model="formData.address"
+    class="form-input"
+    :class="{ 'error': errors.address }"
+    :placeholder="$t('addressPlaceholder')"
+    required
+  />
+  <p v-if="errors.address" class="error-message">{{ errors.address }}</p>
+</div>
   </div>
 
     <div class="form-footer">

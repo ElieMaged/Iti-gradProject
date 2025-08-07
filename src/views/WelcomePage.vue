@@ -21,17 +21,17 @@
             <div class="card-icon">
               <i class="fa-solid fa-user"></i>
             </div>
-            <div class="card-badge">Popular</div>
+            <div class="card-badge">{{ $t('popular') }}</div>
           </div>
           <h3 class="card-title">{{ $t('registerAsUser') }}</h3>
           <p class="card-description">
             {{ $t('userDescription') }}
           </p>
           <ul class="card-features">
-            <li><i class="fa-solid fa-check"></i> Browse skilled technicians</li>
-            <li><i class="fa-solid fa-check"></i> Book appointments easily</li>
-            <li><i class="fa-solid fa-check"></i> Track your bookings</li>
-            <li><i class="fa-solid fa-check"></i> Leave reviews & ratings</li>
+            <li><i class="fa-solid fa-check"></i> {{ $t('browseSkilledTechnicians') }}</li>
+            <li><i class="fa-solid fa-check"></i> {{ $t('bookAppointmentsEasily') }}</li>
+            <li><i class="fa-solid fa-check"></i> {{ $t('trackYourBookings') }}</li>
+            <li><i class="fa-solid fa-check"></i> {{ $t('leaveReviewsRatings') }}</li>
           </ul>
           <button class="get-started-btn primary-btn" @click="$router.push('/usersignup')">
             {{ $t('getStarted') }}
@@ -45,17 +45,17 @@
             <div class="card-icon">
               <i class="fa-solid fa-tools"></i>
             </div>
-            <div class="card-badge">Earn Money</div>
+            <div class="card-badge">{{ $t('earnMoney') }}</div>
           </div>
           <h3 class="card-title">{{ $t('registerAsTechnician') }}</h3>
           <p class="card-description">
             {{ $t('technicianDescription') }}
           </p>
           <ul class="card-features">
-            <li><i class="fa-solid fa-check"></i> Set your own rates</li>
-            <li><i class="fa-solid fa-check"></i> Flexible schedule</li>
-            <li><i class="fa-solid fa-check"></i> Build your reputation</li>
-            <li><i class="fa-solid fa-check"></i> Secure payments</li>
+            <li><i class="fa-solid fa-check"></i> {{ $t('setYourOwnRates') }}</li>
+            <li><i class="fa-solid fa-check"></i> {{ $t('flexibleSchedule') }}</li>
+            <li><i class="fa-solid fa-check"></i> {{ $t('buildYourReputation') }}</li>
+            <li><i class="fa-solid fa-check"></i> {{ $t('securePayments') }}</li>
           </ul>
           <button class="get-started-btn secondary-btn" @click="$router.push('/techregister')">
             {{ $t('getStarted') }}
