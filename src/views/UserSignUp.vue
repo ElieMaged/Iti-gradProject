@@ -6,9 +6,31 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { ensureUserRole, fetchUserRole } from '../utils/userRole';
 import { sendWelcomeEmail } from '../utils/emailService';
+import { useI18n } from 'vue-i18n';
+import { computed, watch, reactive, onMounted } from 'vue';
 import emailjs from '@emailjs/browser';
+import { getGovernmentNames, getDistrictsForGovernment, governmentNamesAr, districtsAr } from '../data/egyptianLocations';
 
-
+const formData = reactive({
+  fullName: '',
+  email: '',
+  phoneNumber: '',
+  password: '',
+  confirmPassword: '',
+  specialization: '',
+  experience: '',
+  bio: '',
+  basePrice: '',
+  government: '',
+  district: '',
+  willingToTravel: '',
+  confirmInfo: false,
+  agreeTerms: false,
+  idPhotoBase64: null, // New field to store Base64 string
+  profilePhotoBase64: null, // New field to store profile picture Base64 string
+  paypalEmail: '' // New field for PayPal email
+});
+const { t, locale } = useI18n();
 const email = ref('');
 const password = ref('');
 const confirmPass = ref('');
@@ -24,6 +46,15 @@ const error = ref('');
 const errors = ref({});
 const showTermsModal = ref(false);
 const router = useRouter();
+const cityOptions = computed(() => {
+  if (!selectedDistrict.value) return [];
+  return getCitiesForDistrict(selectedDistrict.value);
+});
+const governmentOptions = getGovernmentNames();
+const districtOptions = computed(() => {
+  return formData.government ? getDistrictsForGovernment(formData.government) : [];
+});
+watch(() => formData.government, () => { formData.district = ''; })
 
 // Validation functions
 const validateEmail = (email) => {
@@ -160,13 +191,13 @@ const handleRegister = async () => {
       email: email.value,
       gender: gender.value,
       age: parseInt(age.value),
-      address: address.value,
-      area: area.value,
-      city: city.value,
+      address: getDistrictsForGovernment(formData.government)[formData.district] || '',
+      area: getDistrictsForGovernment(formData.government)[formData.district] || '',
+      city: getGovernmentNames()[formData.government] || '',
       phone: phone.value,
       role: 'user',
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     await setDoc(doc(db, 'users', userCredential.user.uid), userDoc);
@@ -311,50 +342,40 @@ const closeTermsModal = () => {
         <p v-if="errors.age" class="error-message">{{ errors.age }}</p>
   </div>
 
-      <!-- address -->
+      <!-- Governorate & District (Location) -->
       <div class="form-group">
-        <label for="address" class="form-label">{{ $t('address') }}</label>
-        <input 
-          type="text" 
-          id="address" 
-          v-model="address" 
+        <label for="government" class="form-label">{{ $t('government') }}</label>
+        <select 
+          id="government" 
+          v-model="formData.government" 
           class="form-input" 
-          :class="{ 'error': errors.address }"
-          :placeholder="$t('address')" 
-          required 
-        />
-        <p v-if="errors.address" class="error-message">{{ errors.address }}</p>
-  </div>
-
-      <!-- area -->
-      <div class="form-group">
-        <label for="area" class="form-label">{{ $t('area') }}</label>
-        <input 
-          type="text" 
-          id="area" 
-          v-model="area" 
-          class="form-input" 
-          :class="{ 'error': errors.area }"
-          :placeholder="$t('area')" 
-          required 
-        />
-        <p v-if="errors.area" class="error-message">{{ errors.area }}</p>
-  </div>
-
-      <!-- city -->
-      <div class="form-group">
-        <label for="city" class="form-label">{{ $t('city') }}</label>
-        <input 
-          type="text" 
-          id="city" 
-          v-model="city" 
-          class="form-input" 
-          :class="{ 'error': errors.city }"
-          :placeholder="$t('city')" 
-          required 
-        />
-        <p v-if="errors.city" class="error-message">{{ errors.city }}</p>
+          required
+        >
+          <option value="" disabled selected>{{ $t('government') }}</option>
+          <option v-for="gov in governmentOptions" :key="gov" :value="gov">
+            {{ locale === 'ar' ? governmentNamesAr[gov] : gov }}
+          </option>
+        </select>
       </div>
+      <div class="form-section location-section full-width">
+  <div class="form-row">
+    <div class="form-group">
+      <label for="district" class="form-label">{{ $t('districtArea') }}</label>
+      <select 
+        id="district" 
+        v-model="formData.district" 
+        class="form-input" 
+        required
+        :disabled="!formData.government"
+      >
+        <option value="" disabled selected>{{ $t('districtArea') }}</option>
+        <option v-for="district in districtOptions" :key="district" :value="district">
+          {{ locale === 'ar' ? (districtsAr[formData.government]?.[district] || district) : district }}
+        </option>
+      </select>
+    </div>
+  </div>
+</div>
 
       <!-- password -->
       <div class="form-group">
@@ -389,13 +410,13 @@ const closeTermsModal = () => {
 
     <div class="form-footer">
       <div class="checkbox-group">
-        <input type="checkbox" class="form-checkbox" id="exampleCheck1" required>
-        <label class="checkbox-label" for="exampleCheck1">
-          I agree to the 
-          <span class="terms-link" @click="openTermsModal">Terms & Conditions</span> 
-          and Privacy policy
-        </label>
-      </div>
+            <input v-model="formData.agreeTerms" type="checkbox" class="form-checkbox" id="agreeTerms" required />
+            <label class="checkbox-label" for="agreeTerms">
+              {{ $t('agreeTermsAndConditions') }}
+              <span class="terms-link" @click="openTermsModal">{{ $t('termsAndConditions') }}</span> 
+              {{ $t('andPrivacyPolicy') }}
+            </label>
+          </div>
 
              <button type="submit" class="submit-btn">
          <span>{{ $t('register') }}</span>
@@ -418,122 +439,105 @@ const closeTermsModal = () => {
 </div>
 
 <!-- Terms and Conditions Modal -->
-<div v-if="showTermsModal" class="modal-overlay" @click="closeTermsModal">
-  <div class="modal-content" @click.stop>
-    <div class="modal-header">
-      <h2 class="modal-title">Terms and Conditions</h2>
-      <button class="modal-close" @click="closeTermsModal">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
-        </svg>
-      </button>
-    </div>
-    <div class="modal-body">
-      <div class="terms-content">
-        <h3>1. General Terms</h3>
-        
-        <h4>1.1 Definitions</h4>
-        <ul>
-          <li><strong>Platform:</strong> Refers to the Bolt Fix website.</li>
-          <li><strong>User:</strong> A person who books maintenance services through the platform.</li>
-          <li><strong>Technician:</strong> A service provider registered on the platform.</li>
-          <li><strong>Booking:</strong> A confirmed request for a maintenance service.</li>
-        </ul>
-
-        <h4>1.2 Account Creation</h4>
-        <ul>
-          <li>All users and technicians must register with accurate and complete information.</li>
-          <li>Each individual may only have one account.</li>
-          <li>By registering, you agree to these terms and all platform policies.</li>
-        </ul>
-
-        <h4>1.3 Privacy</h4>
-        <ul>
-          <li>All personal data is securely stored and protected.</li>
-          <li>Data will not be shared with third parties without user consent.</li>
-        </ul>
-
-        <h4>1.4 Prohibited Conduct</h4>
-        <ul>
-          <li>Providing false information or impersonating others is not allowed.</li>
-          <li>Completing services or payments outside the platform is strictly prohibited.</li>
-          <li>Abusive or inappropriate behavior may lead to account suspension or termination.</li>
-        </ul>
-
-        <h4>1.5 Account Termination</h4>
-        <ul>
-          <li>The platform reserves the right to suspend or delete any account that violates the terms.</li>
-        </ul>
-
-        <h3>2. User Terms</h3>
-
-        <h4>2.1 Booking a Service</h4>
-        <ul>
-          <li>Users can select technicians based on location, availability, and service type.</li>
-          <li>All bookings must be confirmed and completed through the platform.</li>
-        </ul>
-
-        <h4>2.2 Payment</h4>
-        <ul>
-          <li>Users can pay in cash after the service is delivered or online via PayPal before the service.</li>
-          <li>A booking is considered confirmed only after payment or explicit confirmation.</li>
-        </ul>
-
-        <h4>2.3 Cancellation and Refunds</h4>
-        <ul>
-          <li>Users may cancel bookings within a specific time frame before the scheduled appointment.</li>
-          <li>No refunds are available after the service has been completed.</li>
-          <li>Complaints can be submitted through the platform for review.</li>
-        </ul>
-
-        <h4>2.4 Ratings and Feedback</h4>
-        <ul>
-          <li>Users may rate and review technicians after each service.</li>
-          <li>Feedback contributes to service quality monitoring and technician performance.</li>
-        </ul>
-
-        <h3>3. Technician Terms</h3>
-
-        <h4>3.1 Commission Policy</h4>
-        <ul>
-          <li>The platform charges a 25% commission on each completed booking.</li>
-          <li>The remaining 75% is transferred to the technician.</li>
-        </ul>
-
-        <h4>3.2 Payment Methods</h4>
-        <ul>
-          <li>Technicians must add a valid PayPal account to receive online payments.</li>
-          <li>If the user pays in cash, the technician collects the full amount directly, and the platform will deduct its 25% commission later from future settlements.</li>
-        </ul>
-
-        <h4>3.3 Earnings Transfer</h4>
-        <ul>
-          <li>For PayPal payments, the technician's 75% share will be transferred within 24–48 hours after the service is confirmed.</li>
-          <li>For cash payments, the platform will deduct the commission later from upcoming earnings.</li>
-        </ul>
-
-        <h4>3.4 Service Expectations</h4>
-        <ul>
-          <li>Technicians are expected to arrive on time and complete the job professionally.</li>
-          <li>Multiple negative reviews may result in account review or suspension.</li>
-        </ul>
-
-        <h4>3.5 Responsibility</h4>
-        <ul>
-          <li>Technicians are responsible for the quality and completeness of their work.</li>
-          <li>Any misconduct or violation may result in penalties or account removal.</li>
-        </ul>
-
-        <p class="terms-footer">
-          By using the Bolt Fix platform, all users and technicians agree to the terms and conditions listed above.
-        </p>
+    <div v-if="showTermsModal" class="modal-overlay" @click="closeTermsModal">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h2 class="modal-title">{{ $t('terms.title') }}</h2>
+          <button class="modal-close" @click="closeTermsModal">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="terms-content">
+            <h3>{{ $t('terms.generalTerms') }}</h3>
+            <h4>{{ $t('terms.definitions') }}</h4>
+            <ul>
+              <li>{{ $t('terms.platform') }}</li>
+              <li>{{ $t('terms.user') }}</li>
+              <li>{{ $t('terms.technician') }}</li>
+              <li>{{ $t('terms.booking') }}</li>
+            </ul>
+            <h4>{{ $t('terms.accountCreation') }}</h4>
+            <ul>
+              <li>{{ $t('terms.accountCreation1') }}</li>
+              <li>{{ $t('terms.accountCreation2') }}</li>
+              <li>{{ $t('terms.accountCreation3') }}</li>
+            </ul>
+            <h4>{{ $t('terms.privacy') }}</h4>
+            <ul>
+              <li>{{ $t('terms.privacy1') }}</li>
+              <li>{{ $t('terms.privacy2') }}</li>
+            </ul>
+            <h4>{{ $t('terms.prohibitedConduct') }}</h4>
+            <ul>
+              <li>{{ $t('terms.prohibited1') }}</li>
+              <li>{{ $t('terms.prohibited2') }}</li>
+              <li>{{ $t('terms.prohibited3') }}</li>
+            </ul>
+            <h4>{{ $t('terms.accountTermination') }}</h4>
+            <ul>
+              <li>{{ $t('terms.accountTermination1') }}</li>
+            </ul>
+            <h3>{{ $t('terms.userTerms') }}</h3>
+            <h4>{{ $t('terms.bookingService') }}</h4>
+            <ul>
+              <li>{{ $t('terms.bookingService1') }}</li>
+              <li>{{ $t('terms.bookingService2') }}</li>
+            </ul>
+            <h4>{{ $t('terms.payment') }}</h4>
+            <ul>
+              <li>{{ $t('terms.payment1') }}</li>
+              <li>{{ $t('terms.payment2') }}</li>
+            </ul>
+            <h4>{{ $t('terms.cancellationRefunds') }}</h4>
+            <ul>
+              <li>{{ $t('terms.cancellation1') }}</li>
+              <li>{{ $t('terms.cancellation2') }}</li>
+              <li>{{ $t('terms.cancellation3') }}</li>
+            </ul>
+            <h4>{{ $t('terms.ratingsFeedback') }}</h4>
+            <ul>
+              <li>{{ $t('terms.ratings1') }}</li>
+              <li>{{ $t('terms.ratings2') }}</li>
+            </ul>
+            <h3>{{ $t('terms.technicianTerms') }}</h3>
+            <h4>{{ $t('terms.commissionPolicy') }}</h4>
+            <ul>
+              <li>{{ $t('terms.commission1') }}</li>
+              <li>{{ $t('terms.commission2') }}</li>
+            </ul>
+            <h4>{{ $t('terms.paymentMethods') }}</h4>
+            <ul>
+              <li>{{ $t('terms.paymentMethods1') }}</li>
+              <li>{{ $t('terms.paymentMethods2') }}</li>
+            </ul>
+            <h4>{{ $t('terms.earningsTransfer') }}</h4>
+            <ul>
+              <li>{{ $t('terms.earnings1') }}</li>
+              <li>{{ $t('terms.earnings2') }}</li>
+            </ul>
+            <h4>{{ $t('terms.serviceExpectations') }}</h4>
+            <ul>
+              <li>{{ $t('terms.serviceExpectations1') }}</li>
+              <li>{{ $t('terms.serviceExpectations2') }}</li>
+            </ul>
+            <h4>{{ $t('terms.responsibility') }}</h4>
+            <ul>
+              <li>{{ $t('terms.responsibility1') }}</li>
+              <li>{{ $t('terms.responsibility2') }}</li>
+            </ul>
+            <p class="terms-footer">
+              {{ $t('terms.footer') }}
+            </p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="modal-btn" @click="closeTermsModal">{{ $t('terms.iUnderstand') }}</button>
+        </div>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="modal-btn" @click="closeTermsModal">I Understand</button>
-    </div>
-  </div>
-</div>
 
 </body>
 
@@ -648,14 +652,14 @@ body {
     font-size: 1rem;
     transition: all 0.2s ease;
     background: var(--input-bg, #ffffff);
-    color: var(--primary-text, #1f2937);
+    color:  #1f2937;
     font-family: inherit;
 }
 
 .dark .form-input {
   background: var(--input-bg, #374151);
   border-color: #4b5563;
-  color: var(--primary-text, #f9fafb);
+  color: var(--text-muted);
 }
 
 .form-input:focus {

@@ -416,7 +416,6 @@ aspect-ratio: 106.44/101.00;
 .dark .form-input {
   background-color: var(--input-bg);
   border-color: #4b5563;
-  color: var(--text-muted);
 }
 
 .form-input:focus {
