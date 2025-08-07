@@ -133,7 +133,7 @@ const handleRegister = async () => {
       email: formData.email,
       gender: formData.gender,
       age: parseInt(formData.age),
-      address: formData.address,
+      address: `${formData.address},`+ formData.government+ formData.district,
       area: getDistrictsForGovernment(formData.government)[formData.district] || formData.district,
       city: getGovernmentNames()[formData.government] || formData.government,
       phone: formData.phone,
@@ -276,7 +276,20 @@ const closeTermsModal = () => {
         />
         <p v-if="errors.age" class="error-message">{{ errors.age }}</p>
   </div>
-
+      <!-- Address (Street/Building/etc.) -->
+      <div class="form-group full-width">
+        <label for="address" class="form-label">{{ $t('address') }}</label>
+        <input
+          type="text"
+          id="address"
+          v-model="formData.address"
+          class="form-input"
+          :class="{ 'error': errors.address }"
+          :placeholder="$t('addressPlaceholder')"
+          required
+        />
+        <p v-if="errors.address" class="error-message">{{ errors.address }}</p>
+      </div>
       <!-- Governorate & District (Location) -->
       <div class="form-group">
         <label for="government" class="form-label">{{ $t('government') }}</label>
@@ -341,21 +354,6 @@ const closeTermsModal = () => {
         />
         <p v-if="errors.confirmPass" class="error-message">{{ errors.confirmPass }}</p>
       </div>
-
-      <!-- Address (Street/Building/etc.) -->
-      <div class="form-group full-width">
-  <label for="address" class="form-label">{{ $t('address') }}</label>
-  <input
-    type="text"
-    id="address"
-    v-model="formData.address"
-    class="form-input"
-    :class="{ 'error': errors.address }"
-    :placeholder="$t('addressPlaceholder')"
-    required
-  />
-  <p v-if="errors.address" class="error-message">{{ errors.address }}</p>
-</div>
   </div>
 
     <div class="form-footer">
@@ -624,7 +622,7 @@ body {
 }
 
 .form-input::placeholder {
-    color: var(--text-muted, #9ca3af);
+    color:  #676869;
 }
 
 .dark .form-input::placeholder {
@@ -633,11 +631,7 @@ body {
 
 /* Style for select dropdowns to match placeholder color */
 .form-input option {
-    color: var(--text-muted, #9ca3af);
-}
-
-.dark .form-input option {
-  color: var(--text-muted, #6b7280);
+    color: black;
 }
 
 /* Style for select dropdown placeholder text */

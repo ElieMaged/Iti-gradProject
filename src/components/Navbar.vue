@@ -5,6 +5,8 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { auth } from '../firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../firebase'; // adjust path if needed
 import LanguageToggle from './LanguageToggle.vue';
 import NotificationBell from './NotificationBell.vue'
 // Firebase-related imports removed
@@ -51,6 +53,43 @@ export default {
       user.value = null;
       router.push('/');
     };
+    const firstName = ref('');
+    const userRole = ref('');
+    
+onMounted(() => {
+  onAuthStateChanged(auth, async (firebaseUser) => {
+    user.value = firebaseUser;
+    loading.value = false;
+    if (firebaseUser) {
+      // Fetch first name and role from Firestore
+      const userDocRef = doc(db, 'users', firebaseUser.uid);
+      const userDocSnap = await getDoc(userDocRef);
+      if (userDocSnap.exists()) {
+        const data = userDocSnap.data();
+        firstName.value = data.firstName || "";
+        userRole.value = data.role || 'user';
+        // Optionally store in localStorage for quick access
+        localStorage.setItem(firebaseUser.uid + '-firstName', firstName.value);
+        localStorage.setItem(firebaseUser.uid + '-role', userRole.value);
+      }
+    } else {
+      firstName.value = '';
+      userRole.value = '';
+    }
+  });
+});
+const userName = computed(() => {
+  if (firstName.value && firstName.value.trim() !== '') {
+    return firstName.value;
+  }
+  // Fallback: get the part before @ from the user's email
+  if (user.value && user.value.email) {
+    return user.value.email.split('@')[0];
+  }
+  return '';
+});
+
+
 
     function handleProfileClick() {
       const currentUser = auth.currentUser;
@@ -215,6 +254,7 @@ export default {
 
     return {
       user,
+      userName,
       loading,
       locale,
       isDark,
@@ -337,7 +377,7 @@ export default {
         <template v-if="user">
           <span class="flex items-center gap-2 rounded bg-gray-100 cursor-pointer" @click="handleProfileClick">
               <span class="text-gray-700 font-semibold px-3 py-1">
-              {{ user.email || user.uid }}
+              {{ $t('hello') }} {{ userName }}
               <span class="text-xs text-gray-500 ml-2">({{ getRoleDisplayText() }})</span>
             </span>
             <i class="fas fa-user-circle  text-2xl px-3 navbar-icon"></i>

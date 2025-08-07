@@ -1084,11 +1084,7 @@ body {
 
 /* Style for select dropdowns to match placeholder color */
 .form-input option {
-    color: var(--text-muted);
-}
-
-.dark .form-input option {
-  color: var(--text-muted);
+    color: black;
 }
 
 /* Style for select dropdown placeholder text */
