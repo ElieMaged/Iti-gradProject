@@ -12,27 +12,32 @@
             {{ cat.label }}
             <i class="fa" :class="openCategory === cat.key ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
           </button>
-          <div v-if="openCategory === cat.key" class="category-options">
-            <template v-if="cat.type === 'radio'">
-              <label v-for="option in cat.options" :key="option.value" class="dropdown-label">
-                <input type="radio" :name="cat.key" v-model="selectedFilters[cat.key]" :value="option.value" />
-                {{ option.label }}
-              </label>
-            </template>
-            <template v-else>
-              <label v-for="option in cat.options" :key="option.value" class="dropdown-label">
-                <input type="checkbox" v-model="selectedFilters[cat.key]" :value="option.value" />
-                {{ option.label }}
-              </label>
-            </template>
-          </div>
+                     <div v-if="openCategory === cat.key" class="category-options">
+             <template v-if="cat.type === 'radio'">
+               <label v-for="option in cat.options" :key="option.value" class="dropdown-label">
+                 <input type="radio" :name="cat.key" v-model="tempFilters[cat.key]" :value="option.value" @change="updateTempFilter(cat.key, option.value)" />
+                 {{ option.label }}
+               </label>
+             </template>
+             <template v-else>
+               <label v-for="option in cat.options" :key="option.value" class="dropdown-label">
+                 <input type="checkbox" v-model="tempFilters[cat.key]" :value="option.value" @change="updateTempFilter(cat.key, tempFilters[cat.key])" />
+                 {{ option.label }}
+               </label>
+             </template>
+           </div>
+        </div>
+        <div class="filter-actions">
+          <button class="apply-btn" @click="applyFilters">
+            Apply
+          </button>
         </div>
       </div>
     </div>
     <!-- Sort Dropdown -->
     <div class="searchbar-field sort-field">
       <button class="searchbar-btn" @click="onSortBtnClick" type="button">
-        <span class="sort-label">{{ getSortLabel() }}</span>
+                 <span class="sort-label">{{ getSortLabel() === $t('sortby') ? 'Sort by' : getSortLabel() }}</span>
         <i class="fa-solid fa-chevron-down sort-icon"></i>
       </button>
       <div v-if="showSortDropdown" class="sort-dropdown" ref="sortDropdownRef" @click="onSortDropdownClick">
@@ -46,12 +51,12 @@
     <!-- Search Field -->
     <div class="searchbar-field searchbar-search">
       <i class="fa-solid fa-magnifying-glass searchbar-search-icon"></i>
-      <input
-        v-model="searchQuery"
-        :placeholder="Search"
-        class="searchbar-input"
-        @input="emitSearch"
-      />
+             <input
+         v-model="searchQuery"
+         placeholder="Find a Technician"
+         class="searchbar-input"
+         @input="emitSearch"
+       />
     </div>
   </div>
 </template>
@@ -94,30 +99,28 @@ const filterCategories = [
       { value: '4-5', label: t('filterRating4to5') },
     ],
     type: 'radio'
-  },
-  {
-    key: 'years',
-    label: t('filterYears'),
-    options: [
-      { value: '0-1', label: t('filterYears0to1') },
-      { value: '1-2', label: t('filterYears1to2') },
-      { value: '2-3', label: t('filterYears2to3') },
-      { value: '3-5', label: t('filterYears3to5') },
-    ],
-    type: 'checkbox'
   }
 ];
 
 const selectedFilters = ref({
   price: '',
   area: '',
-  rating: '',
-  years: []
+  rating: ''
 });
 
-watch(selectedFilters, (val) => {
-  emit('update:filter', val);
-}, { deep: true });
+const tempFilters = ref({
+  price: '',
+  area: '',
+  rating: ''
+});
+
+// Remove the automatic watch and add apply function
+function applyFilters() {
+  selectedFilters.value = { ...tempFilters.value };
+  emit('update:filter', selectedFilters.value);
+  showFilterDropdown.value = false;
+  openCategory.value = '';
+}
 
 const sortOptions = [
   { value: '', label: t('sortby') },
@@ -145,6 +148,10 @@ const sortDropdownRef = ref(null);
 function toggleCategory(key) {
   openCategory.value = openCategory.value === key ? '' : key;
 }
+
+function updateTempFilter(key, value) {
+  tempFilters.value[key] = value;
+}
 function closeAllDropdowns() {
   showFilterDropdown.value = false;
   showSortDropdown.value = false;
@@ -153,7 +160,12 @@ function closeAllDropdowns() {
 function onFilterBtnClick(e) {
   e.stopPropagation();
   showFilterDropdown.value = !showFilterDropdown.value;
-  if (!showFilterDropdown.value) openCategory.value = '';
+  if (showFilterDropdown.value) {
+    // Initialize temp filters with current selected filters
+    tempFilters.value = { ...selectedFilters.value };
+  } else {
+    openCategory.value = '';
+  }
   showSortDropdown.value = false;
 }
 function onSortBtnClick(e) {
@@ -228,8 +240,8 @@ onBeforeUnmount(() => {
   align-items: center;
   cursor: pointer;
   width: 100%;
-  justify-content: flex-start;
-  padding: 0;
+  justify-content: space-between;
+  padding: 0 0.5px 0 0;
 }
 .filter-dropdown {
   position: absolute;
@@ -239,7 +251,7 @@ onBeforeUnmount(() => {
   background: #fff;
   border-radius: 0.75rem;
   box-shadow: 0 2px 12px rgba(0,0,0,0.12);
-  min-width: 220px;
+  min-width: 150px;
   padding: 0.5rem 0.75rem;
 }
 .filter-category {
@@ -303,12 +315,13 @@ onBeforeUnmount(() => {
 .searchbar-search-icon {
   position: absolute;
   left: 0.5rem;
+  margin-left: 6px;
   color: #aaa;
   font-size: 1rem;
 }
 .filter-icon {
   color: #aaa;
-  margin-left: 1rem;
+  margin-left: 1.5rem;
   margin-right: 0;
 }
 @media (max-width: 600px) {
@@ -333,7 +346,7 @@ onBeforeUnmount(() => {
 }
 .sort-icon {
   color: #aaa;
-  margin-left: 1rem;
+  margin-left: 1.5rem;
   margin-right: 0;
 }
 .sort-dropdown {
@@ -344,7 +357,7 @@ onBeforeUnmount(() => {
   background: #fff;
   border-radius: 0.75rem;
   box-shadow: 0 2px 12px rgba(0,0,0,0.12);
-  min-width: 180px;
+  min-width: 150px;
   padding: 0.5rem 0.75rem;
 }
 .sort-option {
@@ -356,8 +369,9 @@ onBeforeUnmount(() => {
 .sort-option-btn {
   background: none;
   border: none;
-  font-size: 0.98rem;
-  color: #333;
+  font-weight: 600;
+  color: #625397;
+  font-size: 1rem;
   width: 100%;
   text-align: left;
   display: flex;
@@ -368,6 +382,29 @@ onBeforeUnmount(() => {
 }
 .sort-option-btn:hover {
   color: #625397;
+}
+
+.filter-actions {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #eee;
+  text-align: center;
+}
+
+.apply-btn {
+  background: #625397;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.apply-btn:hover {
+  background: #4a3d7a;
 }
 @media (max-width: 900px) {
   .searchbar-row {
@@ -436,7 +473,11 @@ onBeforeUnmount(() => {
   }
   
   .filter-dropdown {
-    min-width: 200px;
+    min-width: 150px;
+  }
+  
+  .sort-dropdown {
+    min-width: 150px;
   }
 }
 
@@ -481,7 +522,12 @@ onBeforeUnmount(() => {
   }
   
   .filter-dropdown {
-    min-width: 180px;
+    min-width: 150px;
+    padding: 0.4rem 0.6rem;
+  }
+  
+  .sort-dropdown {
+    min-width: 150px;
     padding: 0.4rem 0.6rem;
   }
   
@@ -492,6 +538,16 @@ onBeforeUnmount(() => {
   
   .dropdown-label {
     font-size: 0.9rem;
+  }
+  
+  .sort-option-btn {
+    font-size: 0.9rem;
+    padding: 0.2rem 0;
+  }
+  
+  .apply-btn {
+    font-size: 0.85rem;
+    padding: 0.4rem 1.2rem;
   }
 }
 
@@ -548,14 +604,14 @@ onBeforeUnmount(() => {
   
   .filter-icon {
     color: #aaa;
-    margin-left: 0.5rem;
+    margin-left: 0.75rem;
     margin-right: 0;
     font-size: 0.85rem;
   }
   
   .sort-icon {
     color: #aaa;
-    margin-left: 0.5rem;
+    margin-left: 0.75rem;
     margin-right: 0;
     font-size: 0.85rem;
   }
@@ -567,6 +623,7 @@ onBeforeUnmount(() => {
   
   .searchbar-search-icon {
     font-size: 0.85rem;
+    margin-left: 5px;
   }
   
   .filter-dropdown {
@@ -597,12 +654,14 @@ onBeforeUnmount(() => {
   
   .filter-icon {
     font-size: 0.8rem;
-    margin-left: 0.4rem;
+    margin-left: 0.6rem;
+    margin-right: 0;
   }
   
   .sort-icon {
     font-size: 0.8rem;
-    margin-left: 0.4rem;
+    margin-left: 0.6rem;
+    margin-right: 0;
   }
   
   .sort-arrow {
@@ -611,6 +670,7 @@ onBeforeUnmount(() => {
   
   .searchbar-search-icon {
     font-size: 0.8rem;
+    margin-left: 5px;
   }
   
   .category-btn {
@@ -619,6 +679,15 @@ onBeforeUnmount(() => {
   
   .dropdown-label {
     font-size: 0.8rem;
+  }
+  
+  .sort-option-btn {
+    font-size: 0.8rem;
+  }
+  
+  .apply-btn {
+    font-size: 0.8rem;
+    padding: 0.35rem 1rem;
   }
   
   .filter-dropdown {
@@ -647,12 +716,14 @@ onBeforeUnmount(() => {
   
   .filter-icon {
     font-size: 0.75rem;
-    margin-left: 0.3rem;
+    margin-left: 0.45rem;
+    margin-right: 0;
   }
   
   .sort-icon {
     font-size: 0.75rem;
-    margin-left: 0.3rem;
+    margin-left: 0.45rem;
+    margin-right: 0;
   }
   
   .sort-arrow {
@@ -662,6 +733,7 @@ onBeforeUnmount(() => {
   
   .searchbar-search-icon {
     font-size: 0.75rem;
+    margin-left: 5px;
   }
   
   .category-btn {
@@ -670,6 +742,15 @@ onBeforeUnmount(() => {
   
   .dropdown-label {
     font-size: 0.75rem;
+  }
+  
+  .sort-option-btn {
+    font-size: 0.75rem;
+  }
+  
+  .apply-btn {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.8rem;
   }
   
   .filter-dropdown {
