@@ -50,27 +50,14 @@
             <div class="stat-title">{{ $t('customers') }}</div>
             <div class="stat-change positive">{{ dashboardStats.customerChange }}</div>
           </div>
-          
-          <!-- Platform Growth -->
-          <div class="stat-card">
-            <div class="stat-header">
-              <i class="fas fa-chart-line stat-icon"></i>
-              <span class="stat-number">{{ dashboardStats.platformGrowth }}</span>
-            </div>
-            <div class="stat-title">{{ $t('platformGrowth') }}</div>
-            <div class="stat-change growth">{{ dashboardStats.growthChange }}</div>
-          </div>
         </div>
-        
-        <!-- Admin Role Manager -->
-        <AdminRoleManager />
         
         <!-- Charts Row -->
         <div class="charts-grid">
-          <!-- Attendance Comparison Chart -->
+          <!-- User Activity Comparison Chart -->
           <div class="chart-card attendance-chart">
             <div class="chart-header">
-              <div class="chart-title">{{ $t('attendanceComparisonChart') }}</div>
+              <div class="chart-title">{{ $t('userActivityComparison') }}</div>
               <div class="chart-controls">
                 <button 
                   v-for="period in chartPeriods" 
@@ -86,12 +73,12 @@
             <!-- Enhanced Chart -->
             <div class="chart-wrapper">
               <div class="chart-y-labels">
-                <span>100%</span>
-                <span>80%</span>
-                <span>60%</span>
-                <span>40%</span>
-                <span>20%</span>
-                <span>0%</span>
+                <span>{{ maxUsers }}</span>
+                <span>{{ Math.round(maxUsers * 0.8) }}</span>
+                <span>{{ Math.round(maxUsers * 0.6) }}</span>
+                <span>{{ Math.round(maxUsers * 0.4) }}</span>
+                <span>{{ Math.round(maxUsers * 0.2) }}</span>
+                <span>0</span>
               </div>
               <div class="chart-main">
                 <div class="chart-grid">
@@ -168,58 +155,6 @@
               </div>
             </div>
           </div>
-          
-          <!-- Weekly Bookings Chart -->
-          <div class="chart-card bookings-chart">
-            <div class="chart-title">{{ $t('weeklyBookings') }}</div>
-            <div class="chart-wrapper">
-              <div class="chart-y-labels">
-                <span>120</span>
-                <span>90</span>
-                <span>60</span>
-                <span>30</span>
-                <span>0</span>
-              </div>
-              <div class="chart-main">
-                <div class="chart-grid">
-                  <div class="grid-line" v-for="i in 4" :key="i"></div>
-                </div>
-                <div class="bars-container">
-                  <div 
-                    v-for="(bar, index) in bookingsData" 
-                    :key="index"
-                    class="bar-group"
-                    @mouseenter="showBarTooltip($event, bar)"
-                    @mouseleave="hideTooltip"
-                  >
-                    <div class="bar-wrapper">
-                      <div 
-                        class="bar current-bar" 
-                        :style="{ height: bar.current + '%' }"
-                        :data-value="bar.current"
-                      ></div>
-                      <div 
-                        class="bar previous-bar" 
-                        :style="{ height: bar.previous + '%' }"
-                        :data-value="bar.previous"
-                      ></div>
-                    </div>
-                    <div class="bar-label">{{ bar.day }}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="chart-legend">
-              <div class="legend-item">
-                <div class="legend-bar current"></div>
-                <span>{{ $t('thisWeek') }}</span>
-              </div>
-              <div class="legend-item">
-                <div class="legend-bar previous"></div>
-                <span>{{ $t('lastWeek') }}</span>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -228,13 +163,12 @@
 
 <script>
 import AdminSidebar from '../../components/admin-sidebar.vue';
-import AdminRoleManager from '../../components/AdminRoleManager.vue';
 import { useI18n } from 'vue-i18n';
 import { auth } from '../../firebase'; // Added import for auth
 
 export default {
   name: 'AdminDashboard',
-  components: { AdminSidebar, AdminRoleManager },
+  components: { AdminSidebar },
   setup() {
     const { t } = useI18n();
     return { t };
@@ -242,33 +176,31 @@ export default {
   data() {
     return {
       searchQuery: '',
-      selectedPeriod: 'daily',
+      selectedPeriod: 'weekly',
       currentTime: '8:02:09 AM',
       chartPeriods: ['daily', 'weekly', 'monthly'],
-      attendanceData: [
-        { x: 50, y: 180, value: 91 },
-        { x: 150, y: 120, value: 85 },
-        { x: 250, y: 140, value: 88 },
-        { x: 350, y: 80, value: 95 },
-        { x: 450, y: 120, value: 85 },
-        { x: 550, y: 140, value: 88 }
-      ],
-      attendanceLabels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-      bookingsData: [],
-      realBookingsData: [],
+      attendanceData: [],
+      attendanceLabels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
       hoveredPoint: null,
-      tooltip: null
+      tooltip: null,
+      // Add new data properties for dynamic stats
+      totalTechnicians: 0,
+      totalUsers: 0,
+      newTechnicians: 0,
+      customerChange: '0%',
+      // User activity data
+      currentWeekUsers: [],
+      previousWeekUsers: [],
+      maxUsers: 0
     };
   },
   computed: {
     dashboardStats() {
       return {
-        totalTechnicians: 452,
-        newTechnicians: 2,
-        totalCustomers: 360,
-        customerChange: this.t('plus10PercentLessThanYesterday'),
-        platformGrowth: 30,
-        growthChange: this.t('plus3PercentIncreaseThanYesterday')
+        totalTechnicians: this.totalTechnicians,
+        newTechnicians: this.newTechnicians,
+        totalCustomers: this.totalUsers,
+        customerChange: this.customerChange
       };
     },
     linePath() {
@@ -313,6 +245,14 @@ export default {
     setInterval(this.updateTime, 1000);
     this.animateCharts();
     this.fetchWeeklyBookings();
+    // Add calls to fetch dynamic stats
+    this.fetchTechniciansCount();
+    this.fetchUsersCount();
+    // Refresh stats every 5 minutes
+    setInterval(() => {
+      this.fetchTechniciansCount();
+      this.fetchUsersCount();
+    }, 5 * 60 * 1000);
   },
   methods: {
     updateTime() {
@@ -494,6 +434,94 @@ export default {
           { day: 'Thu', current: 33, previous: 28 },
           { day: 'Fri', current: 17, previous: 15 }
         ];
+      }
+    },
+    // Add new methods for fetching dynamic stats
+    async fetchTechniciansCount() {
+      try {
+        const { collection, getDocs } = await import('firebase/firestore');
+        const { db } = await import('../../firebase');
+        
+        console.log('🔍 Fetching technicians count...');
+        
+        // Fetch from technicians collection
+        const techniciansCollection = collection(db, 'technicians');
+        const techniciansSnapshot = await getDocs(techniciansCollection);
+        const techniciansCount = techniciansSnapshot.size;
+        
+        // Fetch from pendingTechnicians collection (approved ones)
+        const pendingTechniciansCollection = collection(db, 'pendingTechnicians');
+        const pendingSnapshot = await getDocs(pendingTechniciansCollection);
+        const pendingTechniciansCount = pendingSnapshot.docs.filter(doc => {
+          const data = doc.data();
+          return data.status === 'approved' || data.status === 'active' || !data.status;
+        }).length;
+        
+        // Total technicians
+        this.totalTechnicians = techniciansCount + pendingTechniciansCount;
+        
+        // Calculate new technicians (added in the last 7 days)
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        
+        const newTechniciansCount = techniciansSnapshot.docs.filter(doc => {
+          const data = doc.data();
+          if (!data.createdAt) return false;
+          const createdAt = data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
+          return createdAt >= oneWeekAgo;
+        }).length;
+        
+        const newPendingTechniciansCount = pendingSnapshot.docs.filter(doc => {
+          const data = doc.data();
+          if (!data.createdAt) return false;
+          const createdAt = data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
+          return (data.status === 'approved' || data.status === 'active' || !data.status) && createdAt >= oneWeekAgo;
+        }).length;
+        
+        this.newTechnicians = newTechniciansCount + newPendingTechniciansCount;
+        
+        console.log('✅ Technicians stats loaded:', {
+          total: this.totalTechnicians,
+          new: this.newTechnicians
+        });
+        
+      } catch (error) {
+        console.error('❌ Error fetching technicians count:', error);
+        this.totalTechnicians = 0;
+        this.newTechnicians = 0;
+      }
+    },
+    
+    async fetchUsersCount() {
+      try {
+        const { collection, getDocs } = await import('firebase/firestore');
+        const { db } = await import('../../firebase');
+        
+        console.log('🔍 Fetching users count...');
+        
+        // Fetch from users collection
+        const usersCollection = collection(db, 'users');
+        const usersSnapshot = await getDocs(usersCollection);
+        
+        // Count only regular users (not technicians or admins)
+        const regularUsers = usersSnapshot.docs.filter(doc => {
+          const data = doc.data();
+          return data.role === 'user' || !data.role; // Include users without role or with 'user' role
+        }).length;
+        
+        this.totalUsers = regularUsers;
+        
+        // Calculate user change (simplified - you can enhance this)
+        this.customerChange = this.t('plus10PercentLessThanYesterday');
+        
+        console.log('✅ Users stats loaded:', {
+          total: this.totalUsers
+        });
+        
+      } catch (error) {
+        console.error('❌ Error fetching users count:', error);
+        this.totalUsers = 0;
+        this.customerChange = '0%';
       }
     }
   }

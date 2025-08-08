@@ -64,7 +64,7 @@ const messages = {
     technician: "Technician",
     customer: "Customer",
     amount: "Amount",
-    paypalOrderId: "PayPal Order ID",
+    paypalOrderId: "Order ID",
     status: "Status",
     actions: "Actions",
     // Admin Pending Technicians
@@ -222,7 +222,8 @@ const messages = {
     paypalFee: "PayPal Fee",
     totalDeduction: "Total Deduction",
     remainingCredits: "Remaining Credits",
-    sendPaypalPayout: "Send PayPal Payout",
+    sendToBankAccount: "Send to Bank Account",
+    bankAccountTransferToTechnician: "Bank Account Transfer to Technician",
     processing: "Processing...",
     payoutInitiated: "Payout initiated successfully",
     payoutFailed: "Failed to initiate payout",
@@ -664,6 +665,7 @@ const messages = {
     faqQ5: "Is My AC Just Tired or in Need of Repair?",
     faqA5:
       "If your AC is blowing warm air, making strange noises, leaking water, or not cooling like it used to, it might be more than just overworked—it could need professional repair.",
+
     // Testimonials.vue navigation
     testimonialPrev: "Previous Testimonial",
     testimonialNext: "Next Testimonial",
@@ -929,7 +931,7 @@ const messages = {
     acTechniciansServiceDesc: 'Professional air conditioning installation, repair, and maintenance',
     applianceRepairServiceTitle: 'Appliance Repair',
     applianceRepairServiceDesc: 'Fast and efficient repair services for all household appliances',
-    wallFinishingServiceTitle: 'Wall Finishing',
+    wallFinishingServiceTitle: 'Wall finishing',
     wallFinishingServiceDesc: 'High-quality painting and finishing services for walls and ceilings',
     
     // Service descriptions for overview section
@@ -1328,7 +1330,7 @@ const messages = {
     technician: 'الفني',
     customer: 'العميل',
     amount: 'المبلغ',
-    paypalOrderId: 'معرف طلب PayPal',
+    paypalOrderId: 'معرف الطلب',
     status: 'الحالة',
     actions: 'الإجراءات',
     // Admin Pending Technicians
@@ -1570,7 +1572,8 @@ const messages = {
     paypalFee: "رسوم PayPal",
     totalDeduction: "إجمالي الخصم",
     remainingCredits: "الرصيد المتبقي",
-    sendPaypalPayout: "إرسال تحويل ",
+    sendToBankAccount: "إرسال إلى الحساب البنكي",
+    bankAccountTransferToTechnician: "تحويل إلى الحساب البنكي للفني",
     processing: "جاري المعالجة...",
     payoutInitiated: "تم بدء التحويل بنجاح",
     payoutFailed: "فشل في بدء التحويل",
