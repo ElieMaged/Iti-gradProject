@@ -22,6 +22,7 @@
             @update:filter="onFilter"
             @update:sort="onSort"
             @update:search="onSearch"
+            @update:location="onLocationChange"
           />
           <div class="breadcrumbs">
             <span>{{ $t('home') }}</span>
@@ -84,7 +85,7 @@
                 </div>
                 <div class="detail-item location-item">
                   <i class="fa-solid fa-location-dot"></i>
-                  <span>{{ technician.location || 'Cairo' }}</span>
+                  <span>{{ getLocationDisplay(technician) }}</span>
                 </div>
                 <div class="detail-item price-item">
                   <i class="fa-solid fa-dollar-sign"></i>
@@ -116,6 +117,7 @@ const firebaseTechnicians = ref([])
 const searchQuery = ref('')
 const filterOption = ref('')
 const sortOption = ref('')
+const locationFilter = ref({ government: '', district: '' })
 // Removed pagination logic
 
 async function fetchTechnicians() {
@@ -152,7 +154,10 @@ const mergedTechnicians = computed(() => {
       price: fbTech.basePrice,
       description: fbTech.bio,
       rating: 5, // or fbTech.rating if available
-      specialization: fbTech.specialization
+      specialization: fbTech.specialization,
+      government: fbTech.government, // Assuming these fields exist in Firebase
+      district: fbTech.district,
+      area: fbTech.area
     })
   })
   console.log('Firebase technicians:', allTechs)
@@ -165,6 +170,22 @@ const filteredTechnicians = computed(() => {
   if (query) {
     list = list.filter(t => t.name && t.name.toLowerCase().includes(query))
   }
+  
+  // Location filtering - exact matching for government and district
+  if (locationFilter.value.government && locationFilter.value.government !== '') {
+    list = list.filter(t => {
+      const techGovernment = t.government || t.location || '';
+      return techGovernment.toLowerCase() === locationFilter.value.government.toLowerCase();
+    });
+  }
+  
+  if (locationFilter.value.district && locationFilter.value.district !== '') {
+    list = list.filter(t => {
+      const techDistrict = t.district || t.area || '';
+      return techDistrict.toLowerCase() === locationFilter.value.district.toLowerCase();
+    });
+  }
+  
   if (filterOption.value === 'price') {
     list = list.filter(t => t.price)
   } else if (filterOption.value === 'area') {
@@ -203,6 +224,10 @@ function onSort(option) {
   sortOption.value = option
 }
 
+function onLocationChange(location) {
+  locationFilter.value = location
+}
+
 function viewProfile(member) {
   if (!member || !member.id) {
     alert('Technician profile data is missing or invalid.');
@@ -226,7 +251,17 @@ function viewProfile(member) {
   });
 }
 
-
+function getLocationDisplay(technician) {
+  if (technician.government && technician.district) {
+    return `${technician.government}, ${technician.district}`;
+  } else if (technician.government) {
+    return technician.government;
+  } else if (technician.location) {
+    return technician.location;
+  } else {
+    return 'Cairo'; // Fallback if location data is missing
+  }
+}
 
 
 const heroBackgroundStyle = computed(() => {

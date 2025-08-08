@@ -78,7 +78,7 @@
                  </div>
                  <div class="detail-item location-item">
                    <i class="fas fa-map-marker-alt"></i>
-                   <span>{{ technician.location || 'Cairo' }}</span>
+                   <span>{{ getLocationDisplay(technician) }}</span>
                  </div>
                  <div class="detail-item price-item">
                    <i class="fa-solid fa-dollar-sign"></i>
@@ -239,7 +239,9 @@ import { db } from '../firebase.js';
             description: data.bio || data.description || 'Professional technician with years of experience.',
             rating: data.averageRating || 4.5,
             price: data.basePrice || data.hourlyRate || 200,
-            location: data.government || data.location || 'Cairo',
+            government: data.government,
+            district: data.district,
+            location: data.location || 'Cairo',
             yearsOfExperience: data.yearsOfExperience || 5,
             skills: data.skills || ['General Repair'],
             specialization: data.specialization || 'General',
@@ -267,7 +269,9 @@ import { db } from '../firebase.js';
                 description: data.bio || data.description || 'Professional technician with years of experience.',
                 rating: data.averageRating || 4.5,
                 price: data.basePrice || data.hourlyRate || 200,
-                location: data.government || data.location || 'Cairo',
+                government: data.government,
+                district: data.district,
+                location: data.location || 'Cairo',
                 yearsOfExperience: data.yearsOfExperience || 5,
                 skills: data.skills || ['General Repair'],
                 specialization: data.specialization || 'General',
@@ -346,6 +350,19 @@ viewProfile(member) {
     },
     navigateToService(route) {
       this.$router.push(route);
+    },
+    getLocationDisplay(technician) {
+      if (technician.government && technician.district) {
+        return `${technician.government}, ${technician.district}`;
+      } else if (technician.government) {
+        return technician.government;
+      } else if (technician.district) {
+        return technician.district;
+      } else if (technician.location) {
+        return technician.location;
+      } else {
+        return 'Cairo'; // Default location
+      }
     }
   },
   async mounted() {

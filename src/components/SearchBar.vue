@@ -12,20 +12,33 @@
             {{ cat.label }}
             <i class="fa" :class="openCategory === cat.key ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
           </button>
-                     <div v-if="openCategory === cat.key" class="category-options">
-             <template v-if="cat.type === 'radio'">
-               <label v-for="option in cat.options" :key="option.value" class="dropdown-label">
-                 <input type="radio" :name="cat.key" v-model="tempFilters[cat.key]" :value="option.value" @change="updateTempFilter(cat.key, option.value)" />
-                 {{ option.label }}
-               </label>
-             </template>
-             <template v-else>
-               <label v-for="option in cat.options" :key="option.value" class="dropdown-label">
-                 <input type="checkbox" v-model="tempFilters[cat.key]" :value="option.value" @change="updateTempFilter(cat.key, tempFilters[cat.key])" />
-                 {{ option.label }}
-               </label>
-             </template>
-           </div>
+          <div v-if="openCategory === cat.key" class="category-options">
+            <!-- Special handling for government/district interlinked filters -->
+            <template v-if="cat.key === 'government'">
+              <label v-for="option in cat.options" :key="option.value" class="dropdown-label">
+                <input type="radio" :name="cat.key" v-model="tempFilters[cat.key]" :value="option.value" @change="onGovernmentFilterChange(option.value)" />
+                {{ option.label }}
+              </label>
+            </template>
+            <template v-else-if="cat.key === 'district'">
+              <label v-for="option in cat.options" :key="option.value" class="dropdown-label" :class="{ 'disabled': !tempFilters.government }">
+                <input type="radio" :name="cat.key" v-model="tempFilters[cat.key]" :value="option.value" @change="updateTempFilter(cat.key, option.value)" :disabled="!tempFilters.government" />
+                {{ option.label }}
+              </label>
+            </template>
+            <template v-else-if="cat.type === 'radio'">
+              <label v-for="option in cat.options" :key="option.value" class="dropdown-label">
+                <input type="radio" :name="cat.key" v-model="tempFilters[cat.key]" :value="option.value" @change="updateTempFilter(cat.key, option.value)" />
+                {{ option.label }}
+              </label>
+            </template>
+            <template v-else>
+              <label v-for="option in cat.options" :key="option.value" class="dropdown-label">
+                <input type="checkbox" v-model="tempFilters[cat.key]" :value="option.value" @change="updateTempFilter(cat.key, tempFilters[cat.key])" />
+                {{ option.label }}
+              </label>
+            </template>
+          </div>
         </div>
         <div class="filter-actions">
           <button class="apply-btn" @click="applyFilters">
@@ -37,7 +50,7 @@
     <!-- Sort Dropdown -->
     <div class="searchbar-field sort-field">
       <button class="searchbar-btn" @click="onSortBtnClick" type="button">
-                 <span class="sort-label">{{ getSortLabel() === $t('sortby') ? 'Sort by' : getSortLabel() }}</span>
+        <span class="sort-label">{{ getSortLabel() === $t('sortby') ? 'Sort by' : getSortLabel() }}</span>
         <i class="fa-solid fa-chevron-down sort-icon"></i>
       </button>
       <div v-if="showSortDropdown" class="sort-dropdown" ref="sortDropdownRef" @click="onSortDropdownClick">
@@ -51,24 +64,75 @@
     <!-- Search Field -->
     <div class="searchbar-field searchbar-search">
       <i class="fa-solid fa-magnifying-glass searchbar-search-icon"></i>
-             <input
-         v-model="searchQuery"
-         placeholder="Find a Technician"
-         class="searchbar-input"
-         @input="emitSearch"
-       />
+      <input
+        v-model="searchQuery"
+        placeholder="Find a Technician"
+        class="searchbar-input"
+        @input="emitSearch"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onBeforeUnmount } from 'vue';
+import { ref, watch, onMounted, onBeforeUnmount, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-const { t } = useI18n();
-const emit = defineEmits(['update:filter', 'update:sort', 'update:search']);
+import { getGovernmentNames, getDistrictsForGovernment, governmentNamesAr, districtsAr } from '../data/egyptianLocations';
+
+const { t, locale } = useI18n();
+const emit = defineEmits(['update:filter', 'update:sort', 'update:search', 'update:location']);
+
+// Location dropdowns
+const selectedGovernment = ref('');
+const selectedDistrict = ref('');
+const governmentOptions = getGovernmentNames();
+
+const districtOptions = computed(() => {
+  return selectedGovernment.value ? getDistrictsForGovernment(selectedGovernment.value) : [];
+});
+
+// Watch for location changes and emit updates
+watch([selectedGovernment, selectedDistrict], ([gov, district]) => {
+  emit('update:location', {
+    government: gov,
+    district: district
+  });
+});
+
+function onGovernmentChange() {
+  selectedDistrict.value = ''; // Reset district when government changes
+}
+
+function onDistrictChange() {
+  // District change is handled by the watch above
+}
 
 // Filter categories and options
-const filterCategories = [
+const filterCategories = computed(() => [
+  {
+    key: 'government',
+    label: t('government'),
+    options: [
+      { value: '', label: t('allGovernments') },
+      ...governmentOptions.map(gov => ({ 
+        value: gov, 
+        label: locale.value === 'ar' ? governmentNamesAr[gov] || gov : gov 
+      })),
+    ],
+    type: 'radio'
+  },
+  {
+    key: 'district',
+    label: t('districtArea'),
+    options: [
+      { value: '', label: t('allDistricts') },
+      ...(tempFilters.value.government ? getDistrictsForGovernment(tempFilters.value.government) : []).map(district => ({ 
+        value: district, 
+        label: locale.value === 'ar' ? (districtsAr[tempFilters.value.government]?.[district] || district) : district 
+      })),
+    ],
+    type: 'radio'
+  },
   {
     key: 'price',
     label: t('filterPrice'),
@@ -76,17 +140,6 @@ const filterCategories = [
       { value: '50-100', label: t('filterPrice50to100') },
       { value: '100-150', label: t('filterPrice100to150') },
       { value: '150-200', label: t('filterPrice150to200') },
-    ],
-    type: 'radio'
-  },
-  {
-    key: 'area',
-    label: t('filterArea'),
-    options: [
-      { value: 'Maadi', label: t('filterAreaMaadi') },
-      { value: 'Mokattam', label: t('filterAreaMokattam') },
-      { value: 'Shoubra', label: t('filterAreaShoubra') },
-      { value: 'Embaba', label: t('filterAreaEmbaba') },
     ],
     type: 'radio'
   },
@@ -100,17 +153,19 @@ const filterCategories = [
     ],
     type: 'radio'
   }
-];
+]);
 
 const selectedFilters = ref({
+  government: '',
+  district: '',
   price: '',
-  area: '',
   rating: ''
 });
 
 const tempFilters = ref({
+  government: '',
+  district: '',
   price: '',
-  area: '',
   rating: ''
 });
 
@@ -118,6 +173,10 @@ const tempFilters = ref({
 function applyFilters() {
   selectedFilters.value = { ...tempFilters.value };
   emit('update:filter', selectedFilters.value);
+  emit('update:location', {
+    government: tempFilters.value.government,
+    district: tempFilters.value.district
+  });
   showFilterDropdown.value = false;
   openCategory.value = '';
 }
@@ -200,9 +259,17 @@ function handleClickOutside(event) {
 onMounted(() => {
   document.addEventListener('click', handleClickOutside);
 });
+
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside);
 });
+
+function onGovernmentFilterChange(value) {
+  tempFilters.value.government = value;
+  tempFilters.value.district = ''; // Reset district when government changes
+  selectedGovernment.value = value;
+  selectedDistrict.value = '';
+}
 </script>
 
 <style scoped>
@@ -225,6 +292,13 @@ onBeforeUnmount(() => {
   flex: 0 0 auto;
   position: relative;
 }
+
+.location-field {
+  min-width: 140px;
+  max-width: 160px;
+  height: 44px;
+}
+
 .filter-field {
   min-width: 80px;
   max-width: 100px;
@@ -278,6 +352,28 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  max-height: 200px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #c1c1c1 #f1f1f1;
+}
+
+.category-options::-webkit-scrollbar {
+  width: 6px;
+}
+
+.category-options::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.category-options::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.category-options::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }
 .dropdown-label {
   font-size: 0.98rem;
@@ -285,6 +381,15 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.dropdown-label.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dropdown-label.disabled input {
+  cursor: not-allowed;
 }
 .searchbar-select {
   width: 100%;
@@ -294,6 +399,16 @@ onBeforeUnmount(() => {
   color: #333;
   outline: none;
   padding: 0.25rem 0;
+}
+
+.location-select {
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.location-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 .searchbar-input {
   border: none;

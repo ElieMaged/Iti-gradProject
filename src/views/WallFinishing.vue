@@ -83,7 +83,7 @@
                 </div>
                 <div class="detail-item location-item">
                   <i class="fa-solid fa-location-dot"></i>
-                  <span>{{ technician.area || technician.location || 'Cairo' }}</span>
+                  <span>{{ getLocationDisplay(technician) }}</span>
                 </div>
                 <div class="detail-item price-item">
                   <i class="fa-solid fa-dollar-sign"></i>
@@ -152,6 +152,8 @@ const mergedTechnicians = computed(() => {
       description: fbTech.bio,
       rating: fbTech.rating || 4.0, // Use actual rating if available
       specialization: fbTech.specialization,
+      government: fbTech.government, // Added government field
+      district: fbTech.district, // Added district field
       area: fbTech.area || fbTech.location || 'Cairo', // Use area/location if available
       yearsOfExperience: fbTech.yearsOfExperience || 5 // Use actual years if available
     })
@@ -260,6 +262,17 @@ function viewProfile(member) {
   });
 }
 
+function getLocationDisplay(technician) {
+  if (technician.government && technician.district) {
+    return `${technician.government}, ${technician.district}`;
+  } else if (technician.government) {
+    return technician.government;
+  } else if (technician.district) {
+    return technician.district;
+  } else {
+    return 'Cairo'; // Fallback
+  }
+}
 
 
 const heroBackgroundStyle = computed(() => {

@@ -38,7 +38,6 @@
               <span class="stat-number">{{ dashboardStats.totalTechnicians }}</span>
             </div>
             <div class="stat-title">{{ $t('totalTechnicians') }}</div>
-            <div class="stat-change positive">{{ dashboardStats.newTechnicians }} {{ $t('newEmployeesAdded') }}</div>
           </div>
           
           <!-- Customers -->
@@ -48,7 +47,6 @@
               <span class="stat-number">{{ dashboardStats.totalCustomers }}</span>
             </div>
             <div class="stat-title">{{ $t('customers') }}</div>
-            <div class="stat-change positive">{{ dashboardStats.customerChange }}</div>
           </div>
         </div>
         
@@ -57,18 +55,7 @@
           <!-- User Activity Comparison Chart -->
           <div class="chart-card attendance-chart">
             <div class="chart-header">
-              <div class="chart-title">{{ $t('userActivityComparison') }}</div>
-              <div class="chart-controls">
-                <button 
-                  v-for="period in chartPeriods" 
-                  :key="period"
-                  class="chart-period-btn"
-                  :class="{ active: selectedPeriod === period }"
-                  @click="selectedPeriod = period"
-                >
-                  {{ $t(period) }}
-                </button>
-              </div>
+              <div class="chart-title">{{ $t('weeklyBookingsComparison') }}</div>
             </div>
             <!-- Enhanced Chart -->
             <div class="chart-wrapper">
@@ -140,7 +127,7 @@
                   />
                 </svg>
                 <div class="chart-x-labels">
-                  <span v-for="(label, index) in attendanceLabels" :key="index">{{ label }}</span>
+                  <span v-for="(point, index) in attendanceData" :key="index">{{ point.day }}</span>
                 </div>
               </div>
             </div>
@@ -176,9 +163,7 @@ export default {
   data() {
     return {
       searchQuery: '',
-      selectedPeriod: 'weekly',
       currentTime: '8:02:09 AM',
-      chartPeriods: ['daily', 'weekly', 'monthly'],
       attendanceData: [],
       attendanceLabels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
       hoveredPoint: null,
@@ -199,8 +184,7 @@ export default {
       return {
         totalTechnicians: this.totalTechnicians,
         newTechnicians: this.newTechnicians,
-        totalCustomers: this.totalUsers,
-        customerChange: this.customerChange
+        totalCustomers: this.totalUsers
       };
     },
     linePath() {
@@ -216,7 +200,7 @@ export default {
       const lastPoint = this.attendanceData[this.attendanceData.length - 1];
       const firstPoint = this.attendanceData[0];
       
-      return `M ${firstPoint.x},200 L ${points.join(' L ')} L ${lastPoint.x},200 Z`;
+      return `M ${firstPoint.x},180 L ${points.join(' L ')} L ${lastPoint.x},180 Z`;
     }
   },
   mounted() {
@@ -252,6 +236,7 @@ export default {
     setInterval(() => {
       this.fetchTechniciansCount();
       this.fetchUsersCount();
+      this.fetchWeeklyBookings(); // Refresh chart data
     }, 5 * 60 * 1000);
   },
   methods: {
@@ -280,7 +265,7 @@ export default {
     },
     showPointTooltip(event, point) {
       this.hoveredPoint = point;
-      this.tooltip = this.createTooltip(event, `${point.value}%`);
+      this.tooltip = this.createTooltip(event, `${point.value} bookings`);
     },
     showBarTooltip(event, bar) {
       this.tooltip = this.createTooltip(event, `${bar.current} bookings`);
@@ -375,23 +360,21 @@ export default {
           previousWeek: previousWeekBookings.length
         });
         
-        // Create a simple array for weekdays
-        const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+        // Create arrays for each day of the week (Monday to Sunday)
+        const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
         
         // Initialize counters for each day
-        const currentWeekCounts = [0, 0, 0, 0, 0]; // Mon, Tue, Wed, Thu, Fri
-        const previousWeekCounts = [0, 0, 0, 0, 0]; // Mon, Tue, Wed, Thu, Fri
+        const currentWeekCounts = [0, 0, 0, 0, 0, 0, 0]; // Mon, Tue, Wed, Thu, Fri, Sat, Sun
+        const previousWeekCounts = [0, 0, 0, 0, 0, 0, 0]; // Mon, Tue, Wed, Thu, Fri, Sat, Sun
         
         // Count current week bookings by day
         currentWeekBookings.forEach(booking => {
           const bookingDate = booking.createdAt?.toDate ? booking.createdAt.toDate() : new Date(booking.createdAt);
           const dayOfWeek = bookingDate.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
           
-          // Only count Monday (1) to Friday (5)
-          if (dayOfWeek >= 1 && dayOfWeek <= 5) {
-            const dayIndex = dayOfWeek - 1; // Convert to 0-based index
-            currentWeekCounts[dayIndex]++;
-          }
+          // Convert to Monday-based index (0 = Monday, 1 = Tuesday, ..., 6 = Sunday)
+          const dayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+          currentWeekCounts[dayIndex]++;
         });
         
         // Count previous week bookings by day
@@ -399,11 +382,9 @@ export default {
           const bookingDate = booking.createdAt?.toDate ? booking.createdAt.toDate() : new Date(booking.createdAt);
           const dayOfWeek = bookingDate.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
           
-          // Only count Monday (1) to Friday (5)
-          if (dayOfWeek >= 1 && dayOfWeek <= 5) {
-            const dayIndex = dayOfWeek - 1; // Convert to 0-based index
-            previousWeekCounts[dayIndex]++;
-          }
+          // Convert to Monday-based index (0 = Monday, 1 = Tuesday, ..., 6 = Sunday)
+          const dayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+          previousWeekCounts[dayIndex]++;
         });
         
         console.log('Day counts:', {
@@ -411,29 +392,45 @@ export default {
           previousWeek: previousWeekCounts
         });
         
-        // Create chart data (Monday to Friday)
-        this.bookingsData = weekDays.map((day, index) => ({
-          day,
-          current: currentWeekCounts[index] || 0,
-          previous: previousWeekCounts[index] || 0
-        }));
+        // Find the maximum value for scaling
+        const maxCurrentWeek = Math.max(...currentWeekCounts);
+        const maxPreviousWeek = Math.max(...previousWeekCounts);
+        const maxValue = Math.max(maxCurrentWeek, maxPreviousWeek, 1); // Ensure at least 1 for scaling
         
-        console.log('Final bookings data:', this.bookingsData);
+        // Update maxUsers for chart scaling
+        this.maxUsers = maxValue;
         
-        // Update dashboard stats
-        this.dashboardStats.totalBookings = currentWeekBookings.length;
-        this.dashboardStats.previousWeekBookings = previousWeekBookings.length;
+        // Generate attendance data for the chart
+        this.attendanceData = currentWeekCounts.map((count, index) => {
+          const x = (index / (weekDays.length - 1)) * 500; // Scale x to 0-500
+          const y = count === 0 ? 180 : 180 - ((count / maxValue) * 160 * 0.7); // Scale y to 20-180 (inverted for SVG) and reduce by 30%
+          return {
+            x: x,
+            y: y,
+            value: count,
+            day: weekDays[index]
+          };
+        });
+        
+        // Store the data for comparison
+        this.currentWeekUsers = currentWeekCounts;
+        this.previousWeekUsers = previousWeekCounts;
+        
+        console.log('Generated attendance data:', this.attendanceData);
         
       } catch (error) {
         console.error('Error fetching weekly bookings:', error);
         // Fallback to static data if there's an error
-        this.bookingsData = [
-          { day: 'Mon', current: 25, previous: 20 },
-          { day: 'Tue', current: 42, previous: 35 },
-          { day: 'Wed', current: 67, previous: 50 },
-          { day: 'Thu', current: 33, previous: 28 },
-          { day: 'Fri', current: 17, previous: 15 }
+        this.attendanceData = [
+          { x: 0, y: 162.67, value: 20, day: 'Mon' },
+          { x: 83.33, y: 145.33, value: 40, day: 'Tue' },
+          { x: 166.67, y: 128, value: 60, day: 'Wed' },
+          { x: 250, y: 164, value: 30, day: 'Thu' },
+          { x: 333.33, y: 181.33, value: 10, day: 'Fri' },
+          { x: 416.67, y: 162.67, value: 20, day: 'Sat' },
+          { x: 500, y: 164, value: 30, day: 'Sun' }
         ];
+        this.maxUsers = 60;
       }
     },
     // Add new methods for fetching dynamic stats
@@ -510,9 +507,6 @@ export default {
         }).length;
         
         this.totalUsers = regularUsers;
-        
-        // Calculate user change (simplified - you can enhance this)
-        this.customerChange = this.t('plus10PercentLessThanYesterday');
         
         console.log('✅ Users stats loaded:', {
           total: this.totalUsers
@@ -839,47 +833,10 @@ export default {
   color: var(--primary-text);
 }
 
-.chart-controls {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.dark .chart-controls {
-  color: var(--primary-color);
-}
-
-.chart-period-btn {
-  color: #7c6bb0;
-  font-weight: 600;
-  background: none;
-  border: none;
-  cursor: pointer;
-  transition: color 0.2s;
-  padding: 0.25rem 0.5rem;
-  font-size: clamp(0.75rem, 2vw, 0.875rem);
-}
-
-.chart-period-btn.active {
-  color: #7c6bb0;
-}
-
-.dark .chart-period-btn.active {
-  color: var(--primary-color);
-}
-
-.chart-period-btn:not(.active) {
-  color: #aaaaaa;
-}
-
-.dark .chart-period-btn:not(.active) {
-  color: var(--icon-color);
-}
-
 .chart-wrapper {
   position: relative;
   width: 100%;
-  height: clamp(200px, 40vh, 300px);
+  height: clamp(140px, 28vh, 210px);
   background: #ede7f6;
   border-radius: 0.75rem;
   overflow: hidden;
@@ -1287,11 +1244,6 @@ export default {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
-  }
-  
-  .chart-controls {
-    width: 100%;
-    justify-content: flex-start;
   }
   
   .chart-wrapper {

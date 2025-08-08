@@ -84,7 +84,7 @@
                 </div>
                 <div class="detail-item location-item">
                   <i class="fa-solid fa-location-dot"></i>
-                  <span>{{ technician.area || technician.location || 'Cairo' }}</span>
+                  <span>{{ getLocationDisplay(technician) }}</span>
                 </div>
                 <div class="detail-item price-item">
                   <i class="fa-solid fa-dollar-sign"></i>
@@ -155,7 +155,10 @@ const mergedTechnicians = computed(() => {
       price: fbTech.basePrice,
       description: fbTech.bio,
       rating: 5, // or fbTech.rating if available
-      specialization: fbTech.specialization
+      specialization: fbTech.specialization,
+      government: fbTech.government, // Added government field
+      district: fbTech.district, // Added district field
+      area: fbTech.area || fbTech.location || 'Cairo'
     })
   })
   console.log('Firebase technicians:', allTechs)
@@ -242,6 +245,18 @@ const heroBackgroundStyle = computed(() => {
     width: '100%'
   }
 })
+
+function getLocationDisplay(technician) {
+  if (technician.government && technician.district) {
+    return `${technician.government}, ${technician.district}`;
+  } else if (technician.government) {
+    return technician.government;
+  } else if (technician.district) {
+    return technician.district;
+  } else {
+    return 'Cairo'; // Fallback if no location data
+  }
+}
 </script>
 
 <style scoped>
