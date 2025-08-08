@@ -138,10 +138,15 @@ const routes = [
   {path: '/technician-reviews', component: TechnicianReviews},
 ]
 
+
 const router = createRouter({
-  history: createWebHistory(), // ✅ use this for browser
+  history: createWebHistory(),
   routes,
-})
+  scrollBehavior(to, from, savedPosition) {
+    // Always scroll to top
+    return { top: 0 };
+  }
+});
 
 // Add global navigation guard for debugging
 router.beforeEach((to, from, next) => {

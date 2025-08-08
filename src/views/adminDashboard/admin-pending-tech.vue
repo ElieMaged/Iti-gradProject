@@ -689,7 +689,7 @@ color: var(--primary-color);
 }
 
 .info-value {
-  color: #374151;
+  color: var(--grey-50);
   text-align: right;
   flex: 1;
 }

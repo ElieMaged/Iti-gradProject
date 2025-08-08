@@ -13,7 +13,7 @@
             <div class="loading-spinner mr-3"></div>
             <span class="text-lg font-semibold text-yellow-700">{{ $t('underReview') }}</span>
           </div>
-          <p class="text-gray-600 text-center">{{ $t('applicationUnderReview') }}</p>
+          <p class=" text-center">{{ $t('applicationUnderReview') }}</p>
         </div>
         
         <div class="info-section w-full mb-6">
@@ -21,15 +21,15 @@
           <div class="space-y-3">
             <div class="flex items-start">
               <div class="step-number mr-3">1</div>
-              <p class="text-gray-700">{{ $t('adminReviewStep') }}</p>
+              <p class="">{{ $t('adminReviewStep') }}</p>
             </div>
             <div class="flex items-start">
               <div class="step-number mr-3">2</div>
-              <p class="text-gray-700">{{ $t('approvalNotificationStep') }}</p>
+              <p class="">{{ $t('approvalNotificationStep') }}</p>
             </div>
             <div class="flex items-start">
               <div class="step-number mr-3">3</div>
-              <p class="text-gray-700">{{ $t('accessGrantedStep') }}</p>
+              <p class="">{{ $t('accessGrantedStep') }}</p>
             </div>
           </div>
         </div>
@@ -85,15 +85,16 @@ export default {
 </script>
 
 <style scoped>
-.pending-application-bg {
-  background-color: #d3cfe2;
-  min-height: 100vh;
-}
 
 .pending-application-card {
   background-color: white;
   border-radius: 2rem;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  margin: 20px;
+}
+.dark .pending-application-card {
+  background-color: var(--secondary-bg);
+  color: var(--primary-text);
 }
 
 .pending-icon {
@@ -112,6 +113,9 @@ export default {
   border-top: 2px solid #f59e0b;
   border-radius: 50%;
   animation: spin 1s linear infinite;
+}
+.dark .loading-spinner {
+  border-top-color: #f59e0b;
 }
 
 @keyframes spin {
@@ -132,6 +136,10 @@ export default {
   font-weight: bold;
   flex-shrink: 0;
 }
+.dark .step-number {
+  background-color: #4a2c7d;
+  color: white;
+}
 
 .btn-primary {
   background-color: #6B4FA1;
@@ -142,6 +150,10 @@ export default {
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.3s;
+}
+.dark .btn-primary {
+  background-color: var(--primary-color);
+  color: white;
 }
 
 .btn-primary:hover {
@@ -158,7 +170,9 @@ export default {
   cursor: pointer;
   transition: all 0.3s;
 }
-
+.dark .items-start {
+  color: var(--text-muted) !important;
+}
 .btn-secondary:hover {
   background-color: #6B4FA1;
   color: white;

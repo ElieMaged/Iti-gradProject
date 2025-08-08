@@ -1,189 +1,159 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, reactive, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { auth, db } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { ensureUserRole, fetchUserRole } from '../utils/userRole';
 import { sendWelcomeEmail } from '../utils/emailService';
-import emailjs from '@emailjs/browser';
+import { useI18n } from 'vue-i18n';
+import { getGovernmentNames, getDistrictsForGovernment, governmentNamesAr, districtsAr } from '../data/egyptianLocations';
 
+const { t, locale } = useI18n();
+const router = useRouter();
 
-const email = ref('');
-const password = ref('');
-const confirmPass = ref('');
-const firstName = ref('');
-const lastName = ref('');
-const gender = ref('');
-const age = ref('');
-const address = ref('');
-const area = ref('');
-const city = ref('');
-const phone = ref('');
+const formData = reactive({
+  firstName: '',
+  lastName: '',
+  email: '',
+  phone: '',
+  password: '',
+  confirmPass: '',
+  gender: '',
+  age: '',
+  address: '', // <-- add this line
+  government: '',
+  district: '',
+  agreeTerms: false,
+});
+
 const error = ref('');
 const errors = ref({});
 const showTermsModal = ref(false);
-const router = useRouter();
+
+const governmentOptions = getGovernmentNames();
+const districtOptions = computed(() => {
+  return formData.government ? getDistrictsForGovernment(formData.government) : [];
+});
+watch(() => formData.government, () => { formData.district = ''; });
 
 // Validation functions
-const validateEmail = (email) => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-};
-
-const validatePassword = (password) => {
-  return password.length >= 8;
-};
-
+const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+const validatePassword = (password) => password.length >= 8;
 const validateAge = (age) => {
   const ageNum = parseInt(age);
   return ageNum >= 18 && ageNum <= 120;
 };
-
-const validateRequired = (value, fieldName) => {
-  // Handle different data types
-  if (value === null || value === undefined) {
-    return false;
-  }
-  
-  // For strings, check if trimmed length is greater than 0
-  if (typeof value === 'string') {
-    return value.trim().length > 0;
-  }
-  
-  // For numbers, check if it's not 0 and not NaN
-  if (typeof value === 'number') {
-    return value !== 0 && !isNaN(value);
-  }
-  
-  // For other types, check if the value exists
-  return Boolean(value);
-};
-
-const validateName = (name) => {
-  return name.length >= 2 && /^[a-zA-Z\s]+$/.test(name);
-};
+const validateName = (name) => name.length >= 2 && /^[a-zA-Z\s]+$/.test(name);
+const validateRequired = (value) => value !== null && value !== undefined && String(value).trim().length > 0;
 
 // Main validation function
 const validateForm = () => {
   errors.value = {};
 
-  // First Name validation
-  if (!validateRequired(firstName.value, 'firstName')) {
-    errors.value.firstName = 'First name is required';
-  } else if (!validateName(firstName.value)) {
-    errors.value.firstName = 'First name must be at least 2 characters and contain only letters';
+  if (!validateRequired(formData.firstName)) {
+    errors.value.firstName = t('firstNameRequired');
+  } else if (!validateName(formData.firstName)) {
+    errors.value.firstName = t('firstNameInvalid');
   }
 
-  // Last Name validation
-  if (!validateRequired(lastName.value, 'lastName')) {
-    errors.value.lastName = 'Last name is required';
-  } else if (!validateName(lastName.value)) {
-    errors.value.lastName = 'Last name must be at least 2 characters and contain only letters';
+  if (!validateRequired(formData.lastName)) {
+    errors.value.lastName = t('lastNameRequired');
+  } else if (!validateName(formData.lastName)) {
+    errors.value.lastName = t('lastNameInvalid');
   }
 
-  // Email validation
-  if (!validateRequired(email.value, 'email')) {
-    errors.value.email = 'Email is required';
-  } else if (!validateEmail(email.value)) {
-    errors.value.email = 'Please enter a valid email address';
+  if (!validateRequired(formData.email)) {
+    errors.value.email = t('emailRequired');
+  } else if (!validateEmail(formData.email)) {
+    errors.value.email = t('emailInvalid');
   }
 
-  // Password validation
-  if (!validateRequired(password.value, 'password')) {
-    errors.value.password = 'Password is required';
-  } else if (!validatePassword(password.value)) {
-    errors.value.password = 'Password must be at least 8 characters long';
+  if (!validateRequired(formData.password)) {
+    errors.value.password = t('passwordRequired');
+  } else if (!validatePassword(formData.password)) {
+    errors.value.password = t('passwordInvalid');
   }
 
-  // Confirm Password validation
-  if (!validateRequired(confirmPass.value, 'confirmPass')) {
-    errors.value.confirmPass = 'Please confirm your password';
-  } else if (password.value !== confirmPass.value) {
-    errors.value.confirmPass = 'Passwords do not match';
+  if (!validateRequired(formData.confirmPass)) {
+    errors.value.confirmPass = t('confirmPasswordRequired');
+  } else if (formData.password !== formData.confirmPass) {
+    errors.value.confirmPass = t('passwordsDontMatch');
   }
 
-  // Gender validation
-  if (!validateRequired(gender.value, 'gender')) {
-    errors.value.gender = 'Please select your gender';
+  if (!validateRequired(formData.gender)) {
+    errors.value.gender = t('genderRequired');
   }
 
-  // Age validation
-  if (!validateRequired(age.value, 'age')) {
-    errors.value.age = 'Age is required';
-  } else if (!validateAge(age.value)) {
-    errors.value.age = 'Age must be between 18 and 120';
+  if (!validateRequired(formData.age)) {
+    errors.value.age = t('ageRequired');
+  } else if (!validateAge(formData.age)) {
+    errors.value.age = t('ageInvalid');
   }
 
-  // Address validation
-  if (!validateRequired(address.value, 'address')) {
-    errors.value.address = 'Address is required';
+  if (!validateRequired(formData.government)) {
+    errors.value.government = t('governmentRequired');
   }
 
-  // Area validation
-  if (!validateRequired(area.value, 'area')) {
-    errors.value.area = 'Area is required';
+  if (!validateRequired(formData.district)) {
+    errors.value.district = t('districtRequired');
   }
 
-  // City validation
-  if (!validateRequired(city.value, 'city')) {
-    errors.value.city = 'City is required';
+  if (!validateRequired(formData.phone)) {
+    errors.value.phone = t('phoneRequired');
   }
 
-  // Phone validation
-  if (!validateRequired(phone.value, 'phone')) {
-    errors.value.phone = 'Phone number is required';
+  if (!formData.agreeTerms) {
+    errors.value.agreeTerms = t('mustAgreeTerms');
+  }
+
+  if (!validateRequired(formData.address)) {
+    errors.value.address = t('addressRequired');
   }
 
   return Object.keys(errors.value).length === 0;
 };
 
-
-
 const handleRegister = async () => {
   error.value = '';
-  
-  // Validate form
+
   if (!validateForm()) {
     return;
   }
 
   try {
     // Create user account with Firebase Auth
-    const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
-    
+    const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+
     // Create user document in Firestore
     const userDoc = {
-      fullName: `${firstName.value} ${lastName.value}`,
-      firstName: firstName.value,
-      lastName: lastName.value,
-      email: email.value,
-      gender: gender.value,
-      age: parseInt(age.value),
-      address: address.value,
-      area: area.value,
-      city: city.value,
-      phone: phone.value,
+      fullName: `${formData.firstName} ${formData.lastName}`,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      gender: formData.gender,
+      age: parseInt(formData.age),
+      address: `${formData.address},`+ formData.government+ formData.district,
+      area: getDistrictsForGovernment(formData.government)[formData.district] || formData.district,
+      city: getGovernmentNames()[formData.government] || formData.government,
+      phone: formData.phone,
       role: 'user',
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     await setDoc(doc(db, 'users', userCredential.user.uid), userDoc);
-    
-    // Enforce persistent admin role for elie1400674@gmail.com
+
     await ensureUserRole(userCredential.user);
     await fetchUserRole(userCredential.user);
-    
-    // Send welcome email using EmailJS
+
     try {
-      await sendWelcomeEmail(email.value, firstName.value, lastName.value);
+      await sendWelcomeEmail(formData.email, formData.firstName, formData.lastName);
     } catch (emailError) {
       console.error('Email sending failed:', emailError);
-      // Don't fail the registration if email fails
     }
-    
-    router.push('/'); // Redirect to home page after registration
+
+    router.push('/');
   } catch (err) {
     console.error('Registration error:', err);
     error.value = err.message;
@@ -197,10 +167,6 @@ const openTermsModal = () => {
 const closeTermsModal = () => {
   showTermsModal.value = false;
 };
-
-
-
-
 </script>
 
 <template>
@@ -222,7 +188,7 @@ const closeTermsModal = () => {
         <input 
           type="text" 
           id="firstName" 
-          v-model="firstName" 
+          v-model="formData.firstName" 
           class="form-input" 
           :class="{ 'error': errors.firstName }"
           :placeholder="$t('firstName')" 
@@ -237,7 +203,7 @@ const closeTermsModal = () => {
         <input 
           type="text" 
           id="lastName" 
-          v-model="lastName" 
+          v-model="formData.lastName" 
           class="form-input" 
           :class="{ 'error': errors.lastName }"
           :placeholder="$t('lastName')" 
@@ -252,7 +218,7 @@ const closeTermsModal = () => {
         <input 
           type="email" 
           id="email" 
-          v-model="email" 
+          v-model="formData.email" 
           class="form-input" 
           :class="{ 'error': errors.email }"
           :placeholder="$t('email')" 
@@ -267,7 +233,7 @@ const closeTermsModal = () => {
         <input 
           type="text" 
           id="phone" 
-          v-model="phone" 
+          v-model="formData.phone" 
           class="form-input" 
           :class="{ 'error': errors.phone }"
           :placeholder="$t('phone')" 
@@ -281,7 +247,7 @@ const closeTermsModal = () => {
         <label for="gender" class="form-label">{{ $t('gender') }}</label>
         <select 
           id="gender" 
-          v-model="gender" 
+          v-model="formData.gender" 
           class="form-input" 
           :class="{ 'error': errors.gender }"
           required
@@ -300,7 +266,7 @@ const closeTermsModal = () => {
         <input 
           type="number" 
           id="age" 
-          v-model="age" 
+          v-model="formData.age" 
           min="18" 
           max="120"
           class="form-input" 
@@ -310,51 +276,54 @@ const closeTermsModal = () => {
         />
         <p v-if="errors.age" class="error-message">{{ errors.age }}</p>
   </div>
-
-      <!-- address -->
-      <div class="form-group">
+      <!-- Address (Street/Building/etc.) -->
+      <div class="form-group full-width">
         <label for="address" class="form-label">{{ $t('address') }}</label>
-        <input 
-          type="text" 
-          id="address" 
-          v-model="address" 
-          class="form-input" 
+        <input
+          type="text"
+          id="address"
+          v-model="formData.address"
+          class="form-input"
           :class="{ 'error': errors.address }"
-          :placeholder="$t('address')" 
-          required 
+          :placeholder="$t('addressPlaceholder')"
+          required
         />
         <p v-if="errors.address" class="error-message">{{ errors.address }}</p>
-  </div>
-
-      <!-- area -->
-      <div class="form-group">
-        <label for="area" class="form-label">{{ $t('area') }}</label>
-        <input 
-          type="text" 
-          id="area" 
-          v-model="area" 
-          class="form-input" 
-          :class="{ 'error': errors.area }"
-          :placeholder="$t('area')" 
-          required 
-        />
-        <p v-if="errors.area" class="error-message">{{ errors.area }}</p>
-  </div>
-
-      <!-- city -->
-      <div class="form-group">
-        <label for="city" class="form-label">{{ $t('city') }}</label>
-        <input 
-          type="text" 
-          id="city" 
-          v-model="city" 
-          class="form-input" 
-          :class="{ 'error': errors.city }"
-          :placeholder="$t('city')" 
-          required 
-        />
-        <p v-if="errors.city" class="error-message">{{ errors.city }}</p>
       </div>
+      <!-- Governorate & District (Location) -->
+      <div class="form-group">
+        <label for="government" class="form-label">{{ $t('government') }}</label>
+        <select 
+          id="government" 
+          v-model="formData.government" 
+          class="form-input" 
+          required
+        >
+          <option value="" disabled selected>{{ $t('government') }}</option>
+          <option v-for="gov in governmentOptions" :key="gov" :value="gov">
+            {{ locale === 'ar' ? governmentNamesAr[gov] : gov }}
+          </option>
+        </select>
+      </div>
+      <div class="form-section location-section full-width">
+  <div class="form-row">
+    <div class="form-group">
+      <label for="district" class="form-label">{{ $t('districtArea') }}</label>
+      <select 
+        id="district" 
+        v-model="formData.district" 
+        class="form-input" 
+        required
+        :disabled="!formData.government"
+      >
+        <option value="" disabled selected>{{ $t('districtArea') }}</option>
+        <option v-for="district in districtOptions" :key="district" :value="district">
+          {{ locale === 'ar' ? (districtsAr[formData.government]?.[district] || district) : district }}
+        </option>
+      </select>
+    </div>
+  </div>
+</div>
 
       <!-- password -->
       <div class="form-group">
@@ -362,7 +331,7 @@ const closeTermsModal = () => {
         <input 
           type="password" 
           id="password" 
-          v-model="password" 
+          v-model="formData.password" 
           class="form-input" 
           :class="{ 'error': errors.password }"
           :placeholder="$t('password')" 
@@ -377,7 +346,7 @@ const closeTermsModal = () => {
         <input 
           type="password" 
           id="confirmPass" 
-          v-model="confirmPass" 
+          v-model="formData.confirmPass" 
           class="form-input" 
           :class="{ 'error': errors.confirmPass }"
           :placeholder="$t('confirmPassword')" 
@@ -389,13 +358,13 @@ const closeTermsModal = () => {
 
     <div class="form-footer">
       <div class="checkbox-group">
-        <input type="checkbox" class="form-checkbox" id="exampleCheck1" required>
-        <label class="checkbox-label" for="exampleCheck1">
-          I agree to the 
-          <span class="terms-link" @click="openTermsModal">Terms & Conditions</span> 
-          and Privacy policy
-        </label>
-      </div>
+            <input v-model="formData.agreeTerms" type="checkbox" class="form-checkbox" id="agreeTerms" required />
+            <label class="checkbox-label" for="agreeTerms">
+              {{ $t('agreeTermsAndConditions') }}
+              <span class="terms-link" @click="openTermsModal">{{ $t('termsAndConditions') }}</span> 
+              {{ $t('andPrivacyPolicy') }}
+            </label>
+          </div>
 
              <button type="submit" class="submit-btn">
          <span>{{ $t('register') }}</span>
@@ -418,122 +387,105 @@ const closeTermsModal = () => {
 </div>
 
 <!-- Terms and Conditions Modal -->
-<div v-if="showTermsModal" class="modal-overlay" @click="closeTermsModal">
-  <div class="modal-content" @click.stop>
-    <div class="modal-header">
-      <h2 class="modal-title">Terms and Conditions</h2>
-      <button class="modal-close" @click="closeTermsModal">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
-        </svg>
-      </button>
-    </div>
-    <div class="modal-body">
-      <div class="terms-content">
-        <h3>1. General Terms</h3>
-        
-        <h4>1.1 Definitions</h4>
-        <ul>
-          <li><strong>Platform:</strong> Refers to the Bolt Fix website.</li>
-          <li><strong>User:</strong> A person who books maintenance services through the platform.</li>
-          <li><strong>Technician:</strong> A service provider registered on the platform.</li>
-          <li><strong>Booking:</strong> A confirmed request for a maintenance service.</li>
-        </ul>
-
-        <h4>1.2 Account Creation</h4>
-        <ul>
-          <li>All users and technicians must register with accurate and complete information.</li>
-          <li>Each individual may only have one account.</li>
-          <li>By registering, you agree to these terms and all platform policies.</li>
-        </ul>
-
-        <h4>1.3 Privacy</h4>
-        <ul>
-          <li>All personal data is securely stored and protected.</li>
-          <li>Data will not be shared with third parties without user consent.</li>
-        </ul>
-
-        <h4>1.4 Prohibited Conduct</h4>
-        <ul>
-          <li>Providing false information or impersonating others is not allowed.</li>
-          <li>Completing services or payments outside the platform is strictly prohibited.</li>
-          <li>Abusive or inappropriate behavior may lead to account suspension or termination.</li>
-        </ul>
-
-        <h4>1.5 Account Termination</h4>
-        <ul>
-          <li>The platform reserves the right to suspend or delete any account that violates the terms.</li>
-        </ul>
-
-        <h3>2. User Terms</h3>
-
-        <h4>2.1 Booking a Service</h4>
-        <ul>
-          <li>Users can select technicians based on location, availability, and service type.</li>
-          <li>All bookings must be confirmed and completed through the platform.</li>
-        </ul>
-
-        <h4>2.2 Payment</h4>
-        <ul>
-          <li>Users can pay in cash after the service is delivered or online via PayPal before the service.</li>
-          <li>A booking is considered confirmed only after payment or explicit confirmation.</li>
-        </ul>
-
-        <h4>2.3 Cancellation and Refunds</h4>
-        <ul>
-          <li>Users may cancel bookings within a specific time frame before the scheduled appointment.</li>
-          <li>No refunds are available after the service has been completed.</li>
-          <li>Complaints can be submitted through the platform for review.</li>
-        </ul>
-
-        <h4>2.4 Ratings and Feedback</h4>
-        <ul>
-          <li>Users may rate and review technicians after each service.</li>
-          <li>Feedback contributes to service quality monitoring and technician performance.</li>
-        </ul>
-
-        <h3>3. Technician Terms</h3>
-
-        <h4>3.1 Commission Policy</h4>
-        <ul>
-          <li>The platform charges a 25% commission on each completed booking.</li>
-          <li>The remaining 75% is transferred to the technician.</li>
-        </ul>
-
-        <h4>3.2 Payment Methods</h4>
-        <ul>
-          <li>Technicians must add a valid PayPal account to receive online payments.</li>
-          <li>If the user pays in cash, the technician collects the full amount directly, and the platform will deduct its 25% commission later from future settlements.</li>
-        </ul>
-
-        <h4>3.3 Earnings Transfer</h4>
-        <ul>
-          <li>For PayPal payments, the technician's 75% share will be transferred within 24–48 hours after the service is confirmed.</li>
-          <li>For cash payments, the platform will deduct the commission later from upcoming earnings.</li>
-        </ul>
-
-        <h4>3.4 Service Expectations</h4>
-        <ul>
-          <li>Technicians are expected to arrive on time and complete the job professionally.</li>
-          <li>Multiple negative reviews may result in account review or suspension.</li>
-        </ul>
-
-        <h4>3.5 Responsibility</h4>
-        <ul>
-          <li>Technicians are responsible for the quality and completeness of their work.</li>
-          <li>Any misconduct or violation may result in penalties or account removal.</li>
-        </ul>
-
-        <p class="terms-footer">
-          By using the Bolt Fix platform, all users and technicians agree to the terms and conditions listed above.
-        </p>
+    <div v-if="showTermsModal" class="modal-overlay" @click="closeTermsModal">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h2 class="modal-title">{{ $t('terms.title') }}</h2>
+          <button class="modal-close" @click="closeTermsModal">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="terms-content">
+            <h3>{{ $t('terms.generalTerms') }}</h3>
+            <h4>{{ $t('terms.definitions') }}</h4>
+            <ul>
+              <li>{{ $t('terms.platform') }}</li>
+              <li>{{ $t('terms.user') }}</li>
+              <li>{{ $t('terms.technician') }}</li>
+              <li>{{ $t('terms.booking') }}</li>
+            </ul>
+            <h4>{{ $t('terms.accountCreation') }}</h4>
+            <ul>
+              <li>{{ $t('terms.accountCreation1') }}</li>
+              <li>{{ $t('terms.accountCreation2') }}</li>
+              <li>{{ $t('terms.accountCreation3') }}</li>
+            </ul>
+            <h4>{{ $t('terms.privacy') }}</h4>
+            <ul>
+              <li>{{ $t('terms.privacy1') }}</li>
+              <li>{{ $t('terms.privacy2') }}</li>
+            </ul>
+            <h4>{{ $t('terms.prohibitedConduct') }}</h4>
+            <ul>
+              <li>{{ $t('terms.prohibited1') }}</li>
+              <li>{{ $t('terms.prohibited2') }}</li>
+              <li>{{ $t('terms.prohibited3') }}</li>
+            </ul>
+            <h4>{{ $t('terms.accountTermination') }}</h4>
+            <ul>
+              <li>{{ $t('terms.accountTermination1') }}</li>
+            </ul>
+            <h3>{{ $t('terms.userTerms') }}</h3>
+            <h4>{{ $t('terms.bookingService') }}</h4>
+            <ul>
+              <li>{{ $t('terms.bookingService1') }}</li>
+              <li>{{ $t('terms.bookingService2') }}</li>
+            </ul>
+            <h4>{{ $t('terms.payment') }}</h4>
+            <ul>
+              <li>{{ $t('terms.payment1') }}</li>
+              <li>{{ $t('terms.payment2') }}</li>
+            </ul>
+            <h4>{{ $t('terms.cancellationRefunds') }}</h4>
+            <ul>
+              <li>{{ $t('terms.cancellation1') }}</li>
+              <li>{{ $t('terms.cancellation2') }}</li>
+              <li>{{ $t('terms.cancellation3') }}</li>
+            </ul>
+            <h4>{{ $t('terms.ratingsFeedback') }}</h4>
+            <ul>
+              <li>{{ $t('terms.ratings1') }}</li>
+              <li>{{ $t('terms.ratings2') }}</li>
+            </ul>
+            <h3>{{ $t('terms.technicianTerms') }}</h3>
+            <h4>{{ $t('terms.commissionPolicy') }}</h4>
+            <ul>
+              <li>{{ $t('terms.commission1') }}</li>
+              <li>{{ $t('terms.commission2') }}</li>
+            </ul>
+            <h4>{{ $t('terms.paymentMethods') }}</h4>
+            <ul>
+              <li>{{ $t('terms.paymentMethods1') }}</li>
+              <li>{{ $t('terms.paymentMethods2') }}</li>
+            </ul>
+            <h4>{{ $t('terms.earningsTransfer') }}</h4>
+            <ul>
+              <li>{{ $t('terms.earnings1') }}</li>
+              <li>{{ $t('terms.earnings2') }}</li>
+            </ul>
+            <h4>{{ $t('terms.serviceExpectations') }}</h4>
+            <ul>
+              <li>{{ $t('terms.serviceExpectations1') }}</li>
+              <li>{{ $t('terms.serviceExpectations2') }}</li>
+            </ul>
+            <h4>{{ $t('terms.responsibility') }}</h4>
+            <ul>
+              <li>{{ $t('terms.responsibility1') }}</li>
+              <li>{{ $t('terms.responsibility2') }}</li>
+            </ul>
+            <p class="terms-footer">
+              {{ $t('terms.footer') }}
+            </p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="modal-btn" @click="closeTermsModal">{{ $t('terms.iUnderstand') }}</button>
+        </div>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="modal-btn" @click="closeTermsModal">I Understand</button>
-    </div>
-  </div>
-</div>
 
 </body>
 
@@ -648,14 +600,14 @@ body {
     font-size: 1rem;
     transition: all 0.2s ease;
     background: var(--input-bg, #ffffff);
-    color: var(--primary-text, #1f2937);
+    color:  #1f2937;
     font-family: inherit;
 }
 
 .dark .form-input {
   background: var(--input-bg, #374151);
   border-color: #4b5563;
-  color: var(--primary-text, #f9fafb);
+  color: var(--text-muted);
 }
 
 .form-input:focus {
@@ -670,7 +622,7 @@ body {
 }
 
 .form-input::placeholder {
-    color: var(--text-muted, #9ca3af);
+    color:  #676869;
 }
 
 .dark .form-input::placeholder {
@@ -679,11 +631,7 @@ body {
 
 /* Style for select dropdowns to match placeholder color */
 .form-input option {
-    color: var(--text-muted, #9ca3af);
-}
-
-.dark .form-input option {
-  color: var(--text-muted, #6b7280);
+    color: black;
 }
 
 /* Style for select dropdown placeholder text */
@@ -693,6 +641,31 @@ body {
 
 .dark .form-input:invalid {
   color: var(--text-muted, #6b7280);
+}
+
+/* Dropdown Icons */
+.form-input[type="select"],
+select.form-input {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 5px center;
+  background-repeat: no-repeat;
+  background-size: 20px 16px;
+  padding-right: 3rem;
+}
+
+.dark .form-input[type="select"],
+.dark select.form-input {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23aaaaaa' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 5px center;
+  background-repeat: no-repeat;
+  background-size: 20px 16px;
+  padding-right: 3rem;
 }
 
 .form-input.error {
