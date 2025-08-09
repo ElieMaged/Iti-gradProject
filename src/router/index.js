@@ -1,4 +1,5 @@
 import { createWebHistory, createRouter } from 'vue-router'
+import { waitForAuth, isAdmin, isTechnician, isAuthenticated } from '../utils/auth'
 
 import HomePage from '../views/HomePage.vue'
 import About from '../views/About.vue'
@@ -29,16 +30,16 @@ import BookingPage from '../views/BookingPage.vue'
 import BookingConfirmation from '../views/BookingConfirmation.vue'
 
 import TechnicianDetails from '../views/TechnicianDetails.vue'
-import TechnicionProfile from '../views/TechnicionProfile.vue'
-import TechnicianEditProfile from '../views/TechnichianEditProfile.vue'
+import TechnicionProfile from '../views/Techncian dashboard/TechnicionProfile.vue'
+import TechnicianEditProfile from '../views/Techncian dashboard/TechnichianEditProfile.vue'
   
-import TechnicianAvailability from '../views/TechnicianAvailbility.vue'
-import TechPayment from '../views/TechPayment.vue'
+import TechnicianAvailability from '../views/Techncian dashboard/TechnicianAvailbility.vue'
+import TechPayment from '../views/Techncian dashboard/TechPayment.vue'
 import Chatbot from '../components/chatbot.vue'
-import TechnicianBookingPending from '../views/TechnicianBookingPending.vue'
-import TechnicianBookingUpcoming from '../views/TechnicianBookingUpcoming.vue'
-import TechnicianBookingCompleted from '../views/TechnicianBookingCompleted.vue'
-import TechnicianReviews from '../views/TechnicianReviews.vue'
+import TechnicianBookingPending from '../views/Techncian dashboard/TechnicianBookingPending.vue'
+import TechnicianBookingUpcoming from '../views/Techncian dashboard/TechnicianBookingUpcoming.vue'
+import TechnicianBookingCompleted from '../views/Techncian dashboard/TechnicianBookingCompleted.vue'
+import TechnicianReviews from '../views/Techncian dashboard/TechnicianReviews.vue'
 
 // User booking views
 import UserBookingPending from '../views/UserBookingPending.vue'
@@ -66,6 +67,7 @@ import AdminPendingTechProfile from '../views/adminDashboard/admin-pending-techP
 import PendingApplication from '../views/PendingApplication.vue'
 import AdminBookingDetails from '../views/adminDashboard/AdminBookingDetails.vue'
 import AdminBookingEdit from '../views/adminDashboard/AdminBookingEdit.vue'
+import AuthTest from '../views/AuthTest.vue'
 
 const routes = [
   { path: '/', component: HomePage },
@@ -136,6 +138,7 @@ const routes = [
   {path: '/admin-booking-details/:id', name: 'admin-booking-details', component: AdminBookingDetails},
   {path: '/admin-booking-edit/:id', name: 'admin-booking-edit', component: AdminBookingEdit},
   {path: '/technician-reviews', component: TechnicianReviews},
+  {path: '/auth-test', component: AuthTest},
 ]
 
 
@@ -148,19 +151,67 @@ const router = createRouter({
   }
 });
 
-// Add global navigation guard for debugging
-router.beforeEach((to, from, next) => {
+// Add global navigation guard with authentication checks
+router.beforeEach(async (to, from, next) => {
   console.log('Navigation:', { from: from.path, to: to.path, params: to.params });
+  
+  // Wait for authentication to be ready
+  await waitForAuth();
+
+  // If user is already authenticated and navigating to a public landing/login route,
+  // redirect to the appropriate dashboard based on role.
+  const isPublicLanding = (
+    to.path === '/' ||
+    to.path === '/userlogin' ||
+    to.path === '/login' ||
+    to.path === '/welcome'
+  );
+  if (isAuthenticated() && isPublicLanding) {
+    if (isAdmin()) {
+      next('/admin-dashboard');
+      return;
+    }
+    if (isTechnician()) {
+      // Use existing technician dashboard route (note the spelling in routes)
+      next('/technicion-profile');
+      return;
+    }
+  }
   
   // Check if trying to access admin routes
   if (to.path.startsWith('/admin-')) {
     console.log('Attempting to access admin route:', to.path);
-    const userType = localStorage.getItem('userType');
-    console.log('User type:', userType);
     
-    if (userType !== 'admin') {
+    if (!isAdmin()) {
       console.log('User is not admin, redirecting to home');
       next('/');
+      return;
+    }
+  }
+  
+  // Check if trying to access technician routes
+  if (to.path.startsWith('/technician-') || 
+      to.path.startsWith('/techprofile') ||
+      to.path.startsWith('/techpayment') ||
+      to.path.startsWith('/technicianavailbility')) {
+    console.log('Attempting to access technician route:', to.path);
+    
+    if (!isTechnician()) {
+      console.log('User is not technician, redirecting to home');
+      next('/');
+      return;
+    }
+  }
+  
+  // Check if trying to access user-specific routes
+  if (to.path.startsWith('/user-') || 
+      to.path === '/profile' ||
+      to.path === '/payment') {
+    console.log('Attempting to access user route:', to.path);
+    
+    if (!isAuthenticated()) {
+      console.log('User is not authenticated, redirecting to login');
+      next('/userlogin');
       return;
     }
   }

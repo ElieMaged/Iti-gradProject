@@ -8,7 +8,7 @@
         <div class="booking-main">
           <div class="booking-container">
             <div class="title-search-row">
-              <h2 class="page-title">{{ $t('pendingBookings') }}</h2>
+              <TopBar :title="$t('pendingBookings')" />
               <div class="search-wrapper">
                 <input v-model="searchQuery" class="search-input" type="text" :placeholder="$t('search')" />
                 <span class="search-icon"><i class="fas fa-search"></i></span>
@@ -73,10 +73,11 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { collection, getDocs, query, where, doc, updateDoc, deleteDoc, addDoc, getDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db } from '../../firebase';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'vue-router';
-import Sidebar from '../components/Sidebar.vue';
+import Sidebar from '../../components/Sidebar.vue';
+import TopBar from '../../components/TopBar.vue';
 
 
 const router = useRouter();
@@ -635,7 +636,6 @@ onMounted(() => {
 }
 
 .title-search-row {
-  display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1.5rem;

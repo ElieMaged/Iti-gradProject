@@ -1,9 +1,9 @@
 <template>
   <div class="admin-dashboard-layout">
     <admin-sidebar />
-    <div class="pending-main mr-20 p-4">
+    <div class="pending-main mx-12 p-4">
+      <TopBar :title="$t('pendingTechnicianApplications')" />
       <div class="pending-container">
-        <h2 class="pending-title">{{ $t('pendingTechnicianApplications') }}</h2>
         <div class="subtitle-search-row">
           <div class="pending-subtitle">{{ $t('reviewApplications') }}</div>
           <div class="search-wrapper">
@@ -151,6 +151,7 @@
 
 <script>
 import AdminSidebar from '../../components/admin-sidebar.vue';
+import TopBar from '../../components/TopBar.vue';
 import Pagination from '../../components/pagination.vue';
 import { collection, getDocs, doc, setDoc, updateDoc, deleteDoc, addDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
@@ -161,6 +162,7 @@ export default {
   name: 'AdminPendingTech',
   components: {
     AdminSidebar,
+    TopBar,
     Pagination
   },
   data() {

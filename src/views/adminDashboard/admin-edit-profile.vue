@@ -1,12 +1,10 @@
 <template>
   <div class="admin-dashboard-layout">
     <admin-sidebar />
-    <div class="edit-profile-main mr-20 p-4">
+    <div class="edit-profile-main mx-12 p-4">
+      <TopBar :title="$t('editProfile')" />
       <div class="edit-profile-wrapper">
         <div class="edit-profile-card">
-          <div class="edit-profile-header">
-            <h2>{{ $t('editProfile') }}</h2>
-          </div>
           
           <!-- Loading State -->
           <div v-if="loading" class="loading-state">
@@ -115,12 +113,13 @@
 
 <script>
 import AdminSidebar from '../../components/admin-sidebar.vue';
+import TopBar from '../../components/TopBar.vue';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { getAuth, updatePassword } from 'firebase/auth';
 
 export default {
-  components: { AdminSidebar },
+  components: { AdminSidebar, TopBar },
   data() {
     return {
       profileImage: null,

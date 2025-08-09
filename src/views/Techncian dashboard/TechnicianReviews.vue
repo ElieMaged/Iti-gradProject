@@ -10,9 +10,9 @@
     <Sidebar :activeMenu="activeMenu" @navigate="handleSidebarNavigate" />
     <!-- Main Content -->
     <div id="admin-profile-container" class="p-4 mr-20">
+      <TopBar :title="$t('myReviews')" />
       <div id="admin-profile-wrapper">
         <div id="admin-profile-card">
-          <h2 class="page-title">{{ $t('myReviews') }}</h2>
           
           <!-- Reviews Summary -->
           <div class="reviews-summary">
@@ -30,25 +30,25 @@
                 <span class="summary-value">{{ fiveStarCount }}</span>
               </div>
             </div>
-      </div>
+          </div>
 
           <!-- Reviews List -->
           <div class="reviews-container">
             <div v-if="reviews.length === 0" class="no-reviews">
               <i class="fas fa-star" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i>
               <p>{{ $t('noReviewsYet') }}</p>
-      </div>
+            </div>
             
             <div v-else class="reviews-list">
-        <div v-for="review in reviews" :key="review.id" class="review-card">
-          <div class="review-header">
+              <div v-for="review in reviews" :key="review.id" class="review-card">
+                <div class="review-header">
                   <div class="reviewer-info">
                     <div class="reviewer-avatar">
                       <i class="fas fa-user"></i>
                     </div>
                     <div class="reviewer-details">
                       <h4 class="reviewer-name">{{ review.customerName || $t('anonymousCustomer') }}</h4>
-            <div class="review-rating">
+                      <div class="review-rating">
                         <span v-for="star in 5" :key="star" class="star">
                           <i :class="star <= review.rating ? 'fas fa-star filled' : 'far fa-star'"></i>
                         </span>
@@ -75,7 +75,7 @@
                     <span class="booking-date">{{ formatDate(review.bookingDate) }}</span>
                   </div>
                 </div>
-            </div>
+              </div>
             </div>
           </div>
 
@@ -110,18 +110,19 @@
 </template>
 
 <script>
-import Sidebar from '../components/Sidebar.vue';
-import { auth, db } from '../firebase';
+import Sidebar from '../../components/Sidebar.vue';
+import TopBar from '../../components/TopBar.vue';
+import { auth, db } from '../../firebase';
 import { collection, query, where, getDocs, orderBy, limit, startAfter } from 'firebase/firestore';
 
 export default {
-  components: { Sidebar },
-    data() {
-        return {
+  components: { Sidebar, TopBar },
+  data() {
+    return {
       activeMenu: 'reviews',
       loading: true,
       error: '',
-        reviews: [],
+      reviews: [],
       currentPage: 1,
       pageSize: 10,
       totalReviews: 0,

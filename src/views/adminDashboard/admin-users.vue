@@ -1,11 +1,11 @@
 <template>
   <div class="admin-dashboard-layout">
     <admin-sidebar />
-    <div class="users-main mr-20 p-4">
+    <div class="users-main mx-12 p-4">
+      <TopBar :title="$t('userManagement')" />
       <div class="users-container">
-        <h2 class="users-title">{{ $t('userManagement') }}</h2>
-                 <div class="subtitle-search-row">
-           <div class="users-subtitle">{{ $t('allRegularUsers') }}</div>
+        <div class="subtitle-search-row">
+          <div class="users-subtitle">{{ $t('allRegularUsers') }}</div>
           <div class="search-wrapper">
             <input 
               type="text" 
@@ -16,7 +16,8 @@
             <span class="search-icon"><i class="fas fa-search"></i></span>
           </div>
         </div>
-  
+        
+
         <!-- Loading State -->
         <div v-if="loading" class="loading-state">
           <div class="loading-spinner"></div>
@@ -77,11 +78,11 @@
           </table>
         </div>
 
-                 <!-- Empty State -->
-         <div v-else class="empty-state">
-           <p>{{ $t('noRegularUsersFound') }}</p>
-           <p class="debug-info">{{ $t('debugInfo') }}</p>
-         </div>
+        <!-- Empty State -->
+        <div v-else class="empty-state">
+          <p>{{ $t('noRegularUsersFound') }}</p>
+          <p class="debug-info">{{ $t('debugInfo') }}</p>
+        </div>
         
         <pagination
           :current-page="currentPage"
@@ -98,6 +99,8 @@
 <script>
 import AdminSidebar from '../../components/admin-sidebar.vue';
 import Pagination from '../../components/pagination.vue';
+import TopBar from '../../components/TopBar.vue';
+
 import { collection, getDocs, doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { deleteUser as deleteAuthUser } from 'firebase/auth';
@@ -107,7 +110,8 @@ export default {
     name: 'AdminUsers',
     components: {
       AdminSidebar,
-      Pagination
+      Pagination,
+      TopBar
     },
     data() {
       return {
@@ -304,12 +308,13 @@ export default {
 .search-wrapper {
   display: flex;
   align-items: center;
-  width: 411px;
   height: 100%;
   padding: 10px;
+
+  width: 300px;
   gap: 8px;
   flex-shrink: 0;
-  margin-bottom: 16px;
+  min-height: 30px;
   min-width: none;
   position: relative;
 }
@@ -535,9 +540,7 @@ export default {
     max-width: 90rem;
   }
   
-  .search-wrapper {
-    width: 450px;
-  }
+  
   
   .users-table {
     font-size: 1rem;

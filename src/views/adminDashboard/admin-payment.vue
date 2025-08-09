@@ -1,14 +1,10 @@
 <template>
   <div class="admin-dashboard-layout">
     <AdminSidebar />
-    <div class="dashboard-main p-4 mr-20">
+    <div class="dashboard-main p-4 mx-12">
+      <TopBar :title="$t('paymentManagement')" />
       <div class="dashboard-container">
-        <div class="dashboard-header">
-          <h2 class="dashboard-title">{{ $t('paymentManagement') }}</h2>
-          <div class="dashboard-actions">
-            <NotificationBell />
-          </div>
-        </div>
+        
         
         <!-- Payment Summary Cards -->
         <div class="stats-grid">
@@ -259,67 +255,51 @@
     </div>
   </div>
 </template>
-
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { collection, getDocs, doc, updateDoc, serverTimestamp, query, orderBy, where, addDoc, limit, getDoc } from 'firebase/firestore'
+import { collection, getDocs, doc, updateDoc, serverTimestamp, query, orderBy, where, addDoc, limit } from 'firebase/firestore'
 import { db, auth } from '../../firebase'
 import { useRouter } from 'vue-router'
 import AdminSidebar from '../../components/admin-sidebar.vue'
+import TopBar from '../../components/TopBar.vue'
 import { onAuthStateChanged } from 'firebase/auth'
 import { ensureUserRole, fetchUserRole } from '../../utils/userRole'
-import NotificationBell from '../../components/NotificationBell.vue'
 
 const router = useRouter()
+
+// State
 const transactions = ref([])
 const adminCredits = ref([])
 const technicians = ref([])
-const paymentSplits = ref([]) // New: payment splits data
+const paymentSplits = ref([])
 const currentFilter = ref('all')
 const loading = ref(true)
 
-// Payout variables
+// Payout state
 const selectedTechnician = ref('')
 const payoutAmount = ref('')
 const payoutReason = ref('')
 const payoutLoading = ref(false)
 const amountError = ref('')
 
-// Computed properties
+// Computed
 const filteredTransactions = computed(() => {
-  if (currentFilter.value === 'all') {
-    return transactions.value
-  }
+  if (currentFilter.value === 'all') return transactions.value
   return transactions.value.filter(t => t.status === currentFilter.value)
 })
 
-const pendingTransactions = computed(() => 
-  transactions.value.filter(t => t.status === 'pending')
-)
+const pendingTransactions = computed(() => transactions.value.filter(t => t.status === 'pending'))
+const approvedTransactions = computed(() => transactions.value.filter(t => t.status === 'approved'))
+const rejectedTransactions = computed(() => transactions.value.filter(t => t.status === 'rejected'))
 
-const approvedTransactions = computed(() => 
-  transactions.value.filter(t => t.status === 'approved')
-)
-
-const rejectedTransactions = computed(() => 
-  transactions.value.filter(t => t.status === 'rejected')
-)
-
-// Payment splits computed properties
-const pendingSplits = computed(() => 
-  paymentSplits.value.filter(s => s.status === 'pending')
-)
-
-const completedSplits = computed(() => 
-  paymentSplits.value.filter(s => s.status === 'completed')
-)
+const pendingSplits = computed(() => paymentSplits.value.filter(s => s.status === 'pending'))
+const completedSplits = computed(() => paymentSplits.value.filter(s => s.status === 'completed'))
 
 const totalAmount = computed(() => {
   return approvedTransactions.value
     .reduce((sum, t) => {
-      // Use originalAmountEGP if available, otherwise convert USD to EGP
-      const amountInEGP = t.originalAmountEGP || (parseFloat(t.amount) * 31);
-      return sum + amountInEGP;
+      const amountInEGP = t.originalAmountEGP || (parseFloat(t.amount) * 31)
+      return sum + amountInEGP
     }, 0)
     .toFixed(2)
 })
@@ -331,13 +311,11 @@ const totalApprovedCredits = computed(() => {
     .toFixed(2)
 })
 
-// Payout computed properties
 const paypalFee = computed(() => {
   if (!payoutAmount.value) return 0
   const amount = parseFloat(payoutAmount.value)
-  // PayPal fee: 2.9% + 0.30 USD, converted to EGP
   const feeUSD = (amount * 0.029) + 0.30
-  return (feeUSD * 31).toFixed(2) // Convert to EGP
+  return (feeUSD * 31).toFixed(2)
 })
 
 const totalDeduction = computed(() => {
@@ -354,27 +332,20 @@ const remainingCredits = computed(() => {
 })
 
 const canPayout = computed(() => {
-  return selectedTechnician.value && 
-         payoutAmount.value && 
-         parseFloat(payoutAmount.value) > 0 && 
-         !amountError.value &&
-         parseFloat(totalDeduction.value) <= parseFloat(totalApprovedCredits.value)
+  return selectedTechnician.value &&
+    payoutAmount.value &&
+    parseFloat(payoutAmount.value) > 0 &&
+    !amountError.value &&
+    parseFloat(totalDeduction.value) <= parseFloat(totalApprovedCredits.value)
 })
 
 // Methods
 async function fetchTransactions() {
   try {
     loading.value = true
-    
-    console.log('Starting to fetch data...')
-    console.log('Current user:', auth.currentUser)
-    console.log('User authenticated:', !!auth.currentUser)
-    console.log('User email:', auth.currentUser?.email)
-    
-    // Check if user is admin using Firestore roles
-    let isAdmin = false
+
+    // Ensure role is loaded (non-blocking if fails)
     try {
-      // First ensure user role is set up
       await ensureUserRole(auth.currentUser)
       const userRole = await fetchUserRole(auth.currentUser)
       
@@ -390,90 +361,26 @@ async function fetchTransactions() {
     } catch (roleError) {
       console.error('Error checking user role:', roleError)
     }
-    
-    // Temporarily allow non-admin users to test technician fetching
-    // if (!isAdmin) {
-    //   console.error('❌ User is not an admin')
-    //   throw new Error('User does not have admin privileges')
-    // }
-    
-    console.log('✅ Proceeding with data fetch (admin check temporarily disabled)')
-    
-    // Fetch payment transactions
+
+    // Transactions
     const q = query(collection(db, 'paymentTransactions'), orderBy('paymentDate', 'desc'))
     const snapshot = await getDocs(q)
-    transactions.value = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }))
-    
-    console.log('Payment transactions fetched:', transactions.value.length)
-    
-    // Fetch admin credits
+    transactions.value = snapshot.docs.map(d => ({ id: d.id, ...d.data() }))
+
+    // Admin credits
     const creditsQuery = query(collection(db, 'adminCredits'), orderBy('createdAt', 'desc'))
     const creditsSnapshot = await getDocs(creditsQuery)
-    adminCredits.value = creditsSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }))
-    
-    console.log('Admin credits fetched:', adminCredits.value.length)
-    
-    // Fetch payment splits
+    adminCredits.value = creditsSnapshot.docs.map(d => ({ id: d.id, ...d.data() }))
+
+    // Payment splits
     const splitsQuery = query(collection(db, 'paymentSplits'), orderBy('createdAt', 'desc'))
     const splitsSnapshot = await getDocs(splitsQuery)
-    paymentSplits.value = splitsSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }))
-    
-    console.log('Payment splits fetched:', paymentSplits.value.length)
-    
-    // Test: Try to access any collection first
-    console.log('Testing Firebase access...')
+    paymentSplits.value = splitsSnapshot.docs.map(d => ({ id: d.id, ...d.data() }))
+
+    // Technicians (approved + pending)
     try {
-      const testQuery = query(collection(db, 'bookings'))
-      const testSnapshot = await getDocs(testQuery)
-      console.log('✅ Firebase access test successful - bookings collection has', testSnapshot.size, 'documents')
-    } catch (testError) {
-      console.error('❌ Firebase access test failed:', testError)
-    }
-    
-    // Fetch technicians - try multiple approaches
-    console.log('Fetching technicians...')
-    try {
-      // Approach 1: Direct query
-      const techniciansQuery = query(collection(db, 'technicians'))
-      console.log('Technicians query created')
-      
-      const techniciansSnapshot = await getDocs(techniciansQuery)
-      console.log('Technicians snapshot received:', techniciansSnapshot)
-      console.log('Technicians snapshot empty:', techniciansSnapshot.empty)
-      console.log('Technicians snapshot size:', techniciansSnapshot.size)
-      
-      const approvedTechnicians = techniciansSnapshot.docs.map(doc => {
-        const data = doc.data()
-        console.log('Processing technician doc:', doc.id, data)
-        return {
-          id: doc.id,
-          fullName: data.fullName || 'Unknown Technician',
-          name: data.name || data.fullName || 'Unknown Technician',
-          email: data.email || 'No email',
-          specialization: data.specialization || 'N/A',
-          basePrice: data.basePrice || 0,
-          ...data // Include all other fields
-        }
-      })
-      
-      console.log('Approved technicians fetched:', approvedTechnicians.length)
-      console.log('Technicians data:', approvedTechnicians)
-      
-      // Fetch pending technicians
-      console.log('Fetching pending technicians...')
-      const pendingTechniciansQuery = query(collection(db, 'pendingTechnicians'))
-      const pendingTechniciansSnapshot = await getDocs(pendingTechniciansQuery)
-      
-      const pendingTechnicians = pendingTechniciansSnapshot.docs.map(doc => {
+      const techSnap = await getDocs(query(collection(db, 'technicians')))
+      const approved = techSnap.docs.map(doc => {
         const data = doc.data()
         return {
           id: doc.id,
@@ -482,53 +389,30 @@ async function fetchTransactions() {
           email: data.email || 'No email',
           specialization: data.specialization || 'N/A',
           basePrice: data.basePrice || 0,
-          ...data // Include all other fields
+          ...data,
         }
       })
-      
-      console.log('Pending technicians fetched:', pendingTechnicians.length)
-      console.log('Pending technicians data:', pendingTechnicians)
-      
-      // Combine all technicians
-      technicians.value = [...approvedTechnicians, ...pendingTechnicians]
-      
-      console.log('Total technicians combined:', technicians.value.length)
-      console.log('Final technicians array:', technicians.value)
-      
-    } catch (techError) {
-      console.error('Error fetching technicians:', techError)
-      console.error('Technician error details:', techError.message)
-      console.error('Technician error code:', techError.code)
-      
-      // Fallback: Try to fetch with different approach
-      console.log('Trying fallback approach...')
-      try {
-        const fallbackQuery = query(collection(db, 'technicians'), limit(10))
-        const fallbackSnapshot = await getDocs(fallbackQuery)
-        console.log('Fallback query successful, found:', fallbackSnapshot.size, 'technicians')
-        
-        const fallbackTechnicians = fallbackSnapshot.docs.map(doc => ({
+
+      const pendingSnap = await getDocs(query(collection(db, 'pendingTechnicians')))
+      const pending = pendingSnap.docs.map(doc => {
+        const data = doc.data()
+        return {
           id: doc.id,
-          fullName: doc.data().fullName || 'Unknown Technician',
-          name: doc.data().name || doc.data().fullName || 'Unknown Technician',
-          email: doc.data().email || 'No email',
-          specialization: doc.data().specialization || 'N/A',
-          basePrice: doc.data().basePrice || 0,
-          ...doc.data()
-        }))
-        
-        technicians.value = fallbackTechnicians
-        console.log('Fallback technicians loaded:', technicians.value.length)
-      } catch (fallbackError) {
-        console.error('Fallback approach also failed:', fallbackError)
-        technicians.value = []
-      }
+          fullName: data.fullName || 'Unknown Technician',
+          name: data.name || data.fullName || 'Unknown Technician',
+          email: data.email || 'No email',
+          specialization: data.specialization || 'N/A',
+          basePrice: data.basePrice || 0,
+          ...data,
+        }
+      })
+
+      technicians.value = [...approved, ...pending]
+    } catch {
+      technicians.value = []
     }
-    
-  } catch (error) {
-    console.error('Error fetching data:', error)
-    console.error('Error details:', error.message)
-    console.error('Error code:', error.code)
+  } catch (e) {
+    console.error('Error fetching data:', e)
   } finally {
     loading.value = false
   }
@@ -538,45 +422,32 @@ async function approveTransaction(transactionId) {
   try {
     const transactionRef = doc(db, 'paymentTransactions', transactionId)
     const transaction = transactions.value.find(t => t.id === transactionId)
-    
-    if (!transaction) {
-      console.error('Transaction not found')
-      return
-    }
-    
-    // Update payment transaction
+    if (!transaction) return
+
     await updateDoc(transactionRef, {
       status: 'approved',
       adminAction: 'approved',
       adminActionDate: serverTimestamp(),
-      adminActionBy: auth.currentUser?.email || 'Admin'
+      adminActionBy: auth.currentUser?.email || 'Admin',
     })
-    
-    // Update corresponding credit record
-    const creditsQuery = query(
-      collection(db, 'adminCredits'),
-      where('paypalOrderId', '==', transaction.paypalOrderId)
-    )
+
+    const creditsQuery = query(collection(db, 'adminCredits'), where('paypalOrderId', '==', transaction.paypalOrderId))
     const creditsSnapshot = await getDocs(creditsQuery)
-    
     if (!creditsSnapshot.empty) {
       const creditDoc = creditsSnapshot.docs[0]
       await updateDoc(doc(db, 'adminCredits', creditDoc.id), {
         status: 'approved',
         approvedAt: serverTimestamp(),
-        approvedBy: auth.currentUser?.email || 'Admin'
+        approvedBy: auth.currentUser?.email || 'Admin',
       })
     }
-    
-    // Update the local state
-    if (transaction) {
-      transaction.status = 'approved'
-      transaction.adminAction = 'approved'
-      transaction.adminActionDate = new Date()
-      transaction.adminActionBy = auth.currentUser?.email || 'Admin'
-    }
-  } catch (error) {
-    console.error('Error approving transaction:', error)
+
+    transaction.status = 'approved'
+    transaction.adminAction = 'approved'
+    transaction.adminActionDate = new Date()
+    transaction.adminActionBy = auth.currentUser?.email || 'Admin'
+  } catch (e) {
+    console.error('Error approving transaction:', e)
   }
 }
 
@@ -584,68 +455,50 @@ async function rejectTransaction(transactionId) {
   try {
     const transactionRef = doc(db, 'paymentTransactions', transactionId)
     const transaction = transactions.value.find(t => t.id === transactionId)
-    
-    if (!transaction) {
-      console.error('Transaction not found')
-      return
-    }
-    
-    // Update payment transaction
+    if (!transaction) return
+
     await updateDoc(transactionRef, {
       status: 'rejected',
       adminAction: 'rejected',
       adminActionDate: serverTimestamp(),
-      adminActionBy: auth.currentUser?.email || 'Admin'
+      adminActionBy: auth.currentUser?.email || 'Admin',
     })
-    
-    // Update corresponding credit record
-    const creditsQuery = query(
-      collection(db, 'adminCredits'),
-      where('paypalOrderId', '==', transaction.paypalOrderId)
-    )
+
+    const creditsQuery = query(collection(db, 'adminCredits'), where('paypalOrderId', '==', transaction.paypalOrderId))
     const creditsSnapshot = await getDocs(creditsQuery)
-    
     if (!creditsSnapshot.empty) {
       const creditDoc = creditsSnapshot.docs[0]
       await updateDoc(doc(db, 'adminCredits', creditDoc.id), {
         status: 'rejected',
         approvedAt: serverTimestamp(),
-        approvedBy: auth.currentUser?.email || 'Admin'
+        approvedBy: auth.currentUser?.email || 'Admin',
       })
     }
-    
-    // Update the local state
-    if (transaction) {
-      transaction.status = 'rejected'
-      transaction.adminAction = 'rejected'
-      transaction.adminActionDate = new Date()
-      transaction.adminActionBy = auth.currentUser?.email || 'Admin'
-    }
-  } catch (error) {
-    console.error('Error rejecting transaction:', error)
+
+    transaction.status = 'rejected'
+    transaction.adminAction = 'rejected'
+    transaction.adminActionDate = new Date()
+    transaction.adminActionBy = auth.currentUser?.email || 'Admin'
+  } catch (e) {
+    console.error('Error rejecting transaction:', e)
   }
 }
 
-// Payout methods
 function validatePayoutAmount() {
   const amount = parseFloat(payoutAmount.value)
   const availableCredits = parseFloat(totalApprovedCredits.value)
-  
   if (!amount || amount <= 0) {
     amountError.value = 'Please enter a valid amount'
     return
   }
-  
   if (amount > availableCredits) {
     amountError.value = `Amount exceeds available credits (${availableCredits} EGP)`
     return
   }
-  
   if (parseFloat(totalDeduction.value) > availableCredits) {
-    amountError.value = `Total deduction (including fees) exceeds available credits`
+    amountError.value = 'Total deduction (including fees) exceeds available credits'
     return
   }
-  
   amountError.value = ''
 }
 
@@ -656,18 +509,12 @@ function onTechnicianChange() {
 }
 
 async function initiatePayout() {
-  if (!canPayout.value) {
-    return
-  }
-  
+  if (!canPayout.value) return
   try {
     payoutLoading.value = true
-    
     const technician = technicians.value.find(t => t.id === selectedTechnician.value)
-    if (!technician) {
-      throw new Error('Technician not found')
-    }
-    
+    if (!technician) throw new Error('Technician not found')
+
     // Create payout record
     const payoutRecord = {
       technicianId: selectedTechnician.value,
@@ -686,7 +533,7 @@ async function initiatePayout() {
     
     // Save payout record
     const payoutRef = await addDoc(collection(db, 'adminPayouts'), payoutRecord)
-    
+
     // Create credit deduction record
     const creditDeduction = {
       payoutId: payoutRef.id,
@@ -703,7 +550,7 @@ async function initiatePayout() {
     }
     
     await addDoc(collection(db, 'adminCredits'), creditDeduction)
-    
+
     // Show success message
     alert(`Payout of ${payoutAmount.value} EGP initiated for ${technician.fullName || technician.name || 'Unknown Technician'}`)
     
@@ -715,9 +562,8 @@ async function initiatePayout() {
     
     // Refresh data
     await fetchTransactions()
-    
-  } catch (error) {
-    console.error('Error initiating payout:', error)
+  } catch (e) {
+    console.error('Error initiating payout:', e)
     alert('Failed to initiate payout. Please try again.')
   } finally {
     payoutLoading.value = false
@@ -728,22 +574,12 @@ async function executePayout(splitId) {
   try {
     const splitRef = doc(db, 'paymentSplits', splitId)
     const split = paymentSplits.value.find(s => s.id === splitId)
+    if (!split) { alert('Payment split not found.'); return }
+    if (split.status !== 'pending') { alert('This payment split is not in a pending state.'); return }
 
-    if (!split) {
-      alert('Payment split not found.')
-      return
-    }
+    const platformFeeEGP = parseFloat(split.platformFeeUSD) * 31
+    const technicianAmountEGP = parseFloat(split.technicianAmountUSD) * 31
 
-    if (split.status !== 'pending') {
-      alert('This payment split is not in a pending state.')
-      return
-    }
-
-    // Convert USD amounts to EGP
-    const platformFeeEGP = parseFloat(split.platformFeeUSD) * 31;
-    const technicianAmountEGP = parseFloat(split.technicianAmountUSD) * 31;
-
-    // Create platform fee transaction record
     const platformTransaction = {
       paymentDate: serverTimestamp(),
       technicianId: 'platform',
@@ -758,10 +594,9 @@ async function executePayout(splitId) {
       adminActionBy: auth.currentUser?.email || 'Admin',
       transactionType: 'platform_fee',
       recipientAccount: split.platformAccount,
-      splitId: splitId
-    };
+      splitId,
+    }
 
-    // Create technician payment transaction record
     const technicianTransaction = {
       paymentDate: serverTimestamp(),
       technicianId: split.technicianAccount,
@@ -776,85 +611,54 @@ async function executePayout(splitId) {
       adminActionBy: auth.currentUser?.email || 'Admin',
       transactionType: 'technician_payment',
       recipientAccount: split.technicianAccount,
-      splitId: splitId
-    };
-
-    // Add both transactions to Firebase
-    await addDoc(collection(db, 'paymentTransactions'), platformTransaction);
-    await addDoc(collection(db, 'paymentTransactions'), technicianTransaction);
-
-    // Update the payment split status to completed
-    await updateDoc(splitRef, {
-      status: 'completed',
-      completedAt: serverTimestamp(),
-      completedBy: auth.currentUser?.email || 'Admin',
-      platformFeeEGP: platformFeeEGP,
-      technicianAmountEGP: technicianAmountEGP
-    });
-
-    alert(`Payment split executed successfully!\nPlatform Fee: ${platformFeeEGP.toFixed(2)} EGP\nTechnician Payment: ${technicianAmountEGP.toFixed(2)} EGP`);
-    await fetchTransactions(); // Refresh transactions to show new payouts
-  } catch (error) {
-    console.error('Error executing payout:', error);
-    alert('Failed to execute payout. Please try again.');
-  }
-}
-
-// Simulate PayPal payout (for testing without Firebase Functions)
-async function simulatePayPalPayout(splitId) {
-  try {
-    const split = paymentSplits.value.find(s => s.id === splitId);
-    
-    if (!split) {
-      alert('Payment split not found.');
-      return;
+      splitId,
     }
 
-    // Simulate PayPal API call
-    console.log('Simulating PayPal payout...');
-    console.log('Platform payout:', split.platformFeeUSD, 'USD to', split.platformAccount);
-    console.log('Technician payout:', split.technicianAmountUSD, 'USD to', split.technicianAccount);
-    
-    // In a real implementation, you would call PayPal's Payouts API here
-    // For now, we'll just mark it as completed
-    
-    const splitRef = doc(db, 'paymentSplits', splitId);
+    await addDoc(collection(db, 'paymentTransactions'), platformTransaction)
+    await addDoc(collection(db, 'paymentTransactions'), technicianTransaction)
+
     await updateDoc(splitRef, {
       status: 'completed',
       completedAt: serverTimestamp(),
       completedBy: auth.currentUser?.email || 'Admin',
-      payoutMethod: 'simulated'
-    });
-    
-    alert('PayPal payout simulation completed successfully!');
-    await fetchTransactions(); // Refresh data
-    
-  } catch (error) {
-    console.error('Error simulating PayPal payout:', error);
-    alert('Failed to simulate payout. Please try again.');
+      platformFeeEGP,
+      technicianAmountEGP,
+    })
+
+    alert(`Payment split executed successfully!\nPlatform Fee: ${platformFeeEGP.toFixed(2)} EGP\nTechnician Payment: ${technicianAmountEGP.toFixed(2)} EGP`)
+    await fetchTransactions()
+  } catch (e) {
+    console.error('Error executing payout:', e)
+    alert('Failed to execute payout. Please try again.')
   }
 }
 
-function filterByStatus(status) {
-  currentFilter.value = status
+async function simulatePayPalPayout(splitId) {
+  try {
+    const split = paymentSplits.value.find(s => s.id === splitId)
+    if (!split) { alert('Payment split not found.'); return }
+    const splitRef = doc(db, 'paymentSplits', splitId)
+    await updateDoc(splitRef, {
+      status: 'completed',
+      completedAt: serverTimestamp(),
+      completedBy: auth.currentUser?.email || 'Admin',
+      payoutMethod: 'simulated',
+    })
+    alert('PayPal payout simulation completed successfully!')
+    await fetchTransactions()
+  } catch (e) {
+    console.error('Error simulating PayPal payout:', e)
+    alert('Failed to simulate payout. Please try again.')
+  }
 }
 
+function filterByStatus(status) { currentFilter.value = status }
 function getStatusBadgeClass(status) {
-  return {
-    'badge-pending': status === 'pending',
-    'badge-approved': status === 'approved',
-    'badge-rejected': status === 'rejected'
-  }
+  return { 'badge-pending': status === 'pending', 'badge-approved': status === 'approved', 'badge-rejected': status === 'rejected' }
 }
-
 function getSplitStatusClass(status) {
-  return {
-    'badge-pending': status === 'pending',
-    'badge-completed': status === 'completed',
-    'badge-failed': status === 'failed'
-  }
+  return { 'badge-pending': status === 'pending', 'badge-completed': status === 'completed', 'badge-failed': status === 'failed' }
 }
-
 function formatDate(date) {
   if (!date) return '-'
   const d = date.toDate ? date.toDate() : new Date(date)
@@ -862,19 +666,11 @@ function formatDate(date) {
 }
 
 onMounted(() => {
-  // Wait for authentication state to be ready
   const unsubscribe = onAuthStateChanged(auth, (user) => {
-    if (user) {
-      console.log('✅ User authenticated:', user.email)
-      fetchTransactions()
-    } else {
-      console.log('❌ No user authenticated, redirecting to login')
-      router.push('/userlogin')
-    }
+    if (user) fetchTransactions()
+    else router.push('/userlogin')
   })
-  
-  // Cleanup subscription when component unmounts
-  return () => unsubscribe()
+  // no explicit cleanup needed in <script setup>
 })
 </script>
 
@@ -1403,13 +1199,12 @@ th {
     flex-direction: column;
     min-height: auto;
   }
-  
   .dashboard-main {
     margin-right: 0;
     padding: 0.5rem;
     margin-top: 30px;
   }
-  
+  /* Rest of the code remains the same */
   .form-row {
     grid-template-columns: 1fr;
     gap: 1rem;

@@ -1,10 +1,10 @@
 <template>
   <div class="admin-dashboard-layout">
     <admin-sidebar />
-    <div class="booking-main mr-20 p-4">
+    <div class="booking-main mx-12 p-4">
+      <TopBar :title="$t('canceledBookings')" />
       <div class="booking-container">
         <div class="title-search-row">
-          <h2 class="booking-title">{{ $t('canceledBookings') }}</h2>
           <div class="search-wrapper">
             <input v-model="searchQuery" class="search-input" type="text" :placeholder="$t('search')" />
             <span class="search-icon"><i class="fas fa-search"></i></span>
@@ -47,12 +47,14 @@
 <script>
 import AdminSidebar from '../../components/admin-sidebar.vue';
 import Pagination from '../../components/pagination.vue';
+import TopBar from '../../components/TopBar.vue';
 
 export default {
   name: 'CanceledBooking',
   components: {
     AdminSidebar,
-    Pagination
+    Pagination,
+    TopBar
   },
   data() {
     return {

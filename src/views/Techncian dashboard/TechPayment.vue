@@ -5,7 +5,7 @@
             @navigate="handleSidebarNavigate"
         />
     <div class="payment-content p-4 mr-20">
-      <h1 class="page-title">{{ $t('payment') }}</h1>  
+      <TopBar :title="$t('payment')" />  
       <div class="payment-balance-card">
 
         <div class="balance-labels">
@@ -59,14 +59,16 @@
 </template>
 
 <script>
-import Sidebar from '../components/Sidebar.vue';
+import Sidebar from '../../components/Sidebar.vue';
+import TopBar from '../../components/TopBar.vue';
 import { ref, onMounted, computed } from 'vue';
-import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
-import { db, auth } from '../firebase';
+import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore'; 
+import { db, auth } from '../../firebase';
 
 export default {
   components: {
-    Sidebar
+    Sidebar,
+    TopBar
   },
   data() {
     return {

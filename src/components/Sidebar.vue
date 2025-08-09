@@ -1,6 +1,11 @@
 <template>
   <div class="layout ">
-          <div class="sidebar" style="margin-left: 80px; margin-right: 80px;">
+          <div class="sidebar">
+      <!-- Logo + Controls Section -->
+      <div class="sidebar-header">
+        <img src="/logo/ace04d3b268cf810c91d002fdf7454a6ef778f27.png" alt="Logo" class="sidebar-logo" />
+      </div>
+
       <a href="/technicion-profile" 
          class="sidebar-item" 
          :class="{ active: activeMenu === 'technicianprofile' }"
@@ -65,6 +70,14 @@
         <i class="fa-regular fa-star"></i>
         <span>{{ $t('myReviews') }}</span>
       </a>
+
+      <!-- Logout Button -->
+      <a href="#" 
+         class="sidebar-item logout-btn" 
+         @click="handleLogout">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>{{ $t('logout') }}</span>
+      </a>
      
     </div>
   </div>
@@ -74,6 +87,9 @@
 import { ref, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { signOut } from 'firebase/auth';
+import { auth } from '../firebase';
+import { clearAuthState } from '../utils/auth';
 
 const props = defineProps({
   activeMenu: String,
@@ -83,10 +99,6 @@ const props = defineProps({
 const router = useRouter();
 const { t } = useI18n();
 const isBookingDropdownOpen = ref(props.activeMenu === 'booking');
-
-watch(() => props.activeMenu, (val) => {
-  isBookingDropdownOpen.value = val === 'booking';
-});
 
 function toggleBookingDropdown() {
   isBookingDropdownOpen.value = !isBookingDropdownOpen.value;
@@ -102,18 +114,24 @@ function handleNavigation(event) {
   }
 }
 
-function handleLogout() {
+async function handleLogout() {
   if (confirm(t('confirmLogout'))) {
-    // Clear any stored authentication data
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    sessionStorage.clear();
-    
-    // Redirect to login page
-    router.push('/login');
-    
-    // Optional: Show success message
-    alert(t('logoutSuccess'));
+    try {
+      // Sign out from Firebase
+      await signOut(auth);
+      
+      // Clear authentication state using the new system
+      clearAuthState();
+      
+      // Redirect to home page
+      router.push('/');
+      
+      // Optional: Show success message
+      alert(t('logoutSuccess'));
+    } catch (error) {
+      console.error('Logout error:', error);
+      alert('Error during logout. Please try again.');
+    }
   }
 }
 
@@ -129,6 +147,11 @@ onMounted(() => {
       isBookingDropdownOpen.value = false;
     }
   });
+});
+
+// Keep dropdown open/closed if active menu changes externally
+watch(() => props.activeMenu, (val) => {
+  isBookingDropdownOpen.value = val === 'booking';
 });
 </script>
 
@@ -151,12 +174,16 @@ body {
 }
 
 .sidebar {
-  width: 16rem;
+  width: 14rem;
   background-color: var(--sidebar);
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 2.5rem;
+  padding-top: 2rem;
+  height: auto;
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.06);
+  overflow-y: auto;
 }
 
 .dark .sidebar {
@@ -166,20 +193,20 @@ body {
 
 .sidebar-item {
   width: 100%;
-  padding: 1rem 2rem;
+  padding: 1rem 1rem;
   display: flex;
   align-items: center;
   gap: 1rem;
-  font-size: 1.125rem;
+  font-size: 1.05rem;
   font-weight: 500;
   color: var(--secondary);
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
   cursor: pointer;
   border: none;
   background: none;
   font-family: inherit;
-  border-radius: 12px;
+  position: relative;
 }
 
 .dark .sidebar-item {
@@ -195,13 +222,42 @@ body {
   background-color: var(--primary-color);
   color: white;
 }
+
 .dark .sidebar-item.active {
   background-color: #c5b7e6;
   color: var(--primary-text-dark);
 }
+
 .dark .sidebar-item:hover {
   background-color: #c5b7e6;
   color: var(--primary-text-dark);
+}
+
+/* Left accent indicator on hover/active */
+.sidebar-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10%;
+  bottom: 10%;
+  width: 3px;
+  border-radius: 3px;
+  background: currentColor;
+  opacity: 0;
+  transform: scaleY(0.5);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.sidebar-item:hover::before,
+.sidebar-item.active::before {
+  opacity: 1;
+  transform: scaleY(1);
+}
+
+/* Keyboard accessibility */
+.sidebar-item:focus-visible {
+  outline: 2px solid rgba(0,0,0,0.15);
+  outline-offset: 2px;
 }
 
 .dropdown-container {
@@ -212,30 +268,25 @@ body {
 .dropdown-menu {
   position: static;
   min-width: 0;
-  width: 92%;
-  border-radius: 12px;
-  padding: 10px 0;
   margin: 6px auto 0 auto;
   z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   background: var(--sidebar);
-  border: none;
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
 }
 
-
-
 .dropdown-status-link {
-  padding: 10px 24px;
+  padding: 10px 1.25rem;
   color: var(--text-main);
   font-weight: 500;
-  font-size: 1rem;
-  border-radius: 8px;
+  font-size: 0.95rem;
   text-decoration: none;
-  margin: 0 4px;
+  margin: 0 0.5rem;
   display: block;
-  transition: background 0.16s, color 0.16s;
+  transition: background 0.16s, color 0.16s, transform 0.16s;
 }
 
 .dark .dropdown-status-link {
@@ -245,6 +296,7 @@ body {
 .dropdown-status-link:hover {
   background: var(--secondary);
   color: white;
+  transform: translateX(2px);
 }
 
 .dark .dropdown-status-link:hover {
@@ -263,7 +315,6 @@ body {
 }
 
 .logout-btn {
-  margin-top: 0.5rem;
   color: #ef4444;
 }
 
@@ -272,17 +323,91 @@ body {
   color: white;
 }
 
-.chevron-icon {
-  margin-left: auto;
-  transition: transform 0.3s ease;
-}
-
-.chevron-icon.rotated {
-  transform: rotate(180deg);
-}
-
 .dark .chevron-icon {
   color: var(--primary-text);
+}
+
+/* Sidebar Header and Controls */
+.sidebar-header {
+  display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: start;
+    gap: 0.5rem;
+    padding: 0 6rem 0 0;
+    margin-bottom: 0.5rem;
+}
+
+.sidebar-logo {
+  height: 26px;
+  width: auto;
+  object-fit: contain;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.sidebar-header:hover .sidebar-logo {
+  transform: scale(1.04);
+}
+
+.sidebar-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  margin: auto 0 0.5rem;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.darkmode-btn {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  border-radius: 50%;
+  padding: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.darkmode-btn:hover {
+  color: var(--gray-500);
+  transform: scale(1.1);
+}
+
+.darkmode-btn .navbar-icon {
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+  width: 20px;
+  height: 20px;
+  color: inherit;
+}
+
+/* Custom scrollbar for sidebar */
+.sidebar::-webkit-scrollbar {
+  width: 10px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.12);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.sidebar:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.2);
 }
 
 /* Mobile Responsive - Horizontal Layout */

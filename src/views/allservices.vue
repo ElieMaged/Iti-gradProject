@@ -136,6 +136,7 @@
 <script>
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../firebase.js';
+import { waitForAuth, isAuthenticated } from '../utils/auth';
 
     export default {
   name: 'AllServices',
@@ -314,28 +315,37 @@ import { db } from '../firebase.js';
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     },
-viewProfile(member) {
-  if (!member || !member.id) {
-    alert('Technician profile data is missing or invalid.');
-    return;
-  }
-  this.$router.push({
-    path: `/technician/${member.id}`,
-    query: {
-      name: member.name || '',
-      specialization: member.specialization || '',
-      rating: member.rating || '',
-      experience: member.experience || '',
-      basePrice: member.basePrice || member.price || '',
-      bio: member.description || '',
-      location: member.location || '',
-      phone: member.phone || '',
-      email: member.email || '',
-      status: member.status || '',
-      image: member.image || '',
-    }
-  });
-},
+    async viewProfile(member) {
+      if (!member || !member.id) {
+        alert('Technician profile data is missing or invalid.');
+        return;
+      }
+
+      // Ensure auth status is ready, then check
+      await waitForAuth();
+      if (!isAuthenticated()) {
+        // Redirect unauthenticated users to Welcome page
+        this.$router.push('/welcomepage');
+        return;
+      }
+
+      this.$router.push({
+        path: `/technician/${member.id}`,
+        query: {
+          name: member.name || '',
+          specialization: member.specialization || '',
+          rating: member.rating || '',
+          experience: member.experience || '',
+          basePrice: member.basePrice || member.price || '',
+          bio: member.description || '',
+          location: member.location || '',
+          phone: member.phone || '',
+          email: member.email || '',
+          status: member.status || '',
+          image: member.image || '',
+        }
+      });
+    },
 
     closeModal() {
       this.selectedTechnician = null;

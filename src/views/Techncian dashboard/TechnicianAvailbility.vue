@@ -10,7 +10,7 @@
             <!-- Main Content -->
             <div class="flex-1">
                 <div class=" mr-20 p-4">
-                    <h2 class="page-title">{{ $t('availabilityTitle') }}</h2>
+                    <TopBar :title="$t('availabilityTitle')" />
                     
                     <!-- Success/Error Messages -->
                     <div v-if="message" :class="['message', messageType]" class="mb-4 p-4 rounded-lg">
@@ -154,16 +154,20 @@
 </template>
 
 <script>
-import Sidebar from '../components/Sidebar.vue';
+import Sidebar from '../../components/Sidebar.vue';
+import TopBar from '../../components/TopBar.vue';
+
 import { ref, onMounted } from 'vue';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db } from '../../firebase';
 
 export default {
   components: {
-    Sidebar
+    Sidebar,
+    TopBar
   },
+
   setup() {
     const activeMenu = ref('technicianavailbility');
     const loading = ref(false);
@@ -408,6 +412,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.body{
+  background-color: var(--primary-bg);
+}
  .page-title {
    color: var(--primary-color);
    font-size: 2rem;

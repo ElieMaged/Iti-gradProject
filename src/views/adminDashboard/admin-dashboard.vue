@@ -1,24 +1,10 @@
 <template>
   <div class="admin-dashboard-layout">
     <admin-sidebar />
-    <div class="dashboard-main mr-20 p-4">
+    <div class="dashboard-main mx-12 p-4">
       <div class="dashboard-container">
-        <div class="title-search-row">
-          <h2 class="dashboard-title">{{ $t('adminDashboard') }}</h2>
-          <div class="filter-search-bar">
-            <button class="filter-btn"><i class="fas fa-filter"></i> <span class="filter-text">{{ $t('filter') }}</span></button>
-            <div class="search-wrapper">
-              <span class="search-icon"><i class="fas fa-search"></i></span>
-              <input 
-                type="text" 
-                :placeholder="$t('searchField')" 
-                class="search-input"
-                v-model="searchQuery"
-              />
-            </div>
-          </div>
-        </div>
-        
+        <TopBar :title="$t('adminDashboard')" />
+
         <!-- Top Cards -->
         <div class="stats-grid">
           <!-- Realtime Insight -->
@@ -229,19 +215,21 @@
 <script>
 import AdminSidebar from '../../components/admin-sidebar.vue';
 import AdminRoleManager from '../../components/AdminRoleManager.vue';
+import TopBar from '../../components/TopBar.vue';
+
 import { useI18n } from 'vue-i18n';
 import { auth } from '../../firebase'; // Added import for auth
 
 export default {
   name: 'AdminDashboard',
-  components: { AdminSidebar, AdminRoleManager },
+  components: { AdminSidebar, AdminRoleManager, TopBar },
+
   setup() {
     const { t } = useI18n();
     return { t };
   },
   data() {
     return {
-      searchQuery: '',
       selectedPeriod: 'daily',
       currentTime: '8:02:09 AM',
       chartPeriods: ['daily', 'weekly', 'monthly'],

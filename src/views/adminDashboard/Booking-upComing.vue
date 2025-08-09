@@ -2,7 +2,8 @@
 <template>
   <div class="admin-dashboard-layout">
     <admin-sidebar />
-    <div class="booking-main mr-20 p-4">
+    <div class="booking-main mx-12 p-4">
+      <TopBar :title="$t('upcomingBookings')" />
       <div class="booking-container">
         <div class="title-search-row">
           <h2 class="booking-title">{{ $t('upcomingBookings') }}</h2>
@@ -72,6 +73,7 @@ import { db } from '../../firebase';
 import { useRouter } from 'vue-router';
 import AdminSidebar from '../../components/admin-sidebar.vue';
 import Pagination from '../../components/pagination.vue';
+import TopBar from '../../components/TopBar.vue';
 export default {
   name: 'UpcomingBooking',
   components: {

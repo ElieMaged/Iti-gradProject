@@ -2,10 +2,10 @@
 <template>
   <div class="admin-dashboard-layout">
     <AdminSidebar />
-    <div id="admin-profile-container" class="mr-20 p-4">
+    <div id="admin-profile-container" class="mx-12 p-4">
+      <TopBar :title="$t('personalInformation')" />
       <div id="admin-profile-wrapper">
         <div id="admin-profile-card">
-          <h2 id="admin-profile-title">{{ $t('personalInformation') }}</h2>
           
           <!-- Loading State -->
           <div v-if="loading" class="loading-state">
@@ -40,13 +40,14 @@
 
 <script>
 import AdminSidebar from '../../components/admin-sidebar.vue';
+import TopBar from '../../components/TopBar.vue';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { getAuth } from 'firebase/auth';
 
 export default {
   name: 'AdminProfile',
-  components: { AdminSidebar },
+  components: { AdminSidebar, TopBar },
   data() {
     return {
       userData: null,
@@ -140,9 +141,7 @@ export default {
 .dark #admin-profile-container {
   background-color: var(--primary-bg);
 }
-#admin-profile-wrapper {
-  max-width: 1000px;
-}
+
 
 #admin-profile-card {
   background-color: white;

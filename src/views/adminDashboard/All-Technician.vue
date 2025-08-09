@@ -1,9 +1,9 @@
 <template>
   <div class="admin-dashboard-layout">
     <admin-sidebar />
-    <div class="technicians-main mr-20 p-4">
+    <div class="technicians-main mx-12 p-4">
+      <TopBar :title="$t('technicianManagement')" />
       <div class="technicians-container">
-        <h2 class="technicians-title">{{ $t('technicianManagement') }}</h2>
         <div class="subtitle-search-row">
           <div class="technicians-subtitle">{{ $t('allTechnicians') }}</div>
           <div class="search-wrapper">
@@ -91,11 +91,12 @@
 <script>
 import AdminSidebar from '../../components/admin-sidebar.vue';
 import Pagination from '../../components/pagination.vue';
+import TopBar from '../../components/TopBar.vue';
 import { collection, getDocs, doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 
 export default {
-  components: { AdminSidebar, Pagination },
+  components: { AdminSidebar, Pagination, TopBar },
   data() {
     return {
       searchQuery: '',

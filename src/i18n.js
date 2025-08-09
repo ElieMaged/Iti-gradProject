@@ -2,7 +2,7 @@ import { createI18n } from "vue-i18n";
 
 const messages = {
   en: {
-    hello: "Hello",
+    hello: "Hello,",
     addressPlaceholder:"Address",
     //welcome page
     welcomeToBoltfix: "Welcome to BoltFix",
@@ -105,6 +105,8 @@ terms: {
     loading: "Loading...",
     saving: "Saving...",
     logout: "Logout",
+    confirmLogout: "Are you sure you want to logout?",
+    logoutSuccess: "Logged out successfully!",
     loginRegister: "Log in/Register",
     allServices: "All Services",
     // Welcome Page

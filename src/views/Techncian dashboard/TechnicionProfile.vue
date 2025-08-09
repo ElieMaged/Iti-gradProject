@@ -10,9 +10,10 @@
     <Sidebar :activeMenu="activeMenu" @navigate="handleSidebarNavigate" />
     <!-- Main Content -->
     <div id="admin-profile-container" class="p-4 mr-20">
+      <!-- Top bar for technician dashboard -->
+      <TopBar :title="$t('personalInformation')" />
       <div id="admin-profile-wrapper">
         <div id="admin-profile-card">
-          <h2 class="page-title">{{ $t('personalInformation') }}</h2>
           <div id="admin-profile-content">
             <!-- Profile Image - Will be moved to top on mobile -->
             <div id="admin-profile-image" class="profile-image-mobile">
@@ -69,12 +70,13 @@
 </template>
 
 <script>
-import Sidebar from '../components/Sidebar.vue';
-import { auth, db } from '../firebase';
+import Sidebar from '../../components/Sidebar.vue';
+import TopBar from '../../components/TopBar.vue';
+import { auth, db } from '../../firebase';
 import { doc, getDoc, collection, query, where, getDocs, updateDoc } from 'firebase/firestore';
 
 export default {
-  components: { Sidebar },
+  components: { Sidebar, TopBar },
   data() {
     return {
       activeMenu: 'technicianprofile',

@@ -1,10 +1,10 @@
 <template>
   <div class="admin-dashboard-layout">
     <admin-sidebar />
-    <div class="booking-main mr-20 p-4">
+    <div class="booking-main mx-12 p-4">
+      <TopBar :title="$t('pendingBookings')" />
       <div class="booking-container">
         <div class="title-search-row">
-          <h2 class="booking-title">{{ $t('pendingBookings') }}</h2>
           <div class="search-wrapper">
             <input v-model="searchQuery" class="search-input" type="text" :placeholder="$t('search')" />
             <span class="search-icon"><i class="fas fa-search"></i></span>
@@ -73,6 +73,7 @@
 <script>
 import AdminSidebar from '../../components/admin-sidebar.vue';
 import Pagination from '../../components/pagination.vue';
+import TopBar from '../../components/TopBar.vue';
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 
@@ -80,7 +81,8 @@ export default {
   name: 'PendingBooking',
   components: {
     AdminSidebar,
-    Pagination
+    Pagination,
+    TopBar
   },
   data() {
     return {

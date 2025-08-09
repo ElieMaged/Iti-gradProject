@@ -279,10 +279,6 @@ onMounted(() => {
     margin-right: 0;
   }
   
-  #admin-profile-wrapper {
-    max-width: 100%;
-  }
-  
   #admin-profile-card {
     padding: 1.5rem;
     border-radius: 0.75rem;
