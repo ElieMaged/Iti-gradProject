@@ -84,11 +84,36 @@
           <p class="debug-info">{{ $t('debugInfo') }}</p>
         </div>
         
+        <!-- Pagination Controls -->
+        <div class="pagination-controls" v-if="users.length > 0">
+          <div class="page-size-selector">
+            <label for="page-size">{{ $t('itemsPerPage') }}:</label>
+            <select 
+              id="page-size" 
+              v-model="itemsPerPage" 
+              @change="onPageSizeChange"
+              class="page-size-select"
+            >
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+          
+          <div class="pagination-info">
+            <span class="pagination-text">
+              {{ $t('showing') }} {{ (currentPage - 1) * itemsPerPage + 1 }}-{{ Math.min(currentPage * itemsPerPage, filteredUsers.length) }} {{ $t('of') }} {{ filteredUsers.length }} {{ $t('users') }}
+            </span>
+          </div>
+        </div>
+        
         <pagination
           :current-page="currentPage"
           :total-pages="totalPages"
           @prev-page="prevPage"
           @next-page="nextPage"
+          @page-changed="goToPage"
         />
         
       </div>
@@ -117,7 +142,7 @@ export default {
       return {
         searchQuery: '',
         currentPage: 1,
-        itemsPerPage: 5,
+        itemsPerPage: 10,
         users: [],
         loading: true,
         error: null
@@ -237,6 +262,16 @@ export default {
         if (this.currentPage < this.totalPages) {
           this.currentPage++;
         }
+      },
+      
+      goToPage(page) {
+        if (page >= 1 && page <= this.totalPages) {
+          this.currentPage = page;
+        }
+      },
+
+      onPageSizeChange() {
+        this.currentPage = 1; // Reset to first page when page size changes
       }
     },
     watch: {
@@ -534,6 +569,66 @@ export default {
   margin-top: 0.5rem;
 }
 
+.pagination-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.dark .pagination-controls {
+  border-top-color: var(--border-border-primary);
+}
+
+.page-size-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.dark .page-size-selector {
+  color: var(--text-muted);
+}
+
+.page-size-select {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-border-primary, #C2C3C4);
+  background: var(--grey-50, #EAEAEA);
+  font-size: 0.9rem;
+  color: #6B5FA7;
+  outline: none;
+  cursor: pointer;
+  transition: border 0.2s;
+}
+.dark .page-size-select {
+  background-color: var(--input-bg);
+  color: var(--text-muted);
+}
+.page-size-select:focus {
+  border: 1.5px solid #6B5FA7;
+}
+.dark .page-size-select:focus {
+  border: 1.5px solid var(--primary-text);
+}
+
+.pagination-info {
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.dark .pagination-info {
+  color: var(--text-muted);
+}
+
+.pagination-text {
+  font-weight: 600;
+}
+
 /* Responsive Design */
 @media (min-width: 1200px) {
   .users-container {
@@ -651,6 +746,26 @@ export default {
   
   .loading-state, .error-state, .empty-state {
     padding: 2rem 1rem;
+  }
+  
+  .pagination-controls {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .page-size-selector {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .page-size-select {
+    min-width: 80px;
+  }
+  
+  .pagination-info {
+    width: 100%;
+    text-align: center;
   }
 }
 

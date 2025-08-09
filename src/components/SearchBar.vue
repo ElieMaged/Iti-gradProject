@@ -80,7 +80,7 @@ import { useI18n } from 'vue-i18n';
 import { getGovernmentNames, getDistrictsForGovernment, governmentNamesAr, districtsAr } from '../data/egyptianLocations';
 
 const { t, locale } = useI18n();
-const emit = defineEmits(['update:filter', 'update:sort', 'update:search', 'update:location']);
+const emit = defineEmits(['update:filter', 'update:sort', 'update:search', 'update:location', 'update:specialization']);
 
 // Location dropdowns
 const selectedGovernment = ref('');
@@ -134,12 +134,26 @@ const filterCategories = computed(() => [
     type: 'radio'
   },
   {
+    key: 'specialization',
+    label: t('specialization'),
+    options: [
+      { value: '', label: t('allSpecializations') },
+      { value: 'plumbing', label: t('plumbing') },
+      { value: 'wallfinishing', label: t('wallFinishing') },
+      { value: 'carpentry', label: t('carpentry') },
+      { value: 'electricity', label: t('electricity') },
+      { value: 'airconditioning', label: t('airConditioning') },
+      { value: 'electricalappliances', label: t('electricalAppliances') }
+    ],
+    type: 'radio'
+  },
+  {
     key: 'price',
     label: t('filterPrice'),
     options: [
       { value: '50-100', label: t('filterPrice50to100') },
       { value: '100-150', label: t('filterPrice100to150') },
-      { value: '150-200', label: t('filterPrice150to200') },
+      { value: '150+', label: t('filterPrice150to200') },
     ],
     type: 'radio'
   },
@@ -158,6 +172,7 @@ const filterCategories = computed(() => [
 const selectedFilters = ref({
   government: '',
   district: '',
+  specialization: '',
   price: '',
   rating: ''
 });
@@ -165,6 +180,7 @@ const selectedFilters = ref({
 const tempFilters = ref({
   government: '',
   district: '',
+  specialization: '',
   price: '',
   rating: ''
 });
@@ -177,6 +193,10 @@ function applyFilters() {
     government: tempFilters.value.government,
     district: tempFilters.value.district
   });
+  // Emit specialization filter separately for easier handling
+  if (tempFilters.value.specialization) {
+    emit('update:specialization', tempFilters.value.specialization);
+  }
   showFilterDropdown.value = false;
   openCategory.value = '';
 }

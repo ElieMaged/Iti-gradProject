@@ -7,22 +7,11 @@
         <div class="hero-content">
           <h1 class="hero-title">{{ $t('plumbingTitle') }}</h1>
           <SearchBar
-            :filterOptions="[
-              { value: 'price', label: 'Select a price' },
-              { value: 'area', label: 'Select an area' },
-              { value: 'rating', label: 'Rating' },
-              { value: 'years', label: 'Years of experience' }
-            ]"
-            :sortOptions="[
-              { value: 'relevance', label: 'Relevance' },
-              { value: 'priceLow', label: 'Price: Low to High' },
-              { value: 'priceHigh', label: 'Price: High to Low' },
-              { value: 'rating', label: 'Rating' }
-            ]"
             @update:filter="onFilter"
             @update:sort="onSort"
             @update:search="onSearch"
             @update:location="onLocationChange"
+            @update:specialization="onSpecializationChange"
           />
           <div class="breadcrumbs">
             <span>{{ $t('home') }}</span>
@@ -118,6 +107,9 @@ const searchQuery = ref('')
 const filterOption = ref('')
 const sortOption = ref('')
 const locationFilter = ref({ government: '', district: '' })
+const specializationFilter = ref('')
+const priceFilter = ref('')
+const ratingFilter = ref('')
 // Removed pagination logic
 
 async function fetchTechnicians() {
@@ -186,15 +178,53 @@ const filteredTechnicians = computed(() => {
     });
   }
   
-  if (filterOption.value === 'price') {
-    list = list.filter(t => t.price)
-  } else if (filterOption.value === 'area') {
-    // Implement area filter if you have area data
-  } else if (filterOption.value === 'rating') {
-    list = list.filter(t => t.rating >= 4)
-  } else if (filterOption.value === 'years') {
-    // Implement years filter if you have years data
+  // Specialization filtering
+  if (specializationFilter.value && specializationFilter.value !== '') {
+    list = list.filter(t => {
+      const techSpecialization = t.specialization || '';
+      return techSpecialization.toLowerCase() === specializationFilter.value.toLowerCase();
+    });
   }
+  
+  // Price filtering with specific ranges
+  if (priceFilter.value && priceFilter.value !== '') {
+    list = list.filter(t => {
+      if (!t.price) return false;
+      const price = parseFloat(t.price);
+      
+      switch (priceFilter.value) {
+        case '50-100':
+          return price >= 50 && price <= 100;
+        case '100-150':
+          return price >= 100 && price <= 150;
+        case '150+':
+          return price > 150;
+        default:
+          return true;
+      }
+    });
+  }
+  
+  // Rating filtering
+  if (ratingFilter.value && ratingFilter.value !== '') {
+    list = list.filter(t => {
+      if (!t.rating) return false;
+      const rating = parseFloat(t.rating);
+      
+      switch (ratingFilter.value) {
+        case '2-3':
+          return rating >= 2 && rating <= 3;
+        case '3-4':
+          return rating >= 3 && rating <= 4;
+        case '4-5':
+          return rating >= 4 && rating <= 5;
+        default:
+          return true;
+      }
+    });
+  }
+  
+  // Sorting
   if (sortOption.value === 'priceLow') {
     list = [...list].sort((a, b) => a.price - b.price)
   } else if (sortOption.value === 'priceHigh') {
@@ -217,15 +247,30 @@ const displayedTechnicians = computed(() => {
 function onSearch(query) {
   searchQuery.value = query
 }
-function onFilter(option) {
-  filterOption.value = option
+
+function onFilter(filters) {
+  // Handle the new filter structure from SearchBar
+  if (filters.price) {
+    priceFilter.value = filters.price;
+  }
+  if (filters.rating) {
+    ratingFilter.value = filters.rating;
+  }
+  if (filters.specialization) {
+    specializationFilter.value = filters.specialization;
+  }
 }
+
 function onSort(option) {
   sortOption.value = option
 }
 
 function onLocationChange(location) {
   locationFilter.value = location
+}
+
+function onSpecializationChange(specialization) {
+  specializationFilter.value = specialization;
 }
 
 function viewProfile(member) {

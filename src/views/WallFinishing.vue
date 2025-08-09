@@ -7,21 +7,11 @@
         <div class="hero-content">
           <h1 class="hero-title">{{ $t('wallFinishingTitle') }}</h1>
           <SearchBar
-            :filterOptions="[
-              { value: 'price', label: 'Select a price' },
-              { value: 'area', label: 'Select an area' },
-              { value: 'rating', label: 'Rating' },
-              { value: 'years', label: 'Years of experience' }
-            ]"
-            :sortOptions="[
-              { value: 'relevance', label: 'Relevance' },
-              { value: 'priceLow', label: 'Price: Low to High' },
-              { value: 'priceHigh', label: 'Price: High to Low' },
-              { value: 'rating', label: 'Rating' }
-            ]"
             @update:filter="onFilter"
             @update:sort="onSort"
             @update:search="onSearch"
+            @update:location="onLocationChange"
+            @update:specialization="onSpecializationChange"
           />
           <div class="breadcrumbs">
             <span>{{ $t('home') }}</span>
@@ -122,6 +112,10 @@ const firebaseTechnicians = ref([])
 const searchQuery = ref('')
 const filterOption = ref('')
 const sortOption = ref('')
+const locationFilter = ref({ government: '', district: '' })
+const specializationFilter = ref('')
+const priceFilter = ref('')
+const ratingFilter = ref('')
 // Removed pagination logic
 
 async function fetchTechnicians() {
@@ -170,42 +164,65 @@ const filteredTechnicians = computed(() => {
     list = list.filter(t => t.name && t.name.toLowerCase().includes(query))
   }
   
-  // Price filter
-  if (filterOption.value.price) {
-    const [min, max] = filterOption.value.price.split('-').map(Number)
+  // Location filtering - exact matching for government and district
+  if (locationFilter.value.government && locationFilter.value.government !== '') {
     list = list.filter(t => {
-      const price = parseFloat(t.price) || 0
-      return price >= min && price <= max
-    })
+      const techGovernment = t.government || t.location || '';
+      return techGovernment.toLowerCase() === locationFilter.value.government.toLowerCase();
+    });
   }
   
-  // Area filter (if technician has area data)
-  if (filterOption.value.area) {
+  if (locationFilter.value.district && locationFilter.value.district !== '') {
     list = list.filter(t => {
-      // Check if technician has area information
-      const technicianArea = t.area || t.location || ''
-      return technicianArea.toLowerCase().includes(filterOption.value.area.toLowerCase())
-    })
+      const techDistrict = t.district || t.area || '';
+      return techDistrict.toLowerCase() === locationFilter.value.district.toLowerCase();
+    });
   }
   
-  // Rating filter
-  if (filterOption.value.rating) {
-    const [min, max] = filterOption.value.rating.split('-').map(Number)
+  // Specialization filtering
+  if (specializationFilter.value && specializationFilter.value !== '') {
     list = list.filter(t => {
-      const rating = parseFloat(t.rating) || 0
-      return rating >= min && rating <= max
-    })
+      const techSpecialization = t.specialization || '';
+      return techSpecialization.toLowerCase() === specializationFilter.value.toLowerCase();
+    });
   }
   
-  // Years of experience filter
-  if (filterOption.value.years && filterOption.value.years.length > 0) {
+  // Price filtering with specific ranges
+  if (priceFilter.value && priceFilter.value !== '') {
     list = list.filter(t => {
-      const years = parseFloat(t.yearsOfExperience) || 0
-      return filterOption.value.years.some(yearRange => {
-        const [min, max] = yearRange.split('-').map(Number)
-        return years >= min && years <= max
-      })
-    })
+      if (!t.price) return false;
+      const price = parseFloat(t.price);
+      
+      switch (priceFilter.value) {
+        case '50-100':
+          return price >= 50 && price <= 100;
+        case '100-150':
+          return price >= 100 && price <= 150;
+        case '150+':
+          return price > 150;
+        default:
+          return true;
+      }
+    });
+  }
+  
+  // Rating filtering
+  if (ratingFilter.value && ratingFilter.value !== '') {
+    list = list.filter(t => {
+      if (!t.rating) return false;
+      const rating = parseFloat(t.rating);
+      
+      switch (ratingFilter.value) {
+        case '2-3':
+          return rating >= 2 && rating <= 3;
+        case '3-4':
+          return rating >= 3 && rating <= 4;
+        case '4-5':
+          return rating >= 4 && rating <= 5;
+        default:
+          return true;
+      }
+    });
   }
   
   // Sort options
@@ -232,11 +249,28 @@ const displayedTechnicians = computed(() => {
 function onSearch(query) {
   searchQuery.value = query
 }
-function onFilter(option) {
-  filterOption.value = option
+function onFilter(filters) {
+  // Handle the new filter structure from SearchBar
+  if (filters.price) {
+    priceFilter.value = filters.price;
+  }
+  if (filters.rating) {
+    ratingFilter.value = filters.rating;
+  }
+  if (filters.specialization) {
+    specializationFilter.value = filters.specialization;
+  }
 }
 function onSort(option) {
   sortOption.value = option
+}
+
+function onLocationChange(location) {
+  locationFilter.value = location
+}
+
+function onSpecializationChange(specialization) {
+  specializationFilter.value = specialization;
 }
 
 function viewProfile(member) {

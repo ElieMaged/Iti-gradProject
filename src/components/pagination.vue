@@ -34,26 +34,31 @@
   </template>
   
   <script setup>
-  import { computed, ref } from 'vue';
+  import { computed } from 'vue';
   
   const props = defineProps({
+    currentPage: {
+      type: Number,
+      required: true
+    },
     totalPages: {
       type: Number,
-      default: 40
-    },
-    initialPage: {
-      type: Number,
-      default: 1
+      required: true
     }
   });
   
-  const emit = defineEmits(['page-changed']);
-  const currentPage = ref(props.initialPage);
+  const emit = defineEmits(['prev-page', 'next-page', 'page-changed']);
   
   const goToPage = (page) => {
     if (page === '...' || page < 1 || page > props.totalPages) return;
-    currentPage.value = page;
-    emit('page-changed', page);
+    
+    if (page === props.currentPage - 1) {
+      emit('prev-page');
+    } else if (page === props.currentPage + 1) {
+      emit('next-page');
+    } else {
+      emit('page-changed', page);
+    }
   };
   
   const visiblePages = computed(() => {
@@ -61,12 +66,12 @@
     if (props.totalPages <= 7) {
       for (let i = 1; i <= props.totalPages; i++) pages.push(i);
     } else {
-      if (currentPage.value <= 4) {
+      if (props.currentPage <= 4) {
         pages.push(1, 2, 3, 4, 5, '...', props.totalPages);
-      } else if (currentPage.value >= props.totalPages - 3) {
+      } else if (props.currentPage >= props.totalPages - 3) {
         pages.push(1, '...', props.totalPages - 4, props.totalPages - 3, props.totalPages - 2, props.totalPages - 1, props.totalPages);
       } else {
-        pages.push(1, '...', currentPage.value - 1, currentPage.value, currentPage.value + 1, '...', props.totalPages);
+        pages.push(1, '...', props.currentPage - 1, props.currentPage, props.currentPage + 1, '...', props.totalPages);
       }
     }
     return pages;
