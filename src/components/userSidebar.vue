@@ -1,6 +1,6 @@
 <template>
   <div class="layout">
-    <div class="sidebar" style="margin-left: 80px; margin-right: 80px;" v-if="user">
+    <div class="sidebar" v-if="user">
       <a :href="`/profile-view/${user.uid}`" 
          class="sidebar-item" 
          :class="{ active: activeTab === 'profile' }"
@@ -100,15 +100,21 @@ body {
 .layout {
   display: flex;
   min-height: 100vh;
+  padding-left: 80px;
+  padding-right: 50px;
 }
 
 .sidebar {
-  width: 16rem;
+  width: 14rem;
   background-color: var(--sidebar);
   display: flex;
   flex-direction: column;
   align-items: center;
   padding-top: 2.5rem;
+  border-radius: 16px;
+  height: 40vh;
+  margin-top: 2rem ;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 .dark .sidebar {
@@ -139,12 +145,12 @@ body {
 }
 
 .sidebar-item:hover {
-  background-color: var(--primary-color);
+  background-color: var(--secondary);
   color: white;
 }
 
 .sidebar-item.active {
-  background-color: var(--primary-color);
+  background-color: var(--secondary);
   color: white;
 }
 .dark .sidebar-item.active {
@@ -172,6 +178,8 @@ body {
   .layout {
     flex-direction: column;
     max-height: 10vh;
+    padding-left: 0;
+    padding-right: 0;
   }
   
   .sidebar {

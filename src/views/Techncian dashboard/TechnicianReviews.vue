@@ -9,7 +9,7 @@
     <!-- Sidebar -->
     <Sidebar :activeMenu="activeMenu" @navigate="handleSidebarNavigate" />
     <!-- Main Content -->
-    <div id="admin-profile-container" class="p-4 mr-20">
+    <div id="admin-profile-container" class="p-4 mx-12">
       <TopBar :title="$t('myReviews')" />
       <div id="admin-profile-wrapper">
         <div id="admin-profile-card">

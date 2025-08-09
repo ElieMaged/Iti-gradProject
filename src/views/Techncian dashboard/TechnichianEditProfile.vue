@@ -2,7 +2,7 @@
 
   <div class="admin-dashboard-layout">
     <Sidebar :activeMenu="activeMenu" @navigate="handleSidebarNavigate" />
-    <div class="edit-profile-main mr-20 p-4">
+    <div class="edit-profile-main mx-12 p-4">
       <div class="edit-profile-header">
         <TopBar :title="$t('editProfileTitle')" />
       </div>

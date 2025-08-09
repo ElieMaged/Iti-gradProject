@@ -9,7 +9,7 @@
     <!-- Sidebar -->
     <Sidebar :activeMenu="activeMenu" @navigate="handleSidebarNavigate" />
     <!-- Main Content -->
-    <div id="admin-profile-container" class="p-4 mr-20">
+    <div id="admin-profile-container" class="p-4 mx-12">
       <!-- Top bar for technician dashboard -->
       <TopBar :title="$t('personalInformation')" />
       <div id="admin-profile-wrapper">

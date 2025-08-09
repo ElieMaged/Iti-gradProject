@@ -4,7 +4,7 @@
             :activeMenu="activeMenu"
             @navigate="handleSidebarNavigate"
         />
-    <div class="payment-content p-4 mr-20">
+    <div class="payment-content p-4 mx-12">
       <TopBar :title="$t('payment')" />  
       <div class="payment-balance-card">
 

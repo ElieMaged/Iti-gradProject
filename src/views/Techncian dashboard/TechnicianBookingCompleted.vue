@@ -3,7 +3,7 @@
     <!-- Sidebar -->
     <Sidebar :activeMenu="'booking'" :activeBookingStatus="'completed'" @navigate="handleSidebarNavigate" />
     <!-- Main Content -->
-    <div class="flex-1 p-4 mr-20">
+    <div class="flex-1 p-4 mx-12">
       <div class="admin-dashboard-layout">
         <div class="booking-main">
           <div class="booking-container">

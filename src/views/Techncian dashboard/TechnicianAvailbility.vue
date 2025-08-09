@@ -9,7 +9,7 @@
             />
             <!-- Main Content -->
             <div class="flex-1">
-                <div class=" mr-20 p-4">
+                <div class=" mx-12 p-4">
                     <TopBar :title="$t('availabilityTitle')" />
                     
                     <!-- Success/Error Messages -->

@@ -4,7 +4,7 @@
     <Sidebar :activeMenu="'booking'" :activeBookingStatus="'upcoming'" @navigate="handleSidebarNavigate" />
     <!-- Main Content -->
     <div class="flex-1">
-      <div class="technician-dashboard-layout p-4 mr-20">
+      <div class="technician-dashboard-layout p-4 mx-12">
         <div class="booking-main">
           <div class="booking-container">
             <div class="title-search-row">
