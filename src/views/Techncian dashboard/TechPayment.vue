@@ -4,10 +4,6 @@
             :activeMenu="activeMenu"
             @navigate="handleSidebarNavigate"
         />
-<<<<<<< Updated upstream:src/views/Techncian dashboard/TechPayment.vue
-    <div class="payment-content p-4 mx-12">
-      <TopBar :title="$t('payment')" />  
-=======
     <div class="payment-content p-4 mr-20">
       <div class="page-header">
         <h1 class="page-title">{{ $t('payment') }}</h1>
@@ -15,8 +11,7 @@
           <i class="fas fa-sync-alt" :class="{ 'fa-spin': loading }"></i>
           {{ loading ? 'Refreshing...' : 'Refresh' }}
         </button>
-      </div>  
->>>>>>> Stashed changes:src/views/TechPayment.vue
+      </div>
       <div class="payment-balance-card">
 
         <div class="balance-labels">
@@ -64,7 +59,7 @@
           <button class="withdraw-btn" type="submit" @click.prevent="handleWithdraw">{{ $t('withdraw') }}</button>
         </form>
       </div>
-    </div>
+      
       <!-- Recent Transactions -->
       <div class="transactions-section" v-if="recentTransactions.length > 0">
         <h3 class="transactions-title">{{ $t('recentTransactions') || 'Recent Transactions' }}</h3>
@@ -84,6 +79,7 @@
         </div>
       </div>
     </div>
+  </div>
 </template>
 
 <script>

@@ -3,15 +3,9 @@
     <admin-sidebar />
     <div class="dashboard-main mx-12 p-4">
       <div class="dashboard-container">
-<<<<<<< Updated upstream
-        <TopBar :title="$t('adminDashboard')" />
-
-=======
         <div class="title-row">
           <h2 class="dashboard-title">{{ $t('adminDashboard') }}</h2>
         </div>
-        
->>>>>>> Stashed changes
         <!-- Top Cards -->
         <div class="stats-grid">
           <!-- Realtime Insight -->
@@ -247,10 +241,7 @@ export default {
   },
   data() {
     return {
-<<<<<<< Updated upstream
       selectedPeriod: 'daily',
-=======
->>>>>>> Stashed changes
       currentTime: '8:02:09 AM',
       attendanceData: [],
       attendanceLabels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],

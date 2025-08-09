@@ -277,11 +277,8 @@ import AdminSidebar from '../../components/admin-sidebar.vue'
 import TopBar from '../../components/TopBar.vue'
 import { onAuthStateChanged } from 'firebase/auth'
 import { ensureUserRole, fetchUserRole } from '../../utils/userRole'
-<<<<<<< Updated upstream
-=======
 import NotificationBell from '../../components/NotificationBell.vue'
 import Pagination from '../../components/pagination.vue'
->>>>>>> Stashed changes
 
 const router = useRouter()
 
@@ -300,15 +297,11 @@ const payoutReason = ref('')
 const payoutLoading = ref(false)
 const amountError = ref('')
 
-<<<<<<< Updated upstream
-// Computed
-=======
 // Pagination variables for payment splits
 const splitsCurrentPage = ref(1)
 const splitsItemsPerPage = ref(10)
 
 // Computed properties
->>>>>>> Stashed changes
 const filteredTransactions = computed(() => {
   if (currentFilter.value === 'all') return transactions.value
   return transactions.value.filter(t => t.status === currentFilter.value)
@@ -318,10 +311,6 @@ const pendingTransactions = computed(() => transactions.value.filter(t => t.stat
 const approvedTransactions = computed(() => transactions.value.filter(t => t.status === 'approved'))
 const rejectedTransactions = computed(() => transactions.value.filter(t => t.status === 'rejected'))
 
-<<<<<<< Updated upstream
-const pendingSplits = computed(() => paymentSplits.value.filter(s => s.status === 'pending'))
-const completedSplits = computed(() => paymentSplits.value.filter(s => s.status === 'completed'))
-=======
 // Pagination computed properties for payment splits
 const splitsTotalPages = computed(() => 
   Math.ceil(paymentSplits.value.length / splitsItemsPerPage.value)
@@ -333,7 +322,8 @@ const paginatedPaymentSplits = computed(() => {
   return paymentSplits.value.slice(startIndex, endIndex)
 })
 
->>>>>>> Stashed changes
+const pendingSplits = computed(() => paymentSplits.value.filter(s => s.status === 'pending'))
+const completedSplits = computed(() => paymentSplits.value.filter(s => s.status === 'completed'))
 
 const totalAmount = computed(() => {
   return approvedTransactions.value
@@ -559,10 +549,6 @@ async function initiatePayout() {
   try {
     payoutLoading.value = true
     const technician = technicians.value.find(t => t.id === selectedTechnician.value)
-<<<<<<< Updated upstream
-    if (!technician) throw new Error('Technician not found')
-
-=======
     if (!technician) {
       throw new Error('Technician not found')
     }
@@ -580,7 +566,6 @@ async function initiatePayout() {
       throw new Error(`Insufficient credits. Available: ${currentAdminCredits} EGP, Required: ${transferAmount} EGP`)
     }
     
->>>>>>> Stashed changes
     // Create payout record
     const payoutRecord = {
       technicianId: selectedTechnician.value,
@@ -599,13 +584,8 @@ async function initiatePayout() {
     
     // Save payout record
     const payoutRef = await addDoc(collection(db, 'adminPayouts'), payoutRecord)
-<<<<<<< Updated upstream
-
-    // Create credit deduction record
-=======
     
     // Create credit deduction record for admin
->>>>>>> Stashed changes
     const creditDeduction = {
       payoutId: payoutRef.id,
       amount: -transferAmount, // Negative amount to indicate deduction
@@ -623,9 +603,6 @@ async function initiatePayout() {
     }
     
     await addDoc(collection(db, 'adminCredits'), creditDeduction)
-<<<<<<< Updated upstream
-
-=======
     
     // Add credits to technician's account
     const technicianCredit = {
@@ -647,7 +624,6 @@ async function initiatePayout() {
     
     await addDoc(collection(db, 'technicianCredits'), technicianCredit)
     
->>>>>>> Stashed changes
     // Show success message
     alert(`Successfully transferred ${transferAmount} EGP to ${technician.fullName || technician.name || 'Unknown Technician'}. Credits have been deducted from your account and added to theirs.`)
     
@@ -659,11 +635,6 @@ async function initiatePayout() {
     
     // Refresh data to show updated credit balance
     await fetchTransactions()
-<<<<<<< Updated upstream
-  } catch (e) {
-    console.error('Error initiating payout:', e)
-    alert('Failed to initiate payout. Please try again.')
-=======
     
     // Also refresh admin credits specifically to show updated balance
     const creditsQuery = query(collection(db, 'adminCredits'), orderBy('createdAt', 'desc'))
@@ -676,7 +647,6 @@ async function initiatePayout() {
   } catch (error) {
     console.error('Error initiating payout:', error)
     alert(`Failed to initiate payout: ${error.message}`)
->>>>>>> Stashed changes
   } finally {
     payoutLoading.value = false
   }
@@ -745,7 +715,7 @@ async function executePayout(splitId) {
   }
 }
 
-async function simulatePayPalPayout(splitId) {
+async function simulateBankTransfer(splitId) {
   try {
     const split = paymentSplits.value.find(s => s.id === splitId)
     if (!split) { alert('Payment split not found.'); return }
@@ -756,11 +726,11 @@ async function simulatePayPalPayout(splitId) {
       completedBy: auth.currentUser?.email || 'Admin',
       payoutMethod: 'simulated',
     })
-    alert('PayPal payout simulation completed successfully!')
+    alert('Bank transfer simulation completed successfully!')
     await fetchTransactions()
   } catch (e) {
-    console.error('Error simulating PayPal payout:', e)
-    alert('Failed to simulate payout. Please try again.')
+    console.error('Error simulating bank transfer:', e)
+    alert('Failed to simulate transfer. Please try again.')
   }
 }
 
