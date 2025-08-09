@@ -68,7 +68,9 @@ body {
   --light-purple: #948ab8;
   --primary-text: #f4f4f5;
 }
-
+a {
+  color: rgb(77 142 237);
+}
 /* Dark mode variables */
 .dark {
   --primary-color: #7b6fa8;

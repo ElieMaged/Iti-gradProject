@@ -101,7 +101,7 @@ body {
   display: flex;
   min-height: 100vh;
   padding-left: 80px;
-  padding-right: 50px;
+  padding-right: 20px;
 }
 
 .sidebar {

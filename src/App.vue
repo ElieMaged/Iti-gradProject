@@ -22,7 +22,7 @@ const isAdminRoute = computed(() => {
          route.path.startsWith('/techbookings') ||
          route.path.startsWith('/techsettings') ||
          route.path.startsWith('/techprofile') ||
-         route.path.startsWith('/booking') ||
+         route.path.startsWith('/booking-') ||
          route.path.startsWith('/admin-payment') ||
          route.path.startsWith('/all-technician');
 });
