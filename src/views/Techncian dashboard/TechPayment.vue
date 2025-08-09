@@ -4,8 +4,19 @@
             :activeMenu="activeMenu"
             @navigate="handleSidebarNavigate"
         />
+<<<<<<< Updated upstream:src/views/Techncian dashboard/TechPayment.vue
     <div class="payment-content p-4 mx-12">
       <TopBar :title="$t('payment')" />  
+=======
+    <div class="payment-content p-4 mr-20">
+      <div class="page-header">
+        <h1 class="page-title">{{ $t('payment') }}</h1>
+        <button class="refresh-btn" @click="refreshData" :disabled="loading">
+          <i class="fas fa-sync-alt" :class="{ 'fa-spin': loading }"></i>
+          {{ loading ? 'Refreshing...' : 'Refresh' }}
+        </button>
+      </div>  
+>>>>>>> Stashed changes:src/views/TechPayment.vue
       <div class="payment-balance-card">
 
         <div class="balance-labels">
@@ -15,6 +26,21 @@
         <div class="balance-amounts">
           <span class="current-balance-amount">{{ currentBalance }} EGP</span>
           <span class="pending-amount">{{ pendingBalance }} EGP</span>
+        </div>
+        
+        <!-- Credit Breakdown -->
+        <div class="credit-breakdown" v-if="creditBreakdown">
+          <div class="breakdown-title">Credit Sources</div>
+          <div class="breakdown-items">
+            <div class="breakdown-item" v-if="creditBreakdown.bookingCredits > 0">
+              <span class="breakdown-label">Booking Payments:</span>
+              <span class="breakdown-amount">+{{ creditBreakdown.bookingCredits }} EGP</span>
+            </div>
+            <div class="breakdown-item" v-if="creditBreakdown.adminTransfers > 0">
+              <span class="breakdown-label">Admin Transfers:</span>
+              <span class="breakdown-amount">+{{ creditBreakdown.adminTransfers }} EGP</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -45,7 +71,9 @@
         <div class="transactions-list">
           <div v-for="transaction in recentTransactions" :key="transaction.id" class="transaction-item">
             <div class="transaction-info">
-              <div class="transaction-type">{{ transaction.type === 'booking_payment' ? 'Booking Payment' : transaction.type }}</div>
+              <div class="transaction-type">
+                {{ getTransactionTypeLabel(transaction.type) }}
+              </div>
               <div class="transaction-description">{{ transaction.description }}</div>
               <div class="transaction-date">{{ formatDate(transaction.createdAt) }}</div>
             </div>
@@ -80,7 +108,8 @@ export default {
       bankName: '',
       accountNumber: '',
       recentTransactions: [],
-      loading: true
+      loading: true,
+      creditBreakdown: null
     }
   },
   methods: {
@@ -100,7 +129,7 @@ export default {
         const technicianId = auth.currentUser.uid;
         console.log('Fetching credits for technician:', technicianId);
         
-        // Fetch approved credits (current balance)
+        // Fetch approved credits (current balance) - including admin transfers
         const approvedCreditsQuery = query(
           collection(db, 'technicianCredits'),
           where('technicianId', '==', technicianId),
@@ -128,14 +157,73 @@ export default {
           ...doc.data()
         }));
         
-        // Calculate balances
-        this.currentBalance = approvedCredits.reduce((sum, credit) => sum + parseFloat(credit.amount || credit.credits || 0), 0);
-        this.pendingBalance = pendingCredits.reduce((sum, credit) => sum + parseFloat(credit.amount || credit.credits || 0), 0);
+        // Also fetch admin payouts to ensure they're included
+        const adminPayoutsQuery = query(
+          collection(db, 'adminPayouts'),
+          where('technicianId', '==', technicianId),
+          where('status', '==', 'completed'),
+          orderBy('createdAt', 'desc')
+        );
         
-        // Get recent transactions (last 10)
-        this.recentTransactions = approvedCredits.slice(0, 10);
+        const adminPayoutsSnapshot = await getDocs(adminPayoutsQuery);
+        const adminPayouts = adminPayoutsSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        // Calculate balances - include admin transfers
+        let totalCurrentBalance = approvedCredits.reduce((sum, credit) => {
+          const amount = parseFloat(credit.amount || credit.credits || 0);
+          return sum + amount;
+        }, 0);
+        
+        // Add admin transfers to the current balance
+        const adminTransfersTotal = adminPayouts.reduce((sum, payout) => {
+          const amount = parseFloat(payout.amount || 0);
+          return sum + amount;
+        }, 0);
+        
+        this.currentBalance = totalCurrentBalance + adminTransfersTotal;
+        
+        // Calculate credit breakdown
+        this.creditBreakdown = {
+          bookingCredits: totalCurrentBalance,
+          adminTransfers: adminTransfersTotal
+        };
+        
+        this.pendingBalance = pendingCredits.reduce((sum, credit) => {
+          const amount = parseFloat(credit.amount || credit.credits || 0);
+          return sum + amount;
+        }, 0);
+        
+        // Get recent transactions (last 10) - include admin transfers
+        const allTransactions = [
+          ...approvedCredits,
+          ...adminPayouts.map(payout => ({
+            id: payout.id,
+            type: 'admin_transfer',
+            amount: payout.amount,
+            description: `Admin Transfer: ${payout.reason || 'Credit Transfer'}`,
+            createdAt: payout.createdAt,
+            status: 'approved'
+          }))
+        ];
+        
+        // Sort by creation date and take the last 10
+        this.recentTransactions = allTransactions
+          .sort((a, b) => {
+            const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+            const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+            return dateB - dateA;
+          })
+          .slice(0, 10);
         
         console.log('Technician credits fetched:', {
+          approvedCredits: approvedCredits.length,
+          pendingCredits: pendingCredits.length,
+          adminPayouts: adminPayouts.length,
+          totalCurrentBalance,
+          adminTransfersTotal,
           currentBalance: this.currentBalance,
           pendingBalance: this.pendingBalance,
           recentTransactions: this.recentTransactions.length
@@ -184,6 +272,21 @@ export default {
       });
     },
     
+    getTransactionTypeLabel(type) {
+      switch (type) {
+        case 'booking_payment':
+          return 'Booking Payment';
+        case 'admin_transfer':
+          return 'Admin Transfer';
+        case 'credit_addition':
+          return 'Credit Addition';
+        case 'payout_sent':
+          return 'Payout Sent';
+        default:
+          return type || 'Transaction';
+      }
+    },
+    
     async handleWithdraw() {
       if (!this.withdrawAmount || !this.bankName || !this.accountNumber) {
         alert('Please enter amount, bank name, and account number');
@@ -213,6 +316,10 @@ export default {
       this.withdrawAmount = '';
       this.bankName = '';
       this.accountNumber = '';
+    },
+    
+    async refreshData() {
+      await this.fetchTechnicianCredits();
     }
   },
   
@@ -241,17 +348,109 @@ export default {
 .dark .payment-page {
   background: var(--primary-bg);
 }
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
 .page-title {
   color: var(--primary-color);
   font-size: 2rem;
   font-weight: 700;
-  margin-bottom: 2rem;
   font-family: Outfit, sans-serif;
+  margin: 0;
+}
+
+.refresh-btn {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.refresh-btn:hover:not(:disabled) {
+  background: var(--primary-color-dark, #4a3f8c);
+  transform: translateY(-1px);
+}
+
+.refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.refresh-btn i {
+  font-size: 1rem;
 }
 
 .dark .page-title {
   color: var(--primary-color);
 }
+
+/* Credit Breakdown Styles */
+.credit-breakdown {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.dark .credit-breakdown {
+  border-top-color: #444;
+}
+
+.breakdown-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.dark .breakdown-title {
+  color: #ccc;
+}
+
+.breakdown-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.breakdown-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+
+.breakdown-label {
+  font-size: 0.9rem;
+  color: #555;
+  font-weight: 500;
+}
+
+.dark .breakdown-label {
+  color: #bbb;
+}
+
+.breakdown-amount {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #28a745;
+}
+
+.dark .breakdown-amount {
+  color: #4ade80;
+}
+
 .payment-balance-card {
   background: #fff;
   border-radius: 18px;
@@ -473,6 +672,18 @@ export default {
     padding: 1rem 0 0 0;
   }
   
+  .page-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .refresh-btn {
+    align-self: flex-end;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+  
   .payment-title {
     margin-left: 0;
     font-size: 1.5rem;
@@ -485,6 +696,24 @@ export default {
   .withdraw-card {
     padding: 12px 6px 10px 6px;
     border-radius: 12px;
+  }
+  
+  .credit-breakdown {
+    margin-top: 1rem;
+    padding-top: 1rem;
+  }
+  
+  .breakdown-title {
+    font-size: 0.9rem;
+  }
+  
+  .breakdown-item {
+    padding: 0.4rem 0;
+  }
+  
+  .breakdown-label,
+  .breakdown-amount {
+    font-size: 0.8rem;
   }
   
   .withdraw-btn {
@@ -513,6 +742,15 @@ export default {
 @media (max-width: 600px) {
   .payment-content {
     padding: 8px 0 0 0;
+  }
+  
+  .page-header {
+    gap: 0.75rem;
+  }
+  
+  .refresh-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
   }
   
   .payment-title {

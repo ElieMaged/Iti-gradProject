@@ -45,10 +45,10 @@
         <div class="payout-section">
           <div class="section-header">
             <h3>{{ $t('bankAccountTransferToTechnician') }}</h3>
-            <div class="available-credits">
-              <i class="fas fa-coins"></i>
-              <span>{{ $t('availableCredits') }}: {{ totalApprovedCredits }} EGP</span>
-            </div>
+                      <div class="available-credits">
+            <i class="fas fa-coins"></i>
+            <span>{{ $t('availableCredits') }}: {{ availableCredits }} EGP</span>
+          </div>
           </div>
           
           <div class="payout-form">
@@ -80,8 +80,17 @@
                   step="0.01"
                   :placeholder="$t('enterAmountInEGP')"
                   @input="validatePayoutAmount"
+                  @blur="validatePayoutAmount"
                 />
                 <div v-if="amountError" class="error-message">{{ amountError }}</div>
+                <div v-if="payoutAmount && parseFloat(payoutAmount) > 0" class="credit-info">
+                  <span class="remaining-credits">
+                    {{ $t('remainingCredits') }}: {{ remainingCredits }} EGP
+                  </span>
+                  <span v-if="parseFloat(remainingCredits) < 0" class="insufficient-credits">
+                    {{ $t('insufficientCredits') }}
+                  </span>
+                </div>
               </div>
               
               <div class="form-group">
@@ -106,7 +115,10 @@
               </div>
               <div class="summary-item remaining">
                 <span>{{ $t('remainingCredits') }}:</span>
-                <span>{{ remainingCredits }} EGP</span>
+                <span :class="{ 'insufficient-credits': parseFloat(remainingCredits) < 0 }">
+                  {{ remainingCredits }} EGP
+                  <i v-if="parseFloat(remainingCredits) < 0" class="fas fa-exclamation-triangle" title="Insufficient credits"></i>
+                </span>
               </div>
             </div>
             
@@ -151,7 +163,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="split in paymentSplits" :key="split.id">
+                <tr v-for="split in paginatedPaymentSplits" :key="split.id">
                   <td>{{ formatDate(split.createdAt) }}</td>
                   <td class="order-id">{{ split.paypalOrderId || split.bookingId }}</td>
                   <td>{{ split.totalAmountEGP ? parseFloat(split.totalAmountEGP).toFixed(2) : (split.totalAmount ? parseFloat(split.totalAmount).toFixed(2) : '0.00') }} EGP</td>
@@ -180,6 +192,20 @@
                 </tr>
               </tbody>
             </table>
+          </div>
+          
+          <!-- Pagination for Payment Splits -->
+          <div v-if="splitsTotalPages > 1" class="pagination-container">
+            <div class="pagination-info">
+              Showing {{ (splitsCurrentPage - 1) * splitsItemsPerPage + 1 }} - 
+              {{ Math.min(splitsCurrentPage * splitsItemsPerPage, paymentSplits.length) }} 
+              of {{ paymentSplits.length }} payment splits
+            </div>
+            <Pagination 
+              :total-pages="splitsTotalPages"
+              :initial-page="splitsCurrentPage"
+              @page-changed="handleSplitsPageChange"
+            />
           </div>
         </div>
 
@@ -251,6 +277,11 @@ import AdminSidebar from '../../components/admin-sidebar.vue'
 import TopBar from '../../components/TopBar.vue'
 import { onAuthStateChanged } from 'firebase/auth'
 import { ensureUserRole, fetchUserRole } from '../../utils/userRole'
+<<<<<<< Updated upstream
+=======
+import NotificationBell from '../../components/NotificationBell.vue'
+import Pagination from '../../components/pagination.vue'
+>>>>>>> Stashed changes
 
 const router = useRouter()
 
@@ -269,7 +300,15 @@ const payoutReason = ref('')
 const payoutLoading = ref(false)
 const amountError = ref('')
 
+<<<<<<< Updated upstream
 // Computed
+=======
+// Pagination variables for payment splits
+const splitsCurrentPage = ref(1)
+const splitsItemsPerPage = ref(10)
+
+// Computed properties
+>>>>>>> Stashed changes
 const filteredTransactions = computed(() => {
   if (currentFilter.value === 'all') return transactions.value
   return transactions.value.filter(t => t.status === currentFilter.value)
@@ -279,8 +318,22 @@ const pendingTransactions = computed(() => transactions.value.filter(t => t.stat
 const approvedTransactions = computed(() => transactions.value.filter(t => t.status === 'approved'))
 const rejectedTransactions = computed(() => transactions.value.filter(t => t.status === 'rejected'))
 
+<<<<<<< Updated upstream
 const pendingSplits = computed(() => paymentSplits.value.filter(s => s.status === 'pending'))
 const completedSplits = computed(() => paymentSplits.value.filter(s => s.status === 'completed'))
+=======
+// Pagination computed properties for payment splits
+const splitsTotalPages = computed(() => 
+  Math.ceil(paymentSplits.value.length / splitsItemsPerPage.value)
+)
+
+const paginatedPaymentSplits = computed(() => {
+  const startIndex = (splitsCurrentPage.value - 1) * splitsItemsPerPage.value
+  const endIndex = startIndex + splitsItemsPerPage.value
+  return paymentSplits.value.slice(startIndex, endIndex)
+})
+
+>>>>>>> Stashed changes
 
 const totalAmount = computed(() => {
   return approvedTransactions.value
@@ -293,8 +346,11 @@ const totalAmount = computed(() => {
 
 const totalApprovedCredits = computed(() => {
   return adminCredits.value
-    .filter(credit => credit.status === 'approved')
-    .reduce((sum, credit) => sum + parseFloat(credit.credits || credit.amount), 0)
+    .filter(credit => credit.status === 'completed' || credit.status === 'approved')
+    .reduce((sum, credit) => {
+      const amount = parseFloat(credit.credits || credit.amount)
+      return sum + amount // This will handle negative amounts (deductions) correctly
+    }, 0)
     .toFixed(2)
 })
 
@@ -315,6 +371,10 @@ const remainingCredits = computed(() => {
   const currentCredits = parseFloat(totalApprovedCredits.value)
   const deduction = parseFloat(totalDeduction.value)
   return Math.max(0, currentCredits - deduction).toFixed(2)
+})
+
+const availableCredits = computed(() => {
+  return parseFloat(totalApprovedCredits.value).toFixed(2)
 })
 
 const canPayout = computed(() => {
@@ -499,45 +559,97 @@ async function initiatePayout() {
   try {
     payoutLoading.value = true
     const technician = technicians.value.find(t => t.id === selectedTechnician.value)
+<<<<<<< Updated upstream
     if (!technician) throw new Error('Technician not found')
 
+=======
+    if (!technician) {
+      throw new Error('Technician not found')
+    }
+    
+    // Ensure we have a valid email for the technician
+    if (!technician.email) {
+      throw new Error('Technician email not found. Cannot send credits.')
+    }
+    
+    // Check if admin has sufficient credits
+    const currentAdminCredits = parseFloat(totalApprovedCredits.value)
+    const transferAmount = parseFloat(payoutAmount.value)
+    
+    if (currentAdminCredits < transferAmount) {
+      throw new Error(`Insufficient credits. Available: ${currentAdminCredits} EGP, Required: ${transferAmount} EGP`)
+    }
+    
+>>>>>>> Stashed changes
     // Create payout record
     const payoutRecord = {
       technicianId: selectedTechnician.value,
       technicianName: technician.fullName || technician.name || 'Unknown Technician',
       technicianEmail: technician.email || 'No email',
-      amount: parseFloat(payoutAmount.value),
+      amount: transferAmount,
       currency: 'EGP',
-      totalDeduction: parseFloat(totalDeduction.value),
+      totalDeduction: transferAmount,
       reason: payoutReason.value || 'Admin payout',
-      status: 'pending',
+      status: 'completed', // Mark as completed since admin is directly transferring
       adminActionBy: auth.currentUser?.email || 'Admin',
       createdAt: serverTimestamp(),
+      completedAt: serverTimestamp(),
       transactionType: 'payout_sent'
     }
     
     // Save payout record
     const payoutRef = await addDoc(collection(db, 'adminPayouts'), payoutRecord)
+<<<<<<< Updated upstream
 
     // Create credit deduction record
+=======
+    
+    // Create credit deduction record for admin
+>>>>>>> Stashed changes
     const creditDeduction = {
       payoutId: payoutRef.id,
-      amount: parseFloat(totalDeduction.value),
+      amount: -transferAmount, // Negative amount to indicate deduction
       currency: 'EGP',
-      credits: parseFloat(totalDeduction.value),
-      status: 'pending',
-      reason: `Bank transfer to ${technician.fullName || technician.name || 'Unknown Technician'}`,
+      credits: -transferAmount, // Negative credits to indicate deduction
+      status: 'completed',
+      reason: `Credit transfer to ${technician.fullName || technician.name || 'Unknown Technician'}`,
       technicianId: selectedTechnician.value,
       technicianName: technician.fullName || technician.name || 'Unknown Technician',
       adminActionBy: auth.currentUser?.email || 'Admin',
       createdAt: serverTimestamp(),
-      transactionType: 'credit_deduction'
+      completedAt: serverTimestamp(),
+      transactionType: 'credit_deduction',
+      description: `Admin transferred ${transferAmount} EGP to technician`
     }
     
     await addDoc(collection(db, 'adminCredits'), creditDeduction)
+<<<<<<< Updated upstream
 
+=======
+    
+    // Add credits to technician's account
+    const technicianCredit = {
+      technicianId: selectedTechnician.value,
+      technicianEmail: technician.email,
+      amount: transferAmount,
+      credits: transferAmount,
+      currency: 'EGP',
+      status: 'approved', // Automatically approved since admin is sending
+      type: 'admin_transfer',
+      description: `Bank transfer from admin: ${payoutReason.value || 'Admin payout'}`,
+      reason: payoutReason.value || 'Admin payout',
+      adminActionBy: auth.currentUser?.email || 'Admin',
+      payoutId: payoutRef.id,
+      createdAt: serverTimestamp(),
+      approvedAt: serverTimestamp(),
+      transactionType: 'credit_addition'
+    }
+    
+    await addDoc(collection(db, 'technicianCredits'), technicianCredit)
+    
+>>>>>>> Stashed changes
     // Show success message
-    alert(`Payout of ${payoutAmount.value} EGP initiated for ${technician.fullName || technician.name || 'Unknown Technician'}`)
+    alert(`Successfully transferred ${transferAmount} EGP to ${technician.fullName || technician.name || 'Unknown Technician'}. Credits have been deducted from your account and added to theirs.`)
     
     // Reset form
     selectedTechnician.value = ''
@@ -545,11 +657,26 @@ async function initiatePayout() {
     payoutReason.value = ''
     amountError.value = ''
     
-    // Refresh data
+    // Refresh data to show updated credit balance
     await fetchTransactions()
+<<<<<<< Updated upstream
   } catch (e) {
     console.error('Error initiating payout:', e)
     alert('Failed to initiate payout. Please try again.')
+=======
+    
+    // Also refresh admin credits specifically to show updated balance
+    const creditsQuery = query(collection(db, 'adminCredits'), orderBy('createdAt', 'desc'))
+    const creditsSnapshot = await getDocs(creditsQuery)
+    adminCredits.value = creditsSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }))
+    
+  } catch (error) {
+    console.error('Error initiating payout:', error)
+    alert(`Failed to initiate payout: ${error.message}`)
+>>>>>>> Stashed changes
   } finally {
     payoutLoading.value = false
   }
@@ -648,6 +775,16 @@ function formatDate(date) {
   if (!date) return '-'
   const d = date.toDate ? date.toDate() : new Date(date)
   return d.toLocaleDateString() + ' ' + d.toLocaleTimeString()
+}
+
+// Pagination handlers
+function handleSplitsPageChange(page) {
+  splitsCurrentPage.value = page
+}
+
+// Helper function to find technician by email
+function findTechnicianByEmail(email) {
+  return technicians.value.find(t => t.email === email)
 }
 
 onMounted(() => {
@@ -1007,6 +1144,29 @@ th {
   color: #374151;
 }
 
+.pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.dark .pagination-container {
+  background: var(--input-bg);
+  border-top-color: var(--border-color);
+}
+
+.pagination-info {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.dark .pagination-info {
+  color: var(--text-muted);
+}
+
 /* Payout Section Styles */
 .payout-section {
   background: white;
@@ -1310,5 +1470,52 @@ th {
     font-size: 0.875rem;
     min-width: 150px;
   }
+}
+
+/* Credit Info Styles */
+.credit-info {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.remaining-credits {
+  font-size: 0.875rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.dark .remaining-credits {
+  color: #ccc;
+}
+
+.insufficient-credits {
+  font-size: 0.875rem;
+  color: #dc3545;
+  font-weight: 600;
+}
+
+.dark .insufficient-credits {
+  color: #ff6b6b;
+}
+
+/* Summary item insufficient credits */
+.payout-summary .summary-item.remaining .insufficient-credits {
+  color: #dc3545;
+  font-weight: 700;
+}
+
+.dark .payout-summary .summary-item.remaining .insufficient-credits {
+  color: #ff6b6b;
+}
+
+.payout-summary .summary-item.remaining .insufficient-credits i {
+  margin-left: 0.5rem;
+  color: #dc3545;
+}
+
+.dark .payout-summary .summary-item.remaining .insufficient-credits i {
+  color: #ff6b6b;
 }
 </style>

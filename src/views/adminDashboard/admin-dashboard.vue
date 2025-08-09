@@ -3,8 +3,15 @@
     <admin-sidebar />
     <div class="dashboard-main mx-12 p-4">
       <div class="dashboard-container">
+<<<<<<< Updated upstream
         <TopBar :title="$t('adminDashboard')" />
 
+=======
+        <div class="title-row">
+          <h2 class="dashboard-title">{{ $t('adminDashboard') }}</h2>
+        </div>
+        
+>>>>>>> Stashed changes
         <!-- Top Cards -->
         <div class="stats-grid">
           <!-- Realtime Insight -->
@@ -128,6 +135,93 @@
               </div>
             </div>
           </div>
+          
+          <!-- Monthly Users Chart -->
+          <div class="chart-card monthly-users-chart">
+            <div class="chart-header">
+              <div class="chart-title">{{ $t('monthlyUserRegistrations') || 'Monthly User Registrations' }}</div>
+            </div>
+            <!-- Monthly Users Chart -->
+            <div class="chart-wrapper">
+              <div class="chart-y-labels">
+                <span>{{ maxMonthlyUsers }}</span>
+                <span>{{ Math.round(maxMonthlyUsers * 0.8) }}</span>
+                <span>{{ Math.round(maxMonthlyUsers * 0.6) }}</span>
+                <span>{{ Math.round(maxMonthlyUsers * 0.4) }}</span>
+                <span>{{ Math.round(maxMonthlyUsers * 0.2) }}</span>
+                <span>0</span>
+              </div>
+              <div class="chart-main">
+                <div class="chart-grid">
+                  <div class="grid-line" v-for="i in 5" :key="i"></div>
+                </div>
+                <svg class="chart-svg" viewBox="0 0 500 200" preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="monthlyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" style="stop-color:#4ade80;stop-opacity:0.8" />
+                      <stop offset="100%" style="stop-color:#4ade80;stop-opacity:0.1" />
+                    </linearGradient>
+                    <filter id="monthlyGlow">
+                      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                      <feMerge> 
+                        <feMergeNode in="coloredBlur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                      </feMerge>
+                    </filter>
+                  </defs>
+                  <!-- Area fill -->
+                  <path 
+                    :d="monthlyAreaPath" 
+                    fill="url(#monthlyGradient)" 
+                    class="chart-area monthly-area"
+                  />
+                  <!-- Main line -->
+                  <path 
+                    :d="monthlyLinePath" 
+                    fill="none" 
+                    stroke="#4ade80" 
+                    stroke-width="3"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="chart-line monthly-line"
+                    filter="url(#monthlyGlow)"
+                  />
+                  <!-- Data points -->
+                  <circle 
+                    v-for="(point, index) in monthlyUsersData" 
+                    :key="index"
+                    :cx="point.x" 
+                    :cy="point.y" 
+                    r="6" 
+                    fill="#4ade80"
+                    stroke="#fff"
+                    stroke-width="2"
+                    class="data-point monthly-point"
+                    @mouseenter="showMonthlyTooltip($event, point)"
+                    @mouseleave="hideTooltip"
+                  />
+                  <!-- Hover effect circle -->
+                  <circle 
+                    v-if="hoveredMonthlyPoint"
+                    :cx="hoveredMonthlyPoint.x" 
+                    :cy="hoveredMonthlyPoint.y" 
+                    r="12" 
+                    fill="rgba(74, 222, 128, 0.2)"
+                    class="hover-circle"
+                  />
+                </svg>
+                <div class="chart-x-labels">
+                  <span v-for="(point, index) in monthlyUsersData" :key="index">{{ point.month }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="chart-legend">
+              <div class="legend-item">
+                <div class="legend-dot monthly-dot"></div>
+                <span>{{ $t('userRegistrations') || 'User Registrations' }}</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -153,7 +247,10 @@ export default {
   },
   data() {
     return {
+<<<<<<< Updated upstream
       selectedPeriod: 'daily',
+=======
+>>>>>>> Stashed changes
       currentTime: '8:02:09 AM',
       attendanceData: [],
       attendanceLabels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
@@ -167,7 +264,11 @@ export default {
       // User activity data
       currentWeekUsers: [],
       previousWeekUsers: [],
-      maxUsers: 0
+      maxUsers: 0,
+      // Monthly users data
+      monthlyUsersData: [],
+      maxMonthlyUsers: 0,
+      hoveredMonthlyPoint: null
     };
   },
   computed: {
@@ -191,6 +292,22 @@ export default {
       const lastPoint = this.attendanceData[this.attendanceData.length - 1];
       const firstPoint = this.attendanceData[0];
       
+      return `M ${firstPoint.x},180 L ${points.join(' L ')} L ${lastPoint.x},180 Z`;
+    },
+    monthlyLinePath() {
+      if (this.monthlyUsersData.length === 0) return '';
+      
+      const points = this.monthlyUsersData.map(point => `${point.x},${point.y}`);
+      return `M ${points.join(' L ')}`;
+    },
+    monthlyAreaPath() {
+      if (this.monthlyUsersData.length === 0) return '';
+      
+      const points = this.monthlyUsersData.map(point => `${point.x},${point.y}`);
+      const lastPoint = this.monthlyUsersData[this.monthlyUsersData.length - 1];
+      const firstPoint = this.monthlyUsersData[0];
+      
+      // Area should connect curve to bottom of chart (y=180)
       return `M ${firstPoint.x},180 L ${points.join(' L ')} L ${lastPoint.x},180 Z`;
     }
   },
@@ -223,11 +340,13 @@ export default {
     // Add calls to fetch dynamic stats
     this.fetchTechniciansCount();
     this.fetchUsersCount();
+    this.fetchMonthlyUsers();
     // Refresh stats every 5 minutes
     setInterval(() => {
       this.fetchTechniciansCount();
       this.fetchUsersCount();
       this.fetchWeeklyBookings(); // Refresh chart data
+      this.fetchMonthlyUsers(); // Refresh monthly chart data
     }, 5 * 60 * 1000);
   },
   methods: {
@@ -258,6 +377,10 @@ export default {
       this.hoveredPoint = point;
       this.tooltip = this.createTooltip(event, `${point.value} bookings`);
     },
+    showMonthlyTooltip(event, point) {
+      this.hoveredMonthlyPoint = point;
+      this.tooltip = this.createTooltip(event, `${point.value} users registered`);
+    },
     showBarTooltip(event, bar) {
       this.tooltip = this.createTooltip(event, `${bar.current} bookings`);
     },
@@ -276,6 +399,8 @@ export default {
       return tooltip;
     },
     hideTooltip() {
+      this.hoveredPoint = null;
+      this.hoveredMonthlyPoint = null;
       if (this.tooltip) {
         this.tooltip.classList.remove('show');
         setTimeout(() => {
@@ -393,7 +518,12 @@ export default {
         
         // Generate attendance data for the chart
         this.attendanceData = currentWeekCounts.map((count, index) => {
-          const x = (index / (weekDays.length - 1)) * 500; // Scale x to 0-500
+          // Calculate x position to align with chart-x-labels spacing
+          // Add padding on sides and distribute evenly
+          const padding = 25; // padding on each side
+          const availableWidth = 500 - (2 * padding);
+          const x = padding + (index / (weekDays.length - 1)) * availableWidth;
+          
           const y = count === 0 ? 180 : 180 - ((count / maxValue) * 160 * 0.7); // Scale y to 20-180 (inverted for SVG) and reduce by 30%
           return {
             x: x,
@@ -413,13 +543,13 @@ export default {
         console.error('Error fetching weekly bookings:', error);
         // Fallback to static data if there's an error
         this.attendanceData = [
-          { x: 0, y: 162.67, value: 20, day: 'Mon' },
-          { x: 83.33, y: 145.33, value: 40, day: 'Tue' },
-          { x: 166.67, y: 128, value: 60, day: 'Wed' },
+          { x: 25, y: 162.67, value: 20, day: 'Mon' },
+          { x: 100, y: 145.33, value: 40, day: 'Tue' },
+          { x: 175, y: 128, value: 60, day: 'Wed' },
           { x: 250, y: 164, value: 30, day: 'Thu' },
-          { x: 333.33, y: 181.33, value: 10, day: 'Fri' },
-          { x: 416.67, y: 162.67, value: 20, day: 'Sat' },
-          { x: 500, y: 164, value: 30, day: 'Sun' }
+          { x: 325, y: 181.33, value: 10, day: 'Fri' },
+          { x: 400, y: 162.67, value: 20, day: 'Sat' },
+          { x: 475, y: 164, value: 30, day: 'Sun' }
         ];
         this.maxUsers = 60;
       }
@@ -508,6 +638,102 @@ export default {
         this.totalUsers = 0;
         this.customerChange = '0%';
       }
+    },
+    
+    async fetchMonthlyUsers() {
+      try {
+        const { collection, getDocs, query, where, orderBy } = await import('firebase/firestore');
+        const { db } = await import('../../firebase');
+        
+        console.log('🔍 Fetching monthly users data...');
+        
+        // Get data for the last 12 months
+        const now = new Date();
+        const startDate = new Date(now.getFullYear(), now.getMonth() - 11, 1); // 12 months ago
+        startDate.setHours(0, 0, 0, 0);
+        
+        // Fetch users registered in the last 12 months
+        const usersQuery = query(
+          collection(db, 'users'),
+          where('createdAt', '>=', startDate),
+          orderBy('createdAt', 'asc')
+        );
+        
+        const usersSnapshot = await getDocs(usersQuery);
+        const users = usersSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        console.log('Users found:', users.length);
+        
+        // Create monthly buckets for the last 12 months
+        const monthlyData = [];
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                           'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        
+        for (let i = 11; i >= 0; i--) {
+          const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
+          const nextMonthDate = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
+          
+          // Count users registered in this month
+          const monthUsers = users.filter(user => {
+            const userDate = user.createdAt?.toDate ? user.createdAt.toDate() : new Date(user.createdAt);
+            return userDate >= monthDate && userDate < nextMonthDate;
+          });
+          
+          monthlyData.push({
+            month: monthNames[monthDate.getMonth()],
+            count: monthUsers.length,
+            date: monthDate
+          });
+        }
+        
+        console.log('Monthly data:', monthlyData);
+        
+        // Find the maximum value for scaling
+        const maxValue = Math.max(...monthlyData.map(m => m.count), 1); // Ensure at least 1 for scaling
+        this.maxMonthlyUsers = maxValue;
+        
+        // Generate chart data points
+        this.monthlyUsersData = monthlyData.map((data, index) => {
+          // Calculate x position to align with chart-x-labels spacing
+          // Add padding on sides and distribute evenly
+          const padding = 25; // padding on each side
+          const availableWidth = 500 - (2 * padding);
+          const x = padding + (index / (monthlyData.length - 1)) * availableWidth;
+          
+          const baseY = data.count === 0 ? 180 : 180 - ((data.count / maxValue) * 160 * 0.7 * 0.7); // Scale y and reduce curve size by additional 30%
+          const y = baseY - (200 * 0.2); // Move curve up by 20% of chart height (200 * 0.2 = 40px)
+          return {
+            x: x,
+            y: y,
+            value: data.count,
+            month: data.month
+          };
+        });
+        
+        console.log('Generated monthly chart data:', this.monthlyUsersData);
+        
+      } catch (error) {
+        console.error('Error fetching monthly users:', error);
+        // Fallback to static data if there's an error (12 months with proper alignment)
+        this.monthlyUsersData = [
+          { x: 25, y: 115.4, value: 5, month: 'Jan' },
+          { x: 66.36, y: 108.6, value: 12, month: 'Feb' },
+          { x: 107.73, y: 101.8, value: 18, month: 'Mar' },
+          { x: 149.09, y: 95, value: 25, month: 'Apr' },
+          { x: 190.45, y: 106.5, value: 15, month: 'May' },
+          { x: 231.82, y: 88.2, value: 32, month: 'Jun' },
+          { x: 273.18, y: 81.4, value: 38, month: 'Jul' },
+          { x: 314.55, y: 95, value: 25, month: 'Aug' },
+          { x: 355.91, y: 74.6, value: 45, month: 'Sep' },
+          { x: 397.27, y: 67.8, value: 52, month: 'Oct' },
+          { x: 438.64, y: 61, value: 58, month: 'Nov' },
+          { x: 475, y: 54.2, value: 65, month: 'Dec' }
+        ];
+        this.maxMonthlyUsers = 65;
+      }
     }
   }
 };
@@ -534,13 +760,10 @@ export default {
   color: var(--primary-text);
 }
 
-.title-search-row {
+.title-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   margin-bottom: 2rem;
-  gap: 1rem;
-  flex-wrap: wrap;
 }
 
 .dashboard-title {
@@ -555,104 +778,15 @@ export default {
   color: var(--primary-color);
 }
 
-.filter-search-bar {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-shrink: 0;
-  border-radius: 58px;
-  background: #D3CFE2;
-  padding: 0.5rem;
-  min-width: 300px;
-  flex-wrap: wrap;
-}
 
-.dark .filter-search-bar {
-  background: var(--input-bg);
-  color: var(--primary-text);
-}
 
-.filter-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border-radius: 58px;
-  border: 1px solid var(--border-border-primary, #C2C3C4);
-  color: #C2C3C4;
-  background: var(--surface-color-surface-primary, #FFF);
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  white-space: nowrap;
-}
 
-.dark .filter-btn {
-  background: var(--grey-bg);
-  color: var(--primary-text);
-} 
 
-.filter-btn i {
-  font-size: 1.1rem;
-}
 
-.dark .filter-btn:hover {
-  background: var(--grey-bg);
-  color: var(--primary-text);
-}
 
-.filter-btn:hover {
-  background: var(--sidebar-color);
-  color: var(--primary-color);
-}
 
-.search-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  border-radius: 58px;
-  border: 1px solid var(--border-border-primary, #C2C3C4);
-  background: var(--surface-color-surface-primary, #FFF);
-  padding: 0.5rem 1rem;
-  flex: 1;
-  min-width: 200px;
-}
 
-.dark .search-wrapper {
-  background: var(--grey-bg);
-}
 
-.search-icon {
-  color: #b8a4e3;
-  font-size: 1.1rem;
-}
-
-.dark .search-icon {
-  color: var(--primary-text);
-}
-
-.search-input {
-  border: none;
-  outline: none;
-  background: transparent;
-  font-size: 1rem;
-  color: #333;
-  width: 100%;
-  min-width: 0;
-}
-
-.dark .search-input {
-  color: var(--primary-text);
-}
-
-.search-input::placeholder {
-  color: #b8a4e3;
-  opacity: 1;
-}
-
-.dark .search-input::placeholder {
-  color: var(--primary-text);
-}
 
 .stats-grid {
   display: grid;
@@ -784,7 +918,7 @@ export default {
 
 .charts-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
 }
 
@@ -793,7 +927,8 @@ export default {
   background: white;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   padding: 1.5rem;
-  min-height: 400px;
+  min-height: 350px;
+  width: 100%;
 }
 
 .dark .chart-card {
@@ -827,7 +962,7 @@ export default {
 .chart-wrapper {
   position: relative;
   width: 100%;
-  height: clamp(140px, 28vh, 210px);
+  height: clamp(160px, 25vh, 200px);
   background: #ede7f6;
   border-radius: 0.75rem;
   overflow: hidden;
@@ -951,6 +1086,34 @@ export default {
   }
 }
 
+.monthly-line {
+  fill: none;
+  stroke: #4ade80;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: url(#monthlyGlow);
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: draw-line 1.5s ease-out 0.3s forwards;
+}
+
+.dark .monthly-line {
+  stroke: #4ade80;
+}
+
+.monthly-area {
+  fill: url(#monthlyGradient);
+  opacity: 0.3;
+  transform: translateY(100%);
+  transition: transform 0.8s ease-out;
+  animation: area-fill 1s ease-out 0.5s forwards;
+}
+
+.dark .monthly-area {
+  fill: url(#monthlyGradient);
+}
+
 .data-point {
   fill: #7c6bb0;
   stroke: #fff;
@@ -967,6 +1130,25 @@ export default {
 .data-point:hover {
   transform: scale(1.3);
   fill: #5a4a8c;
+  stroke-width: 3;
+}
+
+.monthly-point {
+  fill: #4ade80;
+  stroke: #fff;
+  stroke-width: 2;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.dark .monthly-point {
+  fill: #4ade80;
+  stroke: var(--primary-text-dark);
+}
+
+.monthly-point:hover {
+  transform: scale(1.3);
+  fill: #22c55e;
   stroke-width: 3;
 }
 
@@ -1044,6 +1226,10 @@ export default {
 
 .legend-dot.previous {
   background: #b8a4e3;
+}
+
+.legend-dot.monthly-dot {
+  background: #4ade80;
 }
 
 .legend-bar {
@@ -1179,11 +1365,17 @@ export default {
 /* Responsive Design */
 @media (max-width: 1200px) {
   .charts-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
   }
   
   .chart-card {
     min-height: 350px;
+  }
+}
+
+@media (max-width: 1000px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -1201,25 +1393,16 @@ export default {
     margin-top: 30px; /* Space for horizontal sidebar */
   }
   
-  .title-search-row {
+  .title-row {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
   }
   
-  .filter-search-bar {
-    width: 100%;
-    flex-direction: column;
-    height: auto;
-    padding: 1rem;
-    min-width: auto;
+  .charts-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
   }
-  
-  .search-wrapper {
-    width: 100%;
-    min-width: auto;
-  }
-  
   
   .stats-grid {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

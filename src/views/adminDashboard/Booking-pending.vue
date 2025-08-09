@@ -41,14 +41,14 @@
             </thead>
             <tbody>
               <tr v-for="(booking, index) in paginatedBookings" :key="booking.id" class="table-row">
-                <td>{{ booking.userName }}</td>
-                <td>{{ booking.userEmail }}</td>
-                <td>{{ booking.technicianName || booking.technicianId }}</td>
-                <td>{{ booking.specialization }}</td>
-                <td>{{ booking.date }}</td>
-                <td>{{ booking.time }}</td>
-                <td>{{ booking.address }}</td>
-                <td>{{ booking.price }}</td>
+                <td>{{ booking.userName || 'N/A' }}</td>
+                <td>{{ booking.userEmail || 'N/A' }}</td>
+                <td>{{ booking.technicianName || 'N/A' }}</td>
+                <td>{{ booking.specialization || 'N/A' }}</td>
+                <td>{{ booking.date || 'N/A' }}</td>
+                <td>{{ booking.time || 'N/A' }}</td>
+                <td>{{ booking.address || 'N/A' }}</td>
+                <td>{{ booking.price || 'N/A' }}</td>
                 <td><span class="status-pending">{{ $t('pending') }}</span></td>
               </tr>
             </tbody>
@@ -124,6 +124,7 @@ export default {
         const snapshot = await getDocs(collection(db, 'bookings'));
         const now = new Date();
         const pending = [];
+        
         for (const docSnap of snapshot.docs) {
           const booking = { id: docSnap.id, ...docSnap.data() };
           if (booking.status && booking.status.toLowerCase() === 'pending') {
@@ -145,6 +146,24 @@ export default {
               // Move to completed
               await updateDoc(doc(db, 'bookings', booking.id), { status: 'completed' });
             } else {
+              // Fetch technician information to get specialization
+              if (booking.technicianId) {
+                try {
+                  const technicianDoc = await getDocs(collection(db, 'technicians'));
+                  const technician = technicianDoc.docs.find(doc => doc.id === booking.technicianId);
+                  if (technician) {
+                    booking.specialization = technician.data().specialization || 'N/A';
+                    booking.technicianName = technician.data().name || booking.technicianId;
+                  } else {
+                    booking.specialization = 'N/A';
+                  }
+                } catch (error) {
+                  console.error('Error fetching technician data:', error);
+                  booking.specialization = 'N/A';
+                }
+              } else {
+                booking.specialization = 'N/A';
+              }
               pending.push(booking);
             }
           }
@@ -152,6 +171,7 @@ export default {
         this.bookings = pending;
       } catch (e) {
         this.error = 'Failed to fetch bookings';
+        console.error('Error fetching bookings:', e);
       } finally {
         this.loading = false;
       }
@@ -388,6 +408,9 @@ export default {
   padding: 0.75rem 1rem;
   font-size: 0.9rem;
   color: #333;
+  max-width: 200px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 .dark .table-row {
   background-color: var(--input-bg);
@@ -401,6 +424,8 @@ export default {
   font-size: 0.75rem;
   font-weight: 600;
 }
+
+
 
 /* Mobile Responsive Styles */
 @media (max-width: 768px) {
@@ -416,6 +441,8 @@ export default {
     padding: 0.5rem;
     margin: 20px;
   }
+  
+
 }
 
 @media (max-width: 480px) {
