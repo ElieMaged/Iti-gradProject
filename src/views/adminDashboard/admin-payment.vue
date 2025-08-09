@@ -6,53 +6,45 @@
       <div class="dashboard-container">
         
         
-        <!-- Payment Summary Cards -->
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-header">
-              <i class="fas fa-wallet stat-icon"></i>
-              <span class="stat-number">{{ totalAmount }} EGP</span>
-            </div>
-            <div class="stat-title">{{ $t('totalRevenue') }}</div>
-          </div>
-          
-          <div class="stat-card">
-            <div class="stat-header">
-              <i class="fas fa-coins stat-icon"></i>
-              <span class="stat-number">{{ totalApprovedCredits }} EGP</span>
-            </div>
-            <div class="stat-title">{{ $t('totalApprovedCredits') }}</div>
-          </div>
-          
-          <div class="stat-card">
-            <div class="stat-header">
-              <i class="fas fa-clock stat-icon"></i>
-              <span class="stat-number">{{ pendingTransactions.length }}</span>
-            </div>
-            <div class="stat-title">{{ $t('pendingTransactions') }}</div>
-          </div>
-          
-          <div class="stat-card">
-            <div class="stat-header">
-              <i class="fas fa-check-circle stat-icon"></i>
-              <span class="stat-number">{{ approvedTransactions.length }}</span>
-            </div>
-            <div class="stat-title">{{ $t('approvedTransactions') }}</div>
-          </div>
-          
-          <div class="stat-card">
-            <div class="stat-header">
-              <i class="fas fa-times-circle stat-icon"></i>
-              <span class="stat-number">{{ rejectedTransactions.length }}</span>
-            </div>
-            <div class="stat-title">{{ $t('rejectedTransactions') }}</div>
-          </div>
-        </div>
+                 <!-- Payment Summary Cards -->
+         <div class="stats-grid">
+           <div class="stat-card">
+             <div class="stat-header">
+               <i class="fas fa-coins stat-icon"></i>
+               <span class="stat-number">{{ totalApprovedCredits }} EGP</span>
+             </div>
+             <div class="stat-title">{{ $t('totalApprovedCredits') }}</div>
+           </div>
+           
+           <div class="stat-card">
+             <div class="stat-header">
+               <i class="fas fa-clock stat-icon"></i>
+               <span class="stat-number">{{ pendingTransactions.length }}</span>
+             </div>
+             <div class="stat-title">{{ $t('pendingTransactions') }}</div>
+           </div>
+           
+           <div class="stat-card">
+             <div class="stat-header">
+               <i class="fas fa-check-circle stat-icon"></i>
+               <span class="stat-number">{{ approvedTransactions.length }}</span>
+             </div>
+             <div class="stat-title">{{ $t('approvedTransactions') }}</div>
+           </div>
+           
+           <div class="stat-card">
+             <div class="stat-header">
+               <i class="fas fa-times-circle stat-icon"></i>
+               <span class="stat-number">{{ rejectedTransactions.length }}</span>
+             </div>
+             <div class="stat-title">{{ $t('rejectedTransactions') }}</div>
+           </div>
+         </div>
 
-        <!-- PayPal Payout Section -->
+        <!-- Bank Account Transfer Section -->
         <div class="payout-section">
           <div class="section-header">
-            <h3>{{ $t('paypalPayoutToTechnician') }}</h3>
+            <h3>{{ $t('bankAccountTransferToTechnician') }}</h3>
             <div class="available-credits">
               <i class="fas fa-coins"></i>
               <span>{{ $t('availableCredits') }}: {{ totalApprovedCredits }} EGP</span>
@@ -93,7 +85,7 @@
               </div>
               
               <div class="form-group">
-                <label for="payoutReason">{{ $t('reason') }} ({{ $t('optional') }})</label>
+                <label for="payoutReason">Bank Account Number</label>
                 <input 
                   id="payoutReason" 
                   type="text" 
@@ -103,14 +95,10 @@
               </div>
             </div>
             
-            <div class="payout-summary" v-if="payoutAmount && selectedTechnician">
+            <div class="payout-summary" v-if="payoutAmount && selectedTechnician && parseFloat(payoutAmount) > 0">
               <div class="summary-item">
                 <span>{{ $t('amount') }}:</span>
                 <span>{{ payoutAmount }} EGP</span>
-              </div>
-              <div class="summary-item">
-                <span>{{ $t('paypalFee') }}:</span>
-                <span>{{ paypalFee }} EGP</span>
               </div>
               <div class="summary-item total">
                 <span>{{ $t('totalDeduction') }}:</span>
@@ -129,9 +117,8 @@
                 :disabled="!canPayout || payoutLoading"
                 :class="{ 'loading': payoutLoading }"
               >
-                <i v-if="!payoutLoading" class="fab fa-paypal"></i>
-                <i v-else class="fas fa-spinner fa-spin"></i>
-                {{ payoutLoading ? $t('processing') : $t('sendPaypalPayout') }}
+                <i v-if="payoutLoading" class="fas fa-spinner fa-spin"></i>
+                {{ payoutLoading ? $t('processing') : $t('sendToBankAccount') }}
               </button>
             </div>
           </div>
@@ -153,10 +140,10 @@
               <thead>
                 <tr>
                   <th>Date</th>
-                  <th>PayPal Order ID</th>
-                  <th>Total Amount</th>
-                  <th>Platform Fee (25%)</th>
-                  <th>Technician Payment (75%)</th>
+                  <th>Order ID</th>
+                  <th>Total Amount (EGP)</th>
+                  <th>Platform Fee (25%) (EGP)</th>
+                  <th>Technician Payment (75%) (EGP)</th>
                   <th>Platform Account</th>
                   <th>Technician Account</th>
                   <th>Status</th>
@@ -166,12 +153,12 @@
               <tbody>
                 <tr v-for="split in paymentSplits" :key="split.id">
                   <td>{{ formatDate(split.createdAt) }}</td>
-                  <td class="order-id">{{ split.paypalOrderId }}</td>
-                  <td>{{ split.totalAmountUSD }} USD</td>
-                  <td>{{ split.platformFeeUSD }} USD</td>
-                  <td>{{ split.technicianAmountUSD }} USD</td>
-                  <td>{{ split.platformAccount }}</td>
-                  <td>{{ split.technicianAccount }}</td>
+                  <td class="order-id">{{ split.paypalOrderId || split.bookingId }}</td>
+                  <td>{{ split.totalAmountEGP ? parseFloat(split.totalAmountEGP).toFixed(2) : (split.totalAmount ? parseFloat(split.totalAmount).toFixed(2) : '0.00') }} EGP</td>
+                  <td>{{ split.platformFeeEGP ? parseFloat(split.platformFeeEGP).toFixed(2) : (split.adminAmount ? parseFloat(split.adminAmount).toFixed(2) : '0.00') }} EGP</td>
+                  <td>{{ split.technicianAmountEGP ? parseFloat(split.technicianAmountEGP).toFixed(2) : (split.technicianAmount ? parseFloat(split.technicianAmount).toFixed(2) : '0.00') }} EGP</td>
+                  <td>{{ split.platformAccount || 'Platform' }}</td>
+                  <td>{{ split.technicianAccount || split.technicianName || 'Unknown' }}</td>
                   <td>
                     <span class="status-badge" :class="getSplitStatusClass(split.status)">
                       {{ split.status }}
@@ -182,8 +169,8 @@
                       <button class="execute-btn" @click="executePayout(split.id)">
                         <i class="fas fa-play"></i> Execute
                       </button>
-                      <button class="simulate-btn" @click="simulatePayPalPayout(split.id)">
-                        <i class="fab fa-paypal"></i> Simulate PayPal
+                      <button class="simulate-btn" @click="simulateBankTransfer(split.id)">
+                        <i class="fas fa-exchange-alt"></i> Simulate Transfer
                       </button>
                     </div>
                     <div v-else class="action-info">
@@ -321,8 +308,7 @@ const paypalFee = computed(() => {
 const totalDeduction = computed(() => {
   if (!payoutAmount.value) return 0
   const amount = parseFloat(payoutAmount.value)
-  const fee = parseFloat(paypalFee.value)
-  return (amount + fee).toFixed(2)
+  return amount.toFixed(2)
 })
 
 const remainingCredits = computed(() => {
@@ -522,7 +508,6 @@ async function initiatePayout() {
       technicianEmail: technician.email || 'No email',
       amount: parseFloat(payoutAmount.value),
       currency: 'EGP',
-      paypalFee: parseFloat(paypalFee.value),
       totalDeduction: parseFloat(totalDeduction.value),
       reason: payoutReason.value || 'Admin payout',
       status: 'pending',
@@ -541,7 +526,7 @@ async function initiatePayout() {
       currency: 'EGP',
       credits: parseFloat(totalDeduction.value),
       status: 'pending',
-      reason: `PayPal payout to ${technician.fullName || technician.name || 'Unknown Technician'}`,
+      reason: `Bank transfer to ${technician.fullName || technician.name || 'Unknown Technician'}`,
       technicianId: selectedTechnician.value,
       technicianName: technician.fullName || technician.name || 'Unknown Technician',
       adminActionBy: auth.currentUser?.email || 'Admin',

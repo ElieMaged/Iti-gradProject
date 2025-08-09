@@ -22,6 +22,7 @@
             @update:filter="onFilter"
             @update:sort="onSort"
             @update:search="onSearch"
+            @update:location="onLocationChange"
           />
           <div class="breadcrumbs">
             <span>{{ $t('home') }}</span>
@@ -57,7 +58,7 @@
                 </div>
                 <div class="detail-item location-item">
                   <i class="fa-solid fa-location-dot"></i>
-                  <span>{{ technician.area || technician.location || 'Cairo' }}</span>
+                  <span>{{ getLocationDisplay(technician) }}</span>
                 </div>
                 <div class="detail-item price-item">
                   <i class="fa-solid fa-dollar-sign"></i>
@@ -95,6 +96,7 @@ const firebaseTechnicians = ref([])
 const searchQuery = ref('')
 const filterOption = ref('')
 const sortOption = ref('')
+const locationFilter = ref({ government: '', district: '' })
 
 async function fetchTechnicians() {
   const querySnapshot = await getDocs(collection(db, 'technicians'))
@@ -125,6 +127,22 @@ const filteredTechnicians = computed(() => {
   if (query) {
     list = list.filter(t => t.name && t.name.toLowerCase().includes(query))
   }
+  
+  // Location filtering - exact matching for government and district
+  if (locationFilter.value.government && locationFilter.value.government !== '') {
+    list = list.filter(t => {
+      const techGovernment = t.government || t.location || '';
+      return techGovernment.toLowerCase() === locationFilter.value.government.toLowerCase();
+    });
+  }
+  
+  if (locationFilter.value.district && locationFilter.value.district !== '') {
+    list = list.filter(t => {
+      const techDistrict = t.district || t.area || '';
+      return techDistrict.toLowerCase() === locationFilter.value.district.toLowerCase();
+    });
+  }
+  
   if (filterOption.value === 'price') {
     list = list.filter(t => t.price)
   } else if (filterOption.value === 'area') {
@@ -152,6 +170,9 @@ function onFilter(option) {
 }
 function onSort(option) {
   sortOption.value = option
+}
+function onLocationChange(location) {
+  locationFilter.value = location
 }
 
 
@@ -187,6 +208,17 @@ const heroBackgroundStyle = computed(() => {
     width: '100%'
   }
 })
+
+function getLocationDisplay(technician) {
+  if (technician.government && technician.district) {
+    return `${technician.government}, ${technician.district}`;
+  } else if (technician.government) {
+    return technician.government;
+  } else if (technician.location) {
+    return technician.location;
+  }
+  return 'Cairo'; // Default if no location data
+}
 </script>
 
 <style scoped>
