@@ -94,6 +94,7 @@ export default {
   min-height: 100vh;
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
   background: #faf8fd;
+  margin-left: 14rem;
 }
 .dark .admin-dashboard-layout {
   background: var(--primary-bg);
@@ -248,7 +249,7 @@ export default {
 
 .table-header th {
   padding: 0.75rem 1rem;
-  text-align: left;
+  text-align: center;
   font-weight: 600;
   font-size: 0.9rem;
 }
@@ -270,9 +271,33 @@ export default {
 }
 
 .table-row td {
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 0.5rem;
   font-size: 0.9rem;
   color: #333;
+  vertical-align: middle;
+  text-align: center;
+}
+
+/* Vertical borders between columns */
+.booking-table th,
+.booking-table td {
+  border-right: 1px solid #e5e7eb;
+}
+.booking-table th:last-child,
+.booking-table td:last-child {
+  border-right: none;
+}
+.dark .booking-table th,
+.dark .booking-table td {
+  border-right-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Zebra striping for better scanability */
+.table-row:nth-child(even) {
+  background: #faf5ff; /* subtle lavender */
+}
+.dark .table-row:nth-child(even) {
+  background: rgba(255,255,255,0.04);
 }
 
 .status-completed {

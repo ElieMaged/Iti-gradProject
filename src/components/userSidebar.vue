@@ -17,14 +17,6 @@
         <span>{{ $t('settings') }}</span>
       </a>
 
-      <a href="/previous-services" 
-         class="sidebar-item" 
-         :class="{ active: activeTab === 'history' }"
-         @click="handleNavigation">
-        <i class="fas fa-calendar-check"></i>
-        <span>{{ $t('history') }}</span>
-      </a>
-
       <a href="/user-bookings" 
          class="sidebar-item" 
          :class="{ active: activeTab === 'bookings' }"
@@ -101,12 +93,10 @@ body {
   display: flex;
   min-height: 100vh;
   padding-left: 80px;
-  padding-right: 20px;
 }
 
 .sidebar {
-  width: 14rem;
-  background-color: var(--sidebar);
+  width: 10rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -114,17 +104,15 @@ body {
   border-radius: 16px;
   height: 40vh;
   margin-top: 2rem ;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 .dark .sidebar {
-  background: var(--sidebar);
   color: var(--text-main);
 }
 
 .sidebar-item {
   width: 100%;
-  padding: 1rem 2rem;
+  padding: 1rem 1rem;
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -138,6 +126,7 @@ body {
   background: none;
   font-family: inherit;
   border-radius: 12px;
+  color: var(--text-main);
 }
 
 .dark .sidebar-item {
@@ -145,21 +134,17 @@ body {
 }
 
 .sidebar-item:hover {
-  background-color: var(--secondary);
-  color: white;
+  color: var(--secondary);
 }
 
 .sidebar-item.active {
-  background-color: var(--secondary);
-  color: white;
+  color: var(--secondary);
 }
 .dark .sidebar-item.active {
-  background-color: #c5b7e6;
-  color: var(--primary-text-dark);
+  color: var(--primary-color);
 }
 .dark .sidebar-item:hover {
-  background-color: #c5b7e6;
-  color: var(--primary-text-dark);
+  color: var(--primary-color);
 }
 
 

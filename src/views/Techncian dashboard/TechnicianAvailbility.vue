@@ -8,7 +8,7 @@
             
             />
             <!-- Main Content -->
-            <div class="flex-1">
+            <div class="flex-1 main-layout">
                 <div class=" mx-12 p-4">
                     <TopBar :title="$t('availabilityTitle')" />
                     
@@ -412,6 +412,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.main-layout{
+  margin-left: 14rem;
+  background-color: #faf8fd;
+}
 .body{
   background-color: var(--primary-bg);
 }

@@ -180,10 +180,15 @@ body {
   flex-direction: column;
   align-items: center;
   padding-top: 2rem;
-  height: auto;
+  height: 100vh;
   border-right: 1px solid rgba(0, 0, 0, 0.06);
   box-shadow: 2px 0 12px rgba(0, 0, 0, 0.06);
   overflow-y: auto;
+  min-height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
 }
 
 .dark .sidebar {

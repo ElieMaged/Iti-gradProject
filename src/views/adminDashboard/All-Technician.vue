@@ -226,6 +226,7 @@ export default {
   min-height: 100vh;
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
   background: #faf8fd;
+  margin-left: 14rem;
 }
 .dark .admin-dashboard-layout {
   background: var(--primary-bg);
@@ -277,10 +278,6 @@ export default {
 }
 .dark .technicians-main {
   background-color: var(--primary-bg);
-}
-.technicians-container {
-  max-width: 80rem;
-  margin: 0 auto;
 }
 .dark .technicians-container {
   background-color: var(--primary-bg);
@@ -471,7 +468,7 @@ export default {
 }
 .table-header th {
   padding: 0.75rem 1rem;
-  text-align: left;
+  text-align: center;
   font-weight: 600;
   font-size: 0.9rem;
 }
@@ -495,6 +492,8 @@ export default {
   padding: 0.75rem 1rem;
   font-size: 0.9rem;
   color: #333;
+  text-align: center;
+  vertical-align: middle;
 }
 .dark .table-row td {
   color: var(--text-muted);

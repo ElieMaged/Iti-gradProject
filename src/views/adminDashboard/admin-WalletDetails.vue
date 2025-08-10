@@ -171,6 +171,7 @@ export default {
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
   background: #faf8fd;
   overflow-x: hidden;
+  margin-left: 14rem;
 }
 
 .wallet-main {

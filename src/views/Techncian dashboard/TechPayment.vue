@@ -4,7 +4,7 @@
             :activeMenu="activeMenu"
             @navigate="handleSidebarNavigate"
         />
-    <div class="payment-content p-4 mr-20">
+    <div class="payment-content p-4 mx-12">
       <div class="page-header">
         <h1 class="page-title">{{ $t('payment') }}</h1>
         <button class="refresh-btn" @click="refreshData" :disabled="loading">
@@ -330,6 +330,9 @@ export default {
 .main-content {
   display: flex;
   min-height: 100vh;
+  
+  margin-left: 14rem;
+  background-color: #faf8fd;
 }
 
 .payment-content {

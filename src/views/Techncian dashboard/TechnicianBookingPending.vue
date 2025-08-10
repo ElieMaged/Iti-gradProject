@@ -3,7 +3,7 @@
     <!-- Sidebar -->
     <Sidebar :activeMenu="'booking'" :activeBookingStatus="'pending'" @navigate="handleSidebarNavigate" />
     <!-- Main Content -->
-    <div class="flex-1 ">
+    <div class="flex-1 main-layout ">
       <div class="technician-dashboard-layout p-4 mx-12">
         <div class="booking-main">
           <div class="booking-container">
@@ -618,6 +618,10 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.main-layout {
+  margin-left: 14rem;
+  background-color: #faf8fd;
+}
 .admin-dashboard-layout {
   min-height: 100vh;
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;

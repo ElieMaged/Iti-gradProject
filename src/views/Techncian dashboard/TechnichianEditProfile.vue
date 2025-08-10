@@ -266,6 +266,7 @@ onMounted(() => {
   min-height: auto;
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
   background: #faf8fd;
+  margin-left: 14rem;
 }
 .dark .admin-dashboard-layout {
   background: var(--primary-bg);

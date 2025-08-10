@@ -172,6 +172,7 @@ export default {
   min-height: 100vh;
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
   background: #faf8fd;
+  margin-left: 14rem; /* reserve space for fixed sidebar */
 }
 .pending-tech-profile-main {
   flex: 1;

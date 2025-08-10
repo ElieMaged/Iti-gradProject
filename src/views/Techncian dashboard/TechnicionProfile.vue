@@ -189,6 +189,7 @@ this.profileImageUrl = data.profilePhotoUrl || this.profileImageUrl;      } else
   min-height: 100vh;
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
   background: #faf8fd;
+  margin-left: 14rem;
 }
 
 .dark .admin-dashboard-layout {

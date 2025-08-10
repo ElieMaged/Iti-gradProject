@@ -38,7 +38,6 @@
                 <th>{{ $t('no') }}</th>
                 <th>{{ $t('user') }}</th>
                 <th>{{ $t('role') }}</th>
-                <th>{{ $t('specialization') }}</th>
                 <th>{{ $t('location') }}</th>
                 <th>{{ $t('mail') }}</th>
                 <th>{{ $t('contact') }}</th>
@@ -61,7 +60,6 @@
                     {{ $t(user.role) }}
                   </span>
                 </td>
-                <td>{{ user.specialization || 'N/A' }}</td>
                 <td>{{ user.location || 'N/A' }}</td>
                 <td>{{ user.email }}</td>
                 <td>{{ user.contact || 'N/A' }}</td>
@@ -288,6 +286,7 @@ export default {
   min-height: 100vh;
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
   background: #faf8fd;
+  margin-left: 14rem; /* reserve space for fixed sidebar */
   overflow-x: hidden;
 }
 .dark .admin-dashboard-layout {
@@ -419,7 +418,7 @@ export default {
 
 .table-header th {
   padding: 0.75rem 1rem;
-  text-align: left;
+  text-align: center;
   font-weight: 600;
   font-size: 0.9rem;
 }
@@ -441,6 +440,8 @@ export default {
   padding: 0.75rem 1rem;
   font-size: 0.9rem;
   color: #333;
+  text-align: center;
+  vertical-align: middle;
 }
 .dark .table-row td {
   color: var(--text-muted);

@@ -3,9 +3,7 @@
     <admin-sidebar />
     <div class="dashboard-main mx-12 p-4">
       <div class="dashboard-container">
-        <div class="title-row">
-          <h2 class="dashboard-title">{{ $t('adminDashboard') }}</h2>
-        </div>
+        <TopBar :title="$t('adminDashboard')" />
         <!-- Top Cards -->
         <div class="stats-grid">
           <!-- Realtime Insight -->
@@ -736,6 +734,7 @@ export default {
   min-height: 100vh;
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
   background: #f9fafb;
+  margin-left: 14rem; /* reserve space for fixed sidebar */
 }
 
 .dark .admin-dashboard-layout {
@@ -1380,6 +1379,7 @@ export default {
   
   .dashboard-main {
     margin-right: 0;
+    margin-left: 0; /* sidebar becomes stacked on small screens */
     padding: 0.5rem;
     margin-top: 30px; /* Space for horizontal sidebar */
   }
@@ -1444,6 +1444,7 @@ export default {
   }
   
   .dashboard-main {
+    margin-left: 0; /* ensure no left offset on very small screens */
     padding: 0.5rem;
   }
   
@@ -1519,6 +1520,7 @@ export default {
   .dashboard-main {
     padding: 0.5rem;
     margin: 20px;
+    margin-left: 0; /* override combined margin on ultra-small screens */
   }
   
   .dashboard-title {

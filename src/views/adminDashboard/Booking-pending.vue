@@ -29,7 +29,7 @@
             <thead>
               <tr class="table-header">
                 <th>{{ $t('userName') }}</th>
-                <th>{{ $t('userEmail') }}</th>
+                <th>{{ $t('phone') }}</th>
                 <th>{{ $t('technician') }}</th>
                 <th>{{ $t('specialization') }}</th>
                 <th>{{ $t('date') }}</th>
@@ -42,7 +42,7 @@
             <tbody>
               <tr v-for="(booking, index) in paginatedBookings" :key="booking.id" class="table-row">
                 <td>{{ booking.userName || 'N/A' }}</td>
-                <td>{{ booking.userEmail || 'N/A' }}</td>
+                <td>{{ booking.userPhone || 'N/A' }}</td>
                 <td>{{ booking.technicianName || 'N/A' }}</td>
                 <td>{{ booking.specialization || 'N/A' }}</td>
                 <td>{{ booking.date || 'N/A' }}</td>
@@ -153,7 +153,7 @@ export default {
                   const technician = technicianDoc.docs.find(doc => doc.id === booking.technicianId);
                   if (technician) {
                     booking.specialization = technician.data().specialization || 'N/A';
-                    booking.technicianName = technician.data().name || booking.technicianId;
+                    booking.technicianName = technician.data().fullName || booking.technicianId;
                   } else {
                     booking.specialization = 'N/A';
                   }
@@ -197,6 +197,7 @@ export default {
   min-height: 100vh;
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
   background: #faf8fd;
+  margin-left: 14rem;
 }
 .dark .admin-dashboard-layout {
   background: var(--primary-bg);
@@ -387,8 +388,8 @@ export default {
   color: var(--primary-text);
 }
 .table-header th {
-  padding: 0.75rem 1rem;
-  text-align: left;
+  padding: 0.5rem 0.25rem;
+  text-align: center;
   font-weight: 600;
   font-size: 0.9rem;
 }
@@ -405,12 +406,102 @@ export default {
 }
 
 .table-row td {
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 0.25rem 0.5rem 0.25rem ;
   font-size: 0.9rem;
   color: #333;
-  max-width: 200px;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
+  vertical-align: middle;
+  text-align: center;
+}
+
+/* Vertical borders between columns */
+.booking-table th,
+.booking-table td {
+  border-right: 1px solid #e5e7eb;
+}
+.booking-table th:last-child,
+.booking-table td:last-child {
+  border-right: none;
+}
+.dark .booking-table th,
+.dark .booking-table td {
+  border-right-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Zebra striping for better scanability */
+.table-row:nth-child(even) {
+  background: #faf5ff; /* subtle lavender */
+}
+.dark .table-row:nth-child(even) {
+  background: rgba(255,255,255,0.04);
+}
+
+/* Column sizing and alignment without changing markup */
+/* 1: User Name */
+.booking-table th:nth-child(1),
+.booking-table td:nth-child(1) {
+  width: 12ch;
+  max-width: 12ch;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/* 2: Email */
+.booking-table th:nth-child(2),
+.booking-table td:nth-child(2) {
+  width: 8ch; 
+  max-width: 8ch;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/* 3: Technician */
+.booking-table th:nth-child(3),
+.booking-table td:nth-child(3) {
+  width: 8ch;
+  max-width: 8ch;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/* 4: Specialization */
+.booking-table th:nth-child(4),
+.booking-table td:nth-child(4) {
+  width: 9ch;
+  max-width: 9ch;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/* 5: Date */
+.booking-table th:nth-child(5),
+.booking-table td:nth-child(5) {
+  width: 14ch;
+}
+/* 6: Time */
+.booking-table th:nth-child(6),
+.booking-table td:nth-child(6) {
+  width: 12ch;
+}
+/* 7: Address */
+.booking-table th:nth-child(7),
+.booking-table td:nth-child(7) {
+  width: 22ch;
+  max-width: 22ch;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/* 8: Price */
+.booking-table th:nth-child(8),
+.booking-table td:nth-child(8) {
+  width: 5ch;
+  text-align: center;
+}
+/* 9: Status */
+.booking-table th:nth-child(9),
+.booking-table td:nth-child(9) {
+  width: 8ch;
+  text-align: center;
 }
 .dark .table-row {
   background-color: var(--input-bg);

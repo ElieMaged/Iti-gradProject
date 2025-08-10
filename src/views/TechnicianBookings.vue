@@ -307,7 +307,7 @@ watch(() => route.query.status, (newStatus) => {
 
 .table-header th {
   padding: 0.75rem 1rem;
-  text-align: left;
+  text-align: center;
   font-weight: 600;
   font-size: 0.9rem;
 }
@@ -322,8 +322,9 @@ watch(() => route.query.status, (newStatus) => {
 }
 
 .table-row td {
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 0.5rem;
   font-size: 0.9rem;
+  text-align: center;
   color: #333;
 }
 

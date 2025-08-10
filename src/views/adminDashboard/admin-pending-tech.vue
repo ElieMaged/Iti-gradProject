@@ -461,7 +461,9 @@ export default {
   display: flex;
   min-height: 100vh;
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
+  margin-left: 14rem; /* reserve space for fixed sidebar */
   background: #faf8fd;
+
 }
 .dark .admin-dashboard-layout {
   background: var(--primary-bg);

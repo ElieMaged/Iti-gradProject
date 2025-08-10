@@ -26,12 +26,17 @@
           <div class="bookings-header">
             <h2>{{ $t('currentBookings') }} ({{ bookings.length }})</h2>
             <div class="filter-controls">
-              <select v-model="statusFilter" class="filter-select">
-                <option value="all">{{ $t('allBookings') }}</option>
-                <option value="pending">{{ $t('pending') }}</option>
-                <option value="upcoming">{{ $t('upcoming') }}</option>
-                <option value="completed">{{ $t('completed') }}</option>
-                <option value="cancelled">{{ $t('cancelled') }}</option>
+              <select
+                v-model="statusFilter"
+                class="filter-select"
+                aria-label="Filter bookings by status"
+                :title="$t('filterByStatus')"
+              >
+                <option value="all">{{ $t('allBookings') }} ({{ statusCounts.all }})</option>
+                <option value="pending">{{ $t('pending') }} ({{ statusCounts.pending }})</option>
+                <option value="upcoming">{{ $t('upcoming') }} ({{ statusCounts.upcoming }})</option>
+                <option value="completed">{{ $t('completed') }} ({{ statusCounts.completed }})</option>
+                <option value="cancelled">{{ $t('cancelled') }} ({{ statusCounts.cancelled }})</option>
               </select>
             </div>
           </div>
@@ -55,7 +60,7 @@
                 <td data-label="Date">{{ booking.date }}</td>
                 <td data-label="Time">{{ booking.time }}</td>
                 <td data-label="Address">{{ booking.address }}</td>
-                <td data-label="Price">{{ booking.price }} {{ $t('egp') }}</td>
+                <td data-label="Price">{{ booking.price }}</td>
                 <td data-label="Status">
                   <span :class="getStatusClass(booking.status)">
                     {{ getStatusTranslation(booking.status) }}
@@ -117,6 +122,23 @@ const filteredBookings = computed(() => {
     return bookings.value
   }
   return bookings.value.filter(booking => booking.status === statusFilter.value)
+})
+
+// Counts per status for enhanced dropdown labels
+const statusCounts = computed(() => {
+  const counts = {
+    all: bookings.value.length,
+    pending: 0,
+    upcoming: 0,
+    completed: 0,
+    cancelled: 0,
+  }
+  for (const b of bookings.value) {
+    if (b?.status && Object.prototype.hasOwnProperty.call(counts, b.status)) {
+      counts[b.status]++
+    }
+  }
+  return counts
 })
 
 // Methods
@@ -286,13 +308,13 @@ onMounted(() => {
 }
 
 .bookings-container {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
 }
 .dark .bookings-container {
-  background: var(--primary-bg);
+  background: transparent;
 }
 
 .bookings-header {
@@ -341,23 +363,32 @@ onMounted(() => {
   width: 100%;
   border-collapse: collapse;
   border-spacing: 0;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 0;
+  overflow: visible;
+  box-shadow: none;
+  background: transparent;
 }
 
 .table-header {
-  background-color: #f8f9fa;
+  background: rgba(124, 107, 176, 0.2);
   color: #333;
   font-weight: 600;
-  text-align: left;
+  text-align: center;
   padding: 1rem 1.5rem;
   border-bottom: 1px solid #e5e7eb;
+  border-radius: 12px;
 }
 
 .dark .table-header {
-  background: var(--secondary-bg);
+  background: rgba(124, 107, 176, 0.25);
   color: var(--text-main) !important;
+}
+
+/* Center header text like booking-pending */
+.table-header th {
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.9rem;
 }
 
 .dark .table-header th {
@@ -376,42 +407,136 @@ onMounted(() => {
 .table-row:last-child {
   border-bottom: none;
 }
+
+/* Add vertical borders between columns like booking-pending */
 .booking-table th,
 .booking-table td {
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
+  padding: 0.5rem;
+  border-right: 1px solid #e5e7eb;
+
+}
+
+.booking-table th:last-child,
+.booking-table td:last-child {
+  border-right: none;
 }
 
 
 .table-row:hover {
-  background-color: #f1f3f5;
+  background: #ede7f6;
 }
 .dark .table-row {
   background: var(--gray-200);
 }
 
+/* Zebra striping similar to booking-pending */
+.table-row:nth-child(even) {
+  background: #faf5ff;
+}
 
+/* Dark mode: match pending table aesthetics */
+.dark .table-wrapper {
+  background: transparent;
+  box-shadow: none;
+}
+
+.dark .booking-table {
+  background: transparent;
+}
+
+.dark .booking-table th,
+.dark .booking-table td {
+  border-right: 1px solid #3f3f46;
+}
+
+.dark .table-row:hover {
+  background: rgba(124, 107, 176, 0.15);
+}
+
+.dark .table-row:nth-child(even) {
+  background: rgba(124, 107, 176, 0.07);
+}
+
+/* Dark mode table text */
+.dark .table-row td,
+.dark .table-header th {
+  color: var(--text-main) !important;
+}
+
+/* Dark mode status pills - keep same palette for contrast */
+.dark .status-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+.dark .status-upcoming {
+  background: #dbeafe;
+  color: #bfdbfe; /* keep legible but we will override text to main */
+  color: #1e40af;
+}
+.dark .status-completed {
+  background: #d1fae5;
+  color: #065f46;
+}
+.dark .status-cancelled {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+
+/* Center cells and vertically middle align like booking-pending */
 .table-cell {
   padding: 0.75rem 1.5rem;
   color: #333;
   font-size: 0.9rem;
+  text-align: center;
+  vertical-align: middle;
 }
 
-.table-cell.status-pending {
+/* Ensure table body cells are centered and vertically aligned */
+.table-row td {
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* Pill status styles to mirror booking-pending */
+.status-pending {
+  background: #fef3c7;
   color: #92400e;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-block;
 }
 
-.table-cell.status-upcoming {
+.status-upcoming {
+  background: #dbeafe;
   color: #1e40af;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-block;
 }
 
-.table-cell.status-completed {
+.status-completed {
+  background: #d1fae5;
   color: #065f46;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-block;
 }
 
-.table-cell.status-cancelled {
+.status-cancelled {
+  background: #fee2e2;
   color: #991b1b;
-  opacity: 0.7;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-block;
 }
 
 .booking-actions {
@@ -421,15 +546,15 @@ onMounted(() => {
 }
 
 .cancel-btn, .book-again-btn, .view-profile-btn {
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 0.5rem;
   border: none;
-  border-radius: 6px;
+  border-radius: 25px;
   font-size: 0.75rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  width: 100px;
-  height: 30px;
+  width: 85px;
+  height: 25px;
   text-align: center;
   display: flex;
   align-items: center;

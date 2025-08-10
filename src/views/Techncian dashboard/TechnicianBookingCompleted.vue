@@ -3,8 +3,8 @@
     <!-- Sidebar -->
     <Sidebar :activeMenu="'booking'" :activeBookingStatus="'completed'" @navigate="handleSidebarNavigate" />
     <!-- Main Content -->
-    <div class="flex-1 p-4 mx-12">
-      <div class="admin-dashboard-layout">
+    <div class="flex-1 main-layout">
+      <div class="admin-dashboard-layout p-4 mx-12">
         <div class="booking-main">
           <div class="booking-container">
             <div class="title-search-row">
@@ -235,9 +235,14 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.main-layout {
+  margin-left: 14rem;
+  background-color: #faf8fd;
+}
 .admin-dashboard-layout {
   min-height: 100vh;
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
+
 }
 
 .dark .admin-dashboard-layout {
