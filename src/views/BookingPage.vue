@@ -1,5 +1,5 @@
 <template>
-  <div class="booking-page">
+  <div class="booking-page" :class="{ 'loading': isLoading }">
     <!-- Header -->
     <div class="header">
       <h1 class="page-title">{{ $t('completeYourBooking') }}</h1>
@@ -236,7 +236,7 @@
                   @input="formatExpiryDate"
                   @blur="validateExpiryDate"
                 />
-                <span v-if="cardErrors.expiryDate" class="error-message">{{ cardErrors.expiryDate }}</span>
+                <span v-if="cardErrors.expiryDate" class="field-error">{{ cardErrors.expiryDate }}</span>
               </div>
               
               <div class="form-group">
@@ -281,8 +281,15 @@
         </div>
         
         <!-- Confirm Booking Button -->
-        <button v-if="form.payment === 'Cash on Visit' || form.payment === 'Credit Card'" class="confirm-btn" type="submit">
-          {{ $t('confirmBooking') }}
+        <button 
+          v-if="form.payment === 'Cash on Visit' || form.payment === 'Credit Card'" 
+          class="confirm-btn"
+          :class="{ 'loading': isLoading }"
+          :disabled="isLoading"
+          type="submit"
+        >
+          <span v-if="!isLoading">{{ $t('confirmBooking') }}</span>
+          <span v-else>{{ $t('processingPayment') || 'Processing Payment...' }}</span>
         </button>
       </form>
     </div>
@@ -338,6 +345,9 @@ const cardErrors = ref({
 })
 
 const detectedCardType = ref('')
+
+// Loading state for booking confirmation
+const isLoading = ref(false)
 
 // Location data management
 const availableGovernorates = ref(getGovernmentNames())
@@ -853,46 +863,58 @@ async function confirmBooking() {
     return;
   }
 
+  // Set loading state for credit card payments
+  if (form.value.payment === 'Credit Card') {
+    isLoading.value = true;
+  }
+
   // Validate credit card if payment method is Credit Card
   if (form.value.payment === 'Credit Card') {
     if (!validateCreditCardForm()) {
       errorMsg.value = 'Please fix the credit card errors before proceeding.';
-    return;
-  }
+      isLoading.value = false; // Reset loading state on validation error
+      return;
+    }
   }
 
   // Validate that a date is selected
   if (!form.value.date || availableDates.value.length === 0) {
     errorMsg.value = 'Please select an available date for booking.';
+    isLoading.value = false;
     return;
   }
   
   // Validate that a time is selected
   if (!form.value.time || availableTimes.value.length === 0) {
     errorMsg.value = 'Please select an available time slot for booking.';
+    isLoading.value = false;
     return;
   }
 
   // Validate required fields before creating booking data
   if (!technician.value.uid && !technician.value.id) {
     errorMsg.value = 'Technician information is missing. Please try again.';
+    isLoading.value = false;
     return;
   }
 
   if (!auth.currentUser?.uid) {
     errorMsg.value = 'User authentication required. Please log in again.';
+    isLoading.value = false;
     return;
   }
 
   if (!form.value.fullName || !form.value.email || !form.value.phone) {
     errorMsg.value = 'Please fill in all required fields (name, email, phone).';
-      return;
-    }
+    isLoading.value = false;
+    return;
+  }
 
-            if (!form.value.date || !form.value.time) {
+  if (!form.value.date || !form.value.time) {
     errorMsg.value = 'Please select a date and time for your booking.';
-            return;
-          }
+    isLoading.value = false;
+    return;
+  }
           
   // Ensure all numeric values are valid numbers
   const basePrice = parseFloat((technician.value.visitPrice || technician.value.basePrice || '0').replace(/[^\d.]/g, '')) || 0;
@@ -980,6 +1002,15 @@ async function confirmBooking() {
     localStorage.setItem('bookingData', JSON.stringify(confirmationData));
     
     console.log('Booking completed successfully with payment splitting');
+    
+    // Add delay for credit card payments before navigation
+    if (form.value.payment === 'Credit Card') {
+      // Wait for 2 seconds before navigating
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
+    
+    // Reset loading state and navigate
+    isLoading.value = false;
     router.push('/bookingconfirmation');
   } catch (e) {
     console.error('Booking Firestore error:', e);
@@ -988,6 +1019,9 @@ async function confirmBooking() {
       message: e.message,
       stack: e.stack
     });
+    
+    // Reset loading state on error
+    isLoading.value = false;
     
     // Provide more specific error messages
     if (e.code === 'permission-denied') {
@@ -1968,6 +2002,26 @@ watch(() => technician.value, (newTechnician) => {
   background: #6b5fa7;
 }
 
+.confirm-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.confirm-btn.loading {
+  cursor: wait;
+  opacity: 0.8;
+}
+
+/* Loading cursor for the entire page during booking */
+.booking-page.loading {
+  cursor: wait;
+}
+
+.booking-page.loading * {
+  cursor: wait !important;
+}
+
 /* Error styling */
 .error {
   border-color: #dc2626 !important;
@@ -1978,6 +2032,13 @@ watch(() => technician.value, (newTechnician) => {
   color: #dc2626;
   font-size: 0.875rem;
   margin-top: 0.25rem;
+}
+
+.field-error {
+  color: #dc2626;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: block;
 }
 
 /* Dark Mode Styles */
@@ -2005,6 +2066,10 @@ watch(() => technician.value, (newTechnician) => {
   background: #2d2323;
   color: #f87171;
   border-color: #f87171;
+}
+
+.dark .field-error {
+  color: #f87171;
 }
 
 .dark .progress-indicator {
@@ -2173,6 +2238,15 @@ watch(() => technician.value, (newTechnician) => {
 .dark .confirm-btn:hover {
   background: #7c6bb1;
   color: #fff;
+}
+
+.dark .confirm-btn:disabled {
+  background: #4b5563;
+  color: #9ca3af;
+}
+
+.dark .confirm-btn.loading {
+  opacity: 0.8;
 }
 
 /* Dark mode for map itself */
