@@ -9,8 +9,27 @@
             <input v-model="searchQuery" class="search-input" type="text" :placeholder="$t('search')" />
             <span class="search-icon"><i class="fas fa-search"></i></span>
           </div>
+          <div class="pagination-info" v-if="filteredBookings.length > 0">
+            <span class="info-text">
+              Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage, filteredBookings.length) }} of {{ filteredBookings.length }} bookings
+            </span>
+          </div>
         </div>
-        <div class="table-wrapper">
+        
+        <!-- Loading State -->
+        <div v-if="loading" class="loading-state">
+          <div class="loading-spinner"></div>
+          <p>Loading completed bookings...</p>
+        </div>
+
+        <!-- Error State -->
+        <div v-else-if="error" class="error-state">
+          <p class="error-message">{{ error }}</p>
+          <button @click="fetchBookings" class="retry-btn">Retry</button>
+        </div>
+
+        <!-- Bookings Table -->
+        <div v-else-if="filteredBookings.length > 0" class="table-wrapper">
           <table class="booking-table">
             <thead>
               <tr class="table-header">
@@ -25,7 +44,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(booking, index) in filteredBookings" :key="index" class="table-row">
+              <tr v-for="(booking, index) in paginatedBookings" :key="booking.id" class="table-row">
                 <td>{{ booking.userName }}</td>
                 <td>{{ booking.technicianName }}</td>
                 <td>{{ booking.specialization }}</td>
@@ -40,52 +59,97 @@
             </tbody>
           </table>
         </div>
-        <pagination />
+
+        <!-- Empty State -->
+        <div v-else class="empty-state">
+          <p>No completed bookings found.</p>
+        </div>
+        <pagination 
+          v-if="totalPages > 1"
+          :current-page="currentPage"
+          :total-pages="totalPages"
+          @page-changed="goToPage"
+          @prev-page="goToPage(currentPage - 1)"
+          @next-page="goToPage(currentPage + 1)"
+        />
       </div>
     </div>
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted, computed, watch } from 'vue';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { db } from '../../firebase';
 import AdminSidebar from '../../components/admin-sidebar.vue';
 import Pagination from '../../components/pagination.vue';
 import TopBar from '../../components/TopBar.vue';
 
-export default {
-  name: 'CompletedBooking',
-  components: {
-    AdminSidebar,
-    Pagination,
-    TopBar
-  },
-  data() {
-    return {
-      activeTab: 'completed',
-      searchQuery: '',
-      bookings: [
-        {
-          userName: 'Mohamed Ahmed',
-          technicianName: 'Samir Ahmed',
-          specialization: 'Carpenter',
-          date: '10 July 2025',
-          time: '4 - 5 pm',
-          address: '12 main street, Giza',
-          price: '300',
-          status: 'Completed',
-        },
-        // Repeat or fetch more items dynamically
-      ],
-    };
-  },
-  computed: {
-    filteredBookings() {
-      const q = this.searchQuery.toLowerCase();
-      return this.bookings.filter(b =>
-        Object.values(b).some(val => String(val).toLowerCase().includes(q))
-      );
-    },
-  },
-};
+// Reactive data
+const bookings = ref([]);
+const searchQuery = ref('');
+const currentPage = ref(1);
+const itemsPerPage = 10;
+const loading = ref(true);
+const error = ref(null);
+
+// Fetch bookings on mount
+onMounted(async () => {
+  await fetchBookings();
+});
+
+// Fetch completed bookings from Firestore
+async function fetchBookings() {
+  try {
+    loading.value = true;
+    error.value = null;
+    
+    const q = query(collection(db, 'bookings'), where('status', '==', 'completed'));
+    const querySnapshot = await getDocs(q);
+    
+    bookings.value = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    
+  } catch (error) {
+    console.error('Error fetching completed bookings:', error);
+    error.value = 'Failed to fetch completed bookings';
+  } finally {
+    loading.value = false;
+  }
+}
+
+// Pagination logic
+const filteredBookings = computed(() => {
+  if (!searchQuery.value.trim()) return bookings.value;
+  const q = searchQuery.value.toLowerCase();
+  return bookings.value.filter(b =>
+    Object.values(b).some(val => String(val).toLowerCase().includes(q))
+  );
+});
+
+const totalPages = computed(() => {
+  return Math.ceil(filteredBookings.value.length / itemsPerPage);
+});
+
+const paginatedBookings = computed(() => {
+  const startIndex = (currentPage.value - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  return filteredBookings.value.slice(startIndex, endIndex);
+});
+
+// Navigation functions
+function goToPage(page) {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+  }
+}
+
+// Watch for search query changes to reset pagination
+watch(searchQuery, () => {
+  currentPage.value = 1;
+});
 </script>
 
 <style scoped>
@@ -216,6 +280,120 @@ export default {
 }
 .dark .search-icon {
   color: var(--icon-color);
+}
+
+.pagination-info {
+  display: flex;
+  align-items: center;
+}
+
+.info-text {
+  font-size: 0.9rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.dark .info-text {
+  color: var(--text-muted);
+}
+
+/* Loading State */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  background: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.dark .loading-state {
+  background-color: var(--grey-bg);
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #7c6bb0;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+.dark .loading-spinner {
+  border: 4px solid var(--grey-bg);
+  border-top: 4px solid var(--primary-text);
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error State */
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  background: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.dark .error-state {
+  background-color: var(--grey-bg);
+}
+
+.error-message {
+  color: #ef4444;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.retry-btn {
+  background: #7c6bb0;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.dark .retry-btn {
+  background-color: var(--primary-text);
+  color: var(--primary-bg);
+}
+
+.retry-btn:hover {
+  background: #6b5fa7;
+}
+
+.dark .retry-btn:hover {
+  background-color: var(--primary-text);
+  color: var(--primary-bg);
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  background: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.dark .empty-state {
+  background-color: var(--grey-bg);
 }
 
 .table-wrapper {

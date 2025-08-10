@@ -226,6 +226,9 @@ export default {
     };
   },
   async mounted() {
+    console.log('🎯 Technician Profile Component Mounted');
+    console.log('📍 Route params:', this.$route.params);
+    console.log('📍 Route path:', this.$route.path);
     await this.fetchTechnician();
   },
   methods: {
@@ -237,6 +240,12 @@ export default {
         const technicianId = this.$route.params.id;
         console.log('🔍 Fetching technician with ID:', technicianId);
         
+        if (!technicianId) {
+          console.error('❌ No technician ID in route params');
+          this.error = 'No technician ID provided';
+          return;
+        }
+        
         const technicianDoc = doc(db, 'technicians', technicianId);
         const technicianSnap = await getDoc(technicianDoc);
         
@@ -247,8 +256,9 @@ export default {
           };
           console.log('✅ Technician loaded:', this.technician);
         } else {
-          console.log('❌ Technician not found');
+          console.log('❌ Technician not found in Firestore');
           this.technician = null;
+          this.error = 'Technician not found';
         }
         
       } catch (error) {

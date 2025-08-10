@@ -41,6 +41,79 @@
            </div>
          </div>
 
+        <!-- Payment Splits Section -->
+        <div class="payment-splits-section">
+          <div class="section-header">
+            <h3>Payment Splits</h3>
+            <div class="split-stats">
+              <span>Total Splits: {{ paymentSplits.length }}</span>
+              <span>Pending: {{ pendingSplits.length }}</span>
+              <span>Completed: {{ completedSplits.length }}</span>
+            </div>
+          </div>
+          
+          <div class="splits-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Order ID</th>
+                  <th>Total Amount (EGP)</th>
+                  <th>Platform Fee (25%) (EGP)</th>
+                  <th>Technician Payment (75%) (EGP)</th>
+                  <th>Platform Account</th>
+                  <th>Technician Account</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="split in paginatedPaymentSplits" :key="split.id">
+                  <td>{{ formatDate(split.createdAt) }}</td>
+                  <td class="order-id">{{ split.paypalOrderId || split.bookingId }}</td>
+                  <td>{{ split.totalAmountEGP ? parseFloat(split.totalAmountEGP).toFixed(2) : (split.totalAmount ? parseFloat(split.totalAmount).toFixed(2) : '0.00') }} EGP</td>
+                  <td>{{ split.platformFeeEGP ? parseFloat(split.platformFeeEGP).toFixed(2) : (split.adminAmount ? parseFloat(split.adminAmount).toFixed(2) : '0.00') }} EGP</td>
+                  <td>{{ split.technicianAmountEGP ? parseFloat(split.technicianAmountEGP).toFixed(2) : (split.technicianAmount ? parseFloat(split.technicianAmount).toFixed(2) : '0.00') }} EGP</td>
+                  <td>{{ split.platformAccount || 'Platform' }}</td>
+                  <td>{{ split.technicianAccount || split.technicianName || 'Unknown' }}</td>
+                  <td>
+                    <span class="status-badge" :class="getSplitStatusClass(split.status)">
+                      {{ split.status }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="action-buttons" v-if="split.status === 'pending'">
+                      <button class="execute-btn" @click="executePayout(split.id)">
+                        <i class="fas fa-play"></i> Execute
+                      </button>
+                      <button class="simulate-btn" @click="simulateBankTransfer(split.id)">
+                        <i class="fas fa-exchange-alt"></i> Simulate Transfer
+                      </button>
+                    </div>
+                    <div v-else class="action-info">
+                      {{ split.status === 'completed' ? 'Completed' : 'Processing' }}
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <!-- Pagination for Payment Splits -->
+          <div v-if="splitsTotalPages > 1" class="pagination-container">
+            <div class="pagination-info">
+              Showing {{ (splitsCurrentPage - 1) * splitsItemsPerPage + 1 }} - 
+              {{ Math.min(splitsCurrentPage * splitsItemsPerPage, paymentSplits.length) }} 
+              of {{ paymentSplits.length }} payment splits
+            </div>
+            <Pagination 
+              :total-pages="splitsTotalPages"
+              :initial-page="splitsCurrentPage"
+              @page-changed="handleSplitsPageChange"
+            />
+          </div>
+        </div>
+
         <!-- Bank Account Transfer Section -->
         <div class="payout-section">
           <div class="section-header">
@@ -133,79 +206,6 @@
                 {{ payoutLoading ? $t('processing') : $t('sendToBankAccount') }}
               </button>
             </div>
-          </div>
-        </div>
-
-        <!-- Payment Splits Section -->
-        <div class="payment-splits-section">
-          <div class="section-header">
-            <h3>Payment Splits</h3>
-            <div class="split-stats">
-              <span>Total Splits: {{ paymentSplits.length }}</span>
-              <span>Pending: {{ pendingSplits.length }}</span>
-              <span>Completed: {{ completedSplits.length }}</span>
-            </div>
-          </div>
-          
-          <div class="splits-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Order ID</th>
-                  <th>Total Amount (EGP)</th>
-                  <th>Platform Fee (25%) (EGP)</th>
-                  <th>Technician Payment (75%) (EGP)</th>
-                  <th>Platform Account</th>
-                  <th>Technician Account</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="split in paginatedPaymentSplits" :key="split.id">
-                  <td>{{ formatDate(split.createdAt) }}</td>
-                  <td class="order-id">{{ split.paypalOrderId || split.bookingId }}</td>
-                  <td>{{ split.totalAmountEGP ? parseFloat(split.totalAmountEGP).toFixed(2) : (split.totalAmount ? parseFloat(split.totalAmount).toFixed(2) : '0.00') }} EGP</td>
-                  <td>{{ split.platformFeeEGP ? parseFloat(split.platformFeeEGP).toFixed(2) : (split.adminAmount ? parseFloat(split.adminAmount).toFixed(2) : '0.00') }} EGP</td>
-                  <td>{{ split.technicianAmountEGP ? parseFloat(split.technicianAmountEGP).toFixed(2) : (split.technicianAmount ? parseFloat(split.technicianAmount).toFixed(2) : '0.00') }} EGP</td>
-                  <td>{{ split.platformAccount || 'Platform' }}</td>
-                  <td>{{ split.technicianAccount || split.technicianName || 'Unknown' }}</td>
-                  <td>
-                    <span class="status-badge" :class="getSplitStatusClass(split.status)">
-                      {{ split.status }}
-                    </span>
-                  </td>
-                  <td>
-                    <div class="action-buttons" v-if="split.status === 'pending'">
-                      <button class="execute-btn" @click="executePayout(split.id)">
-                        <i class="fas fa-play"></i> Execute
-                      </button>
-                      <button class="simulate-btn" @click="simulateBankTransfer(split.id)">
-                        <i class="fas fa-exchange-alt"></i> Simulate Transfer
-                      </button>
-                    </div>
-                    <div v-else class="action-info">
-                      {{ split.status === 'completed' ? 'Completed' : 'Processing' }}
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          
-          <!-- Pagination for Payment Splits -->
-          <div v-if="splitsTotalPages > 1" class="pagination-container">
-            <div class="pagination-info">
-              Showing {{ (splitsCurrentPage - 1) * splitsItemsPerPage + 1 }} - 
-              {{ Math.min(splitsCurrentPage * splitsItemsPerPage, paymentSplits.length) }} 
-              of {{ paymentSplits.length }} payment splits
-            </div>
-            <Pagination 
-              :total-pages="splitsTotalPages"
-              :initial-page="splitsCurrentPage"
-              @page-changed="handleSplitsPageChange"
-            />
           </div>
         </div>
 

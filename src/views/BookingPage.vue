@@ -1371,7 +1371,7 @@ async function sendBookingRequestNotification(bookingData) {
       ...notificationData,
       recipientId: technicianUid,
       recipientType: 'technician',
-      message: `New booking request from ${bookingData.userName} for ${bookingData.date} at ${bookingData.time}. Payment method: ${bookingData.payment}`
+      message: `${bookingData.userName} has requested a booking from ${bookingData.date} at ${bookingData.time}. Payment method: ${bookingData.payment}. Please log in to your dashboard to accept or reject this booking.`
     };
     
     console.log('Technician UID for notification:', technicianUid);
@@ -1399,7 +1399,7 @@ async function sendBookingRequestNotification(bookingData) {
         recipientId: technicianEmail,
         recipientType: 'technician',
         recipientEmail: technicianEmail,
-        message: `New booking request from ${bookingData.userName} for ${bookingData.date} at ${bookingData.time}. Payment method: ${bookingData.payment}`
+        message: `${bookingData.userName} has requested a booking from ${bookingData.date} at ${bookingData.time}. Payment method: ${bookingData.payment}. Please log in to your dashboard to accept or reject this booking.`
       };
       
       console.log('Adding email fallback notification to Firebase...');
@@ -1426,12 +1426,12 @@ async function sendBookingRequestNotification(bookingData) {
 // Send booking request email to technician
 async function sendBookingRequestEmail(bookingData) {
   try {
-    console.log('Sending booking request email to technician...');
+    console.log('=== SENDING BOOKING REQUEST EMAIL TO TECHNICIAN ===');
     
     // Get technician's email from their profile
     const technicianDoc = await getDoc(doc(db, 'technicians', bookingData.technicianId));
     if (!technicianDoc.exists()) {
-      console.error('Technician not found');
+      console.error('❌ Technician not found');
       return false;
     }
     
@@ -1439,29 +1439,30 @@ async function sendBookingRequestEmail(bookingData) {
     const technicianEmail = technicianData.email;
     
     if (!technicianEmail) {
-      console.error('Technician email not found');
+      console.error('❌ Technician email not found');
       return false;
     }
     
-    // Email template for booking request
-    const emailTemplate = {
-      to_email: technicianEmail,
-      to_name: technicianData.fullName || technicianData.name,
-      customer_name: bookingData.userName,
-      customer_email: bookingData.userEmail,
-      customer_phone: bookingData.userPhone,
-      booking_date: bookingData.date,
-      booking_time: bookingData.time,
-      payment_method: bookingData.payment,
-      subject: 'New Booking Request - BoltFix'
-    };
+    console.log('Technician email found:', technicianEmail);
+    console.log('Technician data:', technicianData);
     
-    // Email functionality removed
-    console.log('Booking request email template:', emailTemplate);
+    // Import and use the email service function
+    const { sendBookingRequestEmail: sendEmail } = await import('../utils/emailService.js');
+    
+    // Send email using the email service
+    const response = await sendEmail(bookingData, technicianData);
+    
+    console.log('✅ Booking request email sent successfully:', response);
     return true;
     
   } catch (error) {
-    console.error('Error sending booking request email:', error);
+    console.error('❌ Error sending booking request email:', error);
+    console.error('Error details:', {
+      code: error.code,
+      message: error.message,
+      status: error.status,
+      text: error.text
+    });
     return false;
   }
 }
