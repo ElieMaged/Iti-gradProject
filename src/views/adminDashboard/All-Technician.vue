@@ -62,10 +62,10 @@
                 <td>{{ technician.experience }} {{ $t('years') }}</td>
                 <td>${{ technician.basePrice }}</td>
                 <td class="action-cell">
-                  <a @click="viewTechnician(technician)" class="action-btn view-btn" :title="$t('viewTechnician')">
+                  <button @click.prevent="viewTechnician(technician)" class="action-btn view-btn" :title="$t('viewTechnician')">
                     <i class="fas fa-eye"></i>
-                  </a>
-                  <button @click="deleteTechnician(technician)" class="action-btn delete-btn" :title="$t('deleteTechnician')">
+                  </button>
+                  <button @click.prevent="deleteTechnician(technician)" class="action-btn delete-btn" :title="$t('deleteTechnician')">
                     <i class="fas fa-trash-alt"></i>
                   </button>
                 </td>
@@ -176,7 +176,29 @@ export default {
     },
     
     viewTechnician(technician) {
-      this.$router.push(`/technician-profile/${technician.id}`);
+      console.log('🔍 Viewing technician:', technician.name, 'with ID:', technician.id);
+      try {
+        // Ensure we have a valid technician ID
+        if (!technician.id) {
+          console.error('❌ No technician ID found');
+          alert('Error: Technician ID not found');
+          return;
+        }
+        
+        const targetRoute = `/technician-profile/${technician.id}`;
+        console.log('🎯 Target route:', targetRoute);
+        
+        // Navigate to technician profile page
+        this.$router.push(targetRoute).then(() => {
+          console.log('✅ Navigation successful to technician profile');
+        }).catch((error) => {
+          console.error('❌ Navigation failed:', error);
+          alert('Error navigating to technician profile');
+        });
+      } catch (error) {
+        console.error('❌ Error in viewTechnician method:', error);
+        alert('Error navigating to technician profile');
+      }
     },
     
     async deleteTechnician(technician) {
@@ -564,18 +586,25 @@ export default {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0.25rem;
+  padding: 0.5rem;
   border-radius: 0.25rem;
   transition: all 0.2s;
   font-size: 1rem;
+  min-width: 2rem;
+  min-height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .view-btn {
   color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
 }
 
 .view-btn:hover {
-  background: #dbeafe;
+  background: rgba(59, 130, 246, 0.2);
+  transform: scale(1.05);
 }
 
 .delete-btn {

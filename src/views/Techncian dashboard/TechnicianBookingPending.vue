@@ -377,18 +377,125 @@ async function acceptBooking(id) {
     // Get technician name
     const technicianName = booking.technicianName || 'Technician';
     
+    // Update technician availability to remove the booked time slot
+    await updateTechnicianAvailability(booking);
+    
     // Send notification to user
     await sendBookingStatusNotification(booking, 'accepted', technicianName);
     
     // Remove from pending list
     bookings.value = bookings.value.filter(b => b.id !== id);
     
-    console.log('✅ Booking accepted and notification sent');
+    console.log('✅ Booking accepted, availability updated, and notification sent');
   } catch (e) {
     console.error('❌ Error accepting booking:', e);
     alert('Failed to accept booking: ' + e.message);
   } finally {
     actionLoading.value = null;
+  }
+}
+
+// Function to update technician availability when accepting a booking
+async function updateTechnicianAvailability(booking) {
+  try {
+    console.log('=== UPDATING TECHNICIAN AVAILABILITY ===');
+    console.log('Booking data:', booking);
+    
+    if (!booking.date || !booking.time || !booking.technicianId) {
+      console.log('⚠️ Missing booking data for availability update');
+      return;
+    }
+    
+    // Get the day name from the booking date
+    const bookingDate = new Date(booking.date);
+    const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const dayName = dayNames[bookingDate.getDay()];
+    
+    console.log('Booking date:', booking.date);
+    console.log('Booking time:', booking.time);
+    console.log('Day name:', dayName);
+    
+    // Get current technician availability
+    const availabilityRef = doc(db, 'technicianAvailability', booking.technicianId);
+    const availabilitySnap = await getDoc(availabilityRef);
+    
+    if (!availabilitySnap.exists()) {
+      console.log('⚠️ No availability document found for technician');
+      return;
+    }
+    
+    const currentAvailability = availabilitySnap.data();
+    console.log('Current availability:', currentAvailability);
+    
+    // Check if the technician is available on this day
+    if (!currentAvailability[dayName] || !currentAvailability[dayName].available) {
+      console.log('⚠️ Technician not available on this day');
+      return;
+    }
+    
+    const { startTime, endTime } = currentAvailability[dayName];
+    console.log('Current time range:', startTime, '-', endTime);
+    
+    // Parse the booking time to check if it falls within the available range
+    const bookingTime = booking.time;
+    
+    // Convert time formats for comparison (e.g., "03:00 PM" to 24-hour format)
+    const parseTime = (timeStr) => {
+      const time = new Date(`2000-01-01 ${timeStr}`);
+      return time.getHours() * 60 + time.getMinutes(); // Convert to minutes for easier comparison
+    };
+    
+    const bookingTimeMinutes = parseTime(bookingTime);
+    const startTimeMinutes = parseTime(startTime);
+    const endTimeMinutes = parseTime(endTime);
+    
+    console.log('Time comparison:', {
+      bookingTime: bookingTime,
+      bookingTimeMinutes: bookingTimeMinutes,
+      startTime: startTime,
+      startTimeMinutes: startTimeMinutes,
+      endTime: endTime,
+      endTimeMinutes: endTimeMinutes
+    });
+    
+    // Check if booking time is within the available range
+    if (bookingTimeMinutes < startTimeMinutes || bookingTimeMinutes >= endTimeMinutes) {
+      console.log('⚠️ Booking time is outside available range');
+      return;
+    }
+    
+    // For now, we'll mark the entire day as unavailable when a booking is accepted
+    // This is a simplified approach - in a more complex system, you might want to
+    // track specific time slots that are booked
+    const updatedAvailability = {
+      [dayName]: {
+        available: false,
+        startTime: '',
+        endTime: '',
+        bookedSlots: currentAvailability[dayName].bookedSlots || []
+      }
+    };
+    
+    // Add the booked time slot to the bookedSlots array
+    if (!updatedAvailability[dayName].bookedSlots.includes(bookingTime)) {
+      updatedAvailability[dayName].bookedSlots.push(bookingTime);
+    }
+    
+    console.log('Updated availability data:', updatedAvailability);
+    
+    // Update the availability document
+    await updateDoc(availabilityRef, updatedAvailability);
+    
+    console.log('✅ Technician availability updated successfully');
+    
+  } catch (error) {
+    console.error('❌ Error updating technician availability:', error);
+    console.error('Error details:', {
+      code: error.code,
+      message: error.message,
+      stack: error.stack
+    });
+    // Don't throw the error - availability update failure shouldn't prevent booking acceptance
   }
 }
 

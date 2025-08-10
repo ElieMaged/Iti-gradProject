@@ -10,6 +10,11 @@
             <input v-model="searchQuery" type="text" class="search-input" :placeholder="$t('search')" />
             <span class="search-icon"><i class="fas fa-search"></i></span>
           </div>
+          <div class="pagination-info" v-if="filteredBookings.length > 0">
+            <span class="info-text">
+              Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage, filteredBookings.length) }} of {{ filteredBookings.length }} bookings
+            </span>
+          </div>
         </div>
         <div class="table-wrapper">
           <table class="booking-table">
@@ -27,7 +32,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="booking in filteredBookings" :key="booking.id" class="table-row">
+              <tr v-for="booking in paginatedBookings" :key="booking.id" class="table-row">
                 <td>{{ booking.userName }}</td>
                 <td>{{ booking.technicianName }}</td>
                 <td>{{ booking.specialization }}</td>
@@ -59,52 +64,84 @@
             </tbody>
           </table>
         </div>
-        <pagination />
+        <pagination 
+          v-if="totalPages > 1"
+          :current-page="currentPage"
+          :total-pages="totalPages"
+          @page-changed="goToPage"
+          @prev-page="goToPage(currentPage - 1)"
+          @next-page="goToPage(currentPage + 1)"
+        />
       </div>
     </div>
   </div>
 </template>
 
-<script>
-import { ref, onMounted, computed } from 'vue';
+<script setup>
+import { ref, onMounted, computed, watch } from 'vue';
 import { collection, getDocs, query, where, doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useRouter } from 'vue-router';
 import AdminSidebar from '../../components/admin-sidebar.vue';
 import Pagination from '../../components/pagination.vue';
 import TopBar from '../../components/TopBar.vue';
-export default {
-  name: 'UpcomingBooking',
-  components: {
-    AdminSidebar,
-    Pagination,
-    TopBar
-  },
-  data() {
-    return {
-      searchQuery: '',
-      bookings: [],
-      actionLoading: null,
-      query: { edit: 'true' },
-      activeTab: 'upcoming',
-    }
-  }
-}
+
+// Reactive data
 const bookings = ref([]);
 const searchQuery = ref('');
 const actionLoading = ref(null);
+const currentPage = ref(1);
+const itemsPerPage = 10;
 const router = useRouter();
 
+// Fetch bookings on mount
 onMounted(async () => {
   await fetchBookings();
 });
 
+// Fetch bookings from Firestore
 async function fetchBookings() {
-  const q = query(collection(db, 'bookings'), where('status', '==', 'upcoming'));
-  const querySnapshot = await getDocs(q);
-  bookings.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  try {
+    const q = query(collection(db, 'bookings'), where('status', '==', 'upcoming'));
+    const querySnapshot = await getDocs(q);
+    bookings.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error('Error fetching bookings:', error);
+  }
 }
 
+// Pagination logic
+const filteredBookings = computed(() => {
+  if (!searchQuery.value.trim()) return bookings.value;
+  const q = searchQuery.value.toLowerCase();
+  return bookings.value.filter(b =>
+    Object.values(b).some(val => String(val).toLowerCase().includes(q))
+  );
+});
+
+const totalPages = computed(() => {
+  return Math.ceil(filteredBookings.value.length / itemsPerPage);
+});
+
+const paginatedBookings = computed(() => {
+  const startIndex = (currentPage.value - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  return filteredBookings.value.slice(startIndex, endIndex);
+});
+
+// Navigation functions
+function goToPage(page) {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+  }
+}
+
+// Watch for search query changes to reset pagination
+watch(searchQuery, () => {
+  currentPage.value = 1;
+});
+
+// Booking actions
 function editBooking(booking) {
   router.push({
     name: 'admin-booking-details',
@@ -132,14 +169,6 @@ async function cancelBooking(bookingId) {
     actionLoading.value = null;
   }
 }
-
-const filteredBookings = computed(() => {
-  if (!searchQuery.value.trim()) return bookings.value;
-  const q = searchQuery.value.toLowerCase();
-  return bookings.value.filter(b =>
-    Object.values(b).some(val => String(val).toLowerCase().includes(q))
-  );
-});
 </script>
 
 <style scoped>

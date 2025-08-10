@@ -110,4 +110,78 @@ export const initializeEmailJS = () => {
   } catch (error) {
     console.error('Failed to initialize EmailJS:', error);
   }
+};
+
+/**
+ * Send booking request email to technician
+ * @param {Object} bookingData - Booking information
+ * @param {Object} technicianData - Technician information
+ * @returns {Promise} - EmailJS response
+ */
+export const sendBookingRequestEmail = async (bookingData, technicianData) => {
+  try {
+    console.log('=== SENDING BOOKING REQUEST EMAIL ===');
+    console.log('Booking data:', bookingData);
+    console.log('Technician data:', technicianData);
+    
+    // Validate inputs
+    if (!bookingData || !technicianData || !technicianData.email) {
+      throw new Error('Missing required parameters: bookingData or technicianData.email');
+    }
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(technicianData.email)) {
+      throw new Error('Invalid technician email format');
+    }
+    
+    // Check if public key is properly set
+    if (!EMAILJS_CONFIG.publicKey || EMAILJS_CONFIG.publicKey === 'YOUR_PUBLIC_KEY') {
+      throw new Error('EmailJS public key is not configured. Please update src/utils/emailjsConfig.js');
+    }
+
+    // Initialize EmailJS before sending
+    emailjs.init(EMAILJS_CONFIG.publicKey);
+    
+    // Add delay to ensure initialization is complete
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    const templateParams = {
+      to_email: technicianData.email,
+      to_name: technicianData.fullName || technicianData.name || 'Technician',
+      customer_name: bookingData.userName,
+      customer_email: bookingData.userEmail,
+      customer_phone: bookingData.userPhone,
+      booking_date: bookingData.date,
+      booking_time: bookingData.time,
+      payment_method: bookingData.payment,
+      technician_name: technicianData.fullName || technicianData.name,
+      service_address: bookingData.address || 'Address not provided',
+      booking_amount: bookingData.price || 'N/A',
+      subject: 'New Booking Request - BoltFix',
+      message: `${bookingData.userName} has requested a booking from ${bookingData.date} at ${bookingData.time}. Payment method: ${bookingData.payment}. Please log in to your dashboard to accept or reject this booking.`
+    };
+
+    console.log('Email template parameters:', templateParams);
+
+    const response = await emailjs.send(
+      EMAILJS_CONFIG.serviceId,
+      EMAILJS_CONFIG.templateId,
+      templateParams,
+      EMAILJS_CONFIG.publicKey
+    );
+
+    console.log('✅ Booking request email sent successfully:', response);
+    return response;
+    
+  } catch (error) {
+    console.error('❌ Failed to send booking request email:', error);
+    console.error('Error details:', {
+      message: error.message,
+      code: error.code,
+      status: error.status,
+      text: error.text
+    });
+    throw error;
+  }
 }; 

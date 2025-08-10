@@ -189,8 +189,19 @@ router.beforeEach(async (to, from, next) => {
     }
   }
   
-  // Check if trying to access technician routes
-  if (to.path.startsWith('/technician-') || 
+  // Check if trying to access admin technician profile route
+  if (to.path.startsWith('/technician-profile/')) {
+    console.log('Attempting to access admin technician profile route:', to.path);
+    
+    if (!isAdmin()) {
+      console.log('User is not admin, redirecting to home');
+      next('/');
+      return;
+    }
+  }
+  
+  // Check if trying to access technician routes (but exclude admin technician profile route)
+  if ((to.path.startsWith('/technician-') && !to.path.startsWith('/technician-profile/')) || 
       to.path.startsWith('/techprofile') ||
       to.path.startsWith('/techpayment') ||
       to.path.startsWith('/technicianavailbility')) {

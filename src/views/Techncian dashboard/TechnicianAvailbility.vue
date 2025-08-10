@@ -36,42 +36,84 @@
                                     <td class="px-6 py-4 border border-gray-300">
                                         <span v-if="availability.saturday && availability.saturday.available">
                                             {{ availability.saturday.startTime }} - {{ availability.saturday.endTime }}
+                                            <div v-if="availability.saturday.bookedSlots && availability.saturday.bookedSlots.length > 0" class="booked-slots">
+                                                <div class="booked-slots-title">Booked:</div>
+                                                <div v-for="slot in availability.saturday.bookedSlots" :key="slot" class="booked-slot">
+                                                    {{ slot }}
+                                                </div>
+                                            </div>
                                         </span>
                                         <span v-else class="text-gray-400">Unavailable</span>
                                     </td>
                                     <td class="px-6 py-4 border border-gray-300">
                                         <span v-if="availability.sunday && availability.sunday.available">
                                             {{ availability.sunday.startTime }} - {{ availability.sunday.endTime }}
+                                            <div v-if="availability.sunday.bookedSlots && availability.sunday.bookedSlots.length > 0" class="booked-slots">
+                                                <div class="booked-slots-title">Booked:</div>
+                                                <div v-for="slot in availability.sunday.bookedSlots" :key="slot" class="booked-slot">
+                                                    {{ slot }}
+                                                </div>
+                                            </div>
                                         </span>
                                         <span v-else class="text-gray-400">Unavailable</span>
                                     </td>
                                     <td class="px-6 py-4 border border-gray-300">
                                         <span v-if="availability.monday && availability.monday.available">
                                             {{ availability.monday.startTime }} - {{ availability.monday.endTime }}
+                                            <div v-if="availability.monday.bookedSlots && availability.monday.bookedSlots.length > 0" class="booked-slots">
+                                                <div class="booked-slots-title">Booked:</div>
+                                                <div v-for="slot in availability.monday.bookedSlots" :key="slot" class="booked-slot">
+                                                    {{ slot }}
+                                                </div>
+                                            </div>
                                         </span>
                                         <span v-else class="text-gray-400">Unavailable</span>
                                     </td>
                                     <td class="px-6 py-4 border border-gray-300">
                                         <span v-if="availability.tuesday && availability.tuesday.available">
                                             {{ availability.tuesday.startTime }} - {{ availability.tuesday.endTime }}
+                                            <div v-if="availability.tuesday.bookedSlots && availability.tuesday.bookedSlots.length > 0" class="booked-slots">
+                                                <div class="booked-slots-title">Booked:</div>
+                                                <div v-for="slot in availability.tuesday.bookedSlots" :key="slot" class="booked-slot">
+                                                    {{ slot }}
+                                                </div>
+                                            </div>
                                         </span>
                                         <span v-else class="text-gray-400">Unavailable</span>
                                     </td>
                                     <td class="px-6 py-4 border border-gray-300">
                                         <span v-if="availability.wednesday && availability.wednesday.available">
                                             {{ availability.wednesday.startTime }} - {{ availability.wednesday.endTime }}
+                                            <div v-if="availability.wednesday.bookedSlots && availability.wednesday.bookedSlots.length > 0" class="booked-slots">
+                                                <div class="booked-slots-title">Booked:</div>
+                                                <div v-for="slot in availability.wednesday.bookedSlots" :key="slot" class="booked-slot">
+                                                    {{ slot }}
+                                                </div>
+                                            </div>
                                         </span>
                                         <span v-else class="text-gray-400">Unavailable</span>
                                     </td>
                                     <td class="px-6 py-4 border border-gray-300">
                                         <span v-if="availability.thursday && availability.thursday.available">
                                             {{ availability.thursday.startTime }} - {{ availability.thursday.endTime }}
+                                            <div v-if="availability.thursday.bookedSlots && availability.thursday.bookedSlots.length > 0" class="booked-slots">
+                                                <div class="booked-slots-title">Booked:</div>
+                                                <div v-for="slot in availability.thursday.bookedSlots" :key="slot" class="booked-slot">
+                                                    {{ slot }}
+                                                </div>
+                                            </div>
                                         </span>
                                         <span v-else class="text-gray-400">Unavailable</span>
                                     </td>
                                     <td class="px-6 py-4 border border-gray-300">
                                         <span v-if="availability.friday && availability.friday.available">
                                             {{ availability.friday.startTime }} - {{ availability.friday.endTime }}
+                                            <div v-if="availability.friday.bookedSlots && availability.friday.bookedSlots.length > 0" class="booked-slots">
+                                                <div class="booked-slots-title">Booked:</div>
+                                                <div v-for="slot in availability.friday.bookedSlots" :key="slot" class="booked-slot">
+                                                    {{ slot }}
+                                                </div>
+                                            </div>
                                         </span>
                                         <span v-else class="text-gray-400">Unavailable</span>
                                     </td>
@@ -88,13 +130,9 @@
                                     <label class="form-label">{{ $t('day') }}</label>
                                     <select v-model="form.day" class="form-select" required>
                                         <option value="">{{ $t('selectDay') }}</option>
-                                        <option value="monday">{{ $t('monday') }}</option>
-                                        <option value="tuesday">{{ $t('tuesday') }}</option>
-                                        <option value="wednesday">{{ $t('wednesday') }}</option>
-                                        <option value="thursday">{{ $t('thursday') }}</option>
-                                        <option value="friday">{{ $t('friday') }}</option>
-                                        <option value="saturday">{{ $t('saturday') }}</option>
-                                        <option value="sunday">{{ $t('sunday') }}</option>
+                                        <option v-for="dayOption in weekDays" :key="dayOption.value" :value="dayOption.value">
+                                            {{ dayOption.label }}
+                                        </option>
                                     </select>
                                 </div>
                                 <div class="form-field">
@@ -193,6 +231,36 @@ export default {
       startTime: '',
       endTime: ''
     });
+
+    // Generate week days with dates starting from tomorrow
+    const generateWeekDays = () => {
+      const today = new Date();
+      const tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1); // Start from tomorrow
+      
+      const weekDays = [];
+      const dayNames = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+      
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(tomorrow);
+        date.setDate(tomorrow.getDate() + i);
+        
+        const dayName = dayNames[i];
+        const formattedDate = date.toLocaleDateString('en-US', { 
+          month: 'numeric', 
+          day: 'numeric' 
+        });
+        
+        weekDays.push({
+          value: dayName,
+          label: `${dayName.charAt(0).toUpperCase() + dayName.slice(1)} ${formattedDate}`
+        });
+      }
+      
+      return weekDays;
+    };
+
+    const weekDays = ref(generateWeekDays());
 
     const showMessage = (text, type = 'success') => {
       message.value = text;
@@ -396,6 +464,7 @@ export default {
       messageType,
       availability,
       form,
+      weekDays,
       updateAvailability,
       setUnavailable,
       handleSidebarNavigate(route) {
@@ -645,6 +714,51 @@ thead th {
 /* Dark Mode Table Styles */
 .dark table.min-w-full td {
   background-color: var(--input-bg);
+}
+
+/* Booked Slots Styling */
+.booked-slots {
+  margin-top: 0.5rem;
+  padding: 0.25rem;
+  background-color: #f3f4f6;
+  border-radius: 0.25rem;
+  border-left: 3px solid #ef4444;
+}
+
+.booked-slots-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #dc2626;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.booked-slot {
+  font-size: 0.75rem;
+  color: #6b7280;
+  padding: 0.125rem 0.25rem;
+  background-color: #e5e7eb;
+  border-radius: 0.125rem;
+  margin: 0.125rem 0;
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+/* Dark Mode Booked Slots */
+.dark .booked-slots {
+  background-color: var(--grey-bg);
+  border-left-color: #f87171;
+}
+
+.dark .booked-slots-title {
+  color: #f87171;
+}
+
+.dark .booked-slot {
+  background-color: var(--input-bg);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
 }
 
 .dark .form-title {
