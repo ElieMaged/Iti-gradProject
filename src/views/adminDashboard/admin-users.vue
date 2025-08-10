@@ -5,7 +5,6 @@
       <TopBar :title="$t('userManagement')" />
       <div class="users-container">
         <div class="subtitle-search-row">
-          <div class="users-subtitle">{{ $t('allRegularUsers') }}</div>
           <div class="search-wrapper">
             <input 
               type="text" 
@@ -342,14 +341,12 @@ export default {
 .search-wrapper {
   display: flex;
   align-items: center;
-  height: 100%;
+  width: 411px;
+  height: 50px;
   padding: 10px;
-
-  width: 300px;
   gap: 8px;
   flex-shrink: 0;
-  min-height: 30px;
-  min-width: none;
+  margin-bottom: 16px;
   position: relative;
 }
 
@@ -417,7 +414,7 @@ export default {
 }
 
 .table-header th {
-  padding: 0.75rem 1rem;
+  padding: 0.5rem;
   text-align: center;
   font-weight: 600;
   font-size: 0.9rem;
@@ -437,7 +434,7 @@ export default {
   background-color: var(--icon-color);
 }
 .table-row td {
-  padding: 0.75rem 1rem;
+  padding: 0.5rem;
   font-size: 0.9rem;
   color: #333;
   text-align: center;
@@ -445,6 +442,28 @@ export default {
 }
 .dark .table-row td {
   color: var(--text-muted);
+}
+
+/* Zebra striping to match All-Technician */
+.table-row:nth-child(even) {
+  background: #faf5ff;
+}
+.dark .table-row:nth-child(even) {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Vertical borders between columns to match All-Technician */
+.users-table th,
+.users-table td {
+  border-right: 1px solid #e5e7eb;
+}
+.users-table th:last-child,
+.users-table td:last-child {
+  border-right: none;
+}
+.dark .users-table th,
+.dark .users-table td {
+  border-right-color: rgba(255, 255, 255, 0.12);
 }
 
 
@@ -518,6 +537,46 @@ export default {
 
 .delete-btn:hover:not(:disabled) {
   background: #fee2e2;
+}
+
+/* Column widths and truncation matching All-Technician */
+.users-table th:nth-child(1),
+.users-table td:nth-child(1) {
+  width: 6ch; /* No. */
+}
+
+
+.users-table th:nth-child(3),
+.users-table td:nth-child(3) {
+  width: 12ch; /* Role */
+}
+
+.users-table th:nth-child(4),
+.users-table td:nth-child(4) {
+  width: 54ch; /* Location */
+  max-width: 54ch;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.users-table th:nth-child(5),
+.users-table td:nth-child(5) {
+  width: 22ch; /* Email */
+  max-width: 22ch;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.users-table th:nth-child(6),
+.users-table td:nth-child(6) {
+  width: 14ch; /* Contact */
+}
+
+.users-table th:nth-child(7),
+.users-table td:nth-child(7) {
+  width: 12ch; /* Action */
 }
 
 .loading-state, .error-state, .empty-state {
@@ -659,7 +718,7 @@ export default {
   
   .table-header th,
   .table-row td {
-    padding: 0.75rem 1rem;
+    padding: 0.5rem;
   }
 }
 
@@ -694,10 +753,11 @@ export default {
     align-items: flex-start;
     gap: 1rem;
   }
+
+  /* Match All-Technician: search takes full width on mobile */
   .search-wrapper {
     width: 100%;
-    height: 100%;
-    min-width: 100%;
+    max-width: none;
   }
   
   .search-input {

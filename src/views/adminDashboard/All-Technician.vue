@@ -5,7 +5,6 @@
       <TopBar :title="$t('technicianManagement')" />
       <div class="technicians-container">
         <div class="subtitle-search-row">
-          <div class="technicians-subtitle">{{ $t('allTechnicians') }}</div>
           <div class="search-wrapper">
             <input 
               type="text" 
@@ -37,6 +36,7 @@
                 <th>{{ $t('no') }}</th>
                 <th>{{ $t('technician') }}</th>
                 <th>{{ $t('specialization') }}</th>
+                <th>{{ $t('phone') }}</th>
                 <th>{{ $t('location') }}</th>
                 <th>{{ $t('mail') }}</th>
                 <th>{{ $t('experience') }}</th>
@@ -56,6 +56,7 @@
                   {{ technician.name }}
                 </td>
                 <td>{{ technician.specialization }}</td>
+                <td>{{ technician.phoneNumber}}</td>
                 <td>{{ technician.location }}</td>
                 <td>{{ technician.email }}</td>
                 <td>{{ technician.experience }} {{ $t('years') }}</td>
@@ -158,6 +159,7 @@ export default {
             basePrice: data.basePrice || 'N/A',
             bio: data.bio || 'No bio available',
             willingToTravel: data.willingToTravel || 'No',
+            phoneNumber: data.phoneNumber || 'N/A',
             createdAt: data.createdAt,
             updatedAt: data.updatedAt
           };
@@ -467,7 +469,7 @@ export default {
   background-color: var(--grey-bg);
 }
 .table-header th {
-  padding: 0.75rem 1rem;
+  padding: 0.5rem;
   text-align: center;
   font-weight: 600;
   font-size: 0.9rem;
@@ -488,8 +490,29 @@ export default {
 .dark .table-row:hover {
   background-color: var(--icon-color);
 }
+/* Zebra striping for better scanability (match Booking-pending) */
+.table-row:nth-child(even) {
+  background: #faf5ff; /* subtle lavender */
+}
+.dark .table-row:nth-child(even) {
+  background: rgba(255,255,255,0.04);
+}
+
+/* Vertical borders between columns (match Booking-pending) */
+.technicians-table th,
+.technicians-table td {
+  border-right: 1px solid #e5e7eb;
+}
+.technicians-table th:last-child,
+.technicians-table td:last-child {
+  border-right: none;
+}
+.dark .technicians-table th,
+.dark .technicians-table td {
+  border-right-color: rgba(255, 255, 255, 0.12);
+}
 .table-row td {
-  padding: 0.75rem 1rem;
+  padding: 0.5rem;
   font-size: 0.9rem;
   color: #333;
   text-align: center;
@@ -497,6 +520,28 @@ export default {
 }
 .dark .table-row td {
   color: var(--text-muted);
+}
+/* Make Technician name column smaller with ellipsis (2nd column) */
+.technicians-table th:nth-child(2),
+.technicians-table td:nth-child(2) {
+  width: 26ch;
+  max-width: 26ch;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/* Help flex content inside technician cell truncate nicely */
+.technician-cell {
+  min-width: 0; /* allow shrinking within table cell */
+}
+/* Make Email column smaller with ellipsis (6th column) */
+.technicians-table th:nth-child(6),
+.technicians-table td:nth-child(6) {
+  width: 22ch;
+  max-width: 22ch;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 .technician-cell {
   display: flex;
@@ -512,6 +557,7 @@ export default {
 .action-cell {
   display: flex;
   gap: 0.5rem;
+  justify-content: center;
 }
 
 .action-btn {
