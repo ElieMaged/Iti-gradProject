@@ -66,7 +66,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { collection, getDocs } from 'firebase/firestore'
-import { db } from '../firebase'
+import { db, auth } from '../firebase'
 import { useRouter } from 'vue-router'
 import SearchBar from '../components/SearchBar.vue'
 import profile1 from '../assets/profile/1.jpg'
@@ -222,6 +222,14 @@ function onSpecializationChange(specialization) {
 function viewProfile(member) {
   if (!member || !member.id) {
     alert('Technician profile data is missing or invalid.');
+    return;
+  }
+  // Redirect unauthenticated users to welcome page, preserving intended route
+  if (!auth.currentUser) {
+    router.push({
+      path: '/welcomepage',
+      query: { redirect: `/technician/${member.id}` }
+    });
     return;
   }
   router.push({

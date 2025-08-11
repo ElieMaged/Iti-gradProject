@@ -1,4 +1,4 @@
-0<template>
+<template>
 <section class="expert-team" :dir="$i18n.locale === 'ar' ? 'rtl' : 'ltr'" :lang="$i18n.locale">
     <div class="team-header">
       <div class="team-title-section">
@@ -65,7 +65,7 @@
 
 <script>
 import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../firebase.js';
+import { db, auth } from '../firebase.js';
 
 export default {
   name: 'ExpertTeam',
@@ -167,6 +167,15 @@ export default {
       this.startAutoSlide();
     },
     viewProfile(member) {
+      // If user is not authenticated, redirect to welcome page and preserve intended route
+      if (!auth.currentUser) {
+        this.$router.push({
+          path: '/welcomepage',
+          query: { redirect: `/technician/${member.id}` }
+        });
+        return;
+      }
+
       // Navigate to technician profile with the specific technician's ID and all available data
       this.$router.push({
         path: `/technician/${member.id}`,
