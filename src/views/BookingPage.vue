@@ -2259,4 +2259,121 @@ watch(() => technician.value, (newTechnician) => {
   border-color: #35355a !important;
 }
 
-</style> 
+</style>
+<style scoped>
+/* Responsive adjustments */
+
+/* Tablets */
+@media (max-width: 1024px) {
+  .booking-card {
+    padding: 1rem 1.25rem;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .date-slots {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .header {
+    text-align: center;
+  }
+  .page-title {
+    font-size: 1.25rem;
+  }
+
+  .progress-indicator {
+    display: flex;
+    flex-direction: row; /* keep horizontal layout */
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem; /* tighter spacing on mobile */
+  }
+  .progress-line {
+    display: block; /* keep the connector visible */
+    width: 36px;    /* shorter connector on mobile */
+    height: 2px;
+  }
+  .progress-step .step-circle {
+    width: 28px;
+    height: 28px;
+    font-size: 0.875rem;
+  }
+  .progress-step .step-text {
+    font-size: 0.7rem;
+  }
+
+  .technician-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .technician-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .available-appointments .date-navigation {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .date-slots {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+  .date-slot {
+    min-width: 90px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .form-group {
+    width: 100%;
+  }
+
+  .payment-methods {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .confirm-btn {
+    width: 100%;
+  }
+
+  .map-container,
+  .map-container iframe {
+    width: 100% !important;
+    height: 240px !important;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .page-title {
+    font-size: 1.1rem;
+  }
+  .technician-photo {
+    width: 56px;
+    height: 56px;
+  }
+  .date-slots {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+</style>

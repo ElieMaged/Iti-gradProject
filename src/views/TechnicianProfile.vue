@@ -1573,21 +1573,35 @@ onMounted(async () => {
   .technician-specialization {
     font-size: 0.9rem;
   }
+  
+  .date-selector {
+    gap: 0.5rem;
+    justify-content: center;
+  }
+  .date-options {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
 }
+
 @media (min-width:600px) {
   .main-content {
     margin-left: 80px;
     margin-right: 80px;
   }
 }
+
 @media (max-width: 600px) {
   .main-content {
     padding: 0.5rem;
+    margin-left: 0.75rem; /* add left margin on mobile */
   }
   .content-grid {
-    flex-direction: column;
+    grid-template-columns: 1fr;
     gap: 1rem;
   }
+  
   .technician-info-card,
   .booking-info-card {
     width: 100%;
@@ -1595,67 +1609,100 @@ onMounted(async () => {
     box-sizing: border-box;
     margin: 0 0 1rem 0;
   }
+  
   .profile-section {
     flex-direction: column;
     align-items: flex-start;
     width: 100%;
   }
+  
   .profile-picture {
     width: 60px;
     height: 60px;
     margin-bottom: 0.5rem;
   }
+  
   .profile-details {
     width: 100%;
     font-size: 1rem;
   }
+  
   .technician-name {
     font-size: 1.1rem;
   }
+  
   .technician-specialization {
     font-size: 0.95rem;
   }
+  
   .detail-item {
     font-size: 0.95rem;
   }
+  
   .bio-title {
     font-size: 1rem;
   }
+  
   .bio-content {
     font-size: 0.95rem;
   }
+  
   .booking-title {
     font-size: 1.1rem;
   }
+  
   .section-subtitle {
     font-size: 1rem;
   }
+  
   .date-option,
   .time-slot {
     font-size: 0.95rem;
     padding: 0.4rem;
   }
+  
   .visit-price {
     font-size: 1rem;
   }
+  
   .price-label,
   .price-value {
     font-size: 0.95rem;
   }
+  
   .book-now-btn {
     font-size: 1rem;
     padding: 0.6rem;
   }
+  
   .date-nav-btn {
     font-size: 1rem;
     padding: 0.4rem;
   }
+  
+  .date-selector {
+    gap: 0.5rem;
+  }
+  .date-options {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+  }
+  .date-option {
+    min-width: 96px;
+    scroll-snap-align: start;
+  }
+  
   .reviews-section {
     padding: 0.5rem 0;
   }
+  
   .reviews-title {
     font-size: 1.2rem;
   }
+  
   .review-form,
   .review-card {
     font-size: 1rem;
@@ -1672,6 +1719,7 @@ onMounted(async () => {
   .main-content {
     padding: 0.25rem;
     width: 100%;
+    margin-left: 0.75rem; /* keep slight left margin */
   }
   
   .page-title {
@@ -1782,6 +1830,7 @@ onMounted(async () => {
   .main-content {
     padding: 0.125rem;
     width: 100%;
+    margin-left: 0.5rem; /* smaller devices */
   }
   
   .page-title h1 {
