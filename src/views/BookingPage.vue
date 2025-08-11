@@ -372,6 +372,42 @@ watch(() => form.value.city, () => {
 // Date and time management
 const currentDateOffset = ref(0)
 
+// Responsive breakpoint: detect mobile (< 768px). iPad portrait (768px) is NOT mobile
+const isMobile = ref(typeof window !== 'undefined' ? window.matchMedia('(max-width: 767px)').matches : false)
+let mqListener = null
+
+onMounted(() => {
+  if (typeof window !== 'undefined') {
+    const mq = window.matchMedia('(max-width: 767px)')
+    // Save listener to remove later
+    mqListener = (e) => {
+      isMobile.value = e.matches
+    }
+    // Newer browsers
+    if (mq.addEventListener) {
+      mq.addEventListener('change', mqListener)
+    } else if (mq.addListener) {
+      // Fallback
+      mq.addListener(mqListener)
+    }
+    // Ensure initial state
+    isMobile.value = mq.matches
+  }
+})
+
+onUnmounted(() => {
+  if (typeof window !== 'undefined') {
+    const mq = window.matchMedia('(max-width: 767px)')
+    if (mq && mqListener) {
+      if (mq.removeEventListener) {
+        mq.removeEventListener('change', mqListener)
+      } else if (mq.removeListener) {
+        mq.removeListener(mqListener)
+      }
+    }
+  }
+})
+
 // Dynamically generate available dates based on technician availability
 const availableDates = computed(() => {
   const days = [];
@@ -414,7 +450,8 @@ const visibleDates = computed(() => {
     const dayOfWeek = dayNames[nextDay.getDay()];
     days.push(`${month}/${date}/${year} ${dayOfWeek}`);
   }
-  return days.slice(0, 3); // Show only 3 days
+  // Show 2 cards on mobile, 3 on larger screens
+  return days.slice(0, isMobile.value ? 2 : 3);
 });
 
 // Dynamic available times based on technician availability
@@ -2261,6 +2298,25 @@ watch(() => technician.value, (newTechnician) => {
 
 </style>
 <style scoped>
+/* Inline form field errors: simple red text under inputs */
+.form-group .error-message,
+.form-group .field-error {
+  display: block;
+  text-align: start;
+  font-size: 0.8rem;
+  line-height: 1.2;
+  color: #ef4444; /* red-500 */
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+/* Dark mode inline error text color */
+.dark .form-group .error-message,
+.dark .form-group .field-error {
+  color: #f87171; /* red-400 */
+}
+
 /* Responsive adjustments */
 
 /* Tablets */
@@ -2277,13 +2333,13 @@ watch(() => technician.value, (newTechnician) => {
 
   .date-slots {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.5rem;
   }
 }
 
 /* Mobile */
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .header {
     text-align: center;
   }
@@ -2302,6 +2358,7 @@ watch(() => technician.value, (newTechnician) => {
     display: block; /* keep the connector visible */
     width: 36px;    /* shorter connector on mobile */
     height: 2px;
+    margin-top: 14px;
   }
   .progress-step .step-circle {
     width: 28px;
@@ -2330,7 +2387,7 @@ watch(() => technician.value, (newTechnician) => {
   }
   .date-slots {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.5rem;
   }
   .date-slot {
