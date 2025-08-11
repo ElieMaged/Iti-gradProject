@@ -1,7 +1,7 @@
 <template>
   <div class="admin-dashboard-layout">
     <admin-sidebar />
-    <div class="technician-profile-bg">
+    <div class="technician-profile-bg mx-12 p-4">
       <div class="technician-profile-main">
         <div class="technician-profile-container">
           <div class="header-row">
@@ -143,7 +143,10 @@
                 </div>
               </div>
 
-              <button class="delete-btn" @click="handleDelete">Delete Account</button>
+              <div class="flex items-center gap-2 mt-4">
+                <button class="back-btn" @click="$router.push('/all-technician')">Back to Technicians</button>
+                <button class="delete-btn" @click="handleDelete" style="margin-top: 0;">Delete Account</button>
+              </div>
             </div>
             <div class="profile-photo-col">
               <div class="photo-section">
@@ -429,12 +432,8 @@ export default {
 .technician-profile-bg {
   flex: 1;
   padding: 2rem 0;
-
 }
 
-.technician-profile-main {
-  margin-right: 80px;
-}
 
 .technician-profile-container {
   background: #fff;
@@ -697,7 +696,7 @@ export default {
   background: #ef4444;
   color: white;
   border: none;
-  padding: 0.75rem 1.5rem;
+  padding: 0.5rem 1rem;
   border-radius: 0.5rem;
   cursor: pointer;
   font-weight: 500;
@@ -730,6 +729,7 @@ export default {
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
+  font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s;
 }
