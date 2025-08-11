@@ -21,6 +21,7 @@
             <thead>
               <tr class="table-header">
                 <th>{{ $t('userName') }}</th>
+                <th>{{ $t('phone') }}</th>
                 <th>{{ $t('technician') }}</th>
                 <th>{{ $t('specialization') }}</th>
                 <th>{{ $t('date') }}</th>
@@ -28,31 +29,19 @@
                 <th>{{ $t('address') }}</th>
                 <th>{{ $t('price') }}</th>
                 <th>{{ $t('status') }}</th>
-                <th>{{ $t('actions') }}</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="booking in paginatedBookings" :key="booking.id" class="table-row">
-                <td>{{ booking.userName }}</td>
                 <td>{{ booking.technicianName }}</td>
+                <td>{{ booking.phone || 'N/A' }}</td>
+                <td>{{ booking.technicianName || 'N/A' }}</td>
                 <td>{{ booking.specialization || 'N/A' }}</td>
                 <td>{{ booking.date }}</td>
                 <td>{{ booking.time }}</td>
-                <td>{{ booking.address }}</td>
-                <td>{{ booking.price }}</td>
-                <td class="booking-status">{{ $t('upcoming') }}</td>
-                <td>
-                    <div class="action-buttons">
-                      <button 
-                        class="delete-btn" 
-                        @click="cancelBooking(booking.id)" 
-                        :disabled="actionLoading === booking.id"
-                        :title="$t('deleteBooking')"
-                      >
-                        <i class="fas fa-trash"></i>
-                      </button>
-                    </div>
-                  </td>
+                <td>{{ booking.address && booking.address.trim() ? booking.address : 'Address not provided' }}</td>
+                <td>{{ booking.price || 'N/A' }}</td>
+                <td class="booking-status">{{ booking.status }}</td>
               </tr>
             </tbody>
           </table>
@@ -102,13 +91,20 @@ async function fetchBookings() {
       querySnapshot.docs.map(async (snapshot) => {
         const bookingData = { id: snapshot.id, ...snapshot.data() };
 
-        // If specialization missing on booking, try to fetch from technician profile
-        if (!bookingData.specialization && bookingData.technicianId) {
+        // If specialization/email/price missing on booking, try to fetch from technician profile
+        if ((!
+              bookingData.specialization ||
+              !bookingData.technicianEmail ||
+              !bookingData.price
+            ) && bookingData.technicianId) {
           try {
             const techRef = doc(db, 'technicians', bookingData.technicianId);
             const techSnap = await getDoc(techRef);
             if (techSnap.exists()) {
               const tech = techSnap.data();
+              const userRef = doc(db, 'users', bookingData.userId);
+              const userSnap = await getDoc(userRef);
+              const user = userSnap.data();
               const specialization = tech.specialization ||
                                     tech.service ||
                                     tech.services ||
@@ -122,17 +118,32 @@ async function fetchBookings() {
                                     tech.skills ||
                                     'N/A';
               bookingData.specialization = specialization;
+              bookingData.phone = user.phone || user.phoneNumber || 'N/A';
 
               // Backfill technician name if missing
               if (!bookingData.technicianName) {
                 bookingData.technicianName = tech.name || tech.fullName || tech.displayName || bookingData.technicianName || 'N/A';
               }
+
+              // Map technician email from common fields
+              if (!bookingData.technicianEmail) {
+                bookingData.technicianEmail = tech.email || tech.userEmail || tech.technicianEmail || tech.contactEmail || 'N/A';
+              }
+
+              // Map price from technician profile common fields
+              if (!bookingData.price) {
+                bookingData.price = tech.costpervisit || tech.basePrice || tech.visitPrice || tech.price || 'N/A';
+              }
             } else {
               bookingData.specialization = bookingData.specialization || 'N/A';
+              bookingData.technicianEmail = bookingData.technicianEmail || 'N/A';
+              bookingData.price = bookingData.price || 'N/A';
             }
           } catch (err) {
             console.error('Error fetching technician for booking', bookingData.id, err);
             bookingData.specialization = bookingData.specialization || 'N/A';
+            bookingData.technicianEmail = bookingData.technicianEmail || 'N/A';
+            bookingData.price = bookingData.price || 'N/A';
           }
         } else if (!bookingData.specialization) {
           // No technicianId to look up
@@ -391,6 +402,75 @@ async function cancelBooking(bookingId) {
 }
 .dark .table-row:nth-child(even) {
   background: rgba(255,255,255,0.04);
+}
+
+/* Column sizing and alignment to match pending table (adjusted for upcoming column order) */
+/* 1: Technician Name */
+.booking-table th:nth-child(1),
+.booking-table td:nth-child(1) {
+  width: 12ch;
+  max-width: 12ch;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/* 2: Technician Email */
+.booking-table th:nth-child(2),
+.booking-table td:nth-child(2) {
+  width: 8ch;
+  max-width: 8ch;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/* 3: Phone */
+.booking-table th:nth-child(3),
+.booking-table td:nth-child(3) {
+  width: 10ch;
+  max-width: 10ch;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/* 4: Specialization */
+.booking-table th:nth-child(4),
+.booking-table td:nth-child(4) {
+  width: 9ch;
+  max-width: 9ch;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/* 5: Date */
+.booking-table th:nth-child(5),
+.booking-table td:nth-child(5) {
+  width: 14ch;
+}
+/* 6: Time */
+.booking-table th:nth-child(6),
+.booking-table td:nth-child(6) {
+  width: 12ch;
+}
+/* 7: Address */
+.booking-table th:nth-child(7),
+.booking-table td:nth-child(7) {
+  width: 22ch;
+  max-width: 22ch;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/* 8: Price */
+.booking-table th:nth-child(8),
+.booking-table td:nth-child(8) {
+  width: 5ch;
+  text-align: center;
+}
+/* 9: Status */
+.booking-table th:nth-child(9),
+.booking-table td:nth-child(9) {
+  width: 8ch;
+  text-align: center;
 }
 
 .booking-status {
