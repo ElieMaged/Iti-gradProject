@@ -301,7 +301,6 @@ export default {
   background-color: var(--primary-bg);
 }
 .users-container {
-  max-width: 80rem;
   margin: 0 auto;
 }
 .dark .users-container {
@@ -393,6 +392,7 @@ export default {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   max-height: none;
   overflow-y: visible;
+  width: auto;
 }
 .dark .table-wrapper {
   background-color: var(--grey-bg);
@@ -691,10 +691,6 @@ export default {
 
 /* Responsive Design */
 @media (min-width: 1200px) {
-  .users-container {
-    max-width: 90rem;
-  }
-  
   
   
   .users-table {

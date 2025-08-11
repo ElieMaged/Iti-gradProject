@@ -129,7 +129,8 @@ export default {
   display: flex;
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
   background: #faf8fd;
-  margin-left: 14rem; /* reserve space for fixed sidebar */
+  margin-left: 14rem;
+  height: 100vh; /* reserve space for fixed sidebar */
 }
 .dark .admin-dashboard-layout {
   background-color: var(--primary-bg);

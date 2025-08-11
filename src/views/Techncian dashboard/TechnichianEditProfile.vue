@@ -261,19 +261,21 @@ onMounted(() => {
 </script>
 
 <style scoped>
+
 .admin-dashboard-layout {
   display: flex;
   min-height: auto;
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
-  background: #faf8fd;
+  background-color: #f9fafb;
   margin-left: 14rem;
+  height: 100vh;
 }
 .dark .admin-dashboard-layout {
   background: var(--primary-bg);
 }
 .edit-profile-main {
   flex: 1;
-  background: #f9fafb;
+  background-color: #f9fafb;
 }
 .dark .edit-profile-main {
   background: var(--primary-bg);

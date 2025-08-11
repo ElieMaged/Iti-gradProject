@@ -35,21 +35,14 @@
               <tr v-for="booking in paginatedBookings" :key="booking.id" class="table-row">
                 <td>{{ booking.userName }}</td>
                 <td>{{ booking.technicianName }}</td>
-                <td>{{ booking.specialization }}</td>
+                <td>{{ booking.specialization || 'N/A' }}</td>
                 <td>{{ booking.date }}</td>
                 <td>{{ booking.time }}</td>
                 <td>{{ booking.address }}</td>
                 <td>{{ booking.price }}</td>
-                                 <td class="booking-status">{{ $t('upcoming') }}</td>
-                                   <td>
+                <td class="booking-status">{{ $t('upcoming') }}</td>
+                <td>
                     <div class="action-buttons">
-                      <button 
-                        class="edit-btn" 
-                        @click="editBooking(booking)"
-                        :title="$t('editBooking')"
-                      >
-                        <i class="fas fa-pen"></i>
-                      </button>
                       <button 
                         class="delete-btn" 
                         @click="cancelBooking(booking.id)" 
@@ -79,7 +72,7 @@
 
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
-import { collection, getDocs, query, where, doc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, deleteDoc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useRouter } from 'vue-router';
 import AdminSidebar from '../../components/admin-sidebar.vue';
@@ -99,12 +92,58 @@ onMounted(async () => {
   await fetchBookings();
 });
 
-// Fetch bookings from Firestore
+// Fetch bookings from Firestore and enrich with technician specialization
 async function fetchBookings() {
   try {
     const q = query(collection(db, 'bookings'), where('status', '==', 'upcoming'));
     const querySnapshot = await getDocs(q);
-    bookings.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    const enriched = await Promise.all(
+      querySnapshot.docs.map(async (snapshot) => {
+        const bookingData = { id: snapshot.id, ...snapshot.data() };
+
+        // If specialization missing on booking, try to fetch from technician profile
+        if (!bookingData.specialization && bookingData.technicianId) {
+          try {
+            const techRef = doc(db, 'technicians', bookingData.technicianId);
+            const techSnap = await getDoc(techRef);
+            if (techSnap.exists()) {
+              const tech = techSnap.data();
+              const specialization = tech.specialization ||
+                                    tech.service ||
+                                    tech.services ||
+                                    tech.category ||
+                                    tech.type ||
+                                    tech.jobType ||
+                                    tech.workType ||
+                                    tech.profession ||
+                                    tech.trade ||
+                                    tech.skill ||
+                                    tech.skills ||
+                                    'N/A';
+              bookingData.specialization = specialization;
+
+              // Backfill technician name if missing
+              if (!bookingData.technicianName) {
+                bookingData.technicianName = tech.name || tech.fullName || tech.displayName || bookingData.technicianName || 'N/A';
+              }
+            } else {
+              bookingData.specialization = bookingData.specialization || 'N/A';
+            }
+          } catch (err) {
+            console.error('Error fetching technician for booking', bookingData.id, err);
+            bookingData.specialization = bookingData.specialization || 'N/A';
+          }
+        } else if (!bookingData.specialization) {
+          // No technicianId to look up
+          bookingData.specialization = 'N/A';
+        }
+
+        return bookingData;
+      })
+    );
+
+    bookings.value = enriched;
   } catch (error) {
     console.error('Error fetching bookings:', error);
   }
@@ -147,7 +186,7 @@ function editBooking(booking) {
     name: 'admin-booking-details',
     params: { id: booking.id },
     query: { edit: 'true' },
-    state: { booking }
+    state: { booking },
   });
 }
 
@@ -355,31 +394,26 @@ async function cancelBooking(bookingId) {
 }
 
 .booking-status {
-  background: none;
-  color: #6b7280 !important;
+  background: transparent;
+  color: #779ce6 !important;
   font-size: 0.8rem;
   font-weight: 600;
   text-transform: capitalize;
-  padding: 0.25rem 0.75rem;
-  border-radius: 1rem;
-  border: 1px solid #6b7280;
-  transition: all 0.2s ease;
-  cursor: pointer;
+  padding: 0; /* remove badge padding */
+  border-radius: 0;
+  border: none; /* remove badge border */
+  transition: color 0.2s ease;
+  cursor: default;
 }
 
 .booking-status:hover {
-  background: var(--primary-color);
-  color: white !important;
-  border-color: var(--primary-color);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: transparent; /* keep no background on hover */
+  color: #6b7280 !important;
+  border-color: transparent;
+  transform: none;
+  box-shadow: none;
 }
 
-.action-buttons {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-}
 
 .edit-btn {
   background: none;

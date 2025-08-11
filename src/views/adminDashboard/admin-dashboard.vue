@@ -912,6 +912,24 @@ export default {
   gap: 1.5rem;
 }
 
+/* Chart theme variables */
+.charts-grid, .chart-card {
+  --chart-accent: #7c6bb0; /* primary purple */
+  --chart-accent-strong: #5a4a8c;
+  --chart-accent-soft: rgba(124, 107, 176, 0.08);
+  --chart-green: #4ade80;
+  --chart-green-strong: #22c55e;
+  --grid-color: rgba(124, 107, 176, 0.18);
+  --grid-color-dark: rgba(255,255,255,0.08);
+}
+
+.dark .charts-grid, .dark .chart-card {
+  --chart-accent: #a78bfa; /* indigo-400 */
+  --chart-accent-strong: #8b5cf6; /* indigo-500 */
+  --chart-accent-soft: rgba(255,255,255,0.06);
+  --grid-color: var(--grid-color-dark);
+}
+
 .chart-card {
   border-radius: 1rem;
   background: white;
@@ -919,12 +937,21 @@ export default {
   padding: 1.5rem;
   min-height: 350px;
   width: 100%;
+  border: 1px solid #eee;
+  transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
 }
 
 .dark .chart-card {
   background: var(--grey-bg);
   color: var(--primary-text);
+  border-color: rgba(255,255,255,0.08);
 } 
+
+.chart-card:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  transform: translateY(-1px);
+  border-color: #e6e6e6;
+}
 
 .chart-header {
   display: flex;
@@ -952,8 +979,8 @@ export default {
 .chart-wrapper {
   position: relative;
   width: 100%;
-  height: clamp(160px, 25vh, 200px);
-  background: #ede7f6;
+  height: clamp(180px, 28vh, 240px);
+  background: linear-gradient(180deg, rgba(124, 107, 176, 0.05) 0%, rgba(124, 107, 176, 0.02) 100%);
   border-radius: 0.75rem;
   overflow: hidden;
   display: flex;
@@ -961,11 +988,13 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
+  border: 1px solid #f0eff6;
 }
 
 .dark .chart-wrapper {
-  background: var(--grey-bg);
+  background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 100%);
   color: var(--primary-text);
+  border-color: rgba(255,255,255,0.08);
 }
 
 .chart-y-labels {
@@ -979,14 +1008,14 @@ export default {
   align-items: flex-end;
   padding-right: 0.5rem;
   font-size: clamp(0.625rem, 1.5vw, 0.75rem);
-  color: #7c6bb0;
+  color: var(--chart-accent);
   font-weight: 600;
   z-index: 2;
 }
 
 .dark .chart-y-labels {
   color: var(--primary-text);
-} 
+}
 
 .chart-main {
   position: relative;
@@ -1012,12 +1041,12 @@ export default {
   position: absolute;
   width: 100%;
   height: 1px;
-  background: rgba(124, 107, 176, 0.2);
-  opacity: 0.6;
+  background: var(--grid-color);
+  opacity: 0.5;
 }
 
 .dark .grid-line {
-  background: var(--icon-color);
+  background: var(--grid-color);
 }
 
 .grid-line:nth-child(1) { top: 20%; }
@@ -1030,6 +1059,18 @@ export default {
   width: 100%;
   height: 100%;
   position: relative;
+}
+
+/* Baseline axis */
+.chart-wrapper::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 28px; /* aligns above x-labels */
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--grid-color), transparent);
+  pointer-events: none;
 }
 
 .dark .chart-area {
@@ -1046,7 +1087,7 @@ export default {
 
 .dark .chart-area {
   fill: var(--icon-color);
-} 
+}
 
 @keyframes area-fill {
   to {
@@ -1056,7 +1097,7 @@ export default {
 
 .chart-line {
   fill: none;
-  stroke: #7c6bb0;
+  stroke: var(--chart-accent);
   stroke-width: 3;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -1066,9 +1107,7 @@ export default {
   animation: draw-line 1.5s ease-out 0.3s forwards;
 }
 
-.dark .chart-line {
-  stroke: var(--primary-color);
-}
+.dark .chart-line { stroke: var(--chart-accent); }
 
 @keyframes draw-line {
   to {
@@ -1078,7 +1117,7 @@ export default {
 
 .monthly-line {
   fill: none;
-  stroke: #4ade80;
+  stroke: var(--chart-green);
   stroke-width: 3;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -1088,9 +1127,7 @@ export default {
   animation: draw-line 1.5s ease-out 0.3s forwards;
 }
 
-.dark .monthly-line {
-  stroke: #4ade80;
-}
+.dark .monthly-line { stroke: var(--chart-green); }
 
 .monthly-area {
   fill: url(#monthlyGradient);
@@ -1119,8 +1156,9 @@ export default {
 
 .data-point:hover {
   transform: scale(1.3);
-  fill: #5a4a8c;
+  fill: var(--chart-accent-strong);
   stroke-width: 3;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
 }
 
 .monthly-point {
@@ -1138,8 +1176,9 @@ export default {
 
 .monthly-point:hover {
   transform: scale(1.3);
-  fill: #22c55e;
+  fill: var(--chart-green-strong);
   stroke-width: 3;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
 }
 
 .hover-circle {
@@ -1157,7 +1196,7 @@ export default {
   justify-content: space-around;
   padding-bottom: 0.5rem;
   font-size: clamp(0.625rem, 1.5vw, 0.75rem);
-  color: #7c6bb0;
+  color: var(--chart-accent);
   font-weight: 600;
 }
 
@@ -1181,6 +1220,19 @@ export default {
   opacity: 1;
 }
 
+/* Tooltip arrow */
+.chart-tooltip::after {
+  content: '';
+  position: absolute;
+  left: 10px;
+  bottom: -6px;
+  width: 10px;
+  height: 10px;
+  background: inherit;
+  transform: rotate(45deg);
+  filter: blur(0.2px);
+}
+
 .chart-legend {
   display: flex;
   justify-content: center;
@@ -1193,13 +1245,23 @@ export default {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: clamp(0.75rem, 2vw, 0.875rem);
   color: #7c6bb0;
   font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(124, 107, 176, 0.08);
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
 .dark .legend-item {
   color: var(--primary-text);
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.08);
+}
+
+.legend-item:hover {
+  background: rgba(124, 107, 176, 0.14);
+  border-color: rgba(124, 107, 176, 0.25);
 }
 
 .legend-dot {

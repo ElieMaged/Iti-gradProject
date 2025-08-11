@@ -599,7 +599,6 @@ export default {
 
 .view-btn {
   color: #3b82f6;
-  background: rgba(59, 130, 246, 0.1);
 }
 
 .view-btn:hover {
