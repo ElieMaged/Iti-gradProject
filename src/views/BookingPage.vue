@@ -450,8 +450,8 @@ const visibleDates = computed(() => {
     const dayOfWeek = dayNames[nextDay.getDay()];
     days.push(`${month}/${date}/${year} ${dayOfWeek}`);
   }
-  // Show 2 cards on mobile, 3 on larger screens
-  return days.slice(0, isMobile.value ? 2 : 3);
+  // Show 3 cards on mobile (in column), 3 on larger screens (in row)
+  return days.slice(0, 3);
 });
 
 // Dynamic available times based on technician availability
@@ -1804,6 +1804,7 @@ watch(() => technician.value, (newTechnician) => {
 
 .date-slots {
   display: flex;
+  flex-direction: row;
   gap: 1rem;
   flex: 1;
   justify-content: center;
@@ -2332,8 +2333,8 @@ watch(() => technician.value, (newTechnician) => {
   }
 
   .date-slots {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    display: flex;
+    flex-direction: row;
     gap: 0.5rem;
   }
 }
@@ -2386,8 +2387,8 @@ watch(() => technician.value, (newTechnician) => {
     gap: 0.5rem;
   }
   .date-slots {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
+    flex-direction: column;
     gap: 0.5rem;
   }
   .date-slot {
@@ -2430,7 +2431,7 @@ watch(() => technician.value, (newTechnician) => {
     height: 56px;
   }
   .date-slots {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    flex-direction: column;
   }
 }
 </style>
