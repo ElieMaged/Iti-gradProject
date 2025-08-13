@@ -34,6 +34,7 @@
             <thead>
               <tr class="table-header">
                 <th>{{ $t('userName') }}</th>
+                <th>{{ $t('phone') }}</th>
                 <th>{{ $t('technician') }}</th>
                 <th>{{ $t('specialization') }}</th>
                 <th>{{ $t('date') }}</th>
@@ -46,6 +47,7 @@
             <tbody>
               <tr v-for="(booking, index) in paginatedBookings" :key="booking.id" class="table-row">
                 <td>{{ booking.userName }}</td>
+                <td>{{ booking.contact }}</td>
                 <td>{{ booking.technicianName }}</td>
                 <td>{{ booking.specialization }}</td>
                 <td>{{ booking.date }}</td>
@@ -79,7 +81,7 @@
 
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import AdminSidebar from '../../components/admin-sidebar.vue';
 import Pagination from '../../components/pagination.vue';
@@ -98,7 +100,7 @@ onMounted(async () => {
   await fetchBookings();
 });
 
-// Fetch completed bookings from Firestore
+// Fetch bookings and enrich with user phone and technician specialization
 async function fetchBookings() {
   try {
     loading.value = true;
@@ -106,11 +108,62 @@ async function fetchBookings() {
     
     const q = query(collection(db, 'bookings'), where('status', '==', 'completed'));
     const querySnapshot = await getDocs(q);
-    
-    bookings.value = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+
+    const enriched = await Promise.all(
+      querySnapshot.docs.map(async (snapshot) => {
+        const bookingData = { id: snapshot.id, ...snapshot.data() };
+
+        try {
+          // Fetch user contact (phone)
+          if (bookingData.userId) {
+            const userRef = doc(db, 'users', bookingData.userId);
+            const userSnap = await getDoc(userRef);
+            if (userSnap.exists()) {
+              const user = userSnap.data();
+              bookingData.contact = bookingData.contact || user.phone || user.phoneNumber || 'N/A';
+              bookingData.userName = bookingData.userName || user.name || user.fullName || user.displayName || 'N/A';
+            } else {
+              bookingData.contact = bookingData.contact || 'N/A';
+            }
+          }
+
+          // Fetch technician specialization
+          if (bookingData.technicianId) {
+            const techRef = doc(db, 'technicians', bookingData.technicianId);
+            const techSnap = await getDoc(techRef);
+            if (techSnap.exists()) {
+              const tech = techSnap.data();
+              const specialization = tech.specialization ||
+                                     tech.service ||
+                                     tech.services ||
+                                     tech.category ||
+                                     tech.type ||
+                                     tech.jobType ||
+                                     tech.workType ||
+                                     tech.profession ||
+                                     tech.trade ||
+                                     tech.skill ||
+                                     tech.skills ||
+                                     'N/A';
+              bookingData.specialization = bookingData.specialization || specialization;
+              bookingData.technicianName = bookingData.technicianName || tech.name || tech.fullName || tech.displayName || 'N/A';
+            } else {
+              bookingData.specialization = bookingData.specialization || 'N/A';
+            }
+          } else {
+            bookingData.specialization = bookingData.specialization || 'N/A';
+          }
+        } catch (e) {
+          console.error('Error enriching booking', bookingData.id, e);
+          bookingData.contact = bookingData.contact || 'N/A';
+          bookingData.specialization = bookingData.specialization || 'N/A';
+        }
+
+        return bookingData;
+      })
+    );
+
+    bookings.value = enriched;
     
   } catch (error) {
     console.error('Error fetching completed bookings:', error);

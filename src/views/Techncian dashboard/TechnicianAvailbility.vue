@@ -485,7 +485,7 @@ export default {
   margin-left: 14rem;
   background-color: #faf8fd;
 }
-.body{
+.dark .main-layout{
   background-color: var(--primary-bg);
 }
  .page-title {
@@ -494,6 +494,30 @@ export default {
    font-weight: 700;
    margin-bottom: 2rem;
    font-family: Outfit, sans-serif;
+ }
+
+ /* Responsive with sidebar */
+ @media (max-width: 768px) {
+  .main-layout {
+    margin-left: 0;   /* sidebar becomes horizontal */
+    height: auto;
+    min-height: auto;
+    margin-top: 40px;
+
+  }
+ }
+ .title-search-row{
+  flex-wrap: nowrap;
+  flex-direction: row;
+  align-items: center;
+ }
+
+ @media (max-width: 480px) {
+  .main-layout {
+    margin: 0;        /* ensure no outer margins on phones */
+    height: auto;
+    min-height: auto;
+  }
  }
 
 .dark .page-title {

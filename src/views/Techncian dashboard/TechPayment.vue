@@ -328,13 +328,13 @@ export default {
 
 <style scoped>
 .main-content {
-  display: flex;
   min-height: 100vh;
-  
   margin-left: 14rem;
   background-color: #faf8fd;
 }
-
+.dark .main-content {
+  background-color: var(--primary-bg);
+}
 .payment-content {
   flex: 1;
   width: auto;

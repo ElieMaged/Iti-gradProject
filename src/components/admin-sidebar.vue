@@ -62,16 +62,16 @@
           <div class="dropdown-menu" v-show="showBooking">
             <router-link to="/booking-upcoming" 
                          class="dropdown-status-link" 
-                         :class="{ 'active-status-link': isBookingStatusActive('upcoming') }">{{ $t('upcoming') }}</router-link>
+                         :class="{ active: isBookingStatusActive('upcoming') }">{{ $t('upcoming') }}</router-link>
             <router-link to="/booking-pending" 
                          class="dropdown-status-link" 
-                         :class="{ 'active-status-link': isBookingStatusActive('pending') }">{{ $t('pending') }}</router-link>
+                         :class="{ active: isBookingStatusActive('pending') }">{{ $t('pending') }}</router-link>
             <router-link to="/booking-completed" 
                          class="dropdown-status-link" 
-                         :class="{ 'active-status-link': isBookingStatusActive('completed') }">{{ $t('completed') }}</router-link>
+                         :class="{ active: isBookingStatusActive('completed') }">{{ $t('completed') }}</router-link>
             <router-link to="/booking-canceled" 
                          class="dropdown-status-link" 
-                         :class="{ 'active-status-link': isBookingStatusActive('canceled') }">{{ $t('canceled') }}</router-link>
+                         :class="{ active: isBookingStatusActive('canceled') }">{{ $t('canceled') }}</router-link>
           </div>
         </div>
         
@@ -470,28 +470,34 @@ const showBooking = ref(false);
   @media (max-width: 768px) {
     .layout {
       flex-direction: column;
-      max-height: 10vh;
+      max-height: none;
+      height: auto;
     }
     
     .sidebar {
-      width: 100vw;
+      width: 100%;
       flex-direction: row;
-      padding: 1rem;
-      justify-content: space-between;
+      padding: 0.5rem;
       align-items: center;
+      justify-content: start;
       flex-wrap: wrap;
-      gap: 0.5rem;
       margin: 0 !important;
+      justify-content: center;
       box-sizing: border-box;
+      min-height: auto;
+      height: auto;
     }
-    
+    .sidebar-header {
+      padding: 0;
+      
+    }
     .sidebar-item {
       width: auto;
-      padding: 0.5rem 1rem;
+      padding: 0;
       font-size: 0.875rem;
       border-radius: 8px;
       min-width: fit-content;
-      margin: 0 20px;
+      margin: 0 10px;
     }
     
     .sidebar-item span {
@@ -550,17 +556,20 @@ const showBooking = ref(false);
   
   @media (max-width: 480px) {
     .sidebar {
-      padding: 0.75rem;
+      padding: 0.5rem;
       gap: 0.25rem;
+      min-height: auto;
+      height: auto;
     }
     
     .layout {
       margin-top: 30px;
-      max-height: 10vh;
+      max-height: none;
+      height: auto;
     }
     
     .sidebar-item {
-      padding: 0.375rem 0.75rem;
+      padding: 0.5rem;
       font-size: 0.75rem;
     }
     

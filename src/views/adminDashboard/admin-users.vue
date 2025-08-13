@@ -36,10 +36,10 @@
               <tr class="table-header">
                 <th>{{ $t('no') }}</th>
                 <th>{{ $t('user') }}</th>
-                <th>{{ $t('role') }}</th>
-                <th>{{ $t('location') }}</th>
-                <th>{{ $t('mail') }}</th>
                 <th>{{ $t('contact') }}</th>
+                <th>{{ $t('location') }}</th>
+                <th>{{ $t('role') }}</th>
+                <th>{{ $t('mail') }}</th>
                 <th>{{ $t('action') }}</th>
               </tr>
             </thead>
@@ -54,14 +54,14 @@
                   <img :src="user.avatar || 'https://randomuser.me/api/portraits/men/1.jpg'" :alt="user.name" class="user-avatar">
                   {{ user.name }}
                 </td>
+                <td>{{ user.contact || 'N/A' }}</td>
+                <td>{{ user.location || 'N/A' }}</td>
                 <td>
                   <span class="role-badge" :class="user.role">
                     {{ $t(user.role) }}
                   </span>
                 </td>
-                <td>{{ user.location || 'N/A' }}</td>
                 <td>{{ user.email }}</td>
-                <td>{{ user.contact || 'N/A' }}</td>
                 <td class="action-cell">
                   <a @click="viewUser(user)" class="action-btn view-btn" :title="$t('viewUser')">
                     <i class="fas fa-eye"></i>

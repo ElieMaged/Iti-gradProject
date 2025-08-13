@@ -537,8 +537,17 @@ onMounted(() => {
 @media (max-width: 768px) {
   .admin-dashboard-layout {
     flex-direction: column;
+    margin-left: 0;
+    height: auto;
+    min-height: auto;
+    margin-top: 40px;
   }
-  
+  .title-search-row{
+    flex-wrap: nowrap;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+  }
   .edit-profile-main {
     margin-left: 0;
     margin-right: 0;
@@ -634,8 +643,16 @@ onMounted(() => {
 }
 
 @media (max-width: 480px) {
+  .admin-dashboard-layout {
+    margin: 0;        /* remove any left/top margins */
+    height: auto;     /* no fixed viewport height */
+    min-height: auto;
+  }
   .edit-profile-main {
     padding: 0.5rem;
+    margin: 0;        /* ensure no extra margins on content */
+    height: auto;
+    min-height: auto;
   }
   
   .edit-profile-card {

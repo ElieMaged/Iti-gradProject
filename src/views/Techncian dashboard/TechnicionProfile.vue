@@ -353,6 +353,7 @@ this.profileImageUrl = data.profilePhotoUrl || this.profileImageUrl;      } else
 @media (max-width: 900px) {
   .admin-dashboard-layout {
     flex-direction: column;
+    
   }
   
   #admin-profile-container {
@@ -393,205 +394,238 @@ this.profileImageUrl = data.profilePhotoUrl || this.profileImageUrl;      } else
     font-size: 3rem;
   }
 }
-
 @media (max-width: 768px) {
-  #admin-profile-container {
-    padding: 0.75rem;
+  .admin-dashboard-layout {
+    flex-direction: column;
+    margin-left: 0;
+    height: auto;
+    min-height: auto;
+    margin-top: 40px;
   }
-  
-  #admin-profile-card {
-    padding: 1.25rem;
+  .mx-12{
+    margin-left: 0 !important;
+    margin-right: 0 !important;
   }
-  
-  #admin-profile-title {
-    font-size: 1.25rem;
-    margin-bottom: 1rem;
-    text-align: left;
-  }
-  
-  #admin-profile-info {
-    grid-template-columns: 1fr;
-    gap: 0.875rem;
-  }
-  
-  .info-block {
-    padding: 0.75rem;
-    background-color: #f9fafb;
-    border-radius: 0.5rem;
-  }
-  
-  .dark .info-block {
-    background-color: var(--secondary-bg);
-  }
-  
-  .info-label {
-    font-size: 0.875rem;
-  }
-  
-  .info-value {
-    font-size: 0.8125rem;
-    margin-top: 0.125rem;
-  }
-  
-  #admin-profile-image {
-    width: 6rem;
-    height: 6rem;
-    display: flex;
-    justify-content: center;
+  .title-search-row{
+    flex-wrap: nowrap;
+    flex-direction: row;
     align-items: center;
-    background-color: #e5e7eb;
-    border-radius: 0.5rem;
+    width: 100%;
   }
-  
-  #profile-icon {
-    font-size: 2.5rem;
-  }
-}
-
-@media (max-width: 600px) {
-  #admin-profile-container {
-    padding: 0.5rem;
-  }
-  
-  #admin-profile-card {
+  .edit-profile-main {
+    margin-left: 0;
+    margin-right: 0;
     padding: 1rem;
   }
   
-  .page-title {
-    font-size: 1.125rem;
-    margin-bottom: 0.875rem;
+  .edit-profile-card {
+    padding: 1.5rem;
+    border-radius: 0.75rem;
   }
   
-  #admin-profile-content {
-    gap: 1.25rem;
+  .edit-profile-content {
+    flex-direction: column;
+    gap: 1.5rem;
   }
   
-  #admin-profile-info {
-    gap: 0.75rem;
+  .edit-profile-fields {
+    grid-template-columns: 1fr;
+    gap: 1rem;
   }
   
-  .info-block {
-    padding: 0.625rem;
+  .edit-profile-image-section {
+    order: -1;
+    align-self: center;
   }
   
-  .info-label {
-    font-size: 0.8125rem;
-  }
-  
-  .info-value {
-    font-size: 0.75rem;
-  }
-  
-  #admin-profile-image {
-    width: 5rem;
-    height: 5rem;
+  /* Mobile: Image at top, fields below */
+  .profile-image-mobile {
+    order: -1;
+    margin-bottom: 1.5rem;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    background-color: #e5e7eb;
-    border-radius: 0.5rem;
+    gap: 1rem;
   }
   
-  #profile-icon {
-    font-size: 2rem;
+  .profile-image-container {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .profile-image-placeholder {
+    font-size: 2.5rem;
+  }
+  
+  /* Mobile: Image at top, fields below */
+  .profile-image-mobile {
+    order: -1;
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .edit-profile-address {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .edit-profile-header h2 {
+    font-size: 1.25rem;
+    text-align: left;
+  }
+  
+  .edit-profile-actions {
+    justify-content: center;
+  }
+  
+  .save-btn {
+    width: 100%;
+    max-width: 300px;
+    padding: 0.875rem 2rem;
+    font-size: 1rem;
+  }
+  
+  .radio-group {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .radio-option {
+    padding: 0.5rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 0.5rem;
+    background: #f8f9fa;
+  }
+  
+  .dark .radio-option {
+    background: var(--input-bg);
+    border-color: var(--border-color);
   }
 }
 
 @media (max-width: 480px) {
-  #admin-profile-container {
-    padding: 0.375rem;
+  .admin-dashboard-layout {
+    margin: 0;        /* remove any left/top margins */
+    height: auto;     /* no fixed viewport height */
+    min-height: auto;
   }
-  
-  #admin-profile-card {
-    padding: 0.875rem;
-  }
-  
-  .page-title {
-    font-size: 1rem;
-    margin-bottom: 0.75rem;
-  }
-  
-  #admin-profile-content {
-    gap: 1rem;
-  }
-  
-  #admin-profile-info {
-    gap: 0.625rem;
-  }
-  
-  .info-block {
+  .edit-profile-main {
     padding: 0.5rem;
+    margin: 0;        /* ensure no extra margins on content */
+    height: auto;
+    min-height: auto;
   }
   
-  .info-label {
-    font-size: 0.75rem;
-  }
-  
-  .info-value {
-    font-size: 0.6875rem;
-  }
-  
-  #admin-profile-image {
-    width: 4rem;
-    height: 4rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #e5e7eb;
+  .edit-profile-card {
+    padding: 1rem;
     border-radius: 0.5rem;
   }
   
-  #profile-icon {
-    font-size: 1.75rem;
+  .edit-profile-header h2 {
+    font-size: 1.125rem;
+    margin-bottom: 1rem;
+  }
+  
+  .edit-profile-fields label {
+    font-size: 0.875rem;
+  }
+  
+  .edit-profile-fields input,
+  .edit-profile-fields select,
+  .edit-profile-fields textarea {
+    padding: 0.75rem;
+    font-size: 0.875rem;
+  }
+  
+  .edit-profile-address label {
+    font-size: 0.875rem;
+  }
+  
+  .edit-profile-address select {
+    padding: 0.75rem;
+    font-size: 0.875rem;
+  }
+  
+  .profile-image-container {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .profile-image-placeholder {
+    font-size: 2rem;
+  }
+  
+  /* Mobile: Image at top, fields below */
+  .profile-image-mobile {
+    order: -1;
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .upload-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .save-btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.875rem;
+  }
+  
+  .edit-profile-section h3 {
+    font-size: 1rem;
   }
 }
 
 @media (max-width: 360px) {
-  #admin-profile-container {
-    padding: 0.25rem;
-  }
-  
-  #admin-profile-card {
+  .edit-profile-card {
     padding: 0.75rem;
   }
   
-  .page-title {
-    font-size: 0.875rem;
-    margin-bottom: 0.625rem;
+  .edit-profile-fields {
+    gap: 0.75rem;
   }
   
-  #admin-profile-content {
-    gap: 0.875rem;
+  .edit-profile-fields input,
+  .edit-profile-fields select,
+  .edit-profile-fields textarea {
+    padding: 0.625rem;
+    font-size: 0.8125rem;
   }
   
-  #admin-profile-info {
-    gap: 0.5rem;
+  .profile-image-container {
+    width: 70px;
+    height: 70px;
   }
   
-  .info-block {
-    padding: 0.375rem;
+  .profile-image-placeholder {
+    font-size: 1.75rem;
   }
   
-  .info-label {
-    font-size: 0.6875rem;
-  }
-  
-  .info-value {
-    font-size: 0.625rem;
-  }
-  
-  #admin-profile-image {
-    width: 3.5rem;
-    height: 3.5rem;
+  /* Mobile: Image at top, fields below */
+  .profile-image-mobile {
+    order: -1;
+    margin-bottom: 1.5rem;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    background-color: #e5e7eb;
-    border-radius: 0.5rem;
+    gap: 1rem;
   }
   
-  #profile-icon {
-    font-size: 1.5rem;
+  .upload-btn {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8125rem;
+  }
+  
+  .save-btn {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.8125rem;
   }
 }
 </style>

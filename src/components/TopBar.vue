@@ -218,7 +218,6 @@ export default {
   }
 
   .filter-search-bar {
-    width: 100%;
     flex-direction: column;
     height: auto;
     padding: 1rem;

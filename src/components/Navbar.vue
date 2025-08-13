@@ -1158,6 +1158,8 @@ body.navbar-fixed {
   display: block;
   width: calc(100% - 1.5rem);
   border-bottom: 1px solid rgba(107, 79, 161, 0.1);
+  text-decoration: none;
+
 }
 
 .mobile-submenu-link:first-child {
@@ -1198,7 +1200,7 @@ body.navbar-fixed {
 
 .mobile-submenu-link .mobile-link-icon {
   position: absolute;
-  left: 1.25rem;
+  left: 0.25rem;
   top: 50%;
   transform: translateY(-50%);
   font-size: 1rem;
@@ -1320,6 +1322,7 @@ body.navbar-fixed {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  margin-bottom: 3rem;
 }
 
 .mobile-login-btn {

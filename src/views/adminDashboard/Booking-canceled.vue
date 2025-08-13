@@ -34,6 +34,7 @@
             <thead>
               <tr class="table-header">
                 <th>{{ $t('userName') }}</th>
+                <th>{{ $t('phone') }}</th>
                 <th>{{ $t('technician') }}</th>
                 <th>{{ $t('specialization') }}</th>
                 <th>{{ $t('date') }}</th>
@@ -46,6 +47,7 @@
             <tbody>
               <tr v-for="(booking, index) in paginatedBookings" :key="booking.id" class="table-row">
                 <td>{{ booking.userName }}</td>
+                <td>{{ booking.userPhone }}</td>
                 <td>{{ booking.technicianName }}</td>
                 <td>{{ booking.specialization }}</td>
                 <td>{{ booking.date }}</td>
@@ -79,7 +81,7 @@
 
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import AdminSidebar from '../../components/admin-sidebar.vue';
 import Pagination from '../../components/pagination.vue';
@@ -106,11 +108,62 @@ async function fetchBookings() {
     
     const q = query(collection(db, 'bookings'), where('status', '==', 'canceled'));
     const querySnapshot = await getDocs(q);
-    
-    bookings.value = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+
+    const enriched = await Promise.all(
+      querySnapshot.docs.map(async (snapshot) => {
+        const bookingData = { id: snapshot.id, ...snapshot.data() };
+
+        try {
+          // Fetch user contact (phone)
+          if (bookingData.userId) {
+            const userRef = doc(db, 'users', bookingData.userId);
+            const userSnap = await getDoc(userRef);
+            if (userSnap.exists()) {
+              const user = userSnap.data();
+              bookingData.contact = bookingData.contact || user.phone || user.phoneNumber || 'N/A';
+              bookingData.userName = bookingData.userName || user.name || user.fullName || user.displayName || 'N/A';
+            } else {
+              bookingData.contact = bookingData.contact || 'N/A';
+            }
+          }
+
+          // Fetch technician specialization
+          if (bookingData.technicianId) {
+            const techRef = doc(db, 'technicians', bookingData.technicianId);
+            const techSnap = await getDoc(techRef);
+            if (techSnap.exists()) {
+              const tech = techSnap.data();
+              const specialization = tech.specialization ||
+                                     tech.service ||
+                                     tech.services ||
+                                     tech.category ||
+                                     tech.type ||
+                                     tech.jobType ||
+                                     tech.workType ||
+                                     tech.profession ||
+                                     tech.trade ||
+                                     tech.skill ||
+                                     tech.skills ||
+                                     'N/A';
+              bookingData.specialization = bookingData.specialization || specialization;
+              bookingData.technicianName = bookingData.technicianName || tech.name || tech.fullName || tech.displayName || 'N/A';
+            } else {
+              bookingData.specialization = bookingData.specialization || 'N/A';
+            }
+          } else {
+            bookingData.specialization = bookingData.specialization || 'N/A';
+          }
+        } catch (e) {
+          console.error('Error enriching booking', bookingData.id, e);
+          bookingData.contact = bookingData.contact || 'N/A';
+          bookingData.specialization = bookingData.specialization || 'N/A';
+        }
+
+        return bookingData;
+      })
+    );
+
+    bookings.value = enriched;
     
   } catch (error) {
     console.error('Error fetching canceled bookings:', error);
@@ -370,14 +423,7 @@ watch(searchQuery, () => {
   color: var(--primary-bg);
 }
 
-.retry-btn:hover {
-  background: #6b5fa7;
-}
 
-.dark .retry-btn:hover {
-  background-color: var(--primary-text);
-  color: var(--primary-bg);
-}
 
 /* Empty State */
 .empty-state {
@@ -484,17 +530,8 @@ watch(searchQuery, () => {
   font-weight: 600;
   padding: 0.25rem 0.75rem;
   border-radius: 1rem;
-  border: 1px solid #991b1b;
   transition: all 0.2s ease;
   cursor: pointer;
-}
-
-.status-canceled:hover {
-  background: var(--primary-color);
-  color: white !important;
-  border-color: var(--primary-color);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 @media (max-width: 768px) {
