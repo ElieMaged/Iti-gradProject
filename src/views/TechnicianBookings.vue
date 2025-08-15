@@ -360,8 +360,8 @@ watch(() => route.query.status, (newStatus) => {
     padding: 1rem;
   }
   .title-search-row {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
     gap: 1rem;
   }
   .search-wrapper {

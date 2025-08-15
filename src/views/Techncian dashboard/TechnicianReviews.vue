@@ -578,9 +578,6 @@ export default {
 
 /* Enhanced Responsive Design */
 @media (max-width: 1200px) {
-  #admin-profile-wrapper {
-    max-width: 95%;
-  }
   
   #admin-profile-title {
     font-size: 1.375rem;
@@ -614,9 +611,6 @@ export default {
 }
 
 @media (max-width: 900px) {
-  .admin-dashboard-layout {
-    flex-direction: column;
-  }
   
   #admin-profile-container {
     margin-right: 0;
@@ -644,10 +638,23 @@ export default {
 }
 
 @media (max-width: 768px) {
+  .layout-container{
+    flex-direction: row;
+  }
+  .admin-dashboard-layout {
+    margin-left: 0;
+  }
   #admin-profile-container {
     padding: 0.5rem;
+    margin-left: 0;
   }
   
+  .title-search-row{
+    flex-direction: row;
+    align-items: center;
+    margin-top: 4rem;
+    gap: 1rem;
+  }
   #admin-profile-card {
     padding: 0.75rem;
   }
@@ -655,6 +662,7 @@ export default {
   #admin-profile-title {
     font-size: 1rem;
     text-align: left;
+
   }
   
   .summary-card {

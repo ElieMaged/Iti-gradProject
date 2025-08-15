@@ -1110,6 +1110,9 @@ onMounted(() => {
 }
 
 @media (max-width: 900px) {
+  .main-layout{
+    margin-left: 0 !important;
+  }
   .flex {
     flex-direction: column;
   }
@@ -1121,6 +1124,7 @@ onMounted(() => {
   .technician-dashboard-layout {
     margin-right: 0;
     padding: 0.75rem;
+    margin-left: 0 !important;
   }
   
   .booking-main {
@@ -1132,9 +1136,10 @@ onMounted(() => {
   }
   
   .title-search-row {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
     gap: 1rem;
+    margin-top: 10px;
   }
   
   .search-wrapper {
@@ -1354,7 +1359,9 @@ onMounted(() => {
   .flex-1.p-8 {
     padding: 0.25rem;
   }
-  
+  .layout-container{
+    flex-direction: row;
+  }
   .technician-dashboard-layout {
     padding: 0.125rem;
   }

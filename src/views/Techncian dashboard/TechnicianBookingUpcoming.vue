@@ -673,13 +673,17 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
+  .main-layout{
+    margin-left: 0 !important;
+  }
   .booking-main {
     padding: 1rem;
   }
   .title-search-row {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
     gap: 1rem;
+    margin-top: 10px;
   }
   .action-row {
     flex-direction: column;
@@ -757,9 +761,10 @@ onMounted(() => {
   }
   
   .title-search-row {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
     gap: 1rem;
+    margin-top: 1rem;
   }
   
   .search-wrapper {
@@ -805,11 +810,6 @@ onMounted(() => {
   .search-input {
     font-size: 0.875rem;
     padding: 0 12px 0 45px;
-  }
-  
-  .search-icon {
-    font-size: 1rem;
-    padding: 20px;
   }
   
   .table-wrapper {
@@ -872,10 +872,6 @@ onMounted(() => {
     padding: 0 10px 0 40px;
   }
   
-  .search-icon {
-    font-size: 0.875rem;
-    padding: 20px;
-  }
   
   .booking-table {
     min-width: 700px;
@@ -938,11 +934,6 @@ onMounted(() => {
     padding: 0 8px 0 38px;
   }
   
-  .search-icon {
-    left: 4px;
-    font-size: 0.8125rem;
-    padding: 4px;
-  }
   
   .booking-table {
     min-width: 600px;
@@ -981,6 +972,9 @@ onMounted(() => {
   .flex-1.p-8 {
     padding: 0.25rem;
   }
+  .layout-container{
+    flex-direction: row !important;
+  }
   
   .technician-dashboard-layout {
     padding: 0.125rem;
@@ -1010,11 +1004,6 @@ onMounted(() => {
     padding: 0 6px 0 36px;
   }
   
-  .search-icon {
-    left: 2px;
-    font-size: 0.75rem;
-    padding: 3px;
-  }
   
   .booking-table {
     min-width: 550px;
@@ -1025,6 +1014,11 @@ onMounted(() => {
   .table-row td {
     padding: 0.125rem 0.125rem;
     font-size: 0.5625rem;
+  }
+  .search-icon {
+    left: 2px;
+    font-size: 0.75rem;
+    padding: 20px;
   }
   
   .booking-status {

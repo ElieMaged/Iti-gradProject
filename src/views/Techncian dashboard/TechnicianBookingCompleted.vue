@@ -552,6 +552,11 @@ onMounted(() => {
     padding: 0.625rem 0.75rem;
     font-size: 0.875rem;
   }
+  
+  /* Remove sidebar offset on tablets and smaller */
+  .main-layout {
+    margin-left: 0;
+  }
 }
 
 @media (max-width: 900px) {
@@ -565,6 +570,7 @@ onMounted(() => {
   
   .admin-dashboard-layout {
     margin-right: 0;
+    margin-left: 0; /* ensure no left margin on mobile */
     padding: 0.75rem;
   }
   
@@ -577,9 +583,10 @@ onMounted(() => {
   }
   
   .title-search-row {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
     gap: 1rem;
+    margin-top: 1rem;
   }
   
   .search-wrapper {
@@ -799,7 +806,9 @@ onMounted(() => {
   }
   
   .title-search-row {
-    gap: 0.5rem;
+    gap: 0rem;
+    flex-wrap: nowrap;
+    margin-top: 1rem;
   }
   
   .search-wrapper {

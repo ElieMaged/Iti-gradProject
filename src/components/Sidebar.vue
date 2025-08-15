@@ -430,6 +430,7 @@ body {
       box-sizing: border-box;
       min-height: auto;
       height: auto;
+      overflow: visible; /* allow dropdown to overflow sidebar on mobile */
     }
     .sidebar-header {
       padding: 0;
@@ -467,8 +468,8 @@ body {
       border: 1px solid #e5e7eb;
       border-radius: 8px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      z-index: 10;
-      margin: 0;
+      z-index: 2000; /* ensure it appears above surrounding content */
+      margin-top: 10px;
       width: auto;
     }
     

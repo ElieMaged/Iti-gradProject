@@ -672,9 +672,10 @@ export default {
   }
   
   .page-header {
-    flex-direction: column;
+    flex-direction: row;
     gap: 1rem;
-    align-items: flex-start;
+    align-items: center;
+    margin-top: 2rem;
   }
   
   .refresh-btn {
@@ -917,6 +918,9 @@ export default {
 }
 
 @media (max-width: 768px) {
+  .main-content{
+    margin-left: 0 !important;
+  }
   .transactions-section {
     margin: 16px 0 16px 0;
     padding: 16px 12px 12px 12px;
@@ -1022,6 +1026,9 @@ export default {
 }
 
 @media (max-width: 360px) {
+  .layout-container{
+    flex-direction: row;
+  }
   .payment-content {
     padding: 0.25rem 0 0 0;
   }
