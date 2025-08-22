@@ -31,6 +31,7 @@ const formData = reactive({
 const error = ref('');
 const errors = ref({});
 const showTermsModal = ref(false);
+const phoneError = ref(false);
 
 const governmentOptions = getGovernmentNames();
 const districtOptions = computed(() => {
@@ -108,10 +109,28 @@ const validateName = (name) => name.length >= 2 && /^[a-zA-Z\s]+$/.test(name);
 const validateRequired = (value) => value !== null && value !== undefined && String(value).trim().length > 0;
 // Egyptian phone validation: supports local (11 digits starting 01x) and international (+20 or 0020)
 const validateEgyptianPhone = (phone) => {
+  if (!phone) return false;
   const cleaned = String(phone).replace(/\s|-/g, '');
   const local = /^01[0125][0-9]{8}$/; // e.g., 010xxxxxxxx, 011xxxxxxxx, 012xxxxxxxx, 015xxxxxxxx
   const intl = /^(?:\+20|0020)1[0125][0-9]{8}$/; // e.g., +2010xxxxxxxx or 002010xxxxxxxx
   return local.test(cleaned) || intl.test(cleaned);
+};
+
+// Phone number validation with real-time feedback
+const validatePhoneNumber = () => {
+  if (!formData.phone) {
+    phoneError.value = false;
+    return false;
+  }
+  
+  // Remove any non-digit characters except + for validation
+  const cleanedPhone = formData.phone.replace(/[^\d+]/g, '');
+  
+  // Check if the phone number matches Egyptian format (local, +20, or 0020)
+  const phoneRegex = /^(01[0125]\d{8}|\+?201[0125]\d{8}|00201[0125]\d{8})$/;
+  phoneError.value = !phoneRegex.test(cleanedPhone);
+  
+  return !phoneError.value;
 };
 
 // Main validation function
@@ -170,8 +189,8 @@ const validateForm = () => {
 
   if (!validateRequired(formData.phone)) {
     errors.value.phone = t('phoneRequired');
-  } else if (!validateEgyptianPhone(formData.phone)) {
-    errors.value.phone = t('phoneInvalid');
+  } else if (!validatePhoneNumber()) {
+    errors.value.phone = t('enterValidEgyptianPhone');
   }
 
   if (!formData.agreeTerms) {
@@ -283,6 +302,27 @@ const closeTermsModal = () => {
         <p v-if="errors.lastName" class="error-message">{{ errors.lastName }}</p>
       </div>
 
+      <!-- phone number -->
+      <div class="form-group">
+        <label for="phone" class="form-label">{{ $t('phoneNumber') }}</label>
+        <input 
+          type="tel" 
+          id="phone" 
+          v-model="formData.phone" 
+          @input="validatePhoneNumber"
+          class="form-input" 
+          :class="{ 'error': phoneError || errors.phone }"
+          :placeholder="$t('phoneNumber')" 
+          inputmode="tel"
+          pattern="^(01[0125][0-9]{8}|(?:\\+20|0020)1[0125][0-9]{8})$"
+          :title="$t('enterValidEgyptianPhone')"
+          required 
+        />
+        <p v-if="phoneError || errors.phone" class="error-message">
+          {{ $t('enterValidEgyptianPhone') || 'Please enter a valid Egyptian phone number (e.g., 01XXXXXXXXX, +201XXXXXXXXX, or 00201XXXXXXXXX)' }}
+        </p>
+      </div>
+
       <!-- email -->
       <div class="form-group">
         <label for="email" class="form-label">{{ $t('email') }}</label>
@@ -304,23 +344,6 @@ const closeTermsModal = () => {
         <p v-if="errors.email" class="error-message">{{ errors.email }}</p>
       </div>
 
-      <!-- phone -->
-      <div class="form-group">
-        <label for="phone" class="form-label">{{ $t('phone') }}</label>
-        <input 
-          type="text" 
-          id="phone" 
-          v-model="formData.phone" 
-          class="form-input" 
-          :class="{ 'error': errors.phone }"
-          inputmode="tel"
-          pattern="^(01[0125][0-9]{8}|(?:\\+20|0020)1[0125][0-9]{8})$"
-          :title="$t('enterValidEgyptianPhone')"
-          :placeholder="$t('phone')" 
-          required 
-        />
-        <p v-if="errors.phone" class="error-message">{{ errors.phone }}</p>
-      </div>
 
       <!-- gender -->
       <div class="form-group">

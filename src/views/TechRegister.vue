@@ -48,13 +48,17 @@
               type="tel" 
               id="phoneNumber" 
               v-model="formData.phoneNumber" 
-              class="form-input" 
+              @input="validatePhoneNumber"
+              :class="['form-input', { 'error': phoneError }]"
               :placeholder="$t('phoneNumber')" 
               inputmode="tel"
               pattern="^(01[0125][0-9]{8}|(?:\\+20|0020)1[0125][0-9]{8})$"
               :title="$t('enterValidEgyptianPhone')"
               required 
             />
+            <p v-if="phoneError" class="error-message">
+              {{ $t('enterValidEgyptianPhone') || 'Please enter a valid Egyptian phone number (e.g., 01XXXXXXXXX, +201XXXXXXXXX, or 00201XXXXXXXXX)' }}
+            </p>
           </div>
 
           <div class="form-group">
@@ -452,6 +456,8 @@ const error = ref('');
 const success = ref('');
 const showTermsModal = ref(false);
 
+const phoneError = ref(false);
+
 const formData = reactive({
   fullName: '',
   email: '',
@@ -510,6 +516,23 @@ const isPasswordValid = computed(() => {
     passwordValidation.special;
 });
 
+// Phone number validation
+const validatePhoneNumber = () => {
+  if (!formData.phoneNumber) {
+    phoneError.value = false;
+    return false;
+  }
+  
+  // Remove any non-digit characters except + for validation
+  const cleanedPhone = formData.phoneNumber.replace(/[^\d+]/g, '');
+  
+  // Check if the phone number matches Egyptian format (local, +20, or 0020)
+  const phoneRegex = /^(01[0125]\d{8}|\+?201[0125]\d{8}|00201[0125]\d{8})$/;
+  phoneError.value = !phoneRegex.test(cleanedPhone);
+  
+  return !phoneError.value;
+};
+
 // Email validation (stricter): trims, rejects consecutive dots, leading/trailing dots or hyphens in labels
 const validateEmail = (email) => {
   if (!email) return false;
@@ -564,62 +587,78 @@ function handleProfileFileChange(event) {
   }
 }
 
+const validateForm = () => {
+  // Validate email
+  if (!formData.email || String(formData.email).trim().length === 0) {
+    error.value = t('emailRequired') || 'Email is required';
+    return false;
+  }
+  
+  const trimmedEmail = String(formData.email).trim();
+  if (!validateEmail(trimmedEmail)) {
+    error.value = t('enterValidEmail') || 'Please enter a valid email address';
+    return false;
+  }
+  
+  // Validate phone number
+  if (!formData.phoneNumber || String(formData.phoneNumber).trim().length === 0) {
+    error.value = t('phoneRequired') || 'Phone number is required';
+    return false;
+  }
+  
+  if (!validatePhoneNumber()) {
+    error.value = t('enterValidEgyptianPhone') || 'Please enter a valid Egyptian phone number';
+    return false;
+  }
+  
+  // Validate password match
+  if (formData.password !== formData.confirmPassword) {
+    error.value = t('passwordsDoNotMatch') || 'Passwords do not match';
+    return false;
+  }
+  
+  // Validate password strength
+  if (!isPasswordValid.value) {
+    error.value = t('passwordTooWeak') || 'Password does not meet requirements';
+    return false;
+  }
+  
+  error.value = '';
+  return true;
+};
+
 async function handleRegister() {
+  // Reset messages
   error.value = '';
   success.value = '';
   
-  // Email validation
-  if (!formData.email || String(formData.email).trim().length === 0) {
-    error.value = t('emailRequired');
-    return;
-  }
-  formData.email = String(formData.email).trim();
-  if (!validateEmail(formData.email)) {
-    error.value = t('emailInvalid');
-    return;
-  }
-
-  // Phone validation
-  if (!formData.phoneNumber || String(formData.phoneNumber).trim().length === 0) {
-    error.value = t('phoneRequired');
-    return;
-  }
-  if (!validateEgyptianPhone(formData.phoneNumber)) {
-    error.value = t('phoneInvalid');
-    return;
-  }
-
-  // Password validation
-  if (!isPasswordValid.value) {
-    error.value = t('passwordRequirementsNotMet');
+  // Validate form before submission
+  if (!validateForm()) {
     return;
   }
   
-  if (formData.password !== formData.confirmPassword) {
-    error.value = t('passwordsDoNotMatch');
-    return;
-  }
-  
+  // Additional validations
   if (!formData.confirmInfo || !formData.agreeTerms) {
-    error.value = t('pleaseConfirmCheckboxes');
+    error.value = t('pleaseConfirmCheckboxes') || 'Please confirm the checkboxes';
     return;
   }
   
   if (!formData.idPhotoBase64) {
-    error.value = 'Please upload your ID photo';
+    error.value = t('idPhotoRequired') || 'Please upload your ID photo';
     return;
   }
   
   if (!formData.profilePhotoBase64) {
-    error.value = 'Please upload a profile picture';
+    error.value = t('profilePhotoRequired') || 'Please upload a profile picture';
     return;
   }
   
+  // Set loading state
   loading.value = true;
   
   // Add timeout to prevent hanging
   const timeoutPromise = new Promise((_, reject) => {
-    setTimeout(() => reject(new Error('Registration timeout - taking too long')), 30000); // 30 second timeout
+    setTimeout(() => reject(new Error(t('registrationTimeout') || 'Registration timeout - taking too long')), 30000);
   });
   
   try {
