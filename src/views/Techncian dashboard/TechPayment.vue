@@ -332,6 +332,12 @@ export default {
   margin-left: 14rem;
   background-color: #faf8fd;
 }
+.layout-container{
+  background-color: #faf8fd;
+}
+.dark .layout-container{
+  background-color: var(--primary-bg);
+}
 .dark .main-content {
   background-color: var(--primary-bg);
 }
@@ -1028,6 +1034,7 @@ export default {
 @media (max-width: 360px) {
   .layout-container{
     flex-direction: row;
+
   }
   .payment-content {
     padding: 0.25rem 0 0 0;

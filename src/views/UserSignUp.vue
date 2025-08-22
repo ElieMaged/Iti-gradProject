@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, reactive, watch } from 'vue';
+
 import { useRouter } from 'vue-router';
 import { auth, db } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
@@ -21,7 +22,7 @@ const formData = reactive({
   confirmPass: '',
   gender: '',
   age: '',
-  address: '', // <-- add this line
+  address: '', 
   government: '',
   district: '',
   agreeTerms: false,
@@ -38,14 +39,80 @@ const districtOptions = computed(() => {
 watch(() => formData.government, () => { formData.district = ''; });
 
 // Validation functions
-const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-const validatePassword = (password) => password.length >= 8;
+// Stricter email validation: basic RFC-like pattern + extra guards for dots/hyphens
+const validateEmail = (email) => {
+  if (!email) return false;
+  const trimmed = String(email).trim();
+  // Basic pattern
+  const basic = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+  if (!basic.test(trimmed)) return false;
+  const [local, domain] = trimmed.split('@');
+  // No consecutive dots
+  if (local.includes('..') || domain.includes('..')) return false;
+  // Local part cannot start/end with dot
+  if (local.startsWith('.') || local.endsWith('.')) return false;
+  // Domain labels cannot start/end with hyphen and must be non-empty
+  const labels = domain.split('.');
+  if (labels.some(label => !label || label.startsWith('-') || label.endsWith('-'))) return false;
+  return true;
+};
+const passwordValidation = reactive({
+  length: false,
+  uppercase: false,
+  lowercase: false,
+  number: false,
+  special: false,
+  match: false,
+});
+
+// Real-time checks
+watch(() => formData.password, (newPassword) => {
+  passwordValidation.length = newPassword.length >= 8;
+  passwordValidation.uppercase = /[A-Z]/.test(newPassword);
+  passwordValidation.lowercase = /[a-z]/.test(newPassword);
+  passwordValidation.number = /\d/.test(newPassword);
+  passwordValidation.special = /[!@#$%^&*(),.?":{}|<>]/.test(newPassword);
+  // update match as well when password changes
+  passwordValidation.match = formData.confirmPass === newPassword && formData.confirmPass.length > 0;
+});
+
+watch(() => formData.confirmPass, (newConfirm) => {
+  passwordValidation.match = newConfirm === formData.password && newConfirm.length > 0;
+});
+
+const isPasswordValid = computed(() => {
+  return (
+    passwordValidation.length &&
+    passwordValidation.uppercase &&
+    passwordValidation.lowercase &&
+    passwordValidation.number &&
+    passwordValidation.special
+  );
+});
+
+const validatePassword = (password) => {
+  return (
+    password.length >= 8 &&
+    /[A-Z]/.test(password) &&
+    /[a-z]/.test(password) &&
+    /\d/.test(password) &&
+    /[!@#$%^&*(),.?":{}|<>]/.test(password)
+  );
+};
+
 const validateAge = (age) => {
   const ageNum = parseInt(age);
   return ageNum >= 18 && ageNum <= 120;
 };
 const validateName = (name) => name.length >= 2 && /^[a-zA-Z\s]+$/.test(name);
 const validateRequired = (value) => value !== null && value !== undefined && String(value).trim().length > 0;
+// Egyptian phone validation: supports local (11 digits starting 01x) and international (+20 or 0020)
+const validateEgyptianPhone = (phone) => {
+  const cleaned = String(phone).replace(/\s|-/g, '');
+  const local = /^01[0125][0-9]{8}$/; // e.g., 010xxxxxxxx, 011xxxxxxxx, 012xxxxxxxx, 015xxxxxxxx
+  const intl = /^(?:\+20|0020)1[0125][0-9]{8}$/; // e.g., +2010xxxxxxxx or 002010xxxxxxxx
+  return local.test(cleaned) || intl.test(cleaned);
+};
 
 // Main validation function
 const validateForm = () => {
@@ -63,6 +130,8 @@ const validateForm = () => {
     errors.value.lastName = t('lastNameInvalid');
   }
 
+  // Normalize whitespace before validating
+  if (typeof formData.email === 'string') formData.email = formData.email.trim();
   if (!validateRequired(formData.email)) {
     errors.value.email = t('emailRequired');
   } else if (!validateEmail(formData.email)) {
@@ -101,6 +170,8 @@ const validateForm = () => {
 
   if (!validateRequired(formData.phone)) {
     errors.value.phone = t('phoneRequired');
+  } else if (!validateEgyptianPhone(formData.phone)) {
+    errors.value.phone = t('phoneInvalid');
   }
 
   if (!formData.agreeTerms) {
@@ -221,6 +292,12 @@ const closeTermsModal = () => {
           v-model="formData.email" 
           class="form-input" 
           :class="{ 'error': errors.email }"
+          autocomplete="email"
+          inputmode="email"
+          autocapitalize="none"
+          spellcheck="false"
+          pattern="^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
+          :title="$t('enterValidEmail') || 'Enter a valid email address (e.g., name@example.com)'"
           :placeholder="$t('email')" 
           required 
         />
@@ -236,6 +313,9 @@ const closeTermsModal = () => {
           v-model="formData.phone" 
           class="form-input" 
           :class="{ 'error': errors.phone }"
+          inputmode="tel"
+          pattern="^(01[0125][0-9]{8}|(?:\\+20|0020)1[0125][0-9]{8})$"
+          :title="$t('enterValidEgyptianPhone')"
           :placeholder="$t('phone')" 
           required 
         />
@@ -337,6 +417,28 @@ const closeTermsModal = () => {
           :placeholder="$t('password')" 
           required 
         />
+        <div class="password-validation" v-if="formData.password">
+          <div class="validation-item" :class="{ 'valid': passwordValidation.length }">
+            <span class="validation-icon">{{ passwordValidation.length ? '✓' : '✗' }}</span>
+            <span class="validation-text">{{ $t('atLeast8Characters') }}</span>
+          </div>
+          <div class="validation-item" :class="{ 'valid': passwordValidation.uppercase }">
+            <span class="validation-icon">{{ passwordValidation.uppercase ? '✓' : '✗' }}</span>
+            <span class="validation-text">{{ $t('oneUppercaseLetter') }}</span>
+          </div>
+          <div class="validation-item" :class="{ 'valid': passwordValidation.lowercase }">
+            <span class="validation-icon">{{ passwordValidation.lowercase ? '✓' : '✗' }}</span>
+            <span class="validation-text">{{ $t('oneLowercaseLetter') }}</span>
+          </div>
+          <div class="validation-item" :class="{ 'valid': passwordValidation.number }">
+            <span class="validation-icon">{{ passwordValidation.number ? '✓' : '✗' }}</span>
+            <span class="validation-text">{{ $t('oneNumber') }}</span>
+          </div>
+          <div class="validation-item" :class="{ 'valid': passwordValidation.special }">
+            <span class="validation-icon">{{ passwordValidation.special ? '✓' : '✗' }}</span>
+            <span class="validation-text">{{ $t('oneSpecialCharacter') }}</span>
+          </div>
+        </div>
         <p v-if="errors.password" class="error-message">{{ errors.password }}</p>
   </div>
 
@@ -348,11 +450,12 @@ const closeTermsModal = () => {
           id="confirmPass" 
           v-model="formData.confirmPass" 
           class="form-input" 
-          :class="{ 'error': errors.confirmPass }"
+          :class="{ 'error': errors.confirmPass || (formData.confirmPass && !passwordValidation.match) }"
           :placeholder="$t('confirmPassword')" 
           required 
         />
-        <p v-if="errors.confirmPass" class="error-message">{{ errors.confirmPass }}</p>
+        <p v-if="formData.confirmPass && !passwordValidation.match" class="error-message">{{ $t('passwordsDontMatch') }}</p>
+        <p v-else-if="errors.confirmPass" class="error-message">{{ errors.confirmPass }}</p>
       </div>
   </div>
 
@@ -682,6 +785,47 @@ select.form-input {
     font-size: 0.75rem;
     margin-top: 0.25rem;
     font-weight: 500;
+}
+
+/* Password validation checklist */
+.password-validation {
+    margin-top: 0.75rem;
+    padding: 1rem;
+    background-color: var(--input-bg, #f8f9fa);
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    font-size: 0.75rem;
+}
+
+.dark .password-validation {
+  background-color: var(--input-bg, #374151);
+  border-color: #4b5563;
+}
+
+.validation-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+    color: #6b7280;
+    transition: color 0.2s ease;
+}
+
+.validation-item:last-child {
+    margin-bottom: 0;
+}
+
+.validation-item.valid {
+    color: #10b981;
+}
+
+.validation-icon {
+    font-weight: bold;
+    font-size: 0.875rem;
+}
+
+.validation-text {
+    font-size: 0.75rem;
 }
 
 .form-footer {

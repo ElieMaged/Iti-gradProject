@@ -239,6 +239,12 @@ onMounted(() => {
   margin-left: 14rem;
   background-color: #faf8fd;
 }
+.layout-container{
+    background-color: #faf8fd;
+}
+.dark .layout-container{
+    background-color: var(--primary-bg);
+}
 .dark .main-layout {
   background-color: var(--primary-bg);
 }

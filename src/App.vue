@@ -41,7 +41,7 @@ onMounted(async () => {
     if (authState.userType === 'admin') {
       router.push('/admin-dashboard');
     } else if (authState.userType === 'technician') {
-      router.push('/techdashboard');
+      router.push('/technicion-profile');
     }
   }
 });

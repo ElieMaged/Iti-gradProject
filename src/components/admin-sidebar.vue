@@ -1,9 +1,20 @@
 <template>
     <div class="layout">
-      <div class="sidebar">
+      <!-- Mobile menu button -->
+      <button class="mobile-menu-btn" @click="toggleMobileSidebar" aria-label="Open sidebar">
+        <i class="fas fa-bars"></i>
+      </button>
+      <!-- Backdrop -->
+      <div v-if="isMobileSidebarOpen" class="backdrop" @click="toggleMobileSidebar"></div>
+
+      <div class="sidebar" :class="{ open: isMobileSidebarOpen }">
         <!-- Logo Section -->
         <div class="sidebar-header">
           <img src="/logo/ace04d3b268cf810c91d002fdf7454a6ef778f27.png" alt="Logo" class="sidebar-logo" />
+          <!-- Mobile close button -->
+          <button class="close-sidebar-btn" @click="toggleMobileSidebar" aria-label="Close sidebar">
+            <i class="fas fa-times"></i>
+          </button>
         </div>
 
         <a href="/admin-profile" 
@@ -115,6 +126,7 @@ const route = useRoute();
 const { t } = useI18n();
 const showTechnicians = ref(false);
 const showBooking = ref(false);
+const isMobileSidebarOpen = ref(false);
 
   // Computed properties for active states
   const isTechniciansActive = computed(() => {
@@ -147,6 +159,10 @@ const showBooking = ref(false);
       showTechnicians.value = false;
     }
   }
+
+  function toggleMobileSidebar() {
+    isMobileSidebarOpen.value = !isMobileSidebarOpen.value;
+  }
   
   function handleNavigation(event) {
     // Prevent default behavior for href links
@@ -158,6 +174,10 @@ const showBooking = ref(false);
     if (href) {
       console.log('Navigating to:', href);
       router.push(href);
+    }
+    // Close sidebar on mobile after navigation
+    if (window.matchMedia('(max-width: 768px)').matches) {
+      isMobileSidebarOpen.value = false;
     }
   }
   
@@ -486,10 +506,11 @@ const showBooking = ref(false);
       box-sizing: border-box;
       min-height: auto;
       height: auto;
+      overflow: visible; /* allow dropdown to overflow sidebar on mobile */
     }
     .sidebar-header {
       padding: 0;
-      
+      position: relative; /* for close button positioning on mobile */
     }
     .sidebar-item {
       width: auto;
@@ -523,8 +544,8 @@ const showBooking = ref(false);
       border: 1px solid #e5e7eb;
       border-radius: 8px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      z-index: 10;
-      margin: 0;
+      z-index: 2000; /* ensure it appears above surrounding content */
+      margin-top: 10px;
       width: auto;
     }
     
@@ -563,7 +584,7 @@ const showBooking = ref(false);
     }
     
     .layout {
-      margin-top: 30px;
+      padding-top: 30px;
       max-height: none;
       height: auto;
     }
@@ -586,5 +607,104 @@ const showBooking = ref(false);
       font-size: 0.75rem;
     }
   }
-  </style> 
-  
+
+/* Off-canvas mobile sidebar overrides */
+.mobile-menu-btn {
+  display: none;
+}
+
+.close-sidebar-btn {
+  display: none;
+  border: none;
+  background: transparent;
+  color: var(--secondary);
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .mobile-menu-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    left: auto;
+    z-index: 1100; /* lower than sidebar (1250) */
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: var(--primary-color);
+    color: #fff;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 1200;
+  }
+
+  /* Force sidebar to be off-canvas drawer on mobile */
+  .sidebar {
+    width: 12rem !important;
+    height: 100vh !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    padding: 1rem 0.75rem !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: stretch !important;
+    overflow-y: auto !important;
+    z-index: 1250 !important;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  /* Show item labels inside drawer */
+  .sidebar-item span {
+    display: inline !important;
+  }
+
+  /* Show and position close button on mobile */
+  .close-sidebar-btn {
+    display: inline-flex;
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1260; /* above sidebar content */
+    color: var(--secondary);
+    backdrop-filter: blur(2px);
+  }
+  .dark .close-sidebar-btn {
+    background: rgba(0,0,0,0.35);
+    color: var(--primary-text);
+  }
+
+  .sidebar-item {
+    padding: 0.75rem 0.75rem !important;
+    margin: 0 0.25rem !important;
+  }
+
+  .dropdown-container {
+    width: 100% !important;
+  }
+
+  .dropdown-menu {
+    position: static !important;
+    margin-top: 6px !important;
+    width: 100% !important;
+  }
+}
+  </style>

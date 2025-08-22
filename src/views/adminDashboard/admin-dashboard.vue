@@ -1437,6 +1437,7 @@ export default {
   }
   .admin-dashboard-layout {
     flex-direction: column;
+    margin-left: 0;
   }
   
   .dashboard-main {

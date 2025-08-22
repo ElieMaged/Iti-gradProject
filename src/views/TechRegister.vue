@@ -31,6 +31,12 @@
               id="email" 
               v-model="formData.email" 
               class="form-input" 
+              autocomplete="email"
+              inputmode="email"
+              autocapitalize="none"
+              spellcheck="false"
+              pattern="^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
+              :title="$t('enterValidEmail') || 'Enter a valid email address (e.g., name@example.com)'"
               :placeholder="$t('emailAddress')" 
               required 
             />
@@ -44,6 +50,9 @@
               v-model="formData.phoneNumber" 
               class="form-input" 
               :placeholder="$t('phoneNumber')" 
+              inputmode="tel"
+              pattern="^(01[0125][0-9]{8}|(?:\\+20|0020)1[0125][0-9]{8})$"
+              :title="$t('enterValidEgyptianPhone')"
               required 
             />
           </div>
@@ -182,33 +191,33 @@
           <div class="form-group">
             <label for="government" class="form-label">{{ $t('government') }}</label>
             <select 
-  id="government" 
-  v-model="formData.government" 
-  class="form-input" 
-  required
->
-  <option value="" disabled selected>{{ $t('government') }}</option>
-  <option v-for="gov in governmentOptions" :key="gov" :value="gov">
-    {{ locale === 'ar' ? governmentNamesAr[gov] : gov }}
-  </option>
-</select>
+              id="government" 
+              v-model="formData.government" 
+              class="form-input" 
+              required
+            >
+              <option value="" disabled selected>{{ $t('government') }}</option>
+              <option v-for="gov in governmentOptions" :key="gov" :value="gov">
+                {{ locale === 'ar' ? governmentNamesAr[gov] : gov }}
+              </option>
+            </select>
           </div>
 
           <div class="form-group">
             <label for="district" class="form-label">{{ $t('districtArea') }}</label>
             
-        <select 
-          id="district" 
-          v-model="formData.district" 
-          class="form-input" 
-          required
-          :disabled="!formData.government"
-        >
-          <option value="" disabled selected>{{ $t('districtArea') }}</option>
-          <option v-for="district in districtOptions" :key="district" :value="district">
-            {{ locale === 'ar' ? (districtsAr[formData.government]?.[district] || district) : district }}
-          </option>
-</select>
+            <select 
+              id="district" 
+              v-model="formData.district" 
+              class="form-input" 
+              required
+              :disabled="!formData.government"
+            >
+              <option value="" disabled selected>{{ $t('districtArea') }}</option>
+              <option v-for="district in districtOptions" :key="district" :value="district">
+                {{ locale === 'ar' ? (districtsAr[formData.government]?.[district] || district) : district }}
+              </option>
+            </select>
 
           </div>
 
@@ -501,6 +510,28 @@ const isPasswordValid = computed(() => {
     passwordValidation.special;
 });
 
+// Email validation (stricter): trims, rejects consecutive dots, leading/trailing dots or hyphens in labels
+const validateEmail = (email) => {
+  if (!email) return false;
+  const trimmed = String(email).trim();
+  const basic = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+  if (!basic.test(trimmed)) return false;
+  const [local, domain] = trimmed.split('@');
+  if (local.includes('..') || domain.includes('..')) return false;
+  if (local.startsWith('.') || local.endsWith('.')) return false;
+  const labels = domain.split('.');
+  if (labels.some(label => !label || label.startsWith('-') || label.endsWith('-'))) return false;
+  return true;
+};
+
+// Egyptian phone validation: supports local (11 digits starting 01x) and international (+20 or 0020)
+const validateEgyptianPhone = (phone) => {
+  const cleaned = String(phone).replace(/\s|-/g, '');
+  const local = /^01[0125][0-9]{8}$/; // e.g., 010xxxxxxxx, 011xxxxxxxx, 012xxxxxxxx, 015xxxxxxxx
+  const intl = /^(?:\+20|0020)1[0125][0-9]{8}$/; // e.g., +2010xxxxxxxx or 002010xxxxxxxx
+  return local.test(cleaned) || intl.test(cleaned);
+};
+
 function triggerFileInput() {
   fileInput.value && fileInput.value.click();
 }
@@ -537,6 +568,27 @@ async function handleRegister() {
   error.value = '';
   success.value = '';
   
+  // Email validation
+  if (!formData.email || String(formData.email).trim().length === 0) {
+    error.value = t('emailRequired');
+    return;
+  }
+  formData.email = String(formData.email).trim();
+  if (!validateEmail(formData.email)) {
+    error.value = t('emailInvalid');
+    return;
+  }
+
+  // Phone validation
+  if (!formData.phoneNumber || String(formData.phoneNumber).trim().length === 0) {
+    error.value = t('phoneRequired');
+    return;
+  }
+  if (!validateEgyptianPhone(formData.phoneNumber)) {
+    error.value = t('phoneInvalid');
+    return;
+  }
+
   // Password validation
   if (!isPasswordValid.value) {
     error.value = t('passwordRequirementsNotMet');

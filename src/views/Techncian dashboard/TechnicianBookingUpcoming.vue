@@ -335,6 +335,12 @@ onMounted(() => {
 .dark .main-layout {
   background-color: var(--primary-bg);
 }
+.layout-container{
+  background-color: #faf8fd;
+}
+.dark .layout-container{
+  background-color: var(--primary-bg);
+}
 .admin-dashboard-layout {
   min-height: 100vh;
   font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
@@ -684,14 +690,17 @@ onMounted(() => {
     align-items: center;
     gap: 1rem;
     margin-top: 10px;
+    flex-wrap: nowrap;
   }
   .action-row {
     flex-direction: column;
     align-items: flex-start;
   }
   .search-wrapper {
-    width: 100%;
+    flex: 1 1 auto;
+    width: auto;
     max-width: none;
+    min-width: 0;
   }
   .table-wrapper {
     font-size: 0.8rem;
@@ -699,6 +708,9 @@ onMounted(() => {
   .table-header th,
   .table-row td {
     padding: 0.5rem 0.5rem;
+  }
+  .filter-search-bar{
+    padding: 0;
   }
 }
 
@@ -748,7 +760,6 @@ onMounted(() => {
   }
   
   .technician-dashboard-layout {
-    margin-right: 0;
     padding: 0.75rem;
   }
   
@@ -763,12 +774,14 @@ onMounted(() => {
   .title-search-row {
     flex-direction: row;
     align-items: center;
-    gap: 1rem;
+    gap: 0.75rem;
     margin-top: 1rem;
   }
   
   .search-wrapper {
-    width: 100%;
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
   }
   
   .booking-title {
@@ -803,7 +816,9 @@ onMounted(() => {
   }
   
   .search-wrapper {
-    width: 100%;
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
     height: 50px;
   }
   
@@ -837,6 +852,9 @@ onMounted(() => {
     padding: 0.5rem 1rem;
     font-size: 0.875rem;
   }
+  .filter-search-bar{
+    padding:0;
+  }
 }
 
 @media (max-width: 600px) {
@@ -863,7 +881,9 @@ onMounted(() => {
   }
   
   .search-wrapper {
-    width: 100%;
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
     height: 50px;
   }
   
@@ -925,7 +945,9 @@ onMounted(() => {
   }
   
   .search-wrapper {
-    width: 100%;
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
     height: 50px;
   }
   
@@ -995,7 +1017,9 @@ onMounted(() => {
   }
   
   .search-wrapper {
-    width: 100%;
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
     height: 50px;
   }
   
