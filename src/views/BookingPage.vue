@@ -414,8 +414,8 @@ const availableDates = computed(() => {
   const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const today = new Date();
   
-  // Check next 14 days (2 weeks) for availability
-  for (let i = 1; i <= 14; i++) {
+  // Check today and next 13 days (2 weeks) for availability
+  for (let i = 0; i < 14; i++) {
     const nextDay = new Date(today);
     nextDay.setDate(today.getDate() + i);
     
@@ -441,7 +441,7 @@ const visibleDates = computed(() => {
   const days = [];
   const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const today = new Date();
-  for (let i = 1; i <= 7; i++) {
+  for (let i = 0; i < 7; i++) {
     const nextDay = new Date(today);
     nextDay.setDate(today.getDate() + i + currentDateOffset.value);
     const month = nextDay.getMonth() + 1;
