@@ -850,7 +850,9 @@ watch(() => visibleDates.value, async () => {
 
 // Helper functions for date formatting
 function formatDay(dateString) {
-  const date = new Date(dateString.split(' ')[0])
+  const [datePart] = dateString.split(' ')
+  const [month, day, year] = datePart.split('/')
+  const date = new Date(year, month - 1, day)
   const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
   return days[date.getDay()]
 }

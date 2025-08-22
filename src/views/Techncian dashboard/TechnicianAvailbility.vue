@@ -232,31 +232,34 @@ export default {
       endTime: ''
     });
 
-    // Generate week days with dates starting from tomorrow
+    // Generate week days with correct upcoming calendar dates for each weekday
     const generateWeekDays = () => {
       const today = new Date();
-      const tomorrow = new Date(today);
-      tomorrow.setDate(today.getDate() + 1); // Start from tomorrow
-      
       const weekDays = [];
-      const dayNames = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-      
-      for (let i = 0; i < 7; i++) {
-        const date = new Date(tomorrow);
-        date.setDate(tomorrow.getDate() + i);
-        
-        const dayName = dayNames[i];
-        const formattedDate = date.toLocaleDateString('en-US', { 
-          month: 'numeric', 
-          day: 'numeric' 
-        });
-        
+      // Map of weekday names to JS Date.getDay() indices (0=Sun .. 6=Sat)
+      const dayOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+      const dayIndexMap = { sunday: 0, monday: 1, tuesday: 2, wednesday: 3, thursday: 4, friday: 5, saturday: 6 };
+
+      const getNextDateForWeekday = (targetDayIndex) => {
+        const d = new Date(today);
+        const todayIndex = d.getDay();
+        let delta = (targetDayIndex - todayIndex + 7) % 7;
+        // Ensure we pick the next occurrence (not today)
+        if (delta === 0) delta = 7;
+        d.setDate(d.getDate() + delta);
+        return d;
+      };
+
+      for (const dayName of dayOrder) {
+        const targetIndex = dayIndexMap[dayName];
+        const date = getNextDateForWeekday(targetIndex);
+        const formattedDate = date.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
         weekDays.push({
           value: dayName,
           label: `${dayName.charAt(0).toUpperCase() + dayName.slice(1)} ${formattedDate}`
         });
       }
-      
+
       return weekDays;
     };
 
