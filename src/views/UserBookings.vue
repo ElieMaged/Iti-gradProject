@@ -3,7 +3,8 @@
     <userSidebar :activeTab="'bookings'" />
     
     <div class="user-bookings-main mr-20 p-4">
-      <div class="page-header">
+      <!-- Page Header - Only show when there are bookings -->
+      <div v-if="!loading && !error && bookings.length > 0" class="page-header">
         <h1 class="page-title">{{ $t('myBookings') }}</h1>
         <p class="page-description">{{ $t('myBookingsDescription') }}</p>
       </div>
@@ -87,11 +88,7 @@
           <div class="empty-icon">
             <i class="fas fa-calendar-times"></i>
           </div>
-          <h3>{{ $t('noBookingsFound') }}</h3>
-          <p>{{ $t('noBookingsDescription') }}</p>
-          <button @click="goToServices" class="browse-services-btn">
-            {{ $t('browseServices') }}
-          </button>
+          <h3>{{ $t('noBookingYet') }}</h3>
         </div>
       </div>
     </div>

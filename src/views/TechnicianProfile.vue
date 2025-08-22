@@ -122,8 +122,11 @@
         <div class="reviews-header">
           <h2 class="reviews-title">{{ $t('reviews') }}</h2>
           <div v-if="!showReviewForm">
+            <div v-if="userBookingsLoading" class="review-loading">
+              <i class="fa-solid fa-spinner fa-spin"></i> {{ $t('checkingEligibility') }}
+            </div>
             <button 
-              v-if="hasBookingWithTechnician && canReview" 
+              v-else-if="hasBookingWithTechnician && canReview" 
               @click="showReviewForm = true" 
               class="add-review-btn"
             >
@@ -181,23 +184,40 @@
               </div>
               <div v-else-if="newReview.text.trim().length < 10" class="validation-error">
                 <i class="fa-solid fa-exclamation-circle"></i>
-                 {{ $t('reviewMustBeAtLeast') }} {{ newReview.text.trim().length }}/{{ $t('reviewMustBeAtLeastCharacters') }}
+                 {{ $t('reviewMustBeAtLeast') }} {{ newReview.text.trim().length }}/10 {{ $t('characters') }}
               </div>
               <div v-else class="validation-success">
                 <i class="fa-solid fa-check-circle"></i>
                  {{ $t('readyToSubmit') }}
               </div>
             </div>
-            <button @click="submitReview" :disabled="!isValidReview || submittingReview" class="submit-btn">
-              {{ submittingReview ? $t('submitting') : $t('submitReview') }}
-            </button>
-            <button @click="cancelReview" class="cancel-btn">
-              {{ $t('cancel') }}
-            </button>
+            <div class="form-buttons">
+              <button @click="submitReview" :disabled="!isValidReview || submittingReview" class="submit-btn">
+                <span v-if="submittingReview">
+                  <i class="fa-solid fa-spinner fa-spin"></i> {{ $t('submitting') }}
+                </span>
+                <span v-else>{{ $t('submitReview') }}</span>
+              </button>
+              <button @click="cancelReview" class="cancel-btn" :disabled="submittingReview">
+                {{ $t('cancel') }}
+              </button>
+            </div>
           </div>
         </div>
         <!-- Reviews List -->
         <div class="reviews-list">
+          <!-- Debug information (remove in production) -->
+          <div v-if="auth.currentUser" class="debug-info" style="background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px; font-size: 12px;">
+            <strong>Debug Info:</strong><br>
+            User: {{ auth.currentUser.email }}<br>
+            Technician ID: {{ route.params.id }}<br>
+            User Bookings: {{ userBookings.length }}<br>
+            Has Booking: {{ hasBookingWithTechnician }}<br>
+            Can Review: {{ canReview }}<br>
+            Reviews Count: {{ reviews.length }}<br>
+            Already Reviewed: {{ reviews.find(r => r.userEmail === auth.currentUser?.email) ? 'Yes' : 'No' }}
+          </div>
+          
           <div v-if="reviewsLoading" class="loading-state">
             <div class="loading-spinner"></div>
             <p>{{ $t('loadingReviews') }}</p>
@@ -362,6 +382,8 @@ const fetchUserBookings = async () => {
       id: doc.id,
       ...doc.data()
     }))
+    
+    console.log('User bookings fetched:', userBookings.value)
   } catch (err) {
     console.error('Error fetching user bookings:', err)
   } finally {
@@ -518,20 +540,37 @@ const positiveReviewPercentage = computed(() => {
 })
 
 const canReview = computed(() => {
-  if (!auth.currentUser) return false
+  if (!auth.currentUser) {
+    console.log('No authenticated user, cannot review')
+    return false
+  }
   
   // Check if user has already reviewed this technician
   const existingReview = reviews.value.find(review => 
     review.userEmail === auth.currentUser.email
   )
   
-  // Check if user has a booking with this technician
+  if (existingReview) {
+    console.log('User has already reviewed this technician')
+    return false
+  }
+  
+  // Check if user has a booking with this technician (any status)
   const hasBooking = userBookings.value.some(booking => {
-    return booking.technicianId === route.params.id &&
-      (booking.status === 'completed' || booking.status === 'complete')
+    const hasBookingWithThisTechnician = booking.technicianId === route.params.id
+    
+    if (hasBookingWithThisTechnician) {
+      console.log('Found booking with technician:', booking)
+    }
+    
+    return hasBookingWithThisTechnician
   })
   
-  // User can review if they haven't already reviewed AND they have a completed booking with this technician
+  console.log('Can review:', !existingReview && hasBooking)
+  console.log('User bookings:', userBookings.value)
+  console.log('Current technician ID:', route.params.id)
+  
+  // User can review if they haven't already reviewed AND they have any booking with this technician
   return !existingReview && hasBooking
 })
 
@@ -540,13 +579,24 @@ const isValidReview = computed(() => {
 })
 
 const hasBookingWithTechnician = computed(() => {
-  if (!auth.currentUser) return false
+  if (!auth.currentUser) {
+    console.log('No authenticated user, no booking check')
+    return false
+  }
   
-  // Check if user has any booking with this technician
-  return userBookings.value.some(booking =>
-    booking.technicianId === route.params.id &&
-    (booking.status === 'completed' || booking.status === 'complete')
-  )
+  // Check if user has any booking with this technician (any status)
+  const hasBooking = userBookings.value.some(booking => {
+    const hasBookingWithThisTechnician = booking.technicianId === route.params.id
+    
+    if (hasBookingWithThisTechnician) {
+      console.log('Found booking with technician:', booking)
+    }
+    
+    return hasBookingWithThisTechnician
+  })
+  
+  console.log('Has booking with technician:', hasBooking)
+  return hasBooking
 })
 
 // Methods
@@ -616,34 +666,54 @@ const setRating = (rating) => {
   newReview.value.rating = rating
 }
 
-const submitReview = () => {
-  if (!isValidReview.value || submittingReview.value) return
+const submitReview = async () => {
+  if (!isValidReview.value || submittingReview.value) {
+    console.log('Review submission blocked - invalid review or already submitting')
+    return
+  }
+  
+  if (!auth.currentUser) {
+    console.log('No authenticated user for review submission')
+    return
+  }
   
   submittingReview.value = true
   
-  const reviewData = {
-    technicianId: route.params.id,
-    rating: newReview.value.rating,
-    text: newReview.value.text.trim(),
-    userName: auth.currentUser?.displayName || auth.currentUser?.email,
-    userEmail: auth.currentUser?.email,
-    createdAt: new Date()
+  try {
+    const reviewData = {
+      technicianId: route.params.id,
+      userId: auth.currentUser.uid,
+      rating: newReview.value.rating,
+      text: newReview.value.text.trim(),
+      userName: auth.currentUser?.displayName || auth.currentUser?.email,
+      userEmail: auth.currentUser?.email,
+      createdAt: new Date()
+    }
+    
+    console.log('Submitting review with data:', reviewData)
+    
+    await addDoc(collection(db, 'reviews'), reviewData)
+    
+    console.log('Review submitted successfully')
+    
+    // Reset form
+    newReview.value = { rating: 0, text: '' }
+    showReviewForm.value = false
+    submittingReview.value = false
+    
+    // Refresh reviews and user bookings
+    await Promise.all([fetchReviews(), fetchUserBookings()])
+    
+    // Show success message (you can implement a toast notification here)
+    alert('Review submitted successfully!')
+    
+  } catch (error) {
+    console.error('Error submitting review:', error)
+    submittingReview.value = false
+    
+    // Show error message to user
+    alert('Failed to submit review. Please try again.')
   }
-  
-  addDoc(collection(db, 'reviews'), reviewData)
-    .then(() => {
-      // Reset form
-      newReview.value = { rating: 0, text: '' }
-      showReviewForm.value = false
-      submittingReview.value = false
-      
-      // Refresh reviews and user bookings
-      Promise.all([fetchReviews(), fetchUserBookings()])
-    })
-    .catch(error => {
-      console.error('Error submitting review:', error)
-      submittingReview.value = false
-    })
 }
 
 const cancelReview = () => {
@@ -1224,7 +1294,18 @@ onMounted(async () => {
   background: #f8f9fa;
   border-radius: 6px;
   border-left: 3px solid #625397;
-  
+}
+
+.review-loading {
+  color: #6b7280;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 3px solid #625397;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 .fa-star {
   color: #fbbf24 !important;
@@ -1332,11 +1413,19 @@ onMounted(async () => {
   display: flex;
   gap: 1rem;
   align-items: center;
+  flex-wrap: wrap;
+}
+
+.form-buttons {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
 }
 
 .validation-status {
   display: flex;
   gap: 0.5rem;
+  flex: 1;
 }
 
 .validation-error {

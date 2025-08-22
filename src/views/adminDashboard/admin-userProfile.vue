@@ -45,13 +45,21 @@
               <div class="user-label">Role</div>
               <div class="user-value">{{ user.role || 'user' }}</div>
             </div>
-            <button 
-              class="delete-btn" 
-              @click="handleDelete"
-              :disabled="deleting"
-            >
-              {{ deleting ? 'Deleting...' : 'Delete Account' }}
-            </button>
+            <div class="button-group">
+              <button 
+                class="back-btn" 
+                @click="goBackToUsers"
+              >
+                Back to Users
+              </button>
+              <button 
+                class="delete-btn" 
+                @click="handleDelete"
+                :disabled="deleting"
+              >
+                {{ deleting ? 'Deleting...' : 'Delete Account' }}
+              </button>
+            </div>
           </div>
           <div class="user-photo-col">
             <div v-if="user.profileImageUrl" class="user-photo">
@@ -66,7 +74,7 @@
         <!-- User Not Found -->
         <div v-else class="not-found-state">
           <p>User not found</p>
-          <button @click="goBack" class="back-btn">Go Back</button>
+          <button @click="goBack" class="not-found-back-btn">Go Back</button>
         </div>
       </div>
     </div>
@@ -154,6 +162,10 @@ export default {
 
     goBack() {
       this.$router.go(-1);
+    },
+
+    goBackToUsers() {
+      this.$router.push('/admin-users');
     }
   }
 };
@@ -240,6 +252,44 @@ export default {
   background: #9ca3af;
   cursor: not-allowed;
 }
+
+/* Button Group Styles */
+.button-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.back-btn {
+  background: #7c6bb0;
+  color: #fff;
+  padding: 0.7rem 2rem;
+  border: none;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 200px;
+}
+
+.back-btn:hover {
+  background: #5a4a8c;
+}
+
+/* Responsive button group */
+@media (max-width: 768px) {
+  .button-group {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .back-btn,
+  .delete-btn {
+    width: 100%;
+  }
+}
 .user-photo-col {
   flex: 1;
   display: flex;
@@ -309,7 +359,7 @@ export default {
   margin-bottom: 1rem;
 }
 
-.retry-btn, .back-btn {
+.retry-btn, .not-found-back-btn {
   background: #7c6bb0;
   color: white;
   padding: 0.5rem 1rem;
@@ -319,7 +369,7 @@ export default {
   font-weight: 600;
 }
 
-.retry-btn:hover, .back-btn:hover {
+.retry-btn:hover, .not-found-back-btn:hover {
   background: #5a4a8c;
 }
 

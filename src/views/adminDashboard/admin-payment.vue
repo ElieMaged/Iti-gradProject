@@ -16,29 +16,7 @@
              <div class="stat-title">{{ $t('totalApprovedCredits') }}</div>
            </div>
            
-           <div class="stat-card">
-             <div class="stat-header">
-               <i class="fas fa-clock stat-icon"></i>
-               <span class="stat-number">{{ pendingTransactions.length }}</span>
-             </div>
-             <div class="stat-title">{{ $t('pendingTransactions') }}</div>
-           </div>
-           
-           <div class="stat-card">
-             <div class="stat-header">
-               <i class="fas fa-check-circle stat-icon"></i>
-               <span class="stat-number">{{ approvedTransactions.length }}</span>
-             </div>
-             <div class="stat-title">{{ $t('approvedTransactions') }}</div>
-           </div>
-           
-           <div class="stat-card">
-             <div class="stat-header">
-               <i class="fas fa-times-circle stat-icon"></i>
-               <span class="stat-number">{{ rejectedTransactions.length }}</span>
-             </div>
-             <div class="stat-title">{{ $t('rejectedTransactions') }}</div>
-           </div>
+
          </div>
 
         <!-- Payment Splits Section -->
@@ -209,61 +187,7 @@
           </div>
         </div>
 
-        <!-- Transactions Table -->
-        <div class="transactions-table">
-          <div class="table-header">
-            <h3>{{ $t('paymentTransactions') }}</h3>
-            <div class="filter-buttons">
-              <button class="filter-btn" @click="filterByStatus('all')" :class="{ active: currentFilter === 'all' }">{{ $t('all') }}</button>
-              <button class="filter-btn" @click="filterByStatus('pending')" :class="{ active: currentFilter === 'pending' }">{{ $t('pending') }}</button>
-              <button class="filter-btn" @click="filterByStatus('approved')" :class="{ active: currentFilter === 'approved' }">{{ $t('approved') }}</button>
-              <button class="filter-btn" @click="filterByStatus('rejected')" :class="{ active: currentFilter === 'rejected' }">{{ $t('rejected') }}</button>
-            </div>
-          </div>
-          
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>{{ $t('date') }}</th>
-                  <th>{{ $t('technician') }}</th>
-                  <th>{{ $t('customer') }}</th>
-                  <th>{{ $t('amount') }}</th>
-                  <th>{{ $t('paypalOrderId') }}</th>
-                  <th>{{ $t('status') }}</th>
-                  <th>{{ $t('actions') }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="transaction in filteredTransactions" :key="transaction.id">
-                  <td>{{ formatDate(transaction.paymentDate) }}</td>
-                  <td>{{ transaction.technicianName }}</td>
-                  <td>{{ transaction.userName }}</td>
-                  <td>{{ transaction.originalAmountEGP || (transaction.amount * 31).toFixed(2) }} EGP</td>
-                  <td class="order-id">{{ transaction.paypalOrderId }}</td>
-                  <td>
-                    <span class="status-badge" :class="getStatusBadgeClass(transaction.status)">
-                      {{ transaction.status }}
-                    </span>
-                  </td>
-                  <td>
-                    <div class="action-buttons" v-if="transaction.status === 'pending'">
-                      <button class="approve-btn" @click="approveTransaction(transaction.id)">
-                        <i class="fas fa-check"></i> {{ $t('approve') }}
-                      </button>
-                      <button class="reject-btn" @click="rejectTransaction(transaction.id)">
-                        <i class="fas fa-times"></i> {{ $t('reject') }}
-                      </button>
-                    </div>
-                    <div v-else class="action-info">
-                      {{ transaction.adminAction }} by {{ transaction.adminActionBy }}
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+
       </div>
     </div>
   </div>
@@ -283,11 +207,9 @@ import Pagination from '../../components/pagination.vue'
 const router = useRouter()
 
 // State
-const transactions = ref([])
 const adminCredits = ref([])
 const technicians = ref([])
 const paymentSplits = ref([])
-const currentFilter = ref('all')
 const loading = ref(true)
 
 // Payout state
@@ -302,14 +224,7 @@ const splitsCurrentPage = ref(1)
 const splitsItemsPerPage = ref(10)
 
 // Computed properties
-const filteredTransactions = computed(() => {
-  if (currentFilter.value === 'all') return transactions.value
-  return transactions.value.filter(t => t.status === currentFilter.value)
-})
 
-const pendingTransactions = computed(() => transactions.value.filter(t => t.status === 'pending'))
-const approvedTransactions = computed(() => transactions.value.filter(t => t.status === 'approved'))
-const rejectedTransactions = computed(() => transactions.value.filter(t => t.status === 'rejected'))
 
 // Pagination computed properties for payment splits
 const splitsTotalPages = computed(() => 
@@ -325,14 +240,7 @@ const paginatedPaymentSplits = computed(() => {
 const pendingSplits = computed(() => paymentSplits.value.filter(s => s.status === 'pending'))
 const completedSplits = computed(() => paymentSplits.value.filter(s => s.status === 'completed'))
 
-const totalAmount = computed(() => {
-  return approvedTransactions.value
-    .reduce((sum, t) => {
-      const amountInEGP = t.originalAmountEGP || (parseFloat(t.amount) * 31)
-      return sum + amountInEGP
-    }, 0)
-    .toFixed(2)
-})
+
 
 const totalApprovedCredits = computed(() => {
   return adminCredits.value
@@ -376,7 +284,7 @@ const canPayout = computed(() => {
 })
 
 // Methods
-async function fetchTransactions() {
+async function fetchData() {
   try {
     loading.value = true
 
@@ -398,10 +306,7 @@ async function fetchTransactions() {
       console.error('Error checking user role:', roleError)
     }
 
-    // Transactions
-    const q = query(collection(db, 'paymentTransactions'), orderBy('paymentDate', 'desc'))
-    const snapshot = await getDocs(q)
-    transactions.value = snapshot.docs.map(d => ({ id: d.id, ...d.data() }))
+
 
     // Admin credits
     const creditsQuery = query(collection(db, 'adminCredits'), orderBy('createdAt', 'desc'))
@@ -454,71 +359,7 @@ async function fetchTransactions() {
   }
 }
 
-async function approveTransaction(transactionId) {
-  try {
-    const transactionRef = doc(db, 'paymentTransactions', transactionId)
-    const transaction = transactions.value.find(t => t.id === transactionId)
-    if (!transaction) return
 
-    await updateDoc(transactionRef, {
-      status: 'approved',
-      adminAction: 'approved',
-      adminActionDate: serverTimestamp(),
-      adminActionBy: auth.currentUser?.email || 'Admin',
-    })
-
-    const creditsQuery = query(collection(db, 'adminCredits'), where('paypalOrderId', '==', transaction.paypalOrderId))
-    const creditsSnapshot = await getDocs(creditsQuery)
-    if (!creditsSnapshot.empty) {
-      const creditDoc = creditsSnapshot.docs[0]
-      await updateDoc(doc(db, 'adminCredits', creditDoc.id), {
-        status: 'approved',
-        approvedAt: serverTimestamp(),
-        approvedBy: auth.currentUser?.email || 'Admin',
-      })
-    }
-
-    transaction.status = 'approved'
-    transaction.adminAction = 'approved'
-    transaction.adminActionDate = new Date()
-    transaction.adminActionBy = auth.currentUser?.email || 'Admin'
-  } catch (e) {
-    console.error('Error approving transaction:', e)
-  }
-}
-
-async function rejectTransaction(transactionId) {
-  try {
-    const transactionRef = doc(db, 'paymentTransactions', transactionId)
-    const transaction = transactions.value.find(t => t.id === transactionId)
-    if (!transaction) return
-
-    await updateDoc(transactionRef, {
-      status: 'rejected',
-      adminAction: 'rejected',
-      adminActionDate: serverTimestamp(),
-      adminActionBy: auth.currentUser?.email || 'Admin',
-    })
-
-    const creditsQuery = query(collection(db, 'adminCredits'), where('paypalOrderId', '==', transaction.paypalOrderId))
-    const creditsSnapshot = await getDocs(creditsQuery)
-    if (!creditsSnapshot.empty) {
-      const creditDoc = creditsSnapshot.docs[0]
-      await updateDoc(doc(db, 'adminCredits', creditDoc.id), {
-        status: 'rejected',
-        approvedAt: serverTimestamp(),
-        approvedBy: auth.currentUser?.email || 'Admin',
-      })
-    }
-
-    transaction.status = 'rejected'
-    transaction.adminAction = 'rejected'
-    transaction.adminActionDate = new Date()
-    transaction.adminActionBy = auth.currentUser?.email || 'Admin'
-  } catch (e) {
-    console.error('Error rejecting transaction:', e)
-  }
-}
 
 function validatePayoutAmount() {
   const amount = parseFloat(payoutAmount.value)
@@ -634,7 +475,7 @@ async function initiatePayout() {
     amountError.value = ''
     
     // Refresh data to show updated credit balance
-    await fetchTransactions()
+    await fetchData()
     
     // Also refresh admin credits specifically to show updated balance
     const creditsQuery = query(collection(db, 'adminCredits'), orderBy('createdAt', 'desc'))
@@ -708,7 +549,7 @@ async function executePayout(splitId) {
     })
 
     alert(`Payment split executed successfully!\nPlatform Fee: ${platformFeeEGP.toFixed(2)} EGP\nTechnician Payment: ${technicianAmountEGP.toFixed(2)} EGP`)
-    await fetchTransactions()
+    await fetchData()
   } catch (e) {
     console.error('Error executing payout:', e)
     alert('Failed to execute payout. Please try again.')
@@ -727,17 +568,14 @@ async function simulateBankTransfer(splitId) {
       payoutMethod: 'simulated',
     })
     alert('Bank transfer simulation completed successfully!')
-    await fetchTransactions()
+    await fetchData()
   } catch (e) {
     console.error('Error simulating bank transfer:', e)
     alert('Failed to simulate transfer. Please try again.')
   }
 }
 
-function filterByStatus(status) { currentFilter.value = status }
-function getStatusBadgeClass(status) {
-  return { 'badge-pending': status === 'pending', 'badge-approved': status === 'approved', 'badge-rejected': status === 'rejected' }
-}
+
 function getSplitStatusClass(status) {
   return { 'badge-pending': status === 'pending', 'badge-completed': status === 'completed', 'badge-failed': status === 'failed' }
 }
@@ -759,7 +597,7 @@ function findTechnicianByEmail(email) {
 
 onMounted(() => {
   const unsubscribe = onAuthStateChanged(auth, (user) => {
-    if (user) fetchTransactions()
+    if (user) fetchData()
     else router.push('/userlogin')
   })
   // no explicit cleanup needed in <script setup>
@@ -861,15 +699,7 @@ onMounted(() => {
   color: var(--primary-text);
 }
 
-.transactions-table {
-  background: white;
-  border-radius: 1rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-}
-.dark .transactions-table {
-  background-color: var(--grey-bg) !important;
-}
+
 
 .table-header {
   display: flex;

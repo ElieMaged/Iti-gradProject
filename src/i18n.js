@@ -232,12 +232,13 @@ terms: {
     tooManyRequests: "Too many requests. Please try again later.",
     passwordResetFailed: "Failed to send reset email. Please try again.",
     // Review System - Booking Requirements
+    checkingEligibility: "Checking review eligibility...",
     loginToReview: "Please log in to submit a review",
     alreadyReviewed: "You have already reviewed this technician",
     thankYouForReview: "Thank you for your review!",
     loginToLeaveReview: "Please log in to leave a review",
     bookingRequiredToReview:
-      "You must book and complete a service with this technician before you can leave a review",
+      "You must book a service with this technician before you can leave a review",
     bookTechnicianFirst: "Book this technician first to leave a review",
     bookToLeaveFirstReview: "Book this technician to leave the first review",
     failedToFetchReviews: "Failed to fetch reviews",
@@ -1103,6 +1104,7 @@ terms: {
     cancelBooking: 'Cancel Booking',
     noBookingsFound: 'No Bookings Found',
     noBookingsDescription: 'You haven\'t made any bookings yet. Start by browsing our services!',
+    noBookingYet: 'No booking yet',
     browseServices: 'Browse Services',
     loginRequired: 'Please log in to view your bookings',
     
@@ -1231,6 +1233,7 @@ terms: {
     specializationCarpentry: 'Carpentry',
     specializationPainting: 'Painting',
     specializationACTechnician: 'AC Technician',
+    specializationWallFinishing: 'Wall Finishing',
     yearsOfExperienceLabel: 'Years of Experience',
     selectExperience: 'Select Experience',
     baseVisitPriceLabel: 'Base Visit Price',
@@ -1683,6 +1686,7 @@ terms: {
     passwordResetFailed:
       "فشل في إرسال رابط إعادة التعيين. يرجى المحاولة مرة أخرى.",
     // Review System - Booking Requirements
+    checkingEligibility: "جاري التحقق من أهلية التقييم...",
     loginToReview: "يرجى تسجيل الدخول لإرسال تقييم",
     alreadyReviewed: "لقد قمت بتقييم هذا الفني بالفعل",
     thankYouForReview: "شكراً لك على تقييمك!",
@@ -2530,6 +2534,7 @@ terms: {
     specializationCarpentry: 'نجارة',
     specializationPainting: 'دهان',
     specializationACTechnician: 'فني تكييف',
+    specializationWallFinishing: 'تشطيب الجدران',
     yearsOfExperienceLabel: 'سنوات الخبرة',
     selectExperience: 'اختر الخبرة',
     baseVisitPriceLabel: 'سعر الزيارة الأساسي',
@@ -2567,6 +2572,7 @@ terms: {
     cancelBooking: 'إلغاء الحجز',
     noBookingsFound: 'لا توجد حجوزات',
     noBookingsDescription: 'لم تقم بأي حجوزات بعد. ابدأ بتصفح خدماتنا!',
+    noBookingYet: 'لا توجد حجوزات بعد',
     browseServices: 'تصفح الخدمات',
     loginRequired: 'يرجى تسجيل الدخول لعرض حجوزاتك',
     //tech edit profile
