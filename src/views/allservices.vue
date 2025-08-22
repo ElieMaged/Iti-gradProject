@@ -657,43 +657,44 @@ import { waitForAuth, isAuthenticated } from '../utils/auth';
   flex-wrap: wrap;
 }
 
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 2rem;
-}
-.pagination-btn {
-  background: #fff;
-  color: #625397;
-  border: 1px solid #d1c4e9;
-  border-radius: 6px;
-  padding: 6px 14px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-}
-.pagination-btn.active,
-.pagination-btn:hover {
-  background: #7c6bb0;
-  color: #fff;
-}
-.pagination-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-.dark .pagination-btn {
-  background: var(--secondary-bg);
-  color: var(--primary-text);
-  border: 1px solid var(--border-color, #333);
-}
-.dark .pagination-btn.active,
-.dark .pagination-btn:hover {
-  background: var(--primary-color);
-  color: var(--primary-text);
-}
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .pagination-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #7c6bb0;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .pagination-btn:hover:not(:disabled) {
+    background: #5a4e99;
+  }
+  .pagination-btn:disabled {
+    background: #d1d5db;
+    cursor: not-allowed;
+  }
+  .dark .pagination-btn {
+    background: var(--primary-color);
+    color: var(--primary-text);
+  }
+  .dark .pagination-btn:hover:not(:disabled) {
+    background: var(--grey-bg);
+  }
+  .dark .pagination-btn:disabled {
+    background: var(--text-muted);
+  }
 
 .team-card {
   width: 24%;

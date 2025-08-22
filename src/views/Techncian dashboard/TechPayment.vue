@@ -28,7 +28,7 @@
           <div class="breakdown-title">Credit Sources</div>
           <div class="breakdown-items">
             <div class="breakdown-item" v-if="creditBreakdown.bookingCredits > 0">
-              <span class="breakdown-label">Booking Payments:</span>
+              <span class="breakdown-label">Booking Payments (75% of total):</span>
               <span class="breakdown-amount">+{{ creditBreakdown.bookingCredits }} EGP</span>
             </div>
             <div class="breakdown-item" v-if="creditBreakdown.adminTransfers > 0">
@@ -37,28 +37,28 @@
             </div>
           </div>
         </div>
-      </div>
-
-      <div class="withdraw-card">
-        <div class="withdraw-title">{{ $t('withdrawFunds') }}</div>
-        <form class="withdraw-form">
-                     <div class="withdraw-fields">
-             <div class="withdraw-field">
-               <label>{{ $t('amount') }}</label>
-               <input type="number" :placeholder="$t('enterAmount')" v-model="withdrawAmount" />
+        
+        <!-- Payment Split Information -->
+        <div class="payment-split-info">
+          <div class="split-title">Payment Split Information</div>
+          <div class="split-description">
+            When customers book your services, the payment is automatically split:
+          </div>
+          <div class="split-breakdown">
+            <div class="split-item">
+              <span class="split-label">Platform Fee (25%):</span>
+              <span class="split-amount admin-amount">25% of booking amount</span>
+            </div>
+            <div class="split-item">
+              <span class="split-label">Your Payment (75%):</span>
+              <span class="split-amount technician-amount">75% of booking amount</span>
+            </div>
+          </div>
+          <div class="split-note">
+            Your 75% share is automatically added to your balance when a booking is confirmed.
+          </div>
+        </div>
              </div>
-                           <div class="withdraw-field">
-                <label>{{ $t('bankName') }}</label>
-                <input type="text" :placeholder="$t('enterBankName')" v-model="bankName" />
-              </div>
-              <div class="withdraw-field">
-                <label>{{ $t('accountNumber') }}</label>
-                <input type="text" :placeholder="$t('enterAccountNumber')" v-model="accountNumber" />
-              </div>
-           </div>
-          <button class="withdraw-btn" type="submit" @click.prevent="handleWithdraw">{{ $t('withdraw') }}</button>
-        </form>
-      </div>
       
       <!-- Recent Transactions -->
       <div class="transactions-section" v-if="recentTransactions.length > 0">
@@ -94,20 +94,17 @@ export default {
     Sidebar,
     TopBar
   },
-  data() {
-    return {
-      activeMenu: 'payment',
-      currentBalance: 0,
-      pendingBalance: 0,
-      technicianEmail: '',
-      withdrawAmount: '',
-      bankName: '',
-      accountNumber: '',
-      recentTransactions: [],
-      loading: true,
-      creditBreakdown: null
-    }
-  },
+     data() {
+     return {
+       activeMenu: 'payment',
+       currentBalance: 0,
+       pendingBalance: 0,
+       technicianEmail: '',
+       recentTransactions: [],
+       loading: true,
+       creditBreakdown: null
+     }
+   },
   methods: {
     handleSidebarNavigate(path) {
       this.$router.push(path);
@@ -281,38 +278,7 @@ export default {
         default:
           return type || 'Transaction';
       }
-    },
-    
-    async handleWithdraw() {
-      if (!this.withdrawAmount || !this.bankName || !this.accountNumber) {
-        alert('Please enter amount, bank name, and account number');
-        return;
-      }
-      
-      const amount = parseFloat(this.withdrawAmount);
-      if (amount > this.currentBalance) {
-        alert('Withdrawal amount cannot exceed current balance');
-        return;
-      }
-      
-      if (amount <= 0) {
-        alert('Please enter a valid amount');
-        return;
-      }
-      
-      // Here you would implement the withdrawal logic
-      console.log('Processing withdrawal:', {
-        amount: amount,
-        bankName: this.bankName,
-        accountNumber: this.accountNumber,
-        currentBalance: this.currentBalance
-      });
-      
-      alert('Withdrawal request submitted successfully');
-      this.withdrawAmount = '';
-      this.bankName = '';
-      this.accountNumber = '';
-    },
+         },
     
     async refreshData() {
       await this.fetchTechnicianCredits();
@@ -452,9 +418,98 @@ export default {
   color: #28a745;
 }
 
-.dark .breakdown-amount {
-  color: #4ade80;
-}
+ .dark .breakdown-amount {
+   color: #4ade80;
+ }
+
+ /* Payment Split Information Styles */
+ .payment-split-info {
+   margin-top: 1.5rem;
+   padding-top: 1.5rem;
+   border-top: 1px solid #e0e0e0;
+ }
+
+ .dark .payment-split-info {
+   border-top-color: #444;
+ }
+
+ .split-title {
+   font-size: 1rem;
+   font-weight: 600;
+   color: #666;
+   margin-bottom: 0.75rem;
+ }
+
+ .dark .split-title {
+   color: #ccc;
+ }
+
+ .split-description {
+   font-size: 0.9rem;
+   color: #555;
+   margin-bottom: 1rem;
+   line-height: 1.4;
+ }
+
+ .dark .split-description {
+   color: #bbb;
+ }
+
+ .split-breakdown {
+   display: flex;
+   flex-direction: column;
+   gap: 0.75rem;
+   margin-bottom: 1rem;
+ }
+
+ .split-item {
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   padding: 0.5rem 0;
+ }
+
+ .split-label {
+   font-size: 0.9rem;
+   color: #555;
+   font-weight: 500;
+ }
+
+ .dark .split-label {
+   color: #bbb;
+ }
+
+ .split-amount {
+   font-size: 0.9rem;
+   font-weight: 600;
+ }
+
+ .admin-amount {
+   color: #dc2626;
+ }
+
+ .dark .admin-amount {
+   color: #ef4444;
+ }
+
+ .technician-amount {
+   color: #059669;
+ }
+
+ .dark .technician-amount {
+   color: #10b981;
+ }
+
+ .split-note {
+   font-size: 0.8rem;
+   color: #666;
+   font-style: italic;
+   line-height: 1.4;
+ }
+
+ .dark .split-note {
+   color: #999;
+ }
 
 .payment-balance-card {
   background: #fff;
@@ -517,98 +572,9 @@ export default {
   align-self: center;
   padding-right: 20px;
 }
-.dark .pending-amount {
-  color: var(--primary-text) !important;
-}
-
-.withdraw-card {
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  padding: 28px 40px 24px 40px;
-}
-.dark .withdraw-card {
-  background: var(--secondary-bg);
-  color: var(--primary-text) !important;
-}
-.withdraw-title {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #222;
-  margin-bottom: 18px;
-}
-.dark .withdraw-title {
-  color: var(--primary-text) !important;
-}
-.withdraw-form {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-.dark .withdraw-form {
-  color: var(--primary-text) !important;
-}
-.withdraw-fields {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 18px;
-  margin-bottom: 10px;
-}
-.dark .withdraw-fields {
-  color: var(--primary-text) !important;
-}
-.withdraw-field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  flex: 1;
-}
-.dark .withdraw-field {
-  color: var(--primary-text) !important;
-}
-.withdraw-field label {
-  font-size: 1rem;
-  color: #222;
-  font-weight: 500;
-}
-.dark .withdraw-field label {
-  color: var(--primary-text) !important;
-}
-.withdraw-field input {
-  border: none;
-  background: #ececec;
-  border-radius: 25px;
-  padding: 10px 18px;
-  font-size: 1rem;
-  color: #222;
-  outline: none;
-}
-.dark .withdraw-field input {
-  color: var(--primary-text) !important;
-}
-.withdraw-btn {
-  background: var(--primary-color);
-  color: #fff;
-  border: none;
-  border-radius: 25px;
-  padding: 10px 38px;
-  font-size: 1.1rem;
-  font-weight: 700;
-  cursor: pointer;
-  align-self: flex-start;
-  transition: background 0.2s;
-}
-.dark .withdraw-btn {
-  background: var(--primary-color) !important;
-}
-.withdraw-btn:hover {
-  background: var(--primary-color);
-  opacity: 0.9;
-}
-.dark .withdraw-btn:hover {
-  background: var(--primary-color) !important;
-  opacity: 0.9;
-}
+ .dark .pending-amount {
+   color: var(--primary-text) !important;
+ }
 
 
 @media (max-width: 1024px) {
@@ -617,16 +583,10 @@ export default {
   }
 
   
-  .payment-balance-card,
-  .withdraw-card {
-    padding: 1.5rem;
-    margin: 0 0 1.5rem 0;
-  }
-  
-  .withdraw-fields {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
+     .payment-balance-card {
+     padding: 1.5rem;
+     margin: 0 0 1.5rem 0;
+   }
 }
 
 @media (max-width: 900px) {
@@ -647,12 +607,11 @@ export default {
     padding: 16px 0 0 0;
   }
   
-  .payment-balance-card,
-  .withdraw-card {
-    margin: 0 0 24px 0;
-    max-width: 100%;
-    padding: 24px 16px 18px 16px;
-  }
+     .payment-balance-card {
+     margin: 0 0 24px 0;
+     max-width: 100%;
+     padding: 24px 16px 18px 16px;
+   }
   
   .payment-title {
     margin-left: 0;
@@ -698,11 +657,10 @@ export default {
     text-align: left;
   }
   
-  .payment-balance-card,
-  .withdraw-card {
-    padding: 12px 6px 10px 6px;
-    border-radius: 12px;
-  }
+     .payment-balance-card {
+     padding: 12px 6px 10px 6px;
+     border-radius: 12px;
+   }
   
   .credit-breakdown {
     margin-top: 1rem;
@@ -722,11 +680,7 @@ export default {
     font-size: 0.8rem;
   }
   
-  .withdraw-btn {
-    padding: 8px 18px;
-    font-size: 1rem;
-    width: 100%;
-  }
+  
   
 
   
@@ -766,16 +720,10 @@ export default {
     margin-bottom: 0.5rem;
   }
   
-  .payment-balance-card,
-  .withdraw-card {
-    padding: 8px 2px 6px 2px;
-    border-radius: 10px;
-  }
-  
-  .withdraw-btn {
-    padding: 6px 12px;
-    font-size: 0.9rem;
-  }
+     .payment-balance-card {
+     padding: 8px 2px 6px 2px;
+     border-radius: 10px;
+   }
   
 
   
@@ -1001,16 +949,10 @@ export default {
     margin-bottom: 0.5rem;
   }
   
-  .payment-balance-card,
-  .withdraw-card {
-    padding: 6px 1px 4px 1px;
-    border-radius: 8px;
-  }
-  
-  .withdraw-btn {
-    padding: 4px 8px;
-    font-size: 0.85rem;
-  }
+     .payment-balance-card {
+     padding: 6px 1px 4px 1px;
+     border-radius: 8px;
+   }
   
 
   
@@ -1026,9 +968,7 @@ export default {
     padding-right: 2px;
   }
   
-    .withdraw-title {
-    font-size: 1rem;
-  }
+    
 }
 
 @media (max-width: 360px) {
@@ -1045,16 +985,10 @@ export default {
     margin-bottom: 0.25rem;
   }
   
-  .payment-balance-card,
-  .withdraw-card {
-    padding: 4px 0.5px 2px 0.5px;
-    border-radius: 6px;
-  }
-  
-  .withdraw-btn {
-    padding: 3px 6px;
-    font-size: 0.8rem;
-  }
+     .payment-balance-card {
+     padding: 4px 0.5px 2px 0.5px;
+     border-radius: 6px;
+   }
   
 
   
@@ -1070,29 +1004,14 @@ export default {
     padding-right: 1px;
   }
   
-    .withdraw-title {
-    font-size: 0.9rem;
-  }
+    
 }
-.payment-balance-card,
-.withdraw-card {
-  transition: box-shadow 0.2s, border 0.2s;
-  border: 1.5px solid #ececec;
-}
-.payment-balance-card:hover,
-.withdraw-card:hover {
-  box-shadow: 0 4px 16px rgba(98,83,151,0.10);
-  border: 1.5px solid #948AB8;
-}
-.payment-balance-card:not(:last-child),
-.withdraw-card:not(:last-child) {
-  border-bottom: 1px solid #ececec;
-}
-.withdraw-field input:focus {
-  border: 1.5px solid #948AB8;
-  background: #f5f5fa;
-}
-.withdraw-btn:focus {
-  outline: 2px solid #948AB8;
-}
+ .payment-balance-card {
+   transition: box-shadow 0.2s, border 0.2s;
+   border: 1.5px solid #ececec;
+ }
+ .payment-balance-card:hover {
+   box-shadow: 0 4px 16px rgba(98,83,151,0.10);
+   border: 1.5px solid #948AB8;
+ }
 </style> 

@@ -42,6 +42,7 @@
                     <option value="Painting">{{ $t('specializationPainting') }}</option>
                     <option value="Air Conditioning">{{ $t('specializationACTechnician') }}</option>
                     <option value="Electrical Appliances">{{ $t('electricalApplianceTechnician') }}</option>
+                    <option value="Wall Finishing">{{ $t('specializationWallFinishing') }}</option>
                   </select>
                 </div>
                 <div>
@@ -152,21 +153,27 @@ async function fetchTechnicianData() {
     const technicianRef = doc(db, 'technicians', user.uid);
     const technicianSnap = await getDoc(technicianRef);
     
+    // Also fetch user data to get the original registration phone number
+    const userRef = doc(db, 'users', user.uid);
+    const userSnap = await getDoc(userRef);
+    
     if (technicianSnap.exists()) {
       const technicianData = technicianSnap.data();
+      const userData = userSnap.exists() ? userSnap.data() : {};
       console.log('Fetched technician data:', technicianData);
+      console.log('Fetched user data:', userData);
       
-      // Populate form with existing data
+      // Populate form with existing data, prioritizing technician data but falling back to user data for phone
       form.value = {
-        fullName: technicianData.fullName || '',
-        email: technicianData.email || user.email || '',
-        phone: technicianData.phone || '',
+        fullName: technicianData.fullName || userData.fullName || '',
+        email: technicianData.email || userData.email || user.email || '',
+        phone: technicianData.phone || userData.phone || '', // Use technician phone first, then user phone
         specialization: technicianData.specialization || '',
         experience: technicianData.experience || '',
         basePrice: technicianData.basePrice || '',
         bio: technicianData.bio || '',
-        government: technicianData.government || '',
-        district: technicianData.district || '',
+        government: technicianData.government || userData.government || '',
+        district: technicianData.district || userData.district || '',
         willingToTravel: technicianData.willingToTravel || '',
       };
       
@@ -175,6 +182,29 @@ async function fetchTechnicianData() {
         profileImageUrl.value = technicianData.profilePhotoUrl;
       } else if (technicianData.idPhotoUrl) {
         profileImageUrl.value = technicianData.idPhotoUrl;
+      } else if (userData.profilePhotoUrl) {
+        profileImageUrl.value = userData.profilePhotoUrl;
+      }
+    } else if (userSnap.exists()) {
+      // If no technician data exists, use user data
+      const userData = userSnap.data();
+      console.log('Fetched user data (no technician data):', userData);
+      
+      form.value = {
+        fullName: userData.fullName || '',
+        email: userData.email || user.email || '',
+        phone: userData.phone || '', // Use the phone number from user registration
+        specialization: userData.specialization || '',
+        experience: userData.experience || '',
+        basePrice: userData.basePrice || '',
+        bio: userData.bio || '',
+        government: userData.government || '',
+        district: userData.district || '',
+        willingToTravel: userData.willingToTravel || '',
+      };
+      
+      if (userData.profilePhotoUrl) {
+        profileImageUrl.value = userData.profilePhotoUrl;
       }
     } else {
       // Set default email from auth

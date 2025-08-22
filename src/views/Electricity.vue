@@ -55,7 +55,7 @@
           </div>
 
           <!-- Actual Technician Cards -->
-          <div v-else v-for="technician in displayedTechnicians" :key="technician.id" class="team-card">
+          <div v-else v-for="technician in paginatedTechnicians" :key="technician.id" class="team-card">
             <!-- Top Section - Image Area -->
             <div class="card-top-section">
               <img :src="technician.image" :alt="technician.name" class="member-photo" />
@@ -85,6 +85,20 @@
           </div>
         </div>
 
+        <!-- Pagination -->
+        <div v-if="totalPages > 1" class="pagination-container">
+          <div class="pagination-info">
+            Showing {{ (currentPage - 1) * pageSize + 1 }} - 
+            {{ Math.min(currentPage * pageSize, filteredTechnicians.length) }} 
+            of {{ filteredTechnicians.length }} technicians
+          </div>
+          <Pagination 
+            :current-page="currentPage"
+            :total-pages="totalPages"
+            @page-changed="goToPage"
+          />
+        </div>
+
     </section>
 
   </div>
@@ -96,6 +110,7 @@ import { collection, getDocs } from 'firebase/firestore'
 import { db, auth } from '../firebase'
 import { useRouter } from 'vue-router'
 import SearchBar from '../components/SearchBar.vue'
+import Pagination from '../components/pagination.vue'
 import profile1 from '../assets/profile/1.jpg'
 import profile2 from '../assets/profile/2.png'
 import profile3 from '../assets/profile/3.png'
@@ -117,7 +132,9 @@ const locationFilter = ref({ government: '', district: '' })
 const specializationFilter = ref('')
 const priceFilter = ref('')
 const ratingFilter = ref('')
-// Removed pagination logic
+// Pagination
+const currentPage = ref(1)
+const pageSize = 12
 
 async function fetchTechnicians() {
   try {
@@ -234,14 +251,18 @@ const filteredTechnicians = computed(() => {
   return list
 })
 
-// Remove pagination logic
-// Instead, show up to 20 technicians from the merged list
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredTechnicians.value.length / pageSize)))
+const paginatedTechnicians = computed(() => {
+  const start = (currentPage.value - 1) * pageSize
+  return filteredTechnicians.value.slice(start, start + pageSize)
+})
 
-const maxTechniciansToShow = 20;
-
-const displayedTechnicians = computed(() => {
-  return filteredTechnicians.value.slice(0, maxTechniciansToShow);
-});
+function goToPage(page) {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+}
 
 function onSearch(query) {
   searchQuery.value = query
@@ -706,13 +727,42 @@ const heroBackgroundStyle = computed(() => {
   }
   
   .pagination {
-    gap: 0.25rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
   }
-  
   .pagination-btn {
-    width: 35px;
-    height: 35px;
-    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #7c6bb0;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .pagination-btn:hover:not(:disabled) {
+    background: #5a4e99;
+  }
+  .pagination-btn:disabled {
+    background: #d1d5db;
+    cursor: not-allowed;
+  }
+  .dark .pagination-btn {
+    background: var(--primary-color);
+    color: var(--primary-text);
+  }
+  .dark .pagination-btn:hover:not(:disabled) {
+    background: var(--grey-bg);
+  }
+  .dark .pagination-btn:disabled {
+    background: var(--text-muted);
   }
 }
 
