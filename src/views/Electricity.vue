@@ -147,7 +147,7 @@ const mergedTechnicians = computed(() => {
       bgColor: '#E8E4F3', // or any default color
       price: fbTech.basePrice,
       description: fbTech.bio,
-      rating: 5, // or fbTech.rating if available
+      rating: fbTech.averageRating || fbTech.rating || 0,
       specialization: fbTech.specialization,
       government: fbTech.government,
       district: fbTech.district,

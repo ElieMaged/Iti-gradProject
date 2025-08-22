@@ -958,31 +958,42 @@ async function confirmBooking() {
   const adminAmount = Math.round(basePrice * 0.25 * 100) / 100; // Round to 2 decimal places
   const technicianAmount = Math.round(basePrice * 0.75 * 100) / 100; // Round to 2 decimal places
 
+            // Construct detailed location information
+            const fullAddress = constructAddress(form.value);
+            const locationDetails = {
+              street: form.value.street || '',
+              building: form.value.building || '',
+              area: form.value.area || '',
+              city: form.value.city || '',
+              fullAddress: fullAddress || 'Address not provided'
+            };
+
             const bookingData = {
               technicianId: technician.value.uid || technician.value.id,
-    technicianName: technician.value.name || 'Unknown Technician',
-    userId: auth.currentUser.uid,
-    userName: form.value.fullName.trim(),
-    userEmail: form.value.email.trim(),
-    userPhone: form.value.phone.trim(),
+              technicianName: technician.value.name || 'Unknown Technician',
+              userId: auth.currentUser.uid,
+              userName: form.value.fullName.trim(),
+              userEmail: form.value.email.trim(),
+              userPhone: form.value.phone.trim(),
               date: form.value.date,
               time: form.value.time,
-    address: constructAddress(form.value) || 'Address not provided',
+              address: fullAddress || 'Address not provided',
+              locationDetails: locationDetails,
               price: technician.value.visitPrice || technician.value.basePrice || 'N/A',
               note: form.value.note || '',
               payment: form.value.payment,
               status: 'pending',
               createdAt: serverTimestamp(),
-    // Payment splitting data - ensure all are numbers
-    basePrice: basePrice,
-    adminAmount: adminAmount,
-    technicianAmount: technicianAmount,
-    paymentSplit: {
-      admin: adminAmount,
-      technician: technicianAmount,
-      total: basePrice
-    }
-  };
+              // Payment splitting data - ensure all are numbers
+              basePrice: basePrice,
+              adminAmount: adminAmount,
+              technicianAmount: technicianAmount,
+              paymentSplit: {
+                admin: adminAmount,
+                technician: technicianAmount,
+                total: basePrice
+              }
+            };
 
   // Debug: Log the booking data to check for any undefined values
   console.log('Booking data validation:');
@@ -995,6 +1006,7 @@ async function confirmBooking() {
   console.log('- date:', bookingData.date);
   console.log('- time:', bookingData.time);
   console.log('- address:', bookingData.address);
+  console.log('- locationDetails:', bookingData.locationDetails);
   console.log('- basePrice:', bookingData.basePrice, 'type:', typeof bookingData.basePrice);
   console.log('- adminAmount:', bookingData.adminAmount, 'type:', typeof bookingData.adminAmount);
   console.log('- technicianAmount:', bookingData.technicianAmount, 'type:', typeof bookingData.technicianAmount);
@@ -1016,12 +1028,43 @@ async function confirmBooking() {
     
     // Send confirmation email to customer
     if (form.value.email) {
-      sendConfirmationEmail(form.value.email, technician.value.name, form.value.date, form.value.time, form.value.payment);
+      try {
+        const { sendBookingConfirmationEmail } = await import('../utils/emailService.js')
+        await sendBookingConfirmationEmail({
+          userEmail: form.value.email,
+          userName: form.value.fullName,
+          technicianName: technician.value.name,
+          date: form.value.date,
+          time: form.value.time,
+          payment: form.value.payment,
+          bookingId: bookingData.id
+        })
+      } catch (e) {
+        console.error('Error sending confirmation email:', e)
+      }
     }
     
     // Send booking request notifications to technician and admin
     console.log('Sending booking request notifications...');
     await sendBookingRequestNotification(bookingData);
+    // Notify user of accepted booking
+    try {
+      const userNotification = {
+        type: 'booking_confirmed',
+        title: 'Booking Confirmed',
+        message: `Your booking with ${technician.value.name} on ${form.value.date} at ${form.value.time} has been accepted.`,
+        bookingId: bookingData.id,
+        recipientId: auth.currentUser.uid,
+        recipientType: 'user',
+        technicianId: bookingData.technicianId,
+        technicianName: bookingData.technicianName,
+        createdAt: serverTimestamp(),
+        read: false
+      }
+      await addDoc(collection(db, 'notifications'), userNotification)
+    } catch (e) {
+      console.error('Error sending user confirmation notification:', e)
+    }
     
     // Send booking request email to technician
     console.log('Sending booking request email...');
@@ -1464,6 +1507,7 @@ async function sendBookingRequestNotification(bookingData) {
 async function sendBookingRequestEmail(bookingData) {
   try {
     console.log('=== SENDING BOOKING REQUEST EMAIL TO TECHNICIAN ===');
+    console.log('Booking data for email:', bookingData);
     
     // Get technician's email from their profile
     const technicianDoc = await getDoc(doc(db, 'technicians', bookingData.technicianId));
@@ -1482,6 +1526,7 @@ async function sendBookingRequestEmail(bookingData) {
     
     console.log('Technician email found:', technicianEmail);
     console.log('Technician data:', technicianData);
+    console.log('Location details being sent:', bookingData.locationDetails);
     
     // Import and use the email service function
     const { sendBookingRequestEmail: sendEmail } = await import('../utils/emailService.js');

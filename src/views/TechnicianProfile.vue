@@ -44,7 +44,12 @@
               </div>
               <div class="rating-section">
                 <div class="rating-stars">
-                  <i v-for="n in 5" :key="n" class="fas fa-star star-filled"></i>
+                  <i 
+                    v-for="n in 5" 
+                    :key="n" 
+                    class="fas fa-star"
+                    :class="{ 'star-filled': n <= Math.round(averageRating), 'star-empty': n > Math.round(averageRating) }"
+                  ></i>
                 </div>
               </div>
             </div>
@@ -501,7 +506,7 @@ const getAvailableTimeSlots = async (date) => {
 
 // Computed properties
 const averageRating = computed(() => {
-  if (reviews.value.length === 0) return 5
+  if (reviews.value.length === 0) return 0
   const totalRating = reviews.value.reduce((sum, review) => sum + review.rating, 0)
   return totalRating / reviews.value.length
 })
@@ -919,6 +924,15 @@ onMounted(async () => {
   color: #fbbf24;
   font-size: 1.2rem;
 }
+
+.star-empty {
+  color: #d1d5db;
+  font-size: 1.2rem;
+}
+
+/* Ensure rating stars respect filled/empty, overriding any global star color */
+.rating-stars .fa-star.star-empty { color: #d1d5db !important; }
+.rating-stars .fa-star.star-filled { color: #fbbf24 !important; }
 
 .bio-section {
   border-top: 1px solid #e5e7eb;

@@ -113,6 +113,71 @@ export const initializeEmailJS = () => {
 };
 
 /**
+ * Send booking confirmation email to customer
+ * @param {Object} params - Confirmation details
+ * @param {string} params.userEmail
+ * @param {string} params.userName
+ * @param {string} params.technicianName
+ * @param {string} params.date
+ * @param {string} params.time
+ * @param {string} params.payment
+ * @param {string} [params.bookingId]
+ */
+export const sendBookingConfirmationEmail = async (params) => {
+  try {
+    const { userEmail, userName, technicianName, date, time, payment, bookingId } = params || {};
+    if (!userEmail || !userName || !technicianName || !date || !time || !payment) {
+      throw new Error('Missing required parameters for booking confirmation email');
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(userEmail)) {
+      throw new Error('Invalid user email format');
+    }
+
+    if (!EMAILJS_CONFIG.publicKey || EMAILJS_CONFIG.publicKey === 'YOUR_PUBLIC_KEY') {
+      throw new Error('EmailJS public key is not configured. Please update src/utils/emailjsConfig.js');
+    }
+
+    emailjs.init(EMAILJS_CONFIG.publicKey);
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    const detailedMessage = `\
+Booking Confirmed - BoltFix\n\n\
+Hello ${userName},\n\
+Your booking has been confirmed. Here are your details:\n\
+• Technician: ${technicianName}\n\
+• Date: ${date}\n\
+• Time: ${time}\n\
+• Payment Method: ${payment}\n\
+${bookingId ? `• Booking ID: ${bookingId}\n\n` : ''}\
+Thank you for choosing BoltFix!`;
+
+    const templateParams = {
+      to_email: userEmail,
+      to_name: userName,
+      technician_name: technicianName,
+      booking_date: date,
+      booking_time: time,
+      payment_method: payment,
+      booking_id: bookingId || '',
+      subject: 'Your Booking is Confirmed - BoltFix',
+      message: detailedMessage
+    };
+
+    const response = await emailjs.send(
+      EMAILJS_CONFIG.serviceId,
+      EMAILJS_CONFIG.templateId,
+      templateParams,
+      EMAILJS_CONFIG.publicKey
+    );
+    return response;
+  } catch (error) {
+    console.error('Failed to send booking confirmation email:', error);
+    throw error;
+  }
+};
+
+/**
  * Send booking request email to technician
  * @param {Object} bookingData - Booking information
  * @param {Object} technicianData - Technician information
@@ -146,6 +211,41 @@ export const sendBookingRequestEmail = async (bookingData, technicianData) => {
     // Add delay to ensure initialization is complete
     await new Promise(resolve => setTimeout(resolve, 100));
 
+    // Construct detailed address information
+    const addressDetails = bookingData.address || 'Address not provided';
+    const locationDetails = bookingData.locationDetails || {};
+    
+    // Create comprehensive message with all user and location details
+    const detailedMessage = `
+New Booking Request - BoltFix
+
+Customer Information:
+• Name: ${bookingData.userName}
+• Email: ${bookingData.userEmail}
+• Phone: ${bookingData.userPhone}
+
+Booking Details:
+• Date: ${bookingData.date}
+• Time: ${bookingData.time}
+• Payment Method: ${bookingData.payment}
+• Total Amount: ${bookingData.price || 'N/A'}
+
+Location Details:
+• Full Address: ${addressDetails}
+${locationDetails.street ? `• Street: ${locationDetails.street}` : ''}
+${locationDetails.building ? `• Building: ${locationDetails.building}` : ''}
+${locationDetails.area ? `• Area: ${locationDetails.area}` : ''}
+${locationDetails.city ? `• City: ${locationDetails.city}` : ''}
+
+Additional Notes:
+${bookingData.note ? `• Customer Notes: ${bookingData.note}` : '• No additional notes provided'}
+
+Please log in to your dashboard to accept or reject this booking request.
+
+Best regards,
+BoltFix Team
+    `.trim();
+
     const templateParams = {
       to_email: technicianData.email,
       to_name: technicianData.fullName || technicianData.name || 'Technician',
@@ -156,10 +256,15 @@ export const sendBookingRequestEmail = async (bookingData, technicianData) => {
       booking_time: bookingData.time,
       payment_method: bookingData.payment,
       technician_name: technicianData.fullName || technicianData.name,
-      service_address: bookingData.address || 'Address not provided',
+      service_address: addressDetails,
+      street_address: locationDetails.street || '',
+      building_address: locationDetails.building || '',
+      area_address: locationDetails.area || '',
+      city_address: locationDetails.city || '',
       booking_amount: bookingData.price || 'N/A',
+      customer_notes: bookingData.note || 'No additional notes provided',
       subject: 'New Booking Request - BoltFix',
-      message: `${bookingData.userName} has requested a booking from ${bookingData.date} at ${bookingData.time}. Payment method: ${bookingData.payment}. Please log in to your dashboard to accept or reject this booking.`
+      message: detailedMessage
     };
 
     console.log('Email template parameters:', templateParams);

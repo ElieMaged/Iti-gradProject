@@ -70,7 +70,7 @@
               <div class="member-details">
                 <div class="detail-item rating-item">
                   <i class="fa-solid fa-star"></i>
-                  <span>{{ technician.rating || 4.0 }}</span>
+                  <span>{{ technician.rating || 0 }}</span>
                 </div>
                 <div class="detail-item location-item">
                   <i class="fa-solid fa-location-dot"></i>
@@ -148,7 +148,7 @@ const mergedTechnicians = computed(() => {
       bgColor: '#E8E4F3', // or any default color
       price: fbTech.basePrice,
       description: fbTech.bio,
-      rating: 5, // or fbTech.rating if available
+      rating: fbTech.averageRating || fbTech.rating || 0,
       specialization: fbTech.specialization,
       government: fbTech.government, // Added government field
       district: fbTech.district, // Added district field

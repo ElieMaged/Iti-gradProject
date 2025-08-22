@@ -43,7 +43,7 @@
               <div class="member-details">
                 <div class="detail-item rating-item">
                   <i class="fa-solid fa-star"></i>
-                  <span>{{ technician.rating || 4.0 }}</span>
+                  <span>{{ technician.rating || 0 }}</span>
                 </div>
                 <div class="detail-item location-item">
                   <i class="fa-solid fa-location-dot"></i>
