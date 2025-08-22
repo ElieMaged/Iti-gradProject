@@ -526,10 +526,10 @@ const canReview = computed(() => {
   )
   
   // Check if user has a booking with this technician
-  const hasBooking = userBookings.value.some(booking =>
-    booking.technicianId === route.params.id &&
-    booking.status === 'completed'
-  )
+  const hasBooking = userBookings.value.some(booking => {
+    return booking.technicianId === route.params.id &&
+      (booking.status === 'completed' || booking.status === 'complete')
+  })
   
   // User can review if they haven't already reviewed AND they have a completed booking with this technician
   return !existingReview && hasBooking
@@ -544,7 +544,8 @@ const hasBookingWithTechnician = computed(() => {
   
   // Check if user has any booking with this technician
   return userBookings.value.some(booking =>
-    booking.technicianId === route.params.id
+    booking.technicianId === route.params.id &&
+    (booking.status === 'completed' || booking.status === 'complete')
   )
 })
 

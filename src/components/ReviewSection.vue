@@ -169,17 +169,29 @@ async function checkBookingEligibility() {
   try {
     bookingCheckLoading.value = true
     
-    // Check if user has already reviewed this technician
-    const reviewsQuery = query(
+    // 1) Check if user has already reviewed this technician
+    const reviewsQueryByUser = query(
       collection(db, 'reviews'),
       where('technicianId', '==', props.technicianId),
       where('userEmail', '==', auth.currentUser.email)
     )
-    
-    const reviewsSnapshot = await getDocs(reviewsQuery)
-    
-    // User can review if they haven't reviewed this technician yet (no booking requirement)
-    canReview.value = reviewsSnapshot.empty
+    const userReviewSnapshot = await getDocs(reviewsQueryByUser)
+
+    if (!userReviewSnapshot.empty) {
+      canReview.value = false
+      return
+    }
+
+    // 2) Require a completed booking with this technician
+    const bookingsQuery = query(
+      collection(db, 'bookings'),
+      where('userId', '==', auth.currentUser.uid),
+      where('technicianId', '==', props.technicianId),
+      where('status', 'in', ['completed', 'complete'])
+    )
+    const bookingsSnapshot = await getDocs(bookingsQuery)
+
+    canReview.value = !bookingsSnapshot.empty
     
   } catch (error) {
     console.error('Error checking review eligibility:', error)

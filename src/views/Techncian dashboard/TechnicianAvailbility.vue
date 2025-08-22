@@ -232,28 +232,17 @@ export default {
       endTime: ''
     });
 
-    // Generate week days with correct upcoming calendar dates for each weekday
+    // Generate the next 7 calendar days starting from today with correct day names
     const generateWeekDays = () => {
       const today = new Date();
       const weekDays = [];
-      // Map of weekday names to JS Date.getDay() indices (0=Sun .. 6=Sat)
-      const dayOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-      const dayIndexMap = { sunday: 0, monday: 1, tuesday: 2, wednesday: 3, thursday: 4, friday: 5, saturday: 6 };
+      const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
-      const getNextDateForWeekday = (targetDayIndex) => {
+      for (let i = 0; i < 7; i++) {
         const d = new Date(today);
-        const todayIndex = d.getDay();
-        let delta = (targetDayIndex - todayIndex + 7) % 7;
-        // Ensure we pick the next occurrence (not today)
-        if (delta === 0) delta = 7;
-        d.setDate(d.getDate() + delta);
-        return d;
-      };
-
-      for (const dayName of dayOrder) {
-        const targetIndex = dayIndexMap[dayName];
-        const date = getNextDateForWeekday(targetIndex);
-        const formattedDate = date.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
+        d.setDate(today.getDate() + i);
+        const dayName = dayNames[d.getDay()];
+        const formattedDate = d.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
         weekDays.push({
           value: dayName,
           label: `${dayName.charAt(0).toUpperCase() + dayName.slice(1)} ${formattedDate}`
@@ -453,6 +442,8 @@ export default {
           console.log('Technician authenticated:', user.uid);
           technicianUid.value = user.uid;
           fetchAvailability();
+          // Refresh weekDays when component mounts (ensures correct week rollover)
+          weekDays.value = generateWeekDays();
         } else {
           console.log('No technician authenticated');
           showMessage('Please log in to manage availability', 'error');
