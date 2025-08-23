@@ -51,8 +51,6 @@
               class="form-input" 
               :placeholder="$t('phoneNumber')" 
               inputmode="tel"
-              pattern="^(01[0125][0-9]{8}|(?:\\+20|0020)1[0125][0-9]{8})$"
-              :title="$t('enterValidEgyptianPhone')"
               required 
             />
           </div>
@@ -524,13 +522,7 @@ const validateEmail = (email) => {
   return true;
 };
 
-// Egyptian phone validation: supports local (11 digits starting 01x) and international (+20 or 0020)
-const validateEgyptianPhone = (phone) => {
-  const cleaned = String(phone).replace(/\s|-/g, '');
-  const local = /^01[0125][0-9]{8}$/; // e.g., 010xxxxxxxx, 011xxxxxxxx, 012xxxxxxxx, 015xxxxxxxx
-  const intl = /^(?:\+20|0020)1[0125][0-9]{8}$/; // e.g., +2010xxxxxxxx or 002010xxxxxxxx
-  return local.test(cleaned) || intl.test(cleaned);
-};
+
 
 function triggerFileInput() {
   fileInput.value && fileInput.value.click();
@@ -576,16 +568,6 @@ async function handleRegister() {
   formData.email = String(formData.email).trim();
   if (!validateEmail(formData.email)) {
     error.value = t('emailInvalid');
-    return;
-  }
-
-  // Phone validation
-  if (!formData.phoneNumber || String(formData.phoneNumber).trim().length === 0) {
-    error.value = t('phoneRequired');
-    return;
-  }
-  if (!validateEgyptianPhone(formData.phoneNumber)) {
-    error.value = t('phoneInvalid');
     return;
   }
 

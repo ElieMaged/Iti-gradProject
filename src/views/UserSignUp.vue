@@ -106,13 +106,6 @@ const validateAge = (age) => {
 };
 const validateName = (name) => name.length >= 2 && /^[a-zA-Z\s]+$/.test(name);
 const validateRequired = (value) => value !== null && value !== undefined && String(value).trim().length > 0;
-// Egyptian phone validation: supports local (11 digits starting 01x) and international (+20 or 0020)
-const validateEgyptianPhone = (phone) => {
-  const cleaned = String(phone).replace(/\s|-/g, '');
-  const local = /^01[0125][0-9]{8}$/; // e.g., 010xxxxxxxx, 011xxxxxxxx, 012xxxxxxxx, 015xxxxxxxx
-  const intl = /^(?:\+20|0020)1[0125][0-9]{8}$/; // e.g., +2010xxxxxxxx or 002010xxxxxxxx
-  return local.test(cleaned) || intl.test(cleaned);
-};
 
 // Main validation function
 const validateForm = () => {
@@ -168,12 +161,6 @@ const validateForm = () => {
     errors.value.district = t('districtRequired');
   }
 
-  if (!validateRequired(formData.phone)) {
-    errors.value.phone = t('phoneRequired');
-  } else if (!validateEgyptianPhone(formData.phone)) {
-    errors.value.phone = t('phoneInvalid');
-  }
-
   if (!formData.agreeTerms) {
     errors.value.agreeTerms = t('mustAgreeTerms');
   }
@@ -202,12 +189,12 @@ const handleRegister = async () => {
       firstName: formData.firstName,
       lastName: formData.lastName,
       email: formData.email,
+      phone: formData.phone,
       gender: formData.gender,
       age: parseInt(formData.age),
       address: `${formData.address},`+ formData.government+ formData.district,
       area: getDistrictsForGovernment(formData.government)[formData.district] || formData.district,
       city: getGovernmentNames()[formData.government] || formData.government,
-      phone: formData.phone,
       role: 'user',
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -283,46 +270,44 @@ const closeTermsModal = () => {
         <p v-if="errors.lastName" class="error-message">{{ errors.lastName }}</p>
       </div>
 
-      <!-- email -->
-      <div class="form-group">
-        <label for="email" class="form-label">{{ $t('email') }}</label>
-        <input 
-          type="email" 
-          id="email" 
-          v-model="formData.email" 
-          class="form-input" 
-          :class="{ 'error': errors.email }"
-          autocomplete="email"
-          inputmode="email"
-          autocapitalize="none"
-          spellcheck="false"
-          pattern="^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
-          :title="$t('enterValidEmail') || 'Enter a valid email address (e.g., name@example.com)'"
-          :placeholder="$t('email')" 
-          required 
-        />
-        <p v-if="errors.email" class="error-message">{{ errors.email }}</p>
-      </div>
+             <!-- email -->
+       <div class="form-group">
+         <label for="email" class="form-label">{{ $t('email') }}</label>
+         <input 
+           type="email" 
+           id="email" 
+           v-model="formData.email" 
+           class="form-input" 
+           :class="{ 'error': errors.email }"
+           autocomplete="email"
+           inputmode="email"
+           autocapitalize="none"
+           spellcheck="false"
+           pattern="^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
+           :title="$t('enterValidEmail') || 'Enter a valid email address (e.g., name@example.com)'"
+           :placeholder="$t('email')" 
+           required 
+         />
+         <p v-if="errors.email" class="error-message">{{ errors.email }}</p>
+       </div>
 
-      <!-- phone -->
-      <div class="form-group">
-        <label for="phone" class="form-label">{{ $t('phone') }}</label>
-        <input 
-          type="text" 
-          id="phone" 
-          v-model="formData.phone" 
-          class="form-input" 
-          :class="{ 'error': errors.phone }"
-          inputmode="tel"
-          pattern="^(01[0125][0-9]{8}|(?:\\+20|0020)1[0125][0-9]{8})$"
-          :title="$t('enterValidEgyptianPhone')"
-          :placeholder="$t('phone')" 
-          required 
-        />
-        <p v-if="errors.phone" class="error-message">{{ errors.phone }}</p>
-      </div>
+       <!-- phone -->
+       <div class="form-group">
+         <label for="phone" class="form-label">{{ $t('phone') }}</label>
+         <input 
+           type="text" 
+           id="phone" 
+           v-model="formData.phone" 
+           class="form-input" 
+           :class="{ 'error': errors.phone }"
+           inputmode="tel"
+           :placeholder="$t('phone')" 
+           required 
+         />
+         <p v-if="errors.phone" class="error-message">{{ errors.phone }}</p>
+       </div>
 
-      <!-- gender -->
+       <!-- gender -->
       <div class="form-group">
         <label for="gender" class="form-label">{{ $t('gender') }}</label>
         <select 
