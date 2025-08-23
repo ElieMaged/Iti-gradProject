@@ -617,8 +617,6 @@ const closeTermsModal = () => {
       </div>
     </div>
 
-</body>
-
 </template>
 
 <style scoped>
