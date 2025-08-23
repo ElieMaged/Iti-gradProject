@@ -65,12 +65,12 @@ watch(() => authState.isAuthenticated, (isAuth) => {
 </script>
 
 <template>
+  <authState/>
+  <Navbar v-if="!isAdminRoute" />
   <div id="app">
-    <authState/>
-    <Navbar v-if="!isAdminRoute" />
     <router-view />
-    <Footer v-if="!isAdminRoute" />
   </div>
+  <Footer v-if="!isAdminRoute" />
 </template>
 
 <style>
