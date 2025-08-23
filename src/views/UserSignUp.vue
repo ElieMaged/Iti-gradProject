@@ -1,259 +1,5 @@
-<template>
-  <div>
-    <!-- Loading state while auth is initializing -->
-    <div v-if="authLoading" class="loading-container">
-      <div class="loading-spinner">
-        <div class="spinner"></div>
-        <p>Loading...</p>
-      </div>
-    </div>
-    
-    <!-- Main content when auth is ready -->
-    <div v-else>
-    <!-- Test: Simple element to confirm template is rendering -->
-    <div style="position: fixed; top: 20px; right: 20px; background: orange; color: black; z-index: 10000; padding: 10px; font-weight: bold;">
-      USERSIGNUP TEMPLATE RENDERING
-    </div>
-    
-    <!-- Debug: UserSignUp component template rendering -->
-    <div style="position: fixed; top: 0; right: 0; background: blue; color: white; z-index: 9999; padding: 10px;">
-      UserSignUp Component Loaded - Route: {{ $route.path }}
-    </div>
-    
-    <div class="signup-container">
-      <form class="signup-form" @submit.prevent="handleRegister">
-        <div class="form-header">
-          <img class="logo" src="/logo/ace04d3b268cf810c91d002fdf7454a6ef778f27.png" alt="BoltFix Logo">
-          <h1 class="title">{{ $t('userRegistration') }}</h1>
-          <p class="subtitle">{{ $t('createAccount') }}</p>
-        </div>
-        
-        <div class="form-grid">
-          <!-- Personal Information -->
-          <div class="form-section">
-            <h3 class="section-title">{{ $t('personalInformation') }}</h3>
-            
-            <div class="form-group">
-              <label for="firstName" class="form-label">{{ $t('firstName') }}</label>
-              <input 
-                type="text" 
-                id="firstName" 
-                v-model="formData.firstName" 
-                class="form-input" 
-                :placeholder="$t('firstName')" 
-                required 
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="lastName" class="form-label">{{ $t('lastName') }}</label>
-              <input 
-                type="text" 
-                id="lastName" 
-                v-model="formData.lastName" 
-                class="form-input" 
-                :placeholder="$t('lastName')" 
-                required 
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="email" class="form-label">{{ $t('emailAddress') }}</label>
-              <input 
-                type="email" 
-                id="email" 
-                v-model="formData.email" 
-                class="form-input" 
-                autocomplete="email"
-                inputmode="email"
-                autocapitalize="none"
-                spellcheck="false"
-                pattern="^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
-                :title="$t('enterValidEmail') || 'Enter a valid email address (e.g., name@example.com)'"
-                :placeholder="$t('emailAddress')" 
-                required 
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="phone" class="form-label">{{ $t('phoneNumber') }}</label>
-              <input 
-                type="tel" 
-                id="phone" 
-                v-model="formData.phone" 
-                @input="validatePhoneNumber"
-                :class="['form-input', { 'error': phoneError }]"
-                :placeholder="$t('phoneNumber')" 
-                inputmode="tel"
-                pattern="^(01[0125][0-9]{8}|(?:\\+20|0020)1[0125][0-9]{8})$"
-                :title="$t('enterValidEgyptianPhone')"
-                required 
-              />
-              <p v-if="phoneError" class="error-message">
-                {{ $t('enterValidEgyptianPhone') || 'Please enter a valid Egyptian phone number (e.g., 01XXXXXXXXX, +201XXXXXXXXX, or 00201XXXXXXXXX)' }}
-              </p>
-            </div>
-
-            <div class="form-group">
-              <label for="password" class="form-label">{{ $t('password') }}</label>
-              <input 
-                type="password" 
-                id="password" 
-                v-model="formData.password" 
-                class="form-input" 
-                :placeholder="$t('password')" 
-                required 
-              />
-              <!-- Password validation indicators -->
-              <div class="password-validation" v-if="formData.password">
-                <div class="validation-item" :class="{ 'valid': passwordValidation.length }">
-                  <span class="validation-icon">{{ passwordValidation.length ? '✓' : '✗' }}</span>
-                  <span class="validation-text">{{ $t('atLeast8Characters') }}</span>
-                </div>
-                <div class="validation-item" :class="{ 'valid': passwordValidation.uppercase }">
-                  <span class="validation-icon">{{ passwordValidation.uppercase ? '✓' : '✗' }}</span>
-                  <span class="validation-text">{{ $t('oneUppercaseLetter') }}</span>
-                </div>
-                <div class="validation-item" :class="{ 'valid': passwordValidation.lowercase }">
-                  <span class="validation-icon">{{ passwordValidation.lowercase ? '✓' : '✗' }}</span>
-                  <span class="validation-text">{{ $t('oneLowercaseLetter') }}</span>
-                </div>
-                <div class="validation-item" :class="{ 'valid': passwordValidation.number }">
-                  <span class="validation-icon">{{ passwordValidation.number ? '✓' : '✗' }}</span>
-                  <span class="validation-text">{{ $t('oneNumber') }}</span>
-                </div>
-                <div class="validation-item" :class="{ 'valid': passwordValidation.special }">
-                  <span class="validation-icon">{{ passwordValidation.special ? '✓' : '✗' }}</span>
-                  <span class="validation-text">{{ $t('oneSpecialCharacter') }}</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="confirmPass" class="form-label">{{ $t('confirmPassword') }}</label>
-              <input 
-                type="password" 
-                id="confirmPass" 
-                v-model="formData.confirmPass" 
-                class="form-input" 
-                :class="{ 'error': formData.confirmPass && !passwordValidation.match }" 
-                :placeholder="$t('confirmPassword')" 
-                required 
-              />
-              <p v-if="formData.confirmPass && !passwordValidation.match" class="error-message">
-                {{ $t('passwordsDoNotMatch') }}
-              </p>
-            </div>
-          </div>
-
-          <!-- Additional Information -->
-          <div class="form-section">
-            <h3 class="section-title">{{ $t('additionalInformation') }}</h3>
-            
-            <div class="form-group">
-              <label for="gender" class="form-label">{{ $t('gender') }}</label>
-              <select 
-                id="gender" 
-                v-model="formData.gender" 
-                class="form-input" 
-                required
-              >
-                <option value="" disabled selected>{{ $t('gender') }}</option>
-                <option value="male">{{ $t('male') }}</option>
-                <option value="female">{{ $t('female') }}</option>
-                <option value="other">{{ $t('other') }}</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="age" class="form-label">{{ $t('age') }}</label>
-              <input 
-                type="number" 
-                id="age" 
-                v-model="formData.age" 
-                class="form-input" 
-                :placeholder="$t('age')" 
-                min="18"
-                max="120"
-                required 
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="address" class="form-label">{{ $t('address') }}</label>
-              <input 
-                type="text" 
-                id="address" 
-                v-model="formData.address" 
-                class="form-input" 
-                :placeholder="$t('address')" 
-                required 
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="government" class="form-label">{{ $t('government') }}</label>
-              <select 
-                id="government" 
-                v-model="formData.government" 
-                class="form-input" 
-                required
-              >
-                <option value="" disabled selected>{{ $t('government') }}</option>
-                <option v-for="gov in governmentOptions" :key="gov" :value="gov">
-                  {{ locale === 'ar' ? governmentNamesAr[gov] : gov }}
-                </option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="district" class="form-label">{{ $t('districtArea') }}</label>
-              <select 
-                id="district" 
-                v-model="formData.district" 
-                class="form-input" 
-                required
-                :disabled="!formData.government"
-              >
-                <option value="" disabled selected>{{ $t('districtArea') }}</option>
-                <option v-for="district in districtOptions" :key="district" :value="district">
-                  {{ locale === 'ar' ? (districtsAr[formData.government]?.[district] || district) : district }}
-                </option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div class="form-footer">
-          <div class="checkbox-group">
-            <input v-model="formData.agreeTerms" type="checkbox" class="form-checkbox" id="agreeTerms" required />
-            <label class="checkbox-label" for="agreeTerms">
-              {{ $t('agreeTermsAndConditions') }}
-              <span class="terms-link" @click="openTermsModal">{{ $t('termsAndConditions') }}</span> 
-              {{ $t('andPrivacyPolicy') }}
-            </label>
-          </div>
-          
-          <button type="submit" class="submit-btn" :disabled="loading">
-            <span>{{ loading ? $t('registering') : $t('register') }}</span>
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="arrow-icon" viewBox="0 0 16 16">
-              <path fill-rule="evenodd" d="M14 2.5a.5.5 0 0 0-.5-.5h-6a.5.5 0 0 0 0 1h4.793L2.146 13.146a.5.5 0 0 0 .708.708L13 3.707V8.5a.5.5 0 0 0 1 0z"/>
-            </svg>
-          </button>
-          
-          <p v-if="error" class="error-text">{{ error }}</p>
-          <p v-if="success" class="success-text">{{ success }}</p>
-          <p class="login-link">{{ $t('haveAccount') }} <a href="/userlogin">{{ $t('signIn') }}</a></p>
-        </div>
-      </form>
-    </div>
-  </div>
-  </div>
-</template>
-
 <script setup>
-console.log('=== USERSIGNUP COMPONENT SCRIPT SETUP START ===');
-import { ref, computed, reactive, watch, onMounted } from 'vue';
+import { ref, computed, reactive, watch } from 'vue';
 
 import { useRouter } from 'vue-router';
 import { auth, db } from '../firebase';
@@ -263,39 +9,9 @@ import { ensureUserRole, fetchUserRole } from '../utils/userRole';
 import { sendWelcomeEmail } from '../utils/emailService';
 import { useI18n } from 'vue-i18n';
 import { getGovernmentNames, getDistrictsForGovernment, governmentNamesAr, districtsAr } from '../data/egyptianLocations';
-import { authState, waitForAuth } from '../utils/auth';
-
-console.log('=== USERSIGNUP IMPORTS COMPLETED ===');
 
 const { t, locale } = useI18n();
 const router = useRouter();
-
-// Debug component mounting
-console.log('UserSignUp component script setup executed');
-
-  // Add comprehensive debugging
-  onMounted(async () => {
-    console.log('UserSignUp component mounted');
-    console.log('Current route:', router.currentRoute.value.path);
-    console.log('Auth state on mount:', {
-      isAuthenticated: authState.isAuthenticated,
-      userType: authState.userType,
-      user: authState.user ? authState.user.email : null,
-      isLoading: authState.isLoading
-    });
-    
-    // Wait for auth to be ready
-    await waitForAuth();
-    authLoading.value = false; // Set loading to false after auth is ready
-    console.log('Auth state after waiting:', {
-      isAuthenticated: authState.isAuthenticated,
-      userType: authState.userType,
-      user: authState.user ? authState.user.email : null,
-      isLoading: authState.isLoading
-    });
-  });
-
-console.log('=== USERSIGNUP COMPONENT SCRIPT SETUP END ===');
 
 const formData = reactive({
   firstName: '',
@@ -315,10 +31,6 @@ const formData = reactive({
 const error = ref('');
 const errors = ref({});
 const showTermsModal = ref(false);
-const phoneError = ref(false);
-const loading = ref(false);
-const success = ref('');
-const authLoading = ref(true); // New loading state for auth initialization
 
 const governmentOptions = getGovernmentNames();
 const districtOptions = computed(() => {
@@ -396,28 +108,10 @@ const validateName = (name) => name.length >= 2 && /^[a-zA-Z\s]+$/.test(name);
 const validateRequired = (value) => value !== null && value !== undefined && String(value).trim().length > 0;
 // Egyptian phone validation: supports local (11 digits starting 01x) and international (+20 or 0020)
 const validateEgyptianPhone = (phone) => {
-  if (!phone) return false;
   const cleaned = String(phone).replace(/\s|-/g, '');
   const local = /^01[0125][0-9]{8}$/; // e.g., 010xxxxxxxx, 011xxxxxxxx, 012xxxxxxxx, 015xxxxxxxx
   const intl = /^(?:\+20|0020)1[0125][0-9]{8}$/; // e.g., +2010xxxxxxxx or 002010xxxxxxxx
   return local.test(cleaned) || intl.test(cleaned);
-};
-
-// Phone number validation with real-time feedback
-const validatePhoneNumber = () => {
-  if (!formData.phone) {
-    phoneError.value = false;
-    return false;
-  }
-  
-  // Remove any non-digit characters except + for validation
-  const cleanedPhone = formData.phone.replace(/[^\d+]/g, '');
-  
-  // Check if the phone number matches Egyptian format (local, +20, or 0020)
-  const phoneRegex = /^(01[0125]\d{8}|\+?201[0125]\d{8}|00201[0125]\d{8})$/;
-  phoneError.value = !phoneRegex.test(cleanedPhone);
-  
-  return !phoneError.value;
 };
 
 // Main validation function
@@ -476,8 +170,8 @@ const validateForm = () => {
 
   if (!validateRequired(formData.phone)) {
     errors.value.phone = t('phoneRequired');
-  } else if (!validatePhoneNumber()) {
-    errors.value.phone = t('enterValidEgyptianPhone');
+  } else if (!validateEgyptianPhone(formData.phone)) {
+    errors.value.phone = t('phoneInvalid');
   }
 
   if (!formData.agreeTerms) {
@@ -493,11 +187,8 @@ const validateForm = () => {
 
 const handleRegister = async () => {
   error.value = '';
-  success.value = '';
-  loading.value = true;
 
   if (!validateForm()) {
-    loading.value = false;
     return;
   }
 
@@ -529,7 +220,6 @@ const handleRegister = async () => {
 
     try {
       await sendWelcomeEmail(formData.email, formData.firstName, formData.lastName);
-      success.value = t('registrationSuccess');
     } catch (emailError) {
       console.error('Email sending failed:', emailError);
     }
@@ -538,8 +228,6 @@ const handleRegister = async () => {
   } catch (err) {
     console.error('Registration error:', err);
     error.value = err.message;
-  } finally {
-    loading.value = false;
   }
 };
 
@@ -551,6 +239,360 @@ const closeTermsModal = () => {
   showTermsModal.value = false;
 };
 </script>
+
+<template>
+
+<body>
+    
+<div class="signup-container">
+<form class="signup-form" @submit.prevent="handleRegister">
+    <div class="form-header">
+      <img class="logo" src="../assets/logo-secondary.png" alt="BoltFix Logo">
+      <h1 class="title">{{ $t('signUp') }}</h1>
+      <p class="subtitle">{{ $t('createAccount') }}</p>
+    </div>
+    
+    <div class="form-grid">
+    <!-- first name -->
+      <div class="form-group">
+        <label for="firstName" class="form-label">{{ $t('firstName') }}</label>
+        <input 
+          type="text" 
+          id="firstName" 
+          v-model="formData.firstName" 
+          class="form-input" 
+          :class="{ 'error': errors.firstName }"
+          :placeholder="$t('firstName')" 
+          required 
+        />
+        <p v-if="errors.firstName" class="error-message">{{ errors.firstName }}</p>
+  </div>
+
+  <!-- last name -->
+      <div class="form-group">
+        <label for="lastName" class="form-label">{{ $t('lastName') }}</label>
+        <input 
+          type="text" 
+          id="lastName" 
+          v-model="formData.lastName" 
+          class="form-input" 
+          :class="{ 'error': errors.lastName }"
+          :placeholder="$t('lastName')" 
+          required 
+        />
+        <p v-if="errors.lastName" class="error-message">{{ errors.lastName }}</p>
+      </div>
+
+      <!-- email -->
+      <div class="form-group">
+        <label for="email" class="form-label">{{ $t('email') }}</label>
+        <input 
+          type="email" 
+          id="email" 
+          v-model="formData.email" 
+          class="form-input" 
+          :class="{ 'error': errors.email }"
+          autocomplete="email"
+          inputmode="email"
+          autocapitalize="none"
+          spellcheck="false"
+          pattern="^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
+          :title="$t('enterValidEmail') || 'Enter a valid email address (e.g., name@example.com)'"
+          :placeholder="$t('email')" 
+          required 
+        />
+        <p v-if="errors.email" class="error-message">{{ errors.email }}</p>
+      </div>
+
+      <!-- phone -->
+      <div class="form-group">
+        <label for="phone" class="form-label">{{ $t('phone') }}</label>
+        <input 
+          type="text" 
+          id="phone" 
+          v-model="formData.phone" 
+          class="form-input" 
+          :class="{ 'error': errors.phone }"
+          inputmode="tel"
+          pattern="^(01[0125][0-9]{8}|(?:\\+20|0020)1[0125][0-9]{8})$"
+          :title="$t('enterValidEgyptianPhone')"
+          :placeholder="$t('phone')" 
+          required 
+        />
+        <p v-if="errors.phone" class="error-message">{{ errors.phone }}</p>
+      </div>
+
+      <!-- gender -->
+      <div class="form-group">
+        <label for="gender" class="form-label">{{ $t('gender') }}</label>
+        <select 
+          id="gender" 
+          v-model="formData.gender" 
+          class="form-input" 
+          :class="{ 'error': errors.gender }"
+          required
+        >
+          <option value="">{{ $t('selectGender') }}</option>
+          <option value="male">{{ $t('male') }}</option>
+          <option value="female">{{ $t('female') }}</option>
+          <option value="other">{{ $t('other') }}</option>
+        </select>
+        <p v-if="errors.gender" class="error-message">{{ errors.gender }}</p>
+      </div>
+
+      <!-- age -->
+      <div class="form-group">
+        <label for="age" class="form-label">{{ $t('age') }}</label>
+        <input 
+          type="number" 
+          id="age" 
+          v-model="formData.age" 
+          min="18" 
+          max="120"
+          class="form-input" 
+          :class="{ 'error': errors.age }"
+          :placeholder="$t('age')" 
+          required 
+        />
+        <p v-if="errors.age" class="error-message">{{ errors.age }}</p>
+  </div>
+      <!-- Address (Street/Building/etc.) -->
+      <div class="form-group full-width">
+        <label for="address" class="form-label">{{ $t('address') }}</label>
+        <input
+          type="text"
+          id="address"
+          v-model="formData.address"
+          class="form-input"
+          :class="{ 'error': errors.address }"
+          :placeholder="$t('addressPlaceholder')"
+          required
+        />
+        <p v-if="errors.address" class="error-message">{{ errors.address }}</p>
+      </div>
+      <!-- Governorate & District (Location) -->
+      <div class="form-group">
+        <label for="government" class="form-label">{{ $t('government') }}</label>
+        <select 
+          id="government" 
+          v-model="formData.government" 
+          class="form-input" 
+          required
+        >
+          <option value="" disabled selected>{{ $t('government') }}</option>
+          <option v-for="gov in governmentOptions" :key="gov" :value="gov">
+            {{ locale === 'ar' ? governmentNamesAr[gov] : gov }}
+          </option>
+        </select>
+      </div>
+      <div class="form-section location-section full-width">
+  <div class="form-row">
+    <div class="form-group">
+      <label for="district" class="form-label">{{ $t('districtArea') }}</label>
+      <select 
+        id="district" 
+        v-model="formData.district" 
+        class="form-input" 
+        required
+        :disabled="!formData.government"
+      >
+        <option value="" disabled selected>{{ $t('districtArea') }}</option>
+        <option v-for="district in districtOptions" :key="district" :value="district">
+          {{ locale === 'ar' ? (districtsAr[formData.government]?.[district] || district) : district }}
+        </option>
+      </select>
+    </div>
+  </div>
+</div>
+
+      <!-- password -->
+      <div class="form-group">
+        <label for="password" class="form-label">{{ $t('password') }}</label>
+        <input 
+          type="password" 
+          id="password" 
+          v-model="formData.password" 
+          class="form-input" 
+          :class="{ 'error': errors.password }"
+          :placeholder="$t('password')" 
+          required 
+        />
+        <div class="password-validation" v-if="formData.password">
+          <div class="validation-item" :class="{ 'valid': passwordValidation.length }">
+            <span class="validation-icon">{{ passwordValidation.length ? '✓' : '✗' }}</span>
+            <span class="validation-text">{{ $t('atLeast8Characters') }}</span>
+          </div>
+          <div class="validation-item" :class="{ 'valid': passwordValidation.uppercase }">
+            <span class="validation-icon">{{ passwordValidation.uppercase ? '✓' : '✗' }}</span>
+            <span class="validation-text">{{ $t('oneUppercaseLetter') }}</span>
+          </div>
+          <div class="validation-item" :class="{ 'valid': passwordValidation.lowercase }">
+            <span class="validation-icon">{{ passwordValidation.lowercase ? '✓' : '✗' }}</span>
+            <span class="validation-text">{{ $t('oneLowercaseLetter') }}</span>
+          </div>
+          <div class="validation-item" :class="{ 'valid': passwordValidation.number }">
+            <span class="validation-icon">{{ passwordValidation.number ? '✓' : '✗' }}</span>
+            <span class="validation-text">{{ $t('oneNumber') }}</span>
+          </div>
+          <div class="validation-item" :class="{ 'valid': passwordValidation.special }">
+            <span class="validation-icon">{{ passwordValidation.special ? '✓' : '✗' }}</span>
+            <span class="validation-text">{{ $t('oneSpecialCharacter') }}</span>
+          </div>
+        </div>
+        <p v-if="errors.password" class="error-message">{{ errors.password }}</p>
+  </div>
+
+      <!-- confirm password -->
+      <div class="form-group">
+        <label for="confirmPass" class="form-label">{{ $t('confirmPassword') }}</label>
+        <input 
+          type="password" 
+          id="confirmPass" 
+          v-model="formData.confirmPass" 
+          class="form-input" 
+          :class="{ 'error': errors.confirmPass || (formData.confirmPass && !passwordValidation.match) }"
+          :placeholder="$t('confirmPassword')" 
+          required 
+        />
+        <p v-if="formData.confirmPass && !passwordValidation.match" class="error-message">{{ $t('passwordsDontMatch') }}</p>
+        <p v-else-if="errors.confirmPass" class="error-message">{{ errors.confirmPass }}</p>
+      </div>
+  </div>
+
+    <div class="form-footer">
+      <div class="checkbox-group">
+            <input v-model="formData.agreeTerms" type="checkbox" class="form-checkbox" id="agreeTerms" required />
+            <label class="checkbox-label" for="agreeTerms">
+              {{ $t('agreeTermsAndConditions') }}
+              <span class="terms-link" @click="openTermsModal">{{ $t('termsAndConditions') }}</span> 
+              {{ $t('andPrivacyPolicy') }}
+            </label>
+          </div>
+
+             <button type="submit" class="submit-btn">
+         <span>{{ $t('register') }}</span>
+         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="arrow-icon" viewBox="0 0 16 16">
+   <path fill-rule="evenodd" d="M14 2.5a.5.5 0 0 0-.5-.5h-6a.5.5 0 0 0 0 1h4.793L2.146 13.146a.5.5 0 0 0 .708.708L13 3.707V8.5a.5.5 0 0 0 1 0z"/>
+         </svg>
+       </button>
+
+       
+
+       
+
+      
+
+      <p v-if="error" class="error-text">{{ error }}</p>
+      <p class="login-link">{{ $t('haveAccount') }} <a href="/userlogin">{{ $t('signIn') }}</a></p>
+    </div>
+
+</form>
+</div>
+
+<!-- Terms and Conditions Modal -->
+    <div v-if="showTermsModal" class="modal-overlay" @click="closeTermsModal">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h2 class="modal-title">{{ $t('terms.title') }}</h2>
+          <button class="modal-close" @click="closeTermsModal">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="terms-content">
+            <h3>{{ $t('terms.generalTerms') }}</h3>
+            <h4>{{ $t('terms.definitions') }}</h4>
+            <ul>
+              <li>{{ $t('terms.platform') }}</li>
+              <li>{{ $t('terms.user') }}</li>
+              <li>{{ $t('terms.technician') }}</li>
+              <li>{{ $t('terms.booking') }}</li>
+            </ul>
+            <h4>{{ $t('terms.accountCreation') }}</h4>
+            <ul>
+              <li>{{ $t('terms.accountCreation1') }}</li>
+              <li>{{ $t('terms.accountCreation2') }}</li>
+              <li>{{ $t('terms.accountCreation3') }}</li>
+            </ul>
+            <h4>{{ $t('terms.privacy') }}</h4>
+            <ul>
+              <li>{{ $t('terms.privacy1') }}</li>
+              <li>{{ $t('terms.privacy2') }}</li>
+            </ul>
+            <h4>{{ $t('terms.prohibitedConduct') }}</h4>
+            <ul>
+              <li>{{ $t('terms.prohibited1') }}</li>
+              <li>{{ $t('terms.prohibited2') }}</li>
+              <li>{{ $t('terms.prohibited3') }}</li>
+            </ul>
+            <h4>{{ $t('terms.accountTermination') }}</h4>
+            <ul>
+              <li>{{ $t('terms.accountTermination1') }}</li>
+            </ul>
+            <h3>{{ $t('terms.userTerms') }}</h3>
+            <h4>{{ $t('terms.bookingService') }}</h4>
+            <ul>
+              <li>{{ $t('terms.bookingService1') }}</li>
+              <li>{{ $t('terms.bookingService2') }}</li>
+            </ul>
+            <h4>{{ $t('terms.payment') }}</h4>
+            <ul>
+              <li>{{ $t('terms.payment1') }}</li>
+              <li>{{ $t('terms.payment2') }}</li>
+            </ul>
+            <h4>{{ $t('terms.cancellationRefunds') }}</h4>
+            <ul>
+              <li>{{ $t('terms.cancellation1') }}</li>
+              <li>{{ $t('terms.cancellation2') }}</li>
+              <li>{{ $t('terms.cancellation3') }}</li>
+            </ul>
+            <h4>{{ $t('terms.ratingsFeedback') }}</h4>
+            <ul>
+              <li>{{ $t('terms.ratings1') }}</li>
+              <li>{{ $t('terms.ratings2') }}</li>
+            </ul>
+            <h3>{{ $t('terms.technicianTerms') }}</h3>
+            <h4>{{ $t('terms.commissionPolicy') }}</h4>
+            <ul>
+              <li>{{ $t('terms.commission1') }}</li>
+              <li>{{ $t('terms.commission2') }}</li>
+            </ul>
+            <h4>{{ $t('terms.paymentMethods') }}</h4>
+            <ul>
+              <li>{{ $t('terms.paymentMethods1') }}</li>
+              <li>{{ $t('terms.paymentMethods2') }}</li>
+            </ul>
+            <h4>{{ $t('terms.earningsTransfer') }}</h4>
+            <ul>
+              <li>{{ $t('terms.earnings1') }}</li>
+              <li>{{ $t('terms.earnings2') }}</li>
+            </ul>
+            <h4>{{ $t('terms.serviceExpectations') }}</h4>
+            <ul>
+              <li>{{ $t('terms.serviceExpectations1') }}</li>
+              <li>{{ $t('terms.serviceExpectations2') }}</li>
+            </ul>
+            <h4>{{ $t('terms.responsibility') }}</h4>
+            <ul>
+              <li>{{ $t('terms.responsibility1') }}</li>
+              <li>{{ $t('terms.responsibility2') }}</li>
+            </ul>
+            <p class="terms-footer">
+              {{ $t('terms.footer') }}
+            </p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="modal-btn" @click="closeTermsModal">{{ $t('terms.iUnderstand') }}</button>
+        </div>
+      </div>
+    </div>
+
+</body>
+
+</template>
 
 <style scoped>
 body {
@@ -881,13 +923,6 @@ select.form-input {
     font-weight: 500;
 }
 
-.success-text {
-    color: #10b981;
-    font-size: 0.875rem;
-    margin: 0.5rem 0;
-    font-weight: 500;
-}
-
 .login-link {
     color: #6b7280;
     font-size: 0.875rem;
@@ -1151,45 +1186,4 @@ select.form-input {
         margin: 0.5rem;
     }
  }
-
-/* Loading styles */
-.loading-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background: #D3CFE2;
-}
-
-.dark .loading-container {
-    background: var(--primary-bg);
-}
-
-.loading-spinner {
-    text-align: center;
-}
-
-.spinner {
-    width: 50px;
-    height: 50px;
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #625397;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 1rem;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.loading-spinner p {
-    color: #625397;
-    font-weight: 600;
-}
-
-.dark .loading-spinner p {
-    color: var(--primary-color);
-}
 </style>
