@@ -27,6 +27,15 @@ const isAdminRoute = computed(() => {
          route.path.startsWith('/all-technician');
 });
 
+// Check if current route is a public auth route (signup, login, etc.)
+const isPublicAuthRoute = computed(() => {
+  return route.path === '/usersignup' || 
+         route.path === '/userlogin' || 
+         route.path === '/techregister' ||
+         route.path === '/welcomepage' ||
+         route.path === '/pending-application';
+});
+
 // Debug authentication state
 onMounted(async () => {
   await waitForAuth();
@@ -37,7 +46,8 @@ onMounted(async () => {
   });
 
   // Redirect admins/technicians to their dashboards if they land on a public route
-  if (authState.isAuthenticated && !isAdminRoute.value) {
+  // But don't redirect if they're on public auth routes (signup, login, etc.)
+  if (authState.isAuthenticated && !isAdminRoute.value && !isPublicAuthRoute.value) {
     if (authState.userType === 'admin') {
       router.push('/admin-dashboard');
     } else if (authState.userType === 'technician') {
@@ -52,7 +62,7 @@ watch(locale, (newLocale) => {
 
 // Also react to auth changes at runtime (e.g., after login without full reload)
 watch(() => authState.isAuthenticated, (isAuth) => {
-  if (isAuth && !isAdminRoute.value) {
+  if (isAuth && !isAdminRoute.value && !isPublicAuthRoute.value) {
     if (authState.userType === 'admin') {
       router.push('/admin-dashboard');
     } else if (authState.userType === 'technician') {
@@ -63,7 +73,6 @@ watch(() => authState.isAuthenticated, (isAuth) => {
 </script>
 
 <template>
-  <AuthStatus />
   <Navbar v-if="!isAdminRoute" />
   <div id="app">
     <router-view />
