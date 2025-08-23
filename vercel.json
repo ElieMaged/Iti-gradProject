@@ -3,6 +3,8 @@
   "outputDirectory": "dist",
   "installCommand": "npm install",
   "framework": "vite",
+  "cleanUrls": true,
+  "trailingSlash": false,
   "rewrites": [
     {
       "source": "/(.*)",
@@ -10,6 +12,15 @@
     }
   ],
   "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
     {
       "source": "/assets/(.*)",
       "headers": [
@@ -20,4 +31,4 @@
       ]
     }
   ]
-} 
+}

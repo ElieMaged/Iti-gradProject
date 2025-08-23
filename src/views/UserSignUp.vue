@@ -1,6 +1,5 @@
 <script setup>
 import { ref, computed, reactive, watch } from 'vue';
-
 import { useRouter } from 'vue-router';
 import { auth, db } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
