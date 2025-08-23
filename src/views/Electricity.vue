@@ -64,7 +64,7 @@
             <div class="card-bottom-section">
               <h3 class="member-name">{{ technician.name }}</h3>
               <div class="member-specialization">{{ technician.specialization }}</div>
-              <p class="member-description">{{ $t('technicianDescription') }}</p>
+              <p class="member-description">{{ technician.description }}</p>
               <!-- Details Row -->
               <div class="member-details">
                 <div class="detail-item rating-item">
@@ -86,18 +86,15 @@
         </div>
 
         <!-- Pagination -->
-        <div v-if="totalPages > 1" class="pagination-container">
-          <div class="pagination-info">
-            Showing {{ (currentPage - 1) * pageSize + 1 }} - 
-            {{ Math.min(currentPage * pageSize, filteredTechnicians.length) }} 
-            of {{ filteredTechnicians.length }} technicians
-          </div>
-          <Pagination 
-            :current-page="currentPage"
-            :total-pages="totalPages"
-            @page-changed="goToPage"
-          />
-        </div>
+        <Pagination
+          v-if="totalPages > 1"
+          :current-page="currentPage"
+          :total-pages="totalPages"
+          @prev-page="goToPage(currentPage - 1)"
+          @next-page="goToPage(currentPage + 1)"
+          @page-changed="goToPage"
+          class="pagination-container"
+        />
 
     </section>
 
@@ -132,9 +129,9 @@ const locationFilter = ref({ government: '', district: '' })
 const specializationFilter = ref('')
 const priceFilter = ref('')
 const ratingFilter = ref('')
-// Pagination
+// Pagination - 3 rows of 4 cards per page
 const currentPage = ref(1)
-const pageSize = 12
+const pageSize = 12 // 4 cards/row × 3 rows
 
 async function fetchTechnicians() {
   try {
@@ -528,12 +525,17 @@ const heroBackgroundStyle = computed(() => {
   font-size: 0.9rem;
   color: #666666;
   line-height: 1.4;
-  margin-bottom: 0px;
-  font-family: Outfit, sans-serif;
-  flex: 1;
-  height: 60px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-height: 2.8em; /* 2 lines with line-height 1.4 */
+  min-height: 2.8em;
+  margin: 0.5rem 0 1rem;
+  font-family: Outfit, sans-serif;
+  flex: 1;
 }
 .member-details {
   display: flex;

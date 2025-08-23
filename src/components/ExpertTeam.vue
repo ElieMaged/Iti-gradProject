@@ -154,7 +154,7 @@ export default {
     startAutoSlide() {
       this.autoSlideInterval = setInterval(() => {
         this.nextSlide();
-      }, 900000); // 10 seconds
+      }, 10000); // 10 seconds
     },
     stopAutoSlide() {
       if (this.autoSlideInterval) {
@@ -369,9 +369,12 @@ export default {
   margin-bottom: 0px;
   font-family: Outfit, sans-serif;
   flex: 1;
-  height: 60px; /* Fixed height for description */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-height: 2.8em; /* 2 lines with line-height 1.4 */
+  max-height: 2.8em; /* 2 lines with line-height 1.4 */
 }
 
 .dark .member-description {
