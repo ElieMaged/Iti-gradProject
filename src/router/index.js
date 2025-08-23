@@ -1,5 +1,5 @@
 import { createWebHistory, createRouter } from 'vue-router'
-import { waitForAuth, isAdmin, isTechnician, isAuthenticated } from '../utils/auth'
+import { waitForAuth, isAdmin, isTechnician, isAuthenticated, getUserType } from '../utils/auth'
 
 import HomePage from '../views/HomePage.vue'
 import About from '../views/About.vue'
@@ -178,8 +178,7 @@ router.beforeEach(async (to, from, next) => {
   console.log('Auth is ready');
   console.log('Current auth state after waiting:', {
     isAuthenticated: isAuthenticated(),
-    userType: authState.userType,
-    isLoading: authState.isLoading
+    userType: getUserType()
   });
 
   // If user is already authenticated and navigating to a public landing/login route,
