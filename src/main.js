@@ -17,14 +17,23 @@ initializeEmailJS();
 
 // Initialize authentication and create app
 async function initializeApp() {
-  // Wait for authentication to be initialized
-  await initializeAuth();
+  console.log('=== MAIN.JS INITIALIZATION START ===');
   
+  // Wait for authentication to be initialized
+  console.log('Initializing authentication...');
+  await initializeAuth();
+  console.log('Authentication initialized');
+  
+  console.log('Creating Vue app...');
   const app = createApp(App);
   
+  console.log('Setting up app plugins...');
   app.use(router)
     .use(i18n)
     .mount('#app');
+    
+  console.log('App mounted successfully');
+  console.log('=== MAIN.JS INITIALIZATION END ===');
 }
 
 // Start the application

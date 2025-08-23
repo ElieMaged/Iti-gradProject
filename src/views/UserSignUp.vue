@@ -1,5 +1,7 @@
 <script setup>
-import { ref, computed, reactive, watch } from 'vue';
+console.log('=== USERSIGNUP COMPONENT SCRIPT SETUP START ===');
+import { ref, computed, reactive, watch, onMounted } from 'vue';
+
 import { useRouter } from 'vue-router';
 import { auth, db } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
@@ -8,9 +10,38 @@ import { ensureUserRole, fetchUserRole } from '../utils/userRole';
 import { sendWelcomeEmail } from '../utils/emailService';
 import { useI18n } from 'vue-i18n';
 import { getGovernmentNames, getDistrictsForGovernment, governmentNamesAr, districtsAr } from '../data/egyptianLocations';
+import { authState, waitForAuth } from '../utils/auth';
+
+console.log('=== USERSIGNUP IMPORTS COMPLETED ===');
 
 const { t, locale } = useI18n();
 const router = useRouter();
+
+// Debug component mounting
+console.log('UserSignUp component script setup executed');
+
+// Add comprehensive debugging
+onMounted(async () => {
+  console.log('UserSignUp component mounted');
+  console.log('Current route:', router.currentRoute.value.path);
+  console.log('Auth state on mount:', {
+    isAuthenticated: authState.isAuthenticated,
+    userType: authState.userType,
+    user: authState.user ? authState.user.email : null,
+    isLoading: authState.isLoading
+  });
+  
+  // Wait for auth to be ready
+  await waitForAuth();
+  console.log('Auth state after waiting:', {
+    isAuthenticated: authState.isAuthenticated,
+    userType: authState.userType,
+    user: authState.user ? authState.user.email : null,
+    isLoading: authState.isLoading
+  });
+});
+
+console.log('=== USERSIGNUP COMPONENT SCRIPT SETUP END ===');
 
 const formData = reactive({
   firstName: '',
@@ -259,16 +290,22 @@ const closeTermsModal = () => {
 </script>
 
 <template>
-
-<body>
-    
-<div class="signup-container">
-<form class="signup-form" @submit.prevent="handleRegister">
-    <div class="form-header">
-      <img class="logo" src="../assets/logo-secondary.png" alt="BoltFix Logo">
-      <h1 class="title">{{ $t('signUp') }}</h1>
-      <p class="subtitle">{{ $t('createAccount') }}</p>
-    </div>
+  <!-- Test: Simple element to confirm template is rendering -->
+  <div style="position: fixed; top: 20px; left: 20px; background: orange; color: black; z-index: 10000; padding: 10px; font-weight: bold;">
+    USERSIGNUP TEMPLATE RENDERING
+  </div>
+  
+  <!-- Debug: UserSignUp component template rendering -->
+  <div style="position: fixed; top: 0; left: 0; background: red; color: white; z-index: 9999; padding: 10px;">
+    UserSignUp Component Loaded - Route: {{ $route.path }}
+  </div>
+  <div class="signup-container">
+    <form class="signup-form" @submit.prevent="handleRegister">
+      <div class="form-header">
+        <img class="logo" src="/logo/ace04d3b268cf810c91d002fdf7454a6ef778f27.png" alt="BoltFix Logo">
+        <h1 class="title">{{ $t('signUp') }}</h1>
+        <p class="subtitle">{{ $t('createAccount') }}</p>
+      </div>
     
     <div class="form-grid">
     <!-- first name -->
@@ -611,8 +648,6 @@ const closeTermsModal = () => {
         </div>
       </div>
     </div>
-
-</body>
 
 </template>
 

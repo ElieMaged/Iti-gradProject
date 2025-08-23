@@ -1,4 +1,13 @@
 <template>
+  <!-- Test: Simple element to confirm template is rendering -->
+  <div style="position: fixed; top: 20px; right: 20px; background: orange; color: black; z-index: 10000; padding: 10px; font-weight: bold;">
+    TECHREGISTER TEMPLATE RENDERING
+  </div>
+  
+  <!-- Debug: TechRegister component template rendering -->
+  <div style="position: fixed; top: 0; right: 0; background: blue; color: white; z-index: 9999; padding: 10px;">
+    TechRegister Component Loaded - Route: {{ $route.path }}
+  </div>
   <div class="signup-container">
     <form class="signup-form" @submit.prevent="handleRegister">
       <div class="form-header">
@@ -430,7 +439,8 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch, computed } from 'vue';
+console.log('=== TECHREGISTER COMPONENT SCRIPT SETUP START ===');
+import { ref, reactive, watch, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { auth, db, storage } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
@@ -440,6 +450,9 @@ import { getGovernmentNames, getDistrictsForGovernment, governmentNamesAr, distr
 import { useI18n } from 'vue-i18n';
 import emailjs from '@emailjs/browser';
 import { EMAILJS_CONFIG } from '../utils/emailjsConfig';
+import { authState, waitForAuth } from '../utils/auth';
+
+console.log('=== TECHREGISTER IMPORTS COMPLETED ===');
 
 // ...existing imports
 
@@ -447,6 +460,33 @@ import { EMAILJS_CONFIG } from '../utils/emailjsConfig';
 const { t , locale} = useI18n();
 
 const router = useRouter();
+
+// Debug component mounting
+console.log('TechRegister component script setup executed');
+
+// Add comprehensive debugging
+onMounted(async () => {
+  console.log('TechRegister component mounted');
+  console.log('Current route:', router.currentRoute.value.path);
+  console.log('Auth state on mount:', {
+    isAuthenticated: authState.isAuthenticated,
+    userType: authState.userType,
+    user: authState.user ? authState.user.email : null,
+    isLoading: authState.isLoading
+  });
+  
+  // Wait for auth to be ready
+  await waitForAuth();
+  console.log('Auth state after waiting:', {
+    isAuthenticated: authState.isAuthenticated,
+    userType: authState.userType,
+    user: authState.user ? authState.user.email : null,
+    isLoading: authState.isLoading
+  });
+});
+
+console.log('=== TECHREGISTER COMPONENT SCRIPT SETUP END ===');
+
 const fileInput = ref(null);
 const profileFileInput = ref(null);
 const previewUrl = ref(null);
