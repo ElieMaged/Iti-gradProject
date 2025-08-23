@@ -43,13 +43,8 @@
                 </div>
               </div>
               <div class="rating-section">
-                <div class="rating-stars">
-                  <i 
-                    v-for="n in 5" 
-                    :key="n" 
-                    class="fas fa-star"
-                    :class="{ 'star-filled': n <= Math.round(averageRating), 'star-empty': n > Math.round(averageRating) }"
-                  ></i>
+                <div class="rating-text" v-if="reviews.length > 0">
+                  {{ averageRating.toFixed(1) }} {{ $t('outOf') }} 5 ({{ reviews.length }} {{ reviews.length === 1 ? $t('review') : $t('reviews') }})
                 </div>
               </div>
             </div>
@@ -206,17 +201,6 @@
         </div>
         <!-- Reviews List -->
         <div class="reviews-list">
-          <!-- Debug information (remove in production) -->
-          <div v-if="auth.currentUser" class="debug-info" style="background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px; font-size: 12px;">
-            <strong>Debug Info:</strong><br>
-            User: {{ auth.currentUser.email }}<br>
-            Technician ID: {{ route.params.id }}<br>
-            User Bookings: {{ userBookings.length }}<br>
-            Has Booking: {{ hasBookingWithTechnician }}<br>
-            Can Review: {{ canReview }}<br>
-            Reviews Count: {{ reviews.length }}<br>
-            Already Reviewed: {{ reviews.find(r => r.userEmail === auth.currentUser?.email) ? 'Yes' : 'No' }}
-          </div>
           
           <div v-if="reviewsLoading" class="loading-state">
             <div class="loading-spinner"></div>
@@ -1307,7 +1291,9 @@ onMounted(async () => {
   align-items: center;
   gap: 0.5rem;
 }
-.fa-star {
+/* Global star color - only for display stars, not interactive ones */
+.rating-stars .fa-star,
+.review-rating .fa-star {
   color: #fbbf24 !important;
 }
 
@@ -1367,19 +1353,19 @@ onMounted(async () => {
 }
 
 .star-button.filled {
-  color: #fbbf24;
+  color: #fbbf24 !important;
 }
 
 .star-button.empty {
-  color: #d1d5db;
+  color: #d1d5db !important;
 }
 
 .star-button.filled:hover {
-  color: #f59e0b;
+  color: #f59e0b !important;
 }
 
 .star-button.empty:hover {
-  color: #fbbf24;
+  color: #fbbf24 !important;
 }
 
 .form-group {
@@ -2280,12 +2266,31 @@ color: #ddd7d7 ;
    color: var(--text-muted);
 }
 
-.dark .fa-star {
+/* Dark mode star colors - only for display stars, not interactive ones */
+.dark .rating-stars .fa-star,
+.dark .review-rating .fa-star {
   color: #fbbf24 !important;
 }
 
 .dark .star-empty {
   color:  var(--primary-text);
+}
+
+/* Dark mode star button styles */
+.dark .star-button.filled {
+  color: #fbbf24 !important;
+}
+
+.dark .star-button.empty {
+  color: #d1d5db !important;
+}
+
+.dark .star-button.filled:hover {
+  color: #f59e0b !important;
+}
+
+.dark .star-button.empty:hover {
+  color: #fbbf24 !important;
 }
 /* Divider before reviews section */
 .reviews-divider {

@@ -31,6 +31,7 @@
 
 import { db } from '../firebase.js';
 import { collection, getDocs, where, query, or } from 'firebase/firestore';
+import { calculateTechnicianRatings } from '../utils/ratingCalculator';
 
 export default {
   name: 'chatbot',
@@ -138,7 +139,7 @@ export default {
           registered.push({
             id: doc.id,
             name: data.fullName || data.name || 'Unknown Technician',
-            rating: data.averageRating || 0,
+            rating: 0, // Will be calculated by calculateTechnicianRatings
             specialization: data.specialization || 'General Technician',
             experience: data.experience || data.yearsOfExperience ? `${data.yearsOfExperience || data.experience}+ years` : '0+ years',
             basePrice: data.basePrice,
@@ -149,6 +150,8 @@ export default {
           });
         });
 
+        // Calculate ratings for all technicians
+        registered = await calculateTechnicianRatings(registered);
         registered = registered.sort((a, b) => (a.experience || 0) - (b.experience || 0));
       } catch (e) {
         console.error('Firebase error:', e);
