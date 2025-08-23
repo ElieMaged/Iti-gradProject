@@ -2,7 +2,7 @@
 import Navbar from './components/Navbar.vue'
 import Footer from './components/Footer.vue'
 import { useI18n } from 'vue-i18n';
-import { watch, computed, onMounted } from 'vue';
+import { watch, computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { authState, waitForAuth } from './utils/auth';
 
@@ -36,10 +36,14 @@ const isPublicAuthRoute = computed(() => {
          route.path === '/pending-application';
 });
 
+// Add a local loading state for the App component
+const appAuthReady = ref(false);
+
 // Debug authentication state
 onMounted(async () => {
   console.log('=== APP COMPONENT MOUNTED ===');
   await waitForAuth();
+  appAuthReady.value = true;
   console.log('App mounted - Auth state:', {
     isAuthenticated: authState.isAuthenticated,
     userType: authState.userType,
@@ -62,6 +66,15 @@ onMounted(async () => {
     console.log('No redirect needed - user can stay on current route');
   }
   console.log('=== APP COMPONENT MOUNTED END ===');
+});
+
+// Add a computed property to handle the display of user type
+const displayUserType = computed(() => {
+  if (!appAuthReady.value) return 'Initializing...';
+  if (authState.isLoading) return 'Loading...';
+  if (!authState.isAuthenticated) return 'Not Authenticated';
+  if (authState.userType === null || authState.userType === undefined) return 'No Type';
+  return authState.userType;
 });
 
 watch(locale, (newLocale) => {
@@ -87,12 +100,25 @@ watch(() => authState.isAuthenticated, (isAuth) => {
     }
   }
 });
+
+// Add a watcher for userType changes to debug
+watch(() => authState.userType, (newUserType, oldUserType) => {
+  console.log('User type changed:', { oldUserType, newUserType });
+});
+
+// Add a watcher for isLoading changes to debug
+watch(() => authState.isLoading, (newLoading, oldLoading) => {
+  console.log('Loading state changed:', { oldLoading, newLoading });
+});
 </script>
 
 <template>
   <!-- Debug: App component template rendering -->
-  <div style="position: fixed; top: 0; left: 50%; transform: translateX(-50%); background: green; color: white; z-index: 9999; padding: 10px;">
-    App Component Loaded - Route: {{ $route.path }} | Auth: {{ authState.isAuthenticated }} | Type: {{ authState.userType }}
+  <div v-if="appAuthReady" style="position: fixed; top: 0; left: 50%; transform: translateX(-50%); background: green; color: white; z-index: 9999; padding: 10px;">
+    App Component Loaded - Route: {{ $route.path }} | Auth: {{ authState.isAuthenticated }} | Type: {{ displayUserType }}
+  </div>
+  <div v-else style="position: fixed; top: 0; left: 50%; transform: translateX(-50%); background: orange; color: white; z-index: 9999; padding: 10px;">
+    Loading Auth State...
   </div>
   <Navbar v-if="!isAdminRoute && !isPublicAuthRoute" />
   <div id="app">
