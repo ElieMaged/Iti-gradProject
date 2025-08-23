@@ -1,4 +1,9 @@
 <template>
+  <!-- Test: Simple element to confirm template is rendering -->
+  <div style="position: fixed; top: 20px; right: 20px; background: orange; color: black; z-index: 10000; padding: 10px; font-weight: bold;">
+    TECHREGISTER TEMPLATE RENDERING
+  </div>
+  
   <!-- Debug: TechRegister component template rendering -->
   <div style="position: fixed; top: 0; right: 0; background: blue; color: white; z-index: 9999; padding: 10px;">
     TechRegister Component Loaded - Route: {{ $route.path }}
@@ -434,6 +439,7 @@
 </template>
 
 <script setup>
+console.log('=== TECHREGISTER COMPONENT SCRIPT SETUP START ===');
 import { ref, reactive, watch, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { auth, db, storage } from '../firebase';
@@ -445,6 +451,8 @@ import { useI18n } from 'vue-i18n';
 import emailjs from '@emailjs/browser';
 import { EMAILJS_CONFIG } from '../utils/emailjsConfig';
 import { authState, waitForAuth } from '../utils/auth';
+
+console.log('=== TECHREGISTER IMPORTS COMPLETED ===');
 
 // ...existing imports
 
@@ -476,6 +484,8 @@ onMounted(async () => {
     isLoading: authState.isLoading
   });
 });
+
+console.log('=== TECHREGISTER COMPONENT SCRIPT SETUP END ===');
 
 const fileInput = ref(null);
 const profileFileInput = ref(null);

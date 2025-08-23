@@ -1,4 +1,5 @@
 <script setup>
+console.log('=== USERSIGNUP COMPONENT SCRIPT SETUP START ===');
 import { ref, computed, reactive, watch, onMounted } from 'vue';
 
 import { useRouter } from 'vue-router';
@@ -10,6 +11,8 @@ import { sendWelcomeEmail } from '../utils/emailService';
 import { useI18n } from 'vue-i18n';
 import { getGovernmentNames, getDistrictsForGovernment, governmentNamesAr, districtsAr } from '../data/egyptianLocations';
 import { authState, waitForAuth } from '../utils/auth';
+
+console.log('=== USERSIGNUP IMPORTS COMPLETED ===');
 
 const { t, locale } = useI18n();
 const router = useRouter();
@@ -37,6 +40,8 @@ onMounted(async () => {
     isLoading: authState.isLoading
   });
 });
+
+console.log('=== USERSIGNUP COMPONENT SCRIPT SETUP END ===');
 
 const formData = reactive({
   firstName: '',
@@ -285,17 +290,22 @@ const closeTermsModal = () => {
 </script>
 
 <template>
-<!-- Debug: UserSignUp component template rendering -->
-<div style="position: fixed; top: 0; left: 0; background: red; color: white; z-index: 9999; padding: 10px;">
-  UserSignUp Component Loaded - Route: {{ $route.path }}
-</div>
-<div class="signup-container">
-<form class="signup-form" @submit.prevent="handleRegister">
-    <div class="form-header">
-      <img class="logo" src="/logo/ace04d3b268cf810c91d002fdf7454a6ef778f27.png" alt="BoltFix Logo">
-      <h1 class="title">{{ $t('signUp') }}</h1>
-      <p class="subtitle">{{ $t('createAccount') }}</p>
-    </div>
+  <!-- Test: Simple element to confirm template is rendering -->
+  <div style="position: fixed; top: 20px; left: 20px; background: orange; color: black; z-index: 10000; padding: 10px; font-weight: bold;">
+    USERSIGNUP TEMPLATE RENDERING
+  </div>
+  
+  <!-- Debug: UserSignUp component template rendering -->
+  <div style="position: fixed; top: 0; left: 0; background: red; color: white; z-index: 9999; padding: 10px;">
+    UserSignUp Component Loaded - Route: {{ $route.path }}
+  </div>
+  <div class="signup-container">
+    <form class="signup-form" @submit.prevent="handleRegister">
+      <div class="form-header">
+        <img class="logo" src="/logo/ace04d3b268cf810c91d002fdf7454a6ef778f27.png" alt="BoltFix Logo">
+        <h1 class="title">{{ $t('signUp') }}</h1>
+        <p class="subtitle">{{ $t('createAccount') }}</p>
+      </div>
     
     <div class="form-grid">
     <!-- first name -->

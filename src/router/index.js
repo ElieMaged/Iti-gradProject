@@ -72,6 +72,7 @@ import AuthTest from '../views/AuthTest.vue'
 const routes = [
   { path: '/', component: HomePage },
   { path: '/test-route', component: () => import('../views/TestPage.vue') }, // Simple test route
+  { path: '/simple-test', component: { template: '<div style="padding: 50px; background: yellow;">SIMPLE TEST COMPONENT WORKS!</div>' } }, // Very simple test
   { path: '/about', component: About },
   { path: '/contact', component: Contact },
   { path: '/plumbing', component: Plumbing },
@@ -142,6 +143,13 @@ const routes = [
   {path: '/auth-test', component: AuthTest},
 ]
 
+console.log('=== ROUTES DEFINED ===');
+console.log('UserSignUp component:', UserSignUp);
+console.log('TechRegister component:', TechRegister);
+console.log('Total routes:', routes.length);
+console.log('Routes with usersignup:', routes.find(r => r.path === '/usersignup'));
+console.log('Routes with techregister:', routes.find(r => r.path === '/techregister'));
+
 
 const router = createRouter({
   history: createWebHistory(),
@@ -158,8 +166,8 @@ router.beforeEach(async (to, from, next) => {
   console.log('Navigation:', { from: from.path, to: to.path, params: to.params });
   
   // Simple test route bypass
-  if (to.path === '/test-route') {
-    console.log('✅ Allowing access to test route');
+  if (to.path === '/test-route' || to.path === '/simple-test') {
+    console.log('✅ Allowing access to test route:', to.path);
     next();
     return;
   }
@@ -168,6 +176,11 @@ router.beforeEach(async (to, from, next) => {
   console.log('Waiting for auth to be ready...');
   await waitForAuth();
   console.log('Auth is ready');
+  console.log('Current auth state after waiting:', {
+    isAuthenticated: isAuthenticated(),
+    userType: authState.userType,
+    isLoading: authState.isLoading
+  });
 
   // If user is already authenticated and navigating to a public landing/login route,
   // redirect to the appropriate dashboard based on role.
@@ -188,12 +201,14 @@ router.beforeEach(async (to, from, next) => {
   console.log('Route analysis:', {
     isPublicLanding,
     isPublicAuthRoute,
-    toPath: to.path
+    toPath: to.path,
+    isAuthenticated: isAuthenticated()
   });
   
   // Always allow access to public auth routes (signup, registration, etc.)
   if (isPublicAuthRoute) {
     console.log('✅ Allowing access to public auth route:', to.path);
+    console.log('Calling next() for public auth route');
     next();
     return;
   }
@@ -265,6 +280,7 @@ router.beforeEach(async (to, from, next) => {
   }
   
   console.log('✅ Allowing navigation to:', to.path);
+  console.log('Calling next() for general route');
   console.log('=== ROUTER NAVIGATION END ===');
   next();
 });
