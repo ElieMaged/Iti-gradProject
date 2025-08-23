@@ -3,6 +3,14 @@ import { getAuth, GoogleAuthProvider, setPersistence, browserLocalPersistence } 
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
+// Debug environment variables
+console.log('=== FIREBASE CONFIG DEBUG ===');
+console.log('VITE_FIREBASE_API_KEY:', import.meta.env.VITE_FIREBASE_API_KEY ? 'SET' : 'NOT SET');
+console.log('VITE_FIREBASE_AUTH_DOMAIN:', import.meta.env.VITE_FIREBASE_AUTH_DOMAIN ? 'SET' : 'NOT SET');
+console.log('VITE_FIREBASE_PROJECT_ID:', import.meta.env.VITE_FIREBASE_PROJECT_ID ? 'SET' : 'NOT SET');
+console.log('NODE_ENV:', import.meta.env.NODE_ENV);
+console.log('MODE:', import.meta.env.MODE);
+
 // Firebase config - use .env values if available, otherwise fallback to project defaults
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyCge8apwznA8qhYMAUSaUltkYMnmYbBKv4",
@@ -14,21 +22,43 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-K6004N4Y0B"
 };
 
+console.log('Firebase config:', {
+  apiKey: firebaseConfig.apiKey ? 'SET' : 'NOT SET',
+  authDomain: firebaseConfig.authDomain,
+  projectId: firebaseConfig.projectId,
+  storageBucket: firebaseConfig.storageBucket,
+  messagingSenderId: firebaseConfig.messagingSenderId,
+  appId: firebaseConfig.appId ? 'SET' : 'NOT SET',
+  measurementId: firebaseConfig.measurementId
+});
+
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
-const db = getFirestore(app);
-const storage = getStorage(app);
+let app, auth, provider, db, storage;
 
-// Enable authentication persistence
-setPersistence(auth, browserLocalPersistence)
-  .then(() => {
-    console.log('Firebase auth persistence enabled');
-  })
-  .catch((error) => {
-    console.error('Error setting auth persistence:', error);
-  });
+try {
+  console.log('Initializing Firebase...');
+  app = initializeApp(firebaseConfig);
+  console.log('Firebase initialized successfully');
+  
+  auth = getAuth(app);
+  provider = new GoogleAuthProvider();
+  db = getFirestore(app);
+  storage = getStorage(app);
 
+  // Enable authentication persistence
+  setPersistence(auth, browserLocalPersistence)
+    .then(() => {
+      console.log('Firebase auth persistence enabled');
+    })
+    .catch((error) => {
+      console.error('Error setting auth persistence:', error);
+    });
+    
+} catch (error) {
+  console.error('Failed to initialize Firebase:', error);
+  throw error;
+}
+
+// Export Firebase instances
 export { auth, provider, db, storage };
 export default app; 

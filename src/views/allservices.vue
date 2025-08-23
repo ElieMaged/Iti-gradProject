@@ -74,7 +74,7 @@
                <div class="member-details">
                  <div class="detail-item rating-item">
                    <i class="fas fa-star"></i>
-                   <span>{{ technician.rating }}</span>
+                   <span>{{ technician.rating || 0 }}</span>
                  </div>
                  <div class="detail-item location-item">
                    <i class="fas fa-map-marker-alt"></i>
@@ -92,32 +92,16 @@
            </div>
          </div>
 
-         <!-- Pagination Controls -->
-         <div v-if="totalPages > 1" class="pagination">
-           <button 
-             class="pagination-btn" 
-             :disabled="currentPage === 1" 
-             @click="goToPage(currentPage - 1)"
-           >
-             &laquo;
-           </button>
-           <button 
-             v-for="page in totalPages" 
-             :key="page" 
-             class="pagination-btn" 
-             :class="{ active: page === currentPage }" 
-             @click="goToPage(page)"
-           >
-             {{ page }}
-           </button>
-           <button 
-             class="pagination-btn" 
-             :disabled="currentPage === totalPages" 
-             @click="goToPage(currentPage + 1)"
-           >
-             &raquo;
-           </button>
-         </div>
+         <!-- Pagination Component -->
+        <Pagination
+          v-if="totalPages > 1"
+          :current-page="currentPage"
+          :total-pages="totalPages"
+          @prev-page="goToPage(currentPage - 1)"
+          @next-page="goToPage(currentPage + 1)"
+          @page-changed="goToPage"
+          class="pagination-container"
+        />
 
         <!-- No Results Message -->
         <div v-if="filteredTechnicians.length === 0 && !loading" class="no-results">
@@ -137,9 +121,14 @@
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../firebase.js';
 import { waitForAuth, isAuthenticated } from '../utils/auth';
+import Pagination from '../components/pagination.vue';
+import { calculateTechnicianRatings } from '../utils/ratingCalculator';
 
     export default {
   name: 'AllServices',
+  components: {
+    Pagination
+  },
   data() {
     return {
       searchQuery: '',
@@ -147,7 +136,6 @@ import { waitForAuth, isAuthenticated } from '../utils/auth';
       loading: true,
       technicians: [],
       currentPage: 1,
-      techniciansPerPage: 12, // 3 rows x 4 cards
       servicesList: [
          {
            id: 'plumbing',
@@ -209,12 +197,14 @@ import { waitForAuth, isAuthenticated } from '../utils/auth';
       return filtered;
     },
     paginatedTechnicians() {
-      const start = (this.currentPage - 1) * this.techniciansPerPage;
-      const end = start + this.techniciansPerPage;
+      const cardsPerPage = 12; // 3 rows × 4 cards per row
+      const start = (this.currentPage - 1) * cardsPerPage;
+      const end = start + cardsPerPage;
       return this.filteredTechnicians.slice(start, end);
     },
     totalPages() {
-      return Math.ceil(this.filteredTechnicians.length / this.techniciansPerPage) || 1;
+      const cardsPerPage = 12; // 3 rows × 4 cards per row
+      return Math.max(1, Math.ceil(this.filteredTechnicians.length / cardsPerPage));
     }
   },
   methods: {
@@ -238,7 +228,7 @@ import { waitForAuth, isAuthenticated } from '../utils/auth';
             name: data.fullName || data.name || 'Unknown Technician',
             image: data.profilePhotoUrl || data.idPhotoUrl || data.profileImage || '/images/Avatar.png',
             description: data.bio || data.description || 'Professional technician with years of experience.',
-            rating: data.averageRating || data.rating || 0,
+            rating: 0, // Will be calculated by calculateTechnicianRatings
             price: data.basePrice || data.hourlyRate || 200,
             government: data.government,
             district: data.district,
@@ -268,7 +258,7 @@ import { waitForAuth, isAuthenticated } from '../utils/auth';
                 name: data.fullName || data.name || 'Unknown Technician',
                 image: data.profilePhotoUrl || data.idPhotoUrl || data.profileImage || '/images/Avatar.png',
                 description: data.bio || data.description || 'Professional technician with years of experience.',
-                rating: data.averageRating || data.rating || 0,
+                rating: 0, // Will be calculated by calculateTechnicianRatings
                 price: data.basePrice || data.hourlyRate || 200,
                 government: data.government,
                 district: data.district,
@@ -288,9 +278,12 @@ import { waitForAuth, isAuthenticated } from '../utils/auth';
 
         console.log('Firebase technicians found:', firebaseTechnicians.length);
         
-        // Use only Firebase technicians
-        this.technicians = firebaseTechnicians;
-        console.log('Using Firebase technicians');
+        // Calculate ratings for all technicians
+        const techniciansWithRatings = await calculateTechnicianRatings(firebaseTechnicians);
+        
+        // Use only Firebase technicians with calculated ratings
+        this.technicians = techniciansWithRatings;
+        console.log('Using Firebase technicians with calculated ratings');
       } catch (error) {
         console.error('Error fetching technicians:', error);
         // Handle Firebase errors gracefully
@@ -657,44 +650,20 @@ import { waitForAuth, isAuthenticated } from '../utils/auth';
   flex-wrap: wrap;
 }
 
-  .pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 2rem;
+/* Pagination Container */
+.pagination-container {
+  margin: 2rem 0;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+/* Ensure the pagination component takes full width on mobile */
+@media (max-width: 768px) {
+  .pagination-container {
+    padding: 0 1rem;
   }
-  .pagination-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    background: #7c6bb0;
-    color: white;
-    border: none;
-    border-radius: 0.5rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  .pagination-btn:hover:not(:disabled) {
-    background: #5a4e99;
-  }
-  .pagination-btn:disabled {
-    background: #d1d5db;
-    cursor: not-allowed;
-  }
-  .dark .pagination-btn {
-    background: var(--primary-color);
-    color: var(--primary-text);
-  }
-  .dark .pagination-btn:hover:not(:disabled) {
-    background: var(--grey-bg);
-  }
-  .dark .pagination-btn:disabled {
-    background: var(--text-muted);
-  }
+}
 
 .team-card {
   width: 24%;
@@ -781,10 +750,12 @@ import { waitForAuth, isAuthenticated } from '../utils/auth';
   line-height: 1.4;
   margin-bottom: 0px;
   font-family: Outfit, sans-serif;
-  flex: 1;
-  height: 20px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-height: 2.8em; /* 2 lines with line-height 1.4 */
+  max-height: 2.8em; /* 2 lines with line-height 1.4 */
 }
 .dark .member-description {
   color: var(--text-muted);

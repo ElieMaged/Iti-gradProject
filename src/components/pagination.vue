@@ -81,9 +81,10 @@
   <style scoped>
   .pagination-wrapper {
     display: flex;
-    justify-content: flex-end;
-    margin-top: 2rem;
+    justify-content: center;
+    margin: 2rem auto;
     font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
+    width: 100%;
   }
 
   .pagination {

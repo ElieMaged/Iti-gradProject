@@ -38,7 +38,7 @@
             <div class="card-bottom-section">
               <h3 class="member-name">{{ technician.name }}</h3>
               <div class="member-specialization">{{ technician.specialization }}</div>
-              <p class="member-description">{{ $t('technicianDescription') }}</p>
+              <p class="member-description">{{ technician.bio }}</p>
               <!-- Details Row -->
               <div class="member-details">
                 <div class="detail-item rating-item">
@@ -60,18 +60,15 @@
         </div>
 
         <!-- Pagination -->
-        <div v-if="totalPages > 1" class="pagination-container">
-          <div class="pagination-info">
-            Showing {{ (currentPage - 1) * pageSize + 1 }} - 
-            {{ Math.min(currentPage * pageSize, filteredTechnicians.length) }} 
-            of {{ filteredTechnicians.length }} technicians
-          </div>
-          <Pagination 
-            :current-page="currentPage"
-            :total-pages="totalPages"
-            @page-changed="goToPage"
-          />
-        </div>
+        <Pagination
+          v-if="totalPages > 1"
+          :current-page="currentPage"
+          :total-pages="totalPages"
+          @prev-page="goToPage(currentPage - 1)"
+          @next-page="goToPage(currentPage + 1)"
+          @page-changed="goToPage"
+          class="pagination-container"
+        />
     </section>
 
   </div>
@@ -93,6 +90,7 @@ import profile6 from '../assets/profile/6.png'
 import profile7 from '../assets/profile/7.png'
 import profile8 from '../assets/profile/8.png'
 import plumbingBg from '../assets/Professions/Air.jpg'
+import { calculateTechnicianRatings } from '../utils/ratingCalculator'
 
 const router = useRouter()
 // Removed stock technicians - only show registered technicians
@@ -110,9 +108,17 @@ const currentPage = ref(1)
 const pageSize = 12
 
 async function fetchTechnicians() {
-  const querySnapshot = await getDocs(collection(db, 'technicians'))
-  firebaseTechnicians.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-  .filter(tech => tech.specialization === 'Air Conditioning' || tech.specialization === 'AC Technician') // Only include air conditioning technicians
+  try {
+    const querySnapshot = await getDocs(collection(db, 'technicians'))
+    const allTechnicians = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+      .filter(tech => tech.specialization === 'Air Conditioning' || tech.specialization === 'AC Technician') // Only include air conditioning technicians
+    
+    // Calculate ratings for all technicians
+    const techniciansWithRatings = await calculateTechnicianRatings(allTechnicians)
+    firebaseTechnicians.value = techniciansWithRatings
+  } catch (error) {
+    console.error('Error fetching technicians:', error)
+  }
 }
 
 onMounted(fetchTechnicians)
@@ -125,7 +131,8 @@ const mergedTechnicians = computed(() => {
       ...fbTech,
       image: fbTech.profilePhotoUrl || fbTech.idPhotoUrl || profile1, // Use profile photo first, then ID photo as fallback
       name: fbTech.fullName || fbTech.name,
-      price: fbTech.basePrice || fbTech.price
+      price: fbTech.basePrice || fbTech.price,
+      rating: fbTech.rating || 0 // Use the calculated rating from reviews
     })
   })
   console.log('Firebase technicians:', allTechs)
@@ -483,12 +490,17 @@ function getLocationDisplay(technician) {
   font-size: 0.9rem;
   color: #666666;
   line-height: 1.4;
-  margin-bottom: 0px;
-  font-family: Outfit, sans-serif;
-  flex: 1;
-  height: 60px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-height: 2.8em; /* 2 lines with line-height 1.4 */
+  min-height: 2.8em;
+  margin: 0.5rem 0 1rem;
+  font-family: Outfit, sans-serif;
+  flex: 1;
 }
 .member-details {
   display: flex;

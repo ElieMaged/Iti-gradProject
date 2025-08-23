@@ -65,12 +65,12 @@
             <div class="card-bottom-section">
               <h3 class="member-name">{{ technician.name }}</h3>
               <div class="member-specialization">{{ technician.specialization }}</div>
-              <p class="member-description">{{ $t('technicianDescription') }}</p>
+              <p class="member-description">{{ technician.description }}</p>
               <!-- Details Row -->
               <div class="member-details">
                 <div class="detail-item rating-item">
                   <i class="fa-solid fa-star"></i>
-                  <span>{{ technician.rating }}</span>
+                  <span>{{ technician.rating || 0 }}</span>
                 </div>
                 <div class="detail-item location-item">
                   <i class="fa-solid fa-location-dot"></i>
@@ -86,32 +86,16 @@
           </div>
         </div>
 
-        <!-- Pagination Controls -->
-        <div v-if="totalPages > 1" class="pagination">
-          <button 
-            class="pagination-btn" 
-            :disabled="currentPage === 1" 
-            @click="goToPage(currentPage - 1)"
-          >
-            &laquo;
-          </button>
-          <button 
-            v-for="page in totalPages" 
-            :key="page" 
-            class="pagination-btn" 
-            :class="{ active: page === currentPage }" 
-            @click="goToPage(page)"
-          >
-            {{ page }}
-          </button>
-          <button 
-            class="pagination-btn" 
-            :disabled="currentPage === totalPages" 
-            @click="goToPage(currentPage + 1)"
-          >
-            &raquo;
-          </button>
-        </div>
+        <!-- Pagination -->
+        <Pagination
+          v-if="totalPages > 1"
+          :current-page="currentPage"
+          :total-pages="totalPages"
+          @prev-page="goToPage(currentPage - 1)"
+          @next-page="goToPage(currentPage + 1)"
+          @page-changed="goToPage"
+          class="pagination-container"
+        />
     </section>
 
   </div>
@@ -123,8 +107,10 @@ import { collection, getDocs } from 'firebase/firestore'
 import { db, auth } from '../firebase'
 import { useRouter } from 'vue-router'
 import SearchBar from '../components/SearchBar.vue'
+import Pagination from '../components/pagination.vue'
 import profile1 from '../assets/profile/1.jpg'
 import plumbingBg from '../assets/Professions/Plumbing.jpg'
+import { calculateTechnicianRatings } from '../utils/ratingCalculator'
 
 const router = useRouter()
 const loading = ref(true)
@@ -152,7 +138,9 @@ async function fetchTechnicians() {
     console.log('All technicians from Firebase:', querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })))
     console.log('Filtered plumbing technicians:', allTechnicians)
     
-    firebaseTechnicians.value = allTechnicians
+    // Calculate ratings for all technicians
+    const techniciansWithRatings = await calculateTechnicianRatings(allTechnicians)
+    firebaseTechnicians.value = techniciansWithRatings
   } catch (error) {
     console.error('Error fetching technicians:', error)
   } finally {
@@ -174,7 +162,7 @@ const mergedTechnicians = computed(() => {
       bgColor: '#E8E4F3', // or any default color
       price: fbTech.basePrice,
       description: fbTech.bio,
-      rating: fbTech.averageRating || fbTech.rating || 0,
+      rating: fbTech.rating || 0, // Use the calculated rating from reviews
       specialization: fbTech.specialization,
       government: fbTech.government, // Assuming these fields exist in Firebase
       district: fbTech.district,
@@ -544,12 +532,17 @@ const heroBackgroundStyle = computed(() => {
   font-size: 0.9rem;
   color: #666666;
   line-height: 1.4;
-  margin-bottom: 0px;
-  font-family: Outfit, sans-serif;
-  flex: 1;
-  height: 60px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-height: 2.8em; /* 2 lines with line-height 1.4 */
+  min-height: 2.8em;
+  margin: 0.5rem 0 1rem;
+  font-family: Outfit, sans-serif;
+  flex: 1;
 }
 .member-details {
   display: flex;

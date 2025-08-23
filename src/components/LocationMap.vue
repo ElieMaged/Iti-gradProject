@@ -73,7 +73,7 @@ const props = defineProps({
 })
 
 // Emits
-const emit = defineEmits(['locationDetected', 'updateCity', 'updateArea', 'updateStreet', 'updateBuilding'])
+const emit = defineEmits(['locationDetected', 'update:city', 'update:area', 'update:street', 'update:building'])
 
 // Reactive state
 const isDetecting = ref(false)
@@ -165,6 +165,57 @@ const reverseGeocode = async (latitude, longitude) => {
   }
 }
 
+const loadLeaflet = () => {
+  return new Promise((resolve, reject) => {
+    // Check if Leaflet is already loaded
+    if (typeof L !== 'undefined') {
+      leafletLoaded.value = true
+      resolve()
+      return
+    }
+
+    // Load Leaflet CSS if not already loaded
+    if (!document.querySelector('link[href*="leaflet"]')) {
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
+      link.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY='
+      link.crossOrigin = ''
+      link.onload = () => {
+        // Load Leaflet JS after CSS is loaded
+        loadLeafletJS().then(resolve).catch(reject)
+      }
+      link.onerror = (error) => {
+        console.error('Failed to load Leaflet CSS:', error)
+        reject(new Error('Failed to load Leaflet CSS'))
+      }
+      document.head.appendChild(link)
+    } else {
+      // If CSS is already loaded, just load JS
+      loadLeafletJS().then(resolve).catch(reject)
+    }
+  })
+}
+
+const loadLeafletJS = () => {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script')
+    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
+    script.integrity = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo='
+    script.crossOrigin = ''
+    script.onload = () => {
+      leafletLoaded.value = true
+      console.log('Leaflet loaded successfully')
+      resolve()
+    }
+    script.onerror = (error) => {
+      console.error('Failed to load Leaflet JS:', error)
+      reject(new Error('Failed to load Leaflet JS'))
+    }
+    document.head.appendChild(script)
+  })
+}
+
 const detectUserLocation = async () => {
   if (!navigator.geolocation) {
     detectionError.value = 'Geolocation is not supported by this browser.'
@@ -173,41 +224,81 @@ const detectUserLocation = async () => {
 
   isDetecting.value = true
   detectionError.value = ''
+  locationDetected.value = false
 
   try {
+    // Initialize map if not already done
+    if (!map.value) {
+      if (!leafletLoaded.value) {
+        await loadLeaflet()
+      }
+      initMap()
+      // Give the map a moment to initialize
+      await new Promise(resolve => setTimeout(resolve, 500))
+    }
+
     const position = await new Promise((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(resolve, reject, {
         enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 60000
+        timeout: 20000,
+        maximumAge: 0,
+        distanceFilter: 10,
+        useSignificantChanges: true
       })
     })
 
-    const { latitude, longitude } = position.coords
+    const { latitude, longitude, accuracy, altitude, altitudeAccuracy, heading, speed } = position.coords
     
-    console.log('Location detected:', { latitude, longitude, accuracy: position.coords.accuracy })
+    console.log('Location details:', {
+      latitude,
+      longitude,
+      accuracy: `${accuracy} meters`,
+      altitude: altitude ? `${altitude} meters` : 'Not available',
+      altitudeAccuracy: altitudeAccuracy ? `${altitudeAccuracy} meters` : 'Not available',
+      heading: heading ? `${heading}° from north` : 'Not available',
+      speed: speed ? `${speed} m/s` : 'Not available',
+      timestamp: new Date(position.timestamp).toLocaleString()
+    })
     
     // Update map to user location
     updateUserLocation(latitude, longitude)
     
+    // Adjust accuracy threshold and provide more specific guidance
+    if (accuracy > 500) { // Increased threshold to 500 meters
+      detectionError.value = `Low location accuracy (${Math.round(accuracy)}m). For better results:
+• Move to an open area
+• Enable high-accuracy mode in your device settings
+• Check if location services are enabled for your browser
+• Try refreshing the page if the issue persists`
+    } else if (accuracy > 100) {
+      // For moderate accuracy, show a less prominent warning
+      console.warn(`Moderate location accuracy: ${Math.round(accuracy)}m`)
+      // Don't show error for moderate accuracy, just log it
+    }
+    
     // Perform reverse geocoding to get address details
     const addressDetails = await reverseGeocode(latitude, longitude)
+    
+    if (!addressDetails) {
+      throw new Error('Could not determine address for this location')
+    }
     
     // Emit the detected coordinates and address details to parent component
     const locationData = {
       latitude,
       longitude,
-      accuracy: position.coords.accuracy,
+      accuracy,
+      address: formattedAddress.value,
       addressDetails
     }
     
     emit('locationDetected', locationData)
     
     // Auto-fill form fields if address details are available
-    if (addressDetails.city) emit('updateCity', addressDetails.city)
-    if (addressDetails.area) emit('updateArea', addressDetails.area)
-    if (addressDetails.street) emit('updateStreet', addressDetails.street)
-    if (addressDetails.building) emit('updateBuilding', addressDetails.building)
+    if (addressDetails.city) emit('update:city', addressDetails.city)
+    if (addressDetails.area) emit('update:area', addressDetails.area)
+    if (addressDetails.street) emit('update:street', addressDetails.street)
+    if (addressDetails.building) emit('update:building', addressDetails.building)
     
     locationDetected.value = true
     console.log('Location detection completed successfully')
@@ -220,11 +311,13 @@ const detectUserLocation = async () => {
     if (error.code === 1) {
       errorMessage = 'Location permission denied. Please allow location access in your browser settings.'
     } else if (error.code === 2) {
-      errorMessage = 'Location unavailable. Please check your device location settings.'
+      errorMessage = 'Location unavailable. Please check your device location settings and try again.'
     } else if (error.code === 3) {
-      errorMessage = 'Location detection timed out. Please try again.'
+      errorMessage = 'Location detection timed out. Please try again in an area with better reception.'
+    } else if (error.message.includes('Network')) {
+      errorMessage = 'Network error. Please check your internet connection and try again.'
     } else {
-      errorMessage = `Location detection failed: ${error.message}`
+      errorMessage = `Location detection failed: ${error.message || 'Unknown error'}`
     }
     
     detectionError.value = errorMessage
@@ -357,38 +450,19 @@ watch(() => [props.city, props.area, props.street, props.building], () => {
 
 // Lifecycle hooks
 onMounted(async () => {
-  // Load Leaflet CSS if not already loaded
-  if (!document.querySelector('link[href*="leaflet"]')) {
-    const link = document.createElement('link')
-    link.rel = 'stylesheet'
-    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
-    link.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY='
-    link.crossOrigin = ''
-    document.head.appendChild(link)
-  }
-
-  // Load Leaflet JS if not already loaded
-  if (typeof L === 'undefined') {
-    const script = document.createElement('script')
-    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
-    script.integrity = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo='
-    script.crossOrigin = ''
-    script.onload = () => {
-      leafletLoaded.value = true
-      initMap()
-      // Auto-detect location after a short delay to ensure map is ready
-      setTimeout(() => {
-        detectUserLocation()
-      }, 1000)
-    }
-    document.head.appendChild(script)
-  } else {
-    leafletLoaded.value = true
+  try {
+    await loadLeaflet()
     initMap()
-    // Auto-detect location after a short delay to ensure map is ready
+    // Auto-detect location with a slight delay to ensure map is ready
     setTimeout(() => {
-      detectUserLocation()
-    }, 1000)
+      console.log('Attempting to detect location...')
+      detectUserLocation().catch(error => {
+        console.error('Auto-location detection failed:', error)
+      })
+    }, 1500) // Slightly longer delay for better initialization
+  } catch (error) {
+    console.error('Failed to initialize map:', error)
+    detectionError.value = 'Failed to load map. Please refresh the page and try again.'
   }
 })
 

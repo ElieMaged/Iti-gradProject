@@ -4,6 +4,11 @@ const messages = {
   en: {
     hello: "Hello,",
     addressPlaceholder:"Address",
+    profilePhotoRequired: "Profile photo is required",
+    idPhotoRequired: "ID photo is required",
+    enterValidEgyptianPhone: "Enter a valid Egyptian phone number ",
+    enterValidEmail: "Enter a valid email address (e.g., name@example.com)",
+    registrationTimeout: "Registration timeout - taking too long",
     //welcome page
     welcomeToBoltfix: "Welcome to BoltFix",
   chooseYourRole: "Choose your role to get started",
@@ -1352,6 +1357,11 @@ terms: {
     //welcome page
     hello: "مرحبًا",
     welcomeToBoltfix: "مرحبًا بك في بولت فيكس",
+    profilePhotoRequired: "الصورة الشخصية مطلوبة",
+    idPhotoRequired: "الصورة الشخصية مطلوبة",
+    enterValidEgyptianPhone: "أدخل رقم هاتف إنجليزي صحيح ",
+    enterValidEmail: "أدخل عنوان بريد إلكتروني صحيح (مثل name@example.com)",
+    registrationTimeout: "انتهت عملية التسجيل - انتظار طويلاً",
   chooseYourRole: "اختر دورك",
   registerAsUser: "سجل كمستخدم",
   registerAsTechnician: "سجل كفني",
