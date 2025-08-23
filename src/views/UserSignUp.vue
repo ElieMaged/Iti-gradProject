@@ -1,14 +1,15 @@
 <template>
-  <!-- Loading state while auth is initializing -->
-  <div v-if="authLoading" class="loading-container">
-    <div class="loading-spinner">
-      <div class="spinner"></div>
-      <p>Loading...</p>
+  <div>
+    <!-- Loading state while auth is initializing -->
+    <div v-if="authLoading" class="loading-container">
+      <div class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+      </div>
     </div>
-  </div>
-  
-  <!-- Main content when auth is ready -->
-  <div v-else>
+    
+    <!-- Main content when auth is ready -->
+    <div v-else>
     <!-- Test: Simple element to confirm template is rendering -->
     <div style="position: fixed; top: 20px; right: 20px; background: orange; color: black; z-index: 10000; padding: 10px; font-weight: bold;">
       USERSIGNUP TEMPLATE RENDERING
@@ -246,6 +247,7 @@
         </div>
       </form>
     </div>
+  </div>
   </div>
 </template>
 
