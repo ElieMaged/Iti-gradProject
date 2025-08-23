@@ -166,6 +166,20 @@ router.beforeEach(async (to, from, next) => {
     to.path === '/login' ||
     to.path === '/welcome'
   );
+  
+  // Don't redirect if user is trying to access signup/registration pages
+  const isPublicAuthRoute = (
+    to.path === '/usersignup' ||
+    to.path === '/techregister' ||
+    to.path === '/pending-application'
+  );
+  // Always allow access to public auth routes (signup, registration, etc.)
+  if (isPublicAuthRoute) {
+    console.log('Allowing access to public auth route:', to.path);
+    next();
+    return;
+  }
+  
   if (isAuthenticated() && isPublicLanding) {
     if (isAdmin()) {
       next('/admin-dashboard');

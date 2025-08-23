@@ -1,4 +1,8 @@
 <template>
+  <!-- Debug: TechRegister component template rendering -->
+  <div style="position: fixed; top: 0; right: 0; background: blue; color: white; z-index: 9999; padding: 10px;">
+    TechRegister Component Loaded - Route: {{ $route.path }}
+  </div>
   <div class="signup-container">
     <form class="signup-form" @submit.prevent="handleRegister">
       <div class="form-header">
@@ -447,6 +451,9 @@ import { EMAILJS_CONFIG } from '../utils/emailjsConfig';
 const { t , locale} = useI18n();
 
 const router = useRouter();
+
+// Debug component mounting
+console.log('TechRegister component script setup executed');
 const fileInput = ref(null);
 const profileFileInput = ref(null);
 const previewUrl = ref(null);

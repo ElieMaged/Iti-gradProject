@@ -13,6 +13,9 @@ import { getGovernmentNames, getDistrictsForGovernment, governmentNamesAr, distr
 const { t, locale } = useI18n();
 const router = useRouter();
 
+// Debug component mounting
+console.log('UserSignUp component script setup executed');
+
 const formData = reactive({
   firstName: '',
   lastName: '',
@@ -260,13 +263,14 @@ const closeTermsModal = () => {
 </script>
 
 <template>
-
-<body>
-    
+<!-- Debug: UserSignUp component template rendering -->
+<div style="position: fixed; top: 0; left: 0; background: red; color: white; z-index: 9999; padding: 10px;">
+  UserSignUp Component Loaded - Route: {{ $route.path }}
+</div>
 <div class="signup-container">
 <form class="signup-form" @submit.prevent="handleRegister">
     <div class="form-header">
-      <img class="logo" src="../assets/logo-secondary.png" alt="BoltFix Logo">
+      <img class="logo" src="/logo/ace04d3b268cf810c91d002fdf7454a6ef778f27.png" alt="BoltFix Logo">
       <h1 class="title">{{ $t('signUp') }}</h1>
       <p class="subtitle">{{ $t('createAccount') }}</p>
     </div>

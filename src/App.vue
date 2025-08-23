@@ -42,17 +42,23 @@ onMounted(async () => {
   console.log('App mounted - Auth state:', {
     isAuthenticated: authState.isAuthenticated,
     userType: authState.userType,
-    user: authState.user ? authState.user.email : null
+    user: authState.user ? authState.user.email : null,
+    currentRoute: route.path,
+    isAdminRoute: isAdminRoute.value,
+    isPublicAuthRoute: isPublicAuthRoute.value
   });
 
   // Redirect admins/technicians to their dashboards if they land on a public route
   // But don't redirect if they're on public auth routes (signup, login, etc.)
   if (authState.isAuthenticated && !isAdminRoute.value && !isPublicAuthRoute.value) {
+    console.log('Redirecting user to dashboard...');
     if (authState.userType === 'admin') {
       router.push('/admin-dashboard');
     } else if (authState.userType === 'technician') {
       router.push('/technicion-profile');
     }
+  } else {
+    console.log('No redirect needed - user can stay on current route');
   }
 });
 
@@ -62,7 +68,16 @@ watch(locale, (newLocale) => {
 
 // Also react to auth changes at runtime (e.g., after login without full reload)
 watch(() => authState.isAuthenticated, (isAuth) => {
+  console.log('Auth state changed:', {
+    isAuth,
+    currentRoute: route.path,
+    isAdminRoute: isAdminRoute.value,
+    isPublicAuthRoute: isPublicAuthRoute.value,
+    userType: authState.userType
+  });
+  
   if (isAuth && !isAdminRoute.value && !isPublicAuthRoute.value) {
+    console.log('Redirecting due to auth change...');
     if (authState.userType === 'admin') {
       router.push('/admin-dashboard');
     } else if (authState.userType === 'technician') {
