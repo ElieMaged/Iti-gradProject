@@ -1,524 +1,866 @@
 <template>
-  <div>
-    <!-- Loading state while auth is initializing -->
-    <div v-if="authLoading" class="loading-container">
-      <div class="loading-spinner">
-        <div class="spinner"></div>
-        <p>Loading...</p>
+  <div class="signup-container">
+    <form class="signup-form" @submit.prevent="handleRegister">
+      <div class="form-header">
+        <img class="logo" src="/logo/ace04d3b268cf810c91d002fdf7454a6ef778f27.png" alt="BoltFix Logo">
+        <h1 class="title">{{ $t('technicianRegistration') }}</h1>
+        <p class="subtitle">{{ $t('createAccount') }}</p>
       </div>
-    </div>
-    
-    <!-- Main content when auth is ready -->
-    <div v-else>
-    <!-- Test: Simple element to confirm template is rendering -->
-    <div style="position: fixed; top: 20px; right: 20px; background: orange; color: black; z-index: 10000; padding: 10px; font-weight: bold;">
-      TECHREGISTER TEMPLATE RENDERING
-    </div>
-    
-    <!-- Debug: TechRegister component template rendering -->
-    <div style="position: fixed; top: 0; right: 0; background: blue; color: white; z-index: 9999; padding: 10px;">
-      TechRegister Component Loaded - Route: {{ $route.path }}
-    </div>
-    <div class="signup-container">
-      <form class="signup-form" @submit.prevent="handleRegister">
-        <div class="form-header">
-          <img class="logo" src="/logo/ace04d3b268cf810c91d002fdf7454a6ef778f27.png" alt="BoltFix Logo">
-          <h1 class="title">{{ $t('technicianRegistration') }}</h1>
-          <p class="subtitle">{{ $t('createAccount') }}</p>
+      
+      <div class="form-grid">
+        <!-- Personal Information -->
+        <div class="form-section">
+          <h3 class="section-title">{{ $t('personalInformation') }}</h3>
+          
+          <div class="form-group">
+            <label for="fullName" class="form-label">{{ $t('fullName') }}</label>
+            <input 
+              type="text" 
+              id="fullName" 
+              v-model="formData.fullName" 
+              class="form-input" 
+              :placeholder="$t('fullName')" 
+              required 
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="email" class="form-label">{{ $t('emailAddress') }}</label>
+            <input 
+              type="email" 
+              id="email" 
+              v-model="formData.email" 
+              class="form-input" 
+              autocomplete="email"
+              inputmode="email"
+              autocapitalize="none"
+              spellcheck="false"
+              pattern="^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
+              :title="$t('enterValidEmail') || 'Enter a valid email address (e.g., name@example.com)'"
+              :placeholder="$t('emailAddress')" 
+              required 
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="phoneNumber" class="form-label">{{ $t('phoneNumber') }}</label>
+            <input 
+              type="tel" 
+              id="phoneNumber" 
+              v-model="formData.phoneNumber" 
+              class="form-input" 
+              :placeholder="$t('phoneNumber')" 
+              inputmode="tel"
+              pattern="^(01[0125][0-9]{8}|(?:\\+20|0020)1[0125][0-9]{8})$"
+              :title="$t('enterValidEgyptianPhone')"
+              required 
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="password" class="form-label">{{ $t('password') }}</label>
+            <input 
+              type="password" 
+              id="password" 
+              v-model="formData.password" 
+              class="form-input" 
+              :placeholder="$t('password')" 
+              required 
+            />
+            <!-- Password validation indicators -->
+            <div class="password-validation" v-if="formData.password">
+              <div class="validation-item" :class="{ 'valid': passwordValidation.length }">
+                <span class="validation-icon">{{ passwordValidation.length ? '✓' : '✗' }}</span>
+                <span class="validation-text">{{ $t('atLeast8Characters') }}</span>
+              </div>
+              <div class="validation-item" :class="{ 'valid': passwordValidation.uppercase }">
+                <span class="validation-icon">{{ passwordValidation.uppercase ? '✓' : '✗' }}</span>
+                <span class="validation-text">{{ $t('oneUppercaseLetter') }}</span>
+              </div>
+              <div class="validation-item" :class="{ 'valid': passwordValidation.lowercase }">
+                <span class="validation-icon">{{ passwordValidation.lowercase ? '✓' : '✗' }}</span>
+                <span class="validation-text">{{ $t('oneLowercaseLetter') }}</span>
+              </div>
+              <div class="validation-item" :class="{ 'valid': passwordValidation.number }">
+                <span class="validation-icon">{{ passwordValidation.number ? '✓' : '✗' }}</span>
+                <span class="validation-text">{{ $t('oneNumber') }}</span>
+              </div>
+              <div class="validation-item" :class="{ 'valid': passwordValidation.special }">
+                <span class="validation-icon">{{ passwordValidation.special ? '✓' : '✗' }}</span>
+                <span class="validation-text">{{ $t('oneSpecialCharacter') }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="confirmPassword" class="form-label">{{ $t('confirmPassword') }}</label>
+            <input 
+              type="password" 
+              id="confirmPassword" 
+              v-model="formData.confirmPassword" 
+              class="form-input" 
+              :class="{ 'error': formData.confirmPassword && !passwordValidation.match }" 
+              :placeholder="$t('confirmPassword')" 
+              required 
+            />
+            <p v-if="formData.confirmPassword && !passwordValidation.match" class="error-message">
+              {{ $t('passwordsDoNotMatch') }}
+            </p>
+          </div>
         </div>
+
+        <!-- Professional Details -->
+        <div class="form-section">
+          <h3 class="section-title">{{ $t('professionalDetails') }}</h3>
+          
+          <div class="form-group">
+            <label for="specialization" class="form-label">{{ $t('specialization') }}</label>
+            <select 
+              id="specialization" 
+              v-model="formData.specialization" 
+              class="form-input" 
+              required
+            >
+              <option value="" disabled selected>{{ $t('specialization') }}</option>
+              <option value="Plumbing">{{ $t('plumbing') }}</option>
+              <option value="Electricity">{{ $t('electricityTitle') }}</option>
+              <option value="Carpentry">{{ $t('carpentry') }}</option>
+              <option value="Wall Finishing">{{ $t('wallFinishing') }}</option>
+              <option value="Air Conditioning">{{ $t('airConditioning') }}</option>
+              <option value="Electrical Appliances">{{ $t('electricalApplianceTechnician') }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="experience" class="form-label">{{ $t('yearsOfExperience') }}</label>
+            <select 
+              id="experience" 
+              v-model="formData.experience" 
+              class="form-input" 
+              required
+            >
+              <option value="" disabled selected>{{ $t('yearsOfExperience') }}</option>
+              <option value="1">{{ $t('oneYear') }}</option>
+              <option value="2">{{ $t('twoYears') }}</option>
+              <option value="3">{{ $t('threeYears') }}</option>
+              <option value="4+">{{ $t('fourPlusYears') }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="bio" class="form-label">{{ $t('briefDescriptionBio') }}</label>
+            <input 
+              type="text" 
+              id="bio" 
+              v-model="formData.bio" 
+              class="form-input" 
+              :placeholder="$t('briefDescriptionBio')" 
+              required 
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="basePrice" class="form-label">{{ $t('baseVisitPrice') }}</label>
+            <input 
+              type="text" 
+              id="basePrice" 
+              v-model="formData.basePrice" 
+              class="form-input" 
+              :placeholder="$t('baseVisitPrice')" 
+              required 
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="paypalEmail" class="form-label">{{ $t('paypalEmail') }}</label>
+            <input 
+              type="number" 
+              id="age" 
+              v-model="formData.age" 
+              class="form-input" 
+              :placeholder="$t('paypalEmail')" 
+              required 
+            />
+          </div>
+        </div>
+
+        <!-- Location -->
+        <div class="form-section">
+          <h3 class="section-title">{{ $t('location') }}</h3>
+          
+          <div class="form-group">
+            <label for="government" class="form-label">{{ $t('government') }}</label>
+            <select 
+              id="government" 
+              v-model="formData.government" 
+              class="form-input" 
+              required
+            >
+              <option value="" disabled selected>{{ $t('government') }}</option>
+              <option v-for="gov in governmentOptions" :key="gov" :value="gov">
+                {{ locale === 'ar' ? governmentNamesAr[gov] : gov }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="district" class="form-label">{{ $t('districtArea') }}</label>
+            
+            <select 
+              id="district" 
+              v-model="formData.district" 
+              class="form-input" 
+              required
+              :disabled="!formData.government"
+            >
+              <option value="" disabled selected>{{ $t('districtArea') }}</option>
+              <option v-for="district in districtOptions" :key="district" :value="district">
+                {{ locale === 'ar' ? (districtsAr[formData.government]?.[district] || district) : district }}
+              </option>
+            </select>
+
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">{{ $t('willingToTravel') }}</label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input v-model="formData.willingToTravel" type="radio" name="travel" value="yes" />
+                <span>{{ $t('yes') }}</span>
+              </label>
+              <label class="radio-label">
+                <input v-model="formData.willingToTravel" type="radio" name="travel" value="no" />
+                <span>{{ $t('no') }}</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Uploads & Agreements -->
+        <div class="form-section">
+          <h3 class="section-title">{{ $t('pleaseUploadYourId') }}</h3>
+          
+          <div class="form-group">
+            <label class="form-label">{{ $t('IdPhoto') }}</label>
+            <div class="upload-area" @click="triggerFileInput">
+              <div class="upload-content">
+                <svg xmlns="http://www.w3.org/2000/svg" class="upload-icon" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                <span class="upload-text">
+                  {{ $t('dragDropOrBrowse') }}
+                  <span class="browse-link">{{ $t('browse') }}</span>
+                </span>
+                <input
+                  ref="fileInput"
+                  type="file"
+                  accept="image/*"
+                  class="hidden"
+                  @change="handleFileChange"
+                />
+              </div>
+              <div v-if="previewUrl" class="preview-container">
+                <img :src="previewUrl" alt="Preview" class="preview-img" />
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">{{ $t('profilePicture') }}</label>
+            <div class="upload-area" @click="triggerProfileFileInput">
+              <div class="upload-content">
+                <svg xmlns="http://www.w3.org/2000/svg" class="upload-icon" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                <span class="upload-text">
+                  {{ $t('dragDropOrBrowse') }}
+                  <span class="browse-link">{{ $t('browse') }}</span>
+                </span>
+                <input
+                  ref="profileFileInput"
+                  type="file"
+                  accept="image/*"
+                  class="hidden"
+                  @change="handleProfileFileChange"
+                />
+              </div>
+              <div v-if="profilePreviewUrl" class="preview-container">
+                <img :src="profilePreviewUrl" alt="Profile Preview" class="preview-img" />
+              </div>
+            </div>
+          </div>
+
+          <div class="checkbox-group">
+            <input v-model="formData.confirmInfo" type="checkbox" class="form-checkbox" id="confirmInfo" required />
+            <label class="checkbox-label" for="confirmInfo">
+              {{ $t('confirmInformationAccurate') }}
+            </label>
+          </div>
+
+          <div class="checkbox-group">
+            <input v-model="formData.agreeTerms" type="checkbox" class="form-checkbox" id="agreeTerms" required />
+            <label class="checkbox-label" for="agreeTerms">
+              {{ $t('agreeTermsAndConditions') }}
+              <span class="terms-link" @click="openTermsModal">{{ $t('termsAndConditions') }}</span> 
+              {{ $t('andPrivacyPolicy') }}
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-footer">
+        <button type="submit" class="submit-btn" :disabled="loading">
+          <span>{{ loading ? $t('registering') : $t('register') }}</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="arrow-icon" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M14 2.5a.5.5 0 0 0-.5-.5h-6a.5.5 0 0 0 0 1h4.793L2.146 13.146a.5.5 0 0 0 .708.708L13 3.707V8.5a.5.5 0 0 0 1 0z"/>
+          </svg>
+        </button>
         
-        <div class="form-grid">
-          <!-- Personal Information -->
-          <div class="form-section">
-            <h3 class="section-title">{{ $t('personalInformation') }}</h3>
-            
-            <div class="form-group">
-              <label for="fullName" class="form-label">{{ $t('fullName') }}</label>
-              <input 
-                type="text" 
-                id="fullName" 
-                v-model="formData.fullName" 
-                class="form-input" 
-                :placeholder="$t('fullName')" 
-                required 
-              />
-            </div>
+        <p v-if="error" class="error-text">{{ error }}</p>
+        <p v-if="success" class="success-text">{{ success }}</p>
+        <p class="login-link">{{ $t('haveAccount') }} <a href="/userlogin">{{ $t('signIn') }}</a></p>
+      </div>
+    </form>
 
-            <div class="form-group">
-              <label for="email" class="form-label">{{ $t('emailAddress') }}</label>
-              <input 
-                type="email" 
-                id="email" 
-                v-model="formData.email" 
-                class="form-input" 
-                autocomplete="email"
-                inputmode="email"
-                autocapitalize="none"
-                spellcheck="false"
-                pattern="^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
-                :title="$t('enterValidEmail') || 'Enter a valid email address (e.g., name@example.com)'"
-                :placeholder="$t('emailAddress')" 
-                required 
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="phoneNumber" class="form-label">{{ $t('phoneNumber') }}</label>
-              <input 
-                type="tel" 
-                id="phoneNumber" 
-                v-model="formData.phoneNumber" 
-                @input="validatePhoneNumber"
-                :class="['form-input', { 'error': phoneError }]"
-                :placeholder="$t('phoneNumber')" 
-                inputmode="tel"
-                pattern="^(01[0125][0-9]{8}|(?:\\+20|0020)1[0125][0-9]{8})$"
-                :title="$t('enterValidEgyptianPhone')"
-                required 
-              />
-              <p v-if="phoneError" class="error-message">
-                {{ $t('enterValidEgyptianPhone') || 'Please enter a valid Egyptian phone number (e.g., 01XXXXXXXXX, +201XXXXXXXXX, or 00201XXXXXXXXX)' }}
-              </p>
-            </div>
-
-            <div class="form-group">
-              <label for="password" class="form-label">{{ $t('password') }}</label>
-              <input 
-                type="password" 
-                id="password" 
-                v-model="formData.password" 
-                class="form-input" 
-                :placeholder="$t('password')" 
-                required 
-              />
-              <!-- Password validation indicators -->
-              <div class="password-validation" v-if="formData.password">
-                <div class="validation-item" :class="{ 'valid': passwordValidation.length }">
-                  <span class="validation-icon">{{ passwordValidation.length ? '✓' : '✗' }}</span>
-                  <span class="validation-text">{{ $t('atLeast8Characters') }}</span>
-                </div>
-                <div class="validation-item" :class="{ 'valid': passwordValidation.uppercase }">
-                  <span class="validation-icon">{{ passwordValidation.uppercase ? '✓' : '✗' }}</span>
-                  <span class="validation-text">{{ $t('oneUppercaseLetter') }}</span>
-                </div>
-                <div class="validation-item" :class="{ 'valid': passwordValidation.lowercase }">
-                  <span class="validation-icon">{{ passwordValidation.lowercase ? '✓' : '✗' }}</span>
-                  <span class="validation-text">{{ $t('oneLowercaseLetter') }}</span>
-                </div>
-                <div class="validation-item" :class="{ 'valid': passwordValidation.number }">
-                  <span class="validation-icon">{{ passwordValidation.number ? '✓' : '✗' }}</span>
-                  <span class="validation-text">{{ $t('oneNumber') }}</span>
-                </div>
-                <div class="validation-item" :class="{ 'valid': passwordValidation.special }">
-                  <span class="validation-icon">{{ passwordValidation.special ? '✓' : '✗' }}</span>
-                  <span class="validation-text">{{ $t('oneSpecialCharacter') }}</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="confirmPassword" class="form-label">{{ $t('confirmPassword') }}</label>
-              <input 
-                type="password" 
-                id="confirmPassword" 
-                v-model="formData.confirmPassword" 
-                class="form-input" 
-                :class="{ 'error': formData.confirmPassword && !passwordValidation.match }" 
-                :placeholder="$t('confirmPassword')" 
-                required 
-              />
-              <p v-if="formData.confirmPassword && !passwordValidation.match" class="error-message">
-                {{ $t('passwordsDoNotMatch') }}
-              </p>
-            </div>
-          </div>
-
-          <!-- Professional Details -->
-          <div class="form-section">
-            <h3 class="section-title">{{ $t('professionalDetails') }}</h3>
-            
-            <div class="form-group">
-              <label for="specialization" class="form-label">{{ $t('specialization') }}</label>
-              <select 
-                id="specialization" 
-                v-model="formData.specialization" 
-                class="form-input" 
-                required
-              >
-                <option value="" disabled selected>{{ $t('specialization') }}</option>
-                <option value="Plumbing">{{ $t('plumbing') }}</option>
-                <option value="Electricity">{{ $t('electricityTitle') }}</option>
-                <option value="Carpentry">{{ $t('carpentry') }}</option>
-                <option value="Wall Finishing">{{ $t('wallFinishing') }}</option>
-                <option value="Air Conditioning">{{ $t('airConditioning') }}</option>
-                <option value="Electrical Appliances">{{ $t('electricalApplianceTechnician') }}</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="experience" class="form-label">{{ $t('yearsOfExperience') }}</label>
-              <select 
-                id="experience" 
-                v-model="formData.experience" 
-                class="form-input" 
-                required
-              >
-                <option value="" disabled selected>{{ $t('yearsOfExperience') }}</option>
-                <option value="1">{{ $t('oneYear') }}</option>
-                <option value="2">{{ $t('twoYears') }}</option>
-                <option value="3">{{ $t('threeYears') }}</option>
-                <option value="4+">{{ $t('fourPlusYears') }}</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="bio" class="form-label">{{ $t('briefDescriptionBio') }}</label>
-              <input 
-                type="text" 
-                id="bio" 
-                v-model="formData.bio" 
-                class="form-input" 
-                :placeholder="$t('briefDescriptionBio')" 
-                required 
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="basePrice" class="form-label">{{ $t('baseVisitPrice') }}</label>
-              <input 
-                type="text" 
-                id="basePrice" 
-                v-model="formData.basePrice" 
-                class="form-input" 
-                :placeholder="$t('baseVisitPrice')" 
-                required 
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="paypalEmail" class="form-label">{{ $t('paypalEmail') }}</label>
-              <input 
-                type="number" 
-                id="age" 
-                v-model="formData.age" 
-                class="form-input" 
-                :placeholder="$t('paypalEmail')" 
-                required 
-              />
-            </div>
-          </div>
-
-          <!-- Location -->
-          <div class="form-section">
-            <h3 class="section-title">{{ $t('location') }}</h3>
-            
-            <div class="form-group">
-              <label for="government" class="form-label">{{ $t('government') }}</label>
-              <select 
-                id="government" 
-                v-model="formData.government" 
-                class="form-input" 
-                required
-              >
-                <option value="" disabled selected>{{ $t('government') }}</option>
-                <option v-for="gov in governmentOptions" :key="gov" :value="gov">
-                  {{ locale === 'ar' ? governmentNamesAr[gov] : gov }}
-                </option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="district" class="form-label">{{ $t('districtArea') }}</label>
-              
-              <select 
-                id="district" 
-                v-model="formData.district" 
-                class="form-input" 
-                required
-                :disabled="!formData.government"
-              >
-                <option value="" disabled selected>{{ $t('districtArea') }}</option>
-                <option v-for="district in districtOptions" :key="district" :value="district">
-                  {{ locale === 'ar' ? (districtsAr[formData.government]?.[district] || district) : district }}
-                </option>
-              </select>
-
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">{{ $t('willingToTravel') }}</label>
-              <div class="radio-group">
-                <label class="radio-label">
-                  <input v-model="formData.willingToTravel" type="radio" name="travel" value="yes" />
-                  <span>{{ $t('yes') }}</span>
-                </label>
-                <label class="radio-label">
-                  <input v-model="formData.willingToTravel" type="radio" name="travel" value="no" />
-                  <span>{{ $t('no') }}</span>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <!-- Uploads & Agreements -->
-          <div class="form-section">
-            <h3 class="section-title">{{ $t('pleaseUploadYourId') }}</h3>
-            
-            <div class="form-group">
-              <label class="form-label">{{ $t('IdPhoto') }}</label>
-              <div class="upload-area" @click="triggerFileInput">
-                <div class="upload-content">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="upload-icon" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                  </svg>
-                  <span class="upload-text">
-                    {{ $t('dragDropOrBrowse') }}
-                    <span class="browse-link">{{ $t('browse') }}</span>
-                  </span>
-                  <input
-                    ref="fileInput"
-                    type="file"
-                    accept="image/*"
-                    class="hidden"
-                    @change="handleFileChange"
-                  />
-                </div>
-                <div v-if="previewUrl" class="preview-container">
-                  <img :src="previewUrl" alt="Preview" class="preview-img" />
-                </div>
-              </div>
-            </div>
-            
-            <div class="form-group">
-              <label class="form-label">{{ $t('profilePicture') }}</label>
-              <div class="upload-area" @click="triggerProfileFileInput">
-                <div class="upload-content">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="upload-icon" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                  </svg>
-                  <span class="upload-text">
-                    {{ $t('dragDropOrBrowse') }}
-                    <span class="browse-link">{{ $t('browse') }}</span>
-                  </span>
-                  <input
-                    ref="profileFileInput"
-                    type="file"
-                    accept="image/*"
-                    class="hidden"
-                    @change="handleProfileFileChange"
-                  />
-                </div>
-                <div v-if="profilePreviewUrl" class="preview-container">
-                  <img :src="profilePreviewUrl" alt="Profile Preview" class="preview-img" />
-                </div>
-              </div>
-            </div>
-
-            <div class="checkbox-group">
-              <input v-model="formData.confirmInfo" type="checkbox" class="form-checkbox" id="confirmInfo" required />
-              <label class="checkbox-label" for="confirmInfo">
-                {{ $t('confirmInformationAccurate') }}
-              </label>
-            </div>
-
-            <div class="checkbox-group">
-              <input v-model="formData.agreeTerms" type="checkbox" class="form-checkbox" id="agreeTerms" required />
-              <label class="checkbox-label" for="agreeTerms">
-                {{ $t('agreeTermsAndConditions') }}
-                <span class="terms-link" @click="openTermsModal">{{ $t('termsAndConditions') }}</span> 
-                {{ $t('andPrivacyPolicy') }}
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <div class="form-footer">
-          <button type="submit" class="submit-btn" :disabled="loading">
-            <span>{{ loading ? $t('registering') : $t('register') }}</span>
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="arrow-icon" viewBox="0 0 16 16">
-              <path fill-rule="evenodd" d="M14 2.5a.5.5 0 0 0-.5-.5h-6a.5.5 0 0 0 0 1h4.793L2.146 13.146a.5.5 0 0 0 .708.708L13 3.707V8.5a.5.5 0 0 0 1 0z"/>
+    <!-- Terms and Conditions Modal -->
+    <div v-if="showTermsModal" class="modal-overlay" @click="closeTermsModal">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h2 class="modal-title">{{ $t('terms.title') }}</h2>
+          <button class="modal-close" @click="closeTermsModal">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
             </svg>
           </button>
-          
-          <p v-if="error" class="error-text">{{ error }}</p>
-          <p v-if="success" class="success-text">{{ success }}</p>
-          <p class="login-link">{{ $t('haveAccount') }} <a href="/userlogin">{{ $t('signIn') }}</a></p>
         </div>
-      </form>
-
-      <!-- Terms and Conditions Modal -->
-      <div v-if="showTermsModal" class="modal-overlay" @click="closeTermsModal">
-        <div class="modal-content" @click.stop>
-          <div class="modal-header">
-            <h2 class="modal-title">{{ $t('terms.title') }}</h2>
-            <button class="modal-close" @click="closeTermsModal">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
-              </svg>
-            </button>
+        <div class="modal-body">
+          <div class="terms-content">
+            <h3>{{ $t('terms.generalTerms') }}</h3>
+            <h4>{{ $t('terms.definitions') }}</h4>
+            <ul>
+              <li>{{ $t('terms.platform') }}</li>
+              <li>{{ $t('terms.user') }}</li>
+              <li>{{ $t('terms.technician') }}</li>
+              <li>{{ $t('terms.booking') }}</li>
+            </ul>
+            <h4>{{ $t('terms.accountCreation') }}</h4>
+            <ul>
+              <li>{{ $t('terms.accountCreation1') }}</li>
+              <li>{{ $t('terms.accountCreation2') }}</li>
+              <li>{{ $t('terms.accountCreation3') }}</li>
+            </ul>
+            <h4>{{ $t('terms.privacy') }}</h4>
+            <ul>
+              <li>{{ $t('terms.privacy1') }}</li>
+              <li>{{ $t('terms.privacy2') }}</li>
+            </ul>
+            <h4>{{ $t('terms.prohibitedConduct') }}</h4>
+            <ul>
+              <li>{{ $t('terms.prohibited1') }}</li>
+              <li>{{ $t('terms.prohibited2') }}</li>
+              <li>{{ $t('terms.prohibited3') }}</li>
+            </ul>
+            <h4>{{ $t('terms.accountTermination') }}</h4>
+            <ul>
+              <li>{{ $t('terms.accountTermination1') }}</li>
+            </ul>
+            <h3>{{ $t('terms.userTerms') }}</h3>
+            <h4>{{ $t('terms.bookingService') }}</h4>
+            <ul>
+              <li>{{ $t('terms.bookingService1') }}</li>
+              <li>{{ $t('terms.bookingService2') }}</li>
+            </ul>
+            <h4>{{ $t('terms.payment') }}</h4>
+            <ul>
+              <li>{{ $t('terms.payment1') }}</li>
+              <li>{{ $t('terms.payment2') }}</li>
+            </ul>
+            <h4>{{ $t('terms.cancellationRefunds') }}</h4>
+            <ul>
+              <li>{{ $t('terms.cancellation1') }}</li>
+              <li>{{ $t('terms.cancellation2') }}</li>
+              <li>{{ $t('terms.cancellation3') }}</li>
+            </ul>
+            <h4>{{ $t('terms.ratingsFeedback') }}</h4>
+            <ul>
+              <li>{{ $t('terms.ratings1') }}</li>
+              <li>{{ $t('terms.ratings2') }}</li>
+            </ul>
+            <h3>{{ $t('terms.technicianTerms') }}</h3>
+            <h4>{{ $t('terms.commissionPolicy') }}</h4>
+            <ul>
+              <li>{{ $t('terms.commission1') }}</li>
+              <li>{{ $t('terms.commission2') }}</li>
+            </ul>
+            <h4>{{ $t('terms.paymentMethods') }}</h4>
+            <ul>
+              <li>{{ $t('terms.paymentMethods1') }}</li>
+              <li>{{ $t('terms.paymentMethods2') }}</li>
+            </ul>
+            <h4>{{ $t('terms.earningsTransfer') }}</h4>
+            <ul>
+              <li>{{ $t('terms.earnings1') }}</li>
+              <li>{{ $t('terms.earnings2') }}</li>
+            </ul>
+            <h4>{{ $t('terms.serviceExpectations') }}</h4>
+            <ul>
+              <li>{{ $t('terms.serviceExpectations1') }}</li>
+              <li>{{ $t('terms.serviceExpectations2') }}</li>
+            </ul>
+            <h4>{{ $t('terms.responsibility') }}</h4>
+            <ul>
+              <li>{{ $t('terms.responsibility1') }}</li>
+              <li>{{ $t('terms.responsibility2') }}</li>
+            </ul>
+            <p class="terms-footer">
+              {{ $t('terms.footer') }}
+            </p>
           </div>
-          <div class="modal-body">
-            <div class="terms-content">
-              <h3>{{ $t('terms.generalTerms') }}</h3>
-              <h4>{{ $t('terms.definitions') }}</h4>
-              <ul>
-                <li>{{ $t('terms.platform') }}</li>
-                <li>{{ $t('terms.user') }}</li>
-                <li>{{ $t('terms.technician') }}</li>
-                <li>{{ $t('terms.booking') }}</li>
-              </ul>
-              <h4>{{ $t('terms.accountCreation') }}</h4>
-              <ul>
-                <li>{{ $t('terms.accountCreation1') }}</li>
-                <li>{{ $t('terms.accountCreation2') }}</li>
-                <li>{{ $t('terms.accountCreation3') }}</li>
-              </ul>
-              <h4>{{ $t('terms.privacy') }}</h4>
-              <ul>
-                <li>{{ $t('terms.privacy1') }}</li>
-                <li>{{ $t('terms.privacy2') }}</li>
-              </ul>
-              <h4>{{ $t('terms.prohibitedConduct') }}</h4>
-              <ul>
-                <li>{{ $t('terms.prohibited1') }}</li>
-                <li>{{ $t('terms.prohibited2') }}</li>
-                <li>{{ $t('terms.prohibited3') }}</li>
-              </ul>
-              <h4>{{ $t('terms.accountTermination') }}</h4>
-              <ul>
-                <li>{{ $t('terms.accountTermination1') }}</li>
-              </ul>
-              <h3>{{ $t('terms.userTerms') }}</h3>
-              <h4>{{ $t('terms.bookingService') }}</h4>
-              <ul>
-                <li>{{ $t('terms.bookingService1') }}</li>
-                <li>{{ $t('terms.bookingService2') }}</li>
-              </ul>
-              <h4>{{ $t('terms.payment') }}</h4>
-              <ul>
-                <li>{{ $t('terms.payment1') }}</li>
-                <li>{{ $t('terms.payment2') }}</li>
-              </ul>
-              <h4>{{ $t('terms.cancellationRefunds') }}</h4>
-              <ul>
-                <li>{{ $t('terms.cancellation1') }}</li>
-                <li>{{ $t('terms.cancellation2') }}</li>
-                <li>{{ $t('terms.cancellation3') }}</li>
-              </ul>
-              <h4>{{ $t('terms.ratingsFeedback') }}</h4>
-              <ul>
-                <li>{{ $t('terms.ratings1') }}</li>
-                <li>{{ $t('terms.ratings2') }}</li>
-              </ul>
-              <h3>{{ $t('terms.technicianTerms') }}</h3>
-              <h4>{{ $t('terms.commissionPolicy') }}</h4>
-              <ul>
-                <li>{{ $t('terms.commission1') }}</li>
-                <li>{{ $t('terms.commission2') }}</li>
-              </ul>
-              <h4>{{ $t('terms.paymentMethods') }}</h4>
-              <ul>
-                <li>{{ $t('terms.paymentMethods1') }}</li>
-                <li>{{ $t('terms.paymentMethods2') }}</li>
-              </ul>
-              <h4>{{ $t('terms.earningsTransfer') }}</h4>
-              <ul>
-                <li>{{ $t('terms.earnings1') }}</li>
-                <li>{{ $t('terms.earnings2') }}</li>
-              </ul>
-              <h4>{{ $t('terms.serviceExpectations') }}</h4>
-              <ul>
-                <li>{{ $t('terms.serviceExpectations1') }}</li>
-                <li>{{ $t('terms.serviceExpectations2') }}</li>
-              </ul>
-              <h4>{{ $t('terms.responsibility') }}</h4>
-              <ul>
-                <li>{{ $t('terms.responsibility1') }}</li>
-                <li>{{ $t('terms.responsibility2') }}</li>
-              </ul>
-              <p class="terms-footer">
-                {{ $t('terms.footer') }}
-              </p>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button class="modal-btn" @click="closeTermsModal">{{ $t('terms.iUnderstand') }}</button>
-          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="modal-btn" @click="closeTermsModal">{{ $t('terms.iUnderstand') }}</button>
         </div>
       </div>
     </div>
   </div>
-  </div>
-  </template>
+</template>
 
-  <script setup>
-  console.log('=== TECHREGISTER COMPONENT SCRIPT SETUP START ===');
-  import { ref, reactive, watch, computed, onMounted } from 'vue';
-  import { useRouter } from 'vue-router';
-  import { auth, db, storage } from '../firebase';
-  import { createUserWithEmailAndPassword } from 'firebase/auth';
-  import { collection, serverTimestamp, doc, setDoc, addDoc, getDocs, query, where, getDoc, updateDoc } from 'firebase/firestore';
-  import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
-  import { getGovernmentNames, getDistrictsForGovernment, governmentNamesAr, districtsAr } from '../data/egyptianLocations';
-  import { useI18n } from 'vue-i18n';
-  import emailjs from '@emailjs/browser';
-  import { EMAILJS_CONFIG } from '../utils/emailjsConfig';
-  import { authState, waitForAuth } from '../utils/auth';
+<script setup>
+import { ref, reactive, watch, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { auth, db, storage } from '../firebase';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { collection, serverTimestamp, doc, setDoc, addDoc, getDocs, query, where, getDoc, updateDoc } from 'firebase/firestore';
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { getGovernmentNames, getDistrictsForGovernment, governmentNamesAr, districtsAr } from '../data/egyptianLocations';
+import { useI18n } from 'vue-i18n';
+import emailjs from '@emailjs/browser';
+import { EMAILJS_CONFIG } from '../utils/emailjsConfig';
 
-  console.log('=== TECHREGISTER IMPORTS COMPLETED ===');
-
-  // ...existing imports
+// ...existing imports
 
 
-  const { t , locale} = useI18n();
+const { t , locale} = useI18n();
 
-  const router = useRouter();
+const router = useRouter();
+const fileInput = ref(null);
+const profileFileInput = ref(null);
+const previewUrl = ref(null);
+const profilePreviewUrl = ref(null);
+const loading = ref(false);
+const error = ref('');
+const success = ref('');
+const showTermsModal = ref(false);
 
-  // Debug component mounting
-  console.log('TechRegister component script setup executed');
+const formData = reactive({
+  fullName: '',
+  email: '',
+  phoneNumber: '',
+  password: '',
+  confirmPassword: '',
+  specialization: '',
+  experience: '',
+  bio: '',
+  basePrice: '',
+  government: '',
+  district: '',
+  willingToTravel: '',
+  confirmInfo: false,
+  agreeTerms: false,
+  idPhotoBase64: null, // New field to store Base64 string
+  profilePhotoBase64: null, // New field to store profile picture Base64 string
+  paypalEmail: '' // New field for PayPal email
+});
 
-  // Add comprehensive debugging
-  onMounted(async () => {
-    console.log('TechRegister component mounted');
-    console.log('Current route:', router.currentRoute.value.path);
-    console.log('Auth state on mount:', {
-      isAuthenticated: authState.isAuthenticated,
-      userType: authState.userType,
-      user: authState.user ? authState.user.email : null,
-      isLoading: authState.isLoading
+const governmentOptions = getGovernmentNames();
+const districtOptions = computed(() => {
+  return formData.government ? getDistrictsForGovernment(formData.government) : [];
+});
+watch(() => formData.government, () => { formData.district = ''; })
+// Password validation
+const passwordValidation = reactive({
+  length: false,
+  uppercase: false,
+  lowercase: false,
+  number: false,
+  special: false,
+  match: false
+});
+
+// Watch password changes for real-time validation
+watch(() => formData.password, (newPassword) => {
+  passwordValidation.length = newPassword.length >= 8;
+  passwordValidation.uppercase = /[A-Z]/.test(newPassword);
+  passwordValidation.lowercase = /[a-z]/.test(newPassword);
+  passwordValidation.number = /\d/.test(newPassword);
+  passwordValidation.special = /[!@#$%^&*(),.?":{}|<>]/.test(newPassword);
+});
+
+// Watch confirm password for matching
+watch(() => formData.confirmPassword, (newConfirmPassword) => {
+  passwordValidation.match = newConfirmPassword === formData.password && newConfirmPassword.length > 0;
+});
+
+// Check if password meets all requirements
+const isPasswordValid = computed(() => {
+  return passwordValidation.length && 
+    passwordValidation.uppercase && 
+    passwordValidation.lowercase && 
+    passwordValidation.number && 
+    passwordValidation.special;
+});
+
+// Email validation (stricter): trims, rejects consecutive dots, leading/trailing dots or hyphens in labels
+const validateEmail = (email) => {
+  if (!email) return false;
+  const trimmed = String(email).trim();
+  const basic = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+  if (!basic.test(trimmed)) return false;
+  const [local, domain] = trimmed.split('@');
+  if (local.includes('..') || domain.includes('..')) return false;
+  if (local.startsWith('.') || local.endsWith('.')) return false;
+  const labels = domain.split('.');
+  if (labels.some(label => !label || label.startsWith('-') || label.endsWith('-'))) return false;
+  return true;
+};
+
+// Egyptian phone validation: supports local (11 digits starting 01x) and international (+20 or 0020)
+const validateEgyptianPhone = (phone) => {
+  const cleaned = String(phone).replace(/\s|-/g, '');
+  const local = /^01[0125][0-9]{8}$/; // e.g., 010xxxxxxxx, 011xxxxxxxx, 012xxxxxxxx, 015xxxxxxxx
+  const intl = /^(?:\+20|0020)1[0125][0-9]{8}$/; // e.g., +2010xxxxxxxx or 002010xxxxxxxx
+  return local.test(cleaned) || intl.test(cleaned);
+};
+
+function triggerFileInput() {
+  fileInput.value && fileInput.value.click();
+}
+
+function triggerProfileFileInput() {
+  profileFileInput.value && profileFileInput.value.click();
+}
+
+function handleFileChange(event) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      previewUrl.value = e.target.result; // For preview
+      formData.idPhotoBase64 = e.target.result; // Save Base64 string
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+function handleProfileFileChange(event) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      profilePreviewUrl.value = e.target.result; // For preview
+      formData.profilePhotoBase64 = e.target.result; // Save Base64 string
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+async function handleRegister() {
+  error.value = '';
+  success.value = '';
+  
+  // Email validation
+  if (!formData.email || String(formData.email).trim().length === 0) {
+    error.value = t('emailRequired');
+    return;
+  }
+  formData.email = String(formData.email).trim();
+  if (!validateEmail(formData.email)) {
+    error.value = t('emailInvalid');
+    return;
+  }
+
+  // Phone validation
+  if (!formData.phoneNumber || String(formData.phoneNumber).trim().length === 0) {
+    error.value = t('phoneRequired');
+    return;
+  }
+  if (!validateEgyptianPhone(formData.phoneNumber)) {
+    error.value = t('phoneInvalid');
+    return;
+  }
+
+  // Password validation
+  if (!isPasswordValid.value) {
+    error.value = t('passwordRequirementsNotMet');
+    return;
+  }
+  
+  if (formData.password !== formData.confirmPassword) {
+    error.value = t('passwordsDoNotMatch');
+    return;
+  }
+  
+  if (!formData.confirmInfo || !formData.agreeTerms) {
+    error.value = t('pleaseConfirmCheckboxes');
+    return;
+  }
+  
+  if (!formData.idPhotoBase64) {
+    error.value = 'Please upload your ID photo';
+    return;
+  }
+  
+  if (!formData.profilePhotoBase64) {
+    error.value = 'Please upload a profile picture';
+    return;
+  }
+  
+  loading.value = true;
+  
+  // Add timeout to prevent hanging
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => reject(new Error('Registration timeout - taking too long')), 30000); // 30 second timeout
+  });
+  
+  try {
+    console.log('Starting registration process...');
+    console.log('Form data:', { 
+      email: formData.email, 
+      fullName: formData.fullName,
+      specialization: formData.specialization,
+      hasIdPhoto: !!formData.idPhotoBase64,
+      hasProfilePhoto: !!formData.profilePhotoBase64
     });
     
-    // Wait for auth to be ready
-    await waitForAuth();
-    authLoading.value = false; // Set loading to false after auth is ready
-    console.log('Auth state after waiting:', {
-      isAuthenticated: authState.isAuthenticated,
-      userType: authState.userType,
-      user: authState.user ? authState.user.email : null,
-      isLoading: authState.isLoading
+    // Create Firebase Auth user
+    console.log('Creating Firebase Auth user...');
+    const userCredential = await Promise.race([
+      createUserWithEmailAndPassword(auth, formData.email, formData.password),
+      timeoutPromise
+    ]);
+    console.log('Firebase Auth user created successfully:', userCredential.user.uid);
+    // Save technician data to Firestore, using Base64 image
+    const technicianData = {
+      uid: userCredential.user.uid,
+      fullName: formData.fullName,
+      email: formData.email,
+      phoneNumber: formData.phoneNumber,
+      specialization: formData.specialization,
+      experience: formData.experience,
+      bio: formData.bio,
+      basePrice: formData.basePrice,
+      government: formData.government,
+      district: formData.district,
+      willingToTravel: formData.willingToTravel,
+      idPhotoUrl: formData.idPhotoBase64 || '', // Save Base64 string
+      profilePhotoUrl: formData.profilePhotoBase64 || '', // Save profile picture Base64 string
+      paypalEmail: formData.paypalEmail || '', // Save PayPal email
+      status: 'pending', // Admin approval status
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      role: 'pending' // Set as pending until admin approves
+    };
+    
+    // Save to pending applications collection
+    console.log('Saving to pendingTechnicians collection...');
+    await Promise.race([
+      setDoc(doc(db, 'pendingTechnicians', userCredential.user.uid), technicianData),
+      timeoutPromise
+    ]);
+    console.log('Saved to pendingTechnicians successfully');
+    
+    // Also save to users collection with pending role
+    console.log('Saving to users collection...');
+    await Promise.race([
+      setDoc(doc(db, 'users', userCredential.user.uid), {
+      email: formData.email,
+      role: 'pending',
+      createdAt: serverTimestamp()
+      }),
+      timeoutPromise
+    ]);
+    console.log('Saved to users collection successfully');
+    
+    // Set localStorage to pending
+    localStorage.setItem('userType', 'pending');
+    
+    // Send notification to admin about new technician application (non-blocking)
+    sendTechnicianApplicationNotification(technicianData).catch(error => {
+      console.error('Failed to send admin notification:', error);
     });
-  });
+    
+    // Send welcome email to the technician (non-blocking)
+    sendWelcomeEmail(formData.email, formData.fullName).catch(error => {
+      console.error('Failed to send welcome email:', error);
+    });
+    
+    success.value = t('applicationSubmitted');
+    // Redirect to pending status page
+    setTimeout(() => {
+      router.push('/pending-application');
+    }, 2000);
+    
+  } catch (err) {
+    console.error('Registration error:', err);
+    
+    // Provide more specific error messages
+    if (err.code === 'auth/email-already-in-use') {
+      error.value = 'An account with this email already exists. Please use a different email or try logging in.';
+    } else if (err.code === 'auth/weak-password') {
+      error.value = 'Password is too weak. Please choose a stronger password.';
+    } else if (err.code === 'auth/invalid-email') {
+      error.value = 'Please enter a valid email address.';
+    } else if (err.message.includes('timeout')) {
+      error.value = 'Registration is taking too long. Please check your internet connection and try again.';
+    } else {
+      error.value = `Registration failed: ${err.message}`;
+    }
+  } finally {
+    loading.value = false;
+  }
+}
 
-  console.log('=== TECHREGISTER COMPONENT SCRIPT SETUP END ===');
+// Function to send notification to admin about new technician application
+async function sendTechnicianApplicationNotification(technicianData) {
+  try {
+    console.log('=== SENDING TECHNICIAN APPLICATION NOTIFICATION ===');
+    console.log('Technician data:', technicianData);
+    
+    const notificationData = {
+      type: 'technician_application',
+      title: 'New Technician Application',
+      message: `New technician application from ${technicianData.fullName} (${technicianData.email}) for ${technicianData.specialization}`,
+      technicianId: technicianData.uid,
+      technicianName: technicianData.fullName,
+      technicianEmail: technicianData.email,
+      specialization: technicianData.specialization,
+      experience: technicianData.experience,
+      government: technicianData.government,
+      district: technicianData.district,
+      basePrice: technicianData.basePrice,
+      status: 'pending',
+      createdAt: new Date(),
+      read: false
+    };
+    
+    console.log('Notification data prepared:', notificationData);
+    
+    // Send notification to admin
+    const adminNotification = {
+      ...notificationData,
+      recipientId: 'admin',
+      recipientType: 'admin',
+      message: `New technician application: ${technicianData.fullName} (${technicianData.email}) has applied for ${technicianData.specialization} position. Experience: ${technicianData.experience} years, Location: ${technicianData.government}, ${technicianData.district}, Base Price: ${technicianData.basePrice}.`
+    };
+    
+    console.log('Admin notification object:', adminNotification);
+    
+    // Add notification to Firebase
+    console.log('Adding admin notification to Firebase...');
+    const adminNotificationRef = await addDoc(collection(db, 'notifications'), adminNotification);
+    console.log('Admin notification added with ID:', adminNotificationRef.id);
+    
+    // Send email notification to admin
+    await sendAdminEmailNotification(technicianData);
+    
+    console.log('=== TECHNICIAN APPLICATION NOTIFICATION SENT SUCCESSFULLY ===');
+    return true;
+    
+  } catch (error) {
+    console.error('=== ERROR SENDING TECHNICIAN APPLICATION NOTIFICATION ===');
+    console.error('Error details:', error);
+    console.error('Error message:', error.message);
+    console.error('Error code:', error.code);
+    return false;
+  }
+}
 
-  const fileInput = ref(null);
-  const profileFileInput = ref(null);
-  const previewUrl = ref(null);
-  const profilePreviewUrl = ref(null);
-  const loading = ref(false);
-  const error = ref('');
-  const success = ref('');
-  const showTermsModal = ref(false);
-  const authLoading = ref(true); // New loading state for auth initialization
+// Function to send email notification to admin about new technician application
+async function sendAdminEmailNotification(technicianData) {
+  try {
+    console.log('=== SENDING ADMIN EMAIL NOTIFICATION ===');
+    
+    // Use environment variable for admin email, with fallback
+    const adminEmail = import.meta.env.VITE_ADMIN_EMAIL || 'admin@boltfix.com';
+    
+    const templateParams = {
+      to_email: adminEmail,
+      to_name: 'BoltFix Admin',
+      subject: 'New Technician Application - Action Required',
+      message: `Dear Admin,\n\nA new technician has applied to join BoltFix:\n\nTechnician Details:\n- Name: ${technicianData.fullName}\n- Email: ${technicianData.email}\n- Specialization: ${technicianData.specialization}\n- Experience: ${technicianData.experience} years\n- Location: ${technicianData.government}, ${technicianData.district}\n- Base Price: ${technicianData.basePrice}\n- PayPal Email: ${technicianData.paypalEmail || 'Not provided'}\n\nPlease review this application in your admin dashboard.\n\nBest regards,\nBoltFix System`
+    };
 
-  const phoneError = ref(false);
+    // Email functionality removed
+    console.log('Admin email template:', templateParams);
+    return true;
+  } catch (error) {
+    console.error('=== ERROR SENDING ADMIN EMAIL NOTIFICATION ===');
+    console.error('Error details:', error);
+    console.error('Error message:', error.message);
+    console.error('Error code:', error.code);
+    return false;
+  }
+}
 
-  const formData = reactive({
-    fullName: '',
-    email: '',
-    phoneNumber: '',
-    password: '',
-    confirmPassword: '',
+// Function to send welcome email to the technician
+async function sendWelcomeEmail(email, fullName) {
+  try {
+    console.log('=== SENDING WELCOME EMAIL TO TECHNICIAN ===');
+    console.log('Email:', email);
+    console.log('Full Name:', fullName);
+
+    // Initialize EmailJS before sending
+    emailjs.init(EMAILJS_CONFIG.publicKey);
+
+    const templateParams = {
+      to_email: email,
+      to_name: fullName,
+      user_name: fullName,
+      service_name: 'BoltFix'
+    };
+
+    const response = await emailjs.send(
+      EMAILJS_CONFIG.serviceId,
+      'template_68btlks', // Use the specified template ID
+      templateParams,
+      EMAILJS_CONFIG.publicKey
+    );
+
+    console.log('✅ Welcome email sent successfully:', response);
+    return response;
+  } catch (error) {
+    console.error('=== ERROR SENDING WELCOME EMAIL ===');
+    console.error('Error details:', error);
+    console.error('Error message:', error.message);
+    console.error('Error code:', error.code);
+    console.error('Error status:', error.status);
+    console.error('Error text:', error.text);
+    throw error;
+  }
+}
+
+// Terms and Conditions Modal Functions
+const openTermsModal = () => {
+  showTermsModal.value = true;
+};
+
+const closeTermsModal = () => {
+  showTermsModal.value = false;
+};
+
+// TEMPORARY ADMIN UTILITY: Promote a user by email to technician
+async function promoteUserToTechnician(email) {
+  const auth = getAuth();
+  // Get all users is not available in client SDK, so this only works if the user is currently logged in
+  const user = auth.currentUser;
+  if (!user || user.email !== email) {
+    alert('Please log in as the user you want to promote: ' + email);
+    return;
+  }
+  const technicianData = {
+    uid: user.uid,
+    fullName: user.displayName || 'Technician',
+    email: user.email,
     specialization: '',
     experience: '',
     bio: '',
@@ -526,1338 +868,861 @@
     government: '',
     district: '',
     willingToTravel: '',
-    confirmInfo: false,
-    agreeTerms: false,
-    idPhotoBase64: null, // New field to store Base64 string
-    profilePhotoBase64: null, // New field to store profile picture Base64 string
-    paypalEmail: '' // New field for PayPal email
-  });
-
-  const governmentOptions = getGovernmentNames();
-  const districtOptions = computed(() => {
-    return formData.government ? getDistrictsForGovernment(formData.government) : [];
-  });
-  watch(() => formData.government, () => { formData.district = ''; })
-  // Password validation
-  const passwordValidation = reactive({
-    length: false,
-    uppercase: false,
-    lowercase: false,
-    number: false,
-    special: false,
-    match: false
-  });
-
-  // Watch password changes for real-time validation
-  watch(() => formData.password, (newPassword) => {
-    passwordValidation.length = newPassword.length >= 8;
-    passwordValidation.uppercase = /[A-Z]/.test(newPassword);
-    passwordValidation.lowercase = /[a-z]/.test(newPassword);
-    passwordValidation.number = /\d/.test(newPassword);
-    passwordValidation.special = /[!@#$%^&*(),.?":{}|<>]/.test(newPassword);
-  });
-
-  // Watch confirm password for matching
-  watch(() => formData.confirmPassword, (newConfirmPassword) => {
-    passwordValidation.match = newConfirmPassword === formData.password && newConfirmPassword.length > 0;
-  });
-
-  // Check if password meets all requirements
-  const isPasswordValid = computed(() => {
-    return passwordValidation.length && 
-      passwordValidation.uppercase && 
-      passwordValidation.lowercase && 
-      passwordValidation.number && 
-      passwordValidation.special;
-  });
-
-  // Phone number validation
-  const validatePhoneNumber = () => {
-    if (!formData.phoneNumber) {
-      phoneError.value = false;
-      return false;
-    }
-    
-    // Remove any non-digit characters except + for validation
-    const cleanedPhone = formData.phoneNumber.replace(/[^\d+]/g, '');
-    
-    // Check if the phone number matches Egyptian format (local, +20, or 0020)
-    const phoneRegex = /^(01[0125]\d{8}|\+?201[0125]\d{8}|00201[0125]\d{8})$/;
-    phoneError.value = !phoneRegex.test(cleanedPhone);
-    
-    return !phoneError.value;
+    idPhotoUrl: '',
+    status: 'pending',
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    role: 'pending'
   };
+  await setDoc(doc(db, 'pendingTechnicians', user.uid), technicianData);
+  await setDoc(doc(db, 'users', user.uid), {
+    email: user.email,
+    role: 'pending',
+    createdAt: serverTimestamp()
+  });
+  alert('User promoted to technician!');
+}
+// Usage: Call promoteUserToTechnician('narutossj123@yahoo.com') in the browser console after logging in as that user.
 
-  // Email validation (stricter): trims, rejects consecutive dots, leading/trailing dots or hyphens in labels
-  const validateEmail = (email) => {
-    if (!email) return false;
-    const trimmed = String(email).trim();
-    const basic = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
-    if (!basic.test(trimmed)) return false;
-    const [local, domain] = trimmed.split('@');
-    if (local.includes('..') || domain.includes('..')) return false;
-    if (local.startsWith('.') || local.endsWith('.')) return false;
-    const labels = domain.split('.');
-    if (labels.some(label => !label || label.startsWith('-') || label.endsWith('-'))) return false;
-    return true;
-  };
-
-  // Egyptian phone validation: supports local (11 digits starting 01x) and international (+20 or 0020)
-  const validateEgyptianPhone = (phone) => {
-    const cleaned = String(phone).replace(/\s|-/g, '');
-    const local = /^01[0125][0-9]{8}$/; // e.g., 010xxxxxxxx, 011xxxxxxxx, 012xxxxxxxx, 015xxxxxxxx
-    const intl = /^(?:\+20|0020)1[0125][0-9]{8}$/; // e.g., +2010xxxxxxxx or 002010xxxxxxxx
-    return local.test(cleaned) || intl.test(cleaned);
-  };
-
-  function triggerFileInput() {
-    fileInput.value && fileInput.value.click();
-  }
-
-  function triggerProfileFileInput() {
-    profileFileInput.value && profileFileInput.value.click();
-  }
-
-  function handleFileChange(event) {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        previewUrl.value = e.target.result; // For preview
-        formData.idPhotoBase64 = e.target.result; // Save Base64 string
-      };
-      reader.readAsDataURL(file);
-    }
-  }
-
-  function handleProfileFileChange(event) {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        profilePreviewUrl.value = e.target.result; // For preview
-        formData.profilePhotoBase64 = e.target.result; // Save Base64 string
-      };
-      reader.readAsDataURL(file);
-    }
-  }
-
-  const validateForm = () => {
-    // Validate email
-    if (!formData.email || String(formData.email).trim().length === 0) {
-      error.value = t('emailRequired') || 'Email is required';
-      return false;
-    }
+// TEMPORARY UTILITY: Fix specific user role issue
+async function fixUserRole(email) {
+  try {
+    console.log('Fixing role for user:', email);
     
-    const trimmedEmail = String(formData.email).trim();
-    if (!validateEmail(trimmedEmail)) {
-      error.value = t('enterValidEmail') || 'Please enter a valid email address';
-      return false;
-    }
+    // Get user by email
+    const usersRef = collection(db, 'users');
+    const q = query(usersRef, where('email', '==', email));
+    const querySnapshot = await getDocs(q);
     
-    // Validate phone number
-    if (!formData.phoneNumber || String(formData.phoneNumber).trim().length === 0) {
-      error.value = t('phoneRequired') || 'Phone number is required';
-      return false;
-    }
-    
-    if (!validatePhoneNumber()) {
-      error.value = t('enterValidEgyptianPhone') || 'Please enter a valid Egyptian phone number';
-      return false;
-    }
-    
-    // Validate password match
-    if (formData.password !== formData.confirmPassword) {
-      error.value = t('passwordsDoNotMatch') || 'Passwords do not match';
-      return false;
-    }
-    
-    // Validate password strength
-    if (!isPasswordValid.value) {
-      error.value = t('passwordTooWeak') || 'Password does not meet requirements';
-      return false;
-    }
-    
-    error.value = '';
-    return true;
-  };
-
-  async function handleRegister() {
-    // Reset messages
-    error.value = '';
-    success.value = '';
-    
-    // Validate form before submission
-    if (!validateForm()) {
+    if (querySnapshot.empty) {
+      console.log('User not found in users collection');
       return;
     }
     
-    // Additional validations
-    if (!formData.confirmInfo || !formData.agreeTerms) {
-      error.value = t('pleaseConfirmCheckboxes') || 'Please confirm the checkboxes';
-      return;
+    const userDoc = querySnapshot.docs[0];
+    const userData = userDoc.data();
+    
+    console.log('Current user data:', userData);
+    
+    // Check if user is in pendingTechnicians collection
+    const pendingRef = doc(db, 'pendingTechnicians', userDoc.id);
+    const pendingSnap = await getDoc(pendingRef);
+    
+    // Check if user is in technicians collection
+    const techRef = doc(db, 'technicians', userDoc.id);
+    const techSnap = await getDoc(techRef);
+    
+    let correctRole = 'user'; // Default role
+    
+    if (email === 'elie1400674@gmail.com' || email === 'tasneemmostafa200110@gmail.com') {
+      correctRole = 'admin';
+    } else if (techSnap.exists()) {
+      correctRole = 'technician';
+    } else if (pendingSnap.exists()) {
+      correctRole = 'pending';
     }
     
-    if (!formData.idPhotoBase64) {
-      error.value = t('idPhotoRequired') || 'Please upload your ID photo';
-      return;
-    }
+    console.log('Correct role should be:', correctRole);
     
-    if (!formData.profilePhotoBase64) {
-      error.value = t('profilePhotoRequired') || 'Please upload a profile picture';
-      return;
-    }
-    
-    // Set loading state
-    loading.value = true;
-    
-    // Add timeout to prevent hanging
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error(t('registrationTimeout') || 'Registration timeout - taking too long')), 30000);
-    });
-    
-    try {
-      console.log('Starting registration process...');
-      console.log('Form data:', { 
-        email: formData.email, 
-        fullName: formData.fullName,
-        specialization: formData.specialization,
-        hasIdPhoto: !!formData.idPhotoBase64,
-        hasProfilePhoto: !!formData.profilePhotoBase64
+    // Update user role if it's incorrect
+    if (userData.role !== correctRole) {
+      await updateDoc(doc(db, 'users', userDoc.id), {
+        role: correctRole,
+        updatedAt: serverTimestamp()
       });
-      
-      // Create Firebase Auth user
-      console.log('Creating Firebase Auth user...');
-      const userCredential = await Promise.race([
-        createUserWithEmailAndPassword(auth, formData.email, formData.password),
-        timeoutPromise
-      ]);
-      console.log('Firebase Auth user created successfully:', userCredential.user.uid);
-      // Save technician data to Firestore, using Base64 image
-      const technicianData = {
-        uid: userCredential.user.uid,
-        fullName: formData.fullName,
-        email: formData.email,
-        phoneNumber: formData.phoneNumber,
-        specialization: formData.specialization,
-        experience: formData.experience,
-        bio: formData.bio,
-        basePrice: formData.basePrice,
-        government: formData.government,
-        district: formData.district,
-        willingToTravel: formData.willingToTravel,
-        idPhotoUrl: formData.idPhotoBase64 || '', // Save Base64 string
-        profilePhotoUrl: formData.profilePhotoBase64 || '', // Save profile picture Base64 string
-        paypalEmail: formData.paypalEmail || '', // Save PayPal email
-        status: 'pending', // Admin approval status
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        role: 'pending' // Set as pending until admin approves
-      };
-      
-      // Save to pending applications collection
-      console.log('Saving to pendingTechnicians collection...');
-      await Promise.race([
-        setDoc(doc(db, 'pendingTechnicians', userCredential.user.uid), technicianData),
-        timeoutPromise
-      ]);
-      console.log('Saved to pendingTechnicians successfully');
-      
-      // Also save to users collection with pending role
-      console.log('Saving to users collection...');
-      await Promise.race([
-        setDoc(doc(db, 'users', userCredential.user.uid), {
-        email: formData.email,
-        role: 'pending',
-        createdAt: serverTimestamp()
-        }),
-        timeoutPromise
-      ]);
-      console.log('Saved to users collection successfully');
-      
-      // Set localStorage to pending
-      localStorage.setItem('userType', 'pending');
-      
-      // Send notification to admin about new technician application (non-blocking)
-      sendTechnicianApplicationNotification(technicianData).catch(error => {
-        console.error('Failed to send admin notification:', error);
-      });
-      
-      // Send welcome email to the technician (non-blocking)
-      sendWelcomeEmail(formData.email, formData.fullName).catch(error => {
-        console.error('Failed to send welcome email:', error);
-      });
-      
-      success.value = t('applicationSubmitted');
-      // Redirect to pending status page
-      setTimeout(() => {
-        router.push('/pending-application');
-      }, 2000);
-      
-    } catch (err) {
-      console.error('Registration error:', err);
-      
-      // Provide more specific error messages
-      if (err.code === 'auth/email-already-in-use') {
-        error.value = 'An account with this email already exists. Please use a different email or try logging in.';
-      } else if (err.code === 'auth/weak-password') {
-        error.value = 'Password is too weak. Please choose a stronger password.';
-      } else if (err.code === 'auth/invalid-email') {
-        error.value = 'Please enter a valid email address.';
-      } else if (err.message.includes('timeout')) {
-        error.value = 'Registration is taking too long. Please check your internet connection and try again.';
-      } else {
-        error.value = `Registration failed: ${err.message}`;
-      }
-    } finally {
-      loading.value = false;
+      console.log('Updated user role to:', correctRole);
     }
+    
+    // Update localStorage
+    localStorage.setItem('userType', correctRole);
+    
+    console.log('Role fix completed for:', email);
+    alert(`Role fixed for ${email}. New role: ${correctRole}`);
+    
+  } catch (error) {
+    console.error('Error fixing user role:', error);
+    alert('Error fixing user role: ' + error.message);
   }
+}
 
-  // Function to send notification to admin about new technician application
-  async function sendTechnicianApplicationNotification(technicianData) {
-    try {
-      console.log('=== SENDING TECHNICIAN APPLICATION NOTIFICATION ===');
-      console.log('Technician data:', technicianData);
-      
-      const notificationData = {
-        type: 'technician_application',
-        title: 'New Technician Application',
-        message: `New technician application from ${technicianData.fullName} (${technicianData.email}) for ${technicianData.specialization}`,
-        technicianId: technicianData.uid,
-        technicianName: technicianData.fullName,
-        technicianEmail: technicianData.email,
-        specialization: technicianData.specialization,
-        experience: technicianData.experience,
-        government: technicianData.government,
-        district: technicianData.district,
-        basePrice: technicianData.basePrice,
-        status: 'pending',
-        createdAt: new Date(),
-        read: false
-      };
-      
-      console.log('Notification data prepared:', notificationData);
-      
-      // Send notification to admin
-      const adminNotification = {
-        ...notificationData,
-        recipientId: 'admin',
-        recipientType: 'admin',
-        message: `New technician application: ${technicianData.fullName} (${technicianData.email}) has applied for ${technicianData.specialization} position. Experience: ${technicianData.experience} years, Location: ${technicianData.government}, ${technicianData.district}, Base Price: ${technicianData.basePrice}.`
-      };
-      
-      console.log('Admin notification object:', adminNotification);
-      
-      // Add notification to Firebase
-      console.log('Adding admin notification to Firebase...');
-      const adminNotificationRef = await addDoc(collection(db, 'notifications'), adminNotification);
-      console.log('Admin notification added with ID:', adminNotificationRef.id);
-      
-      // Send email notification to admin
-      await sendAdminEmailNotification(technicianData);
-      
-      console.log('=== TECHNICIAN APPLICATION NOTIFICATION SENT SUCCESSFULLY ===');
-      return true;
-      
-    } catch (error) {
-      console.error('=== ERROR SENDING TECHNICIAN APPLICATION NOTIFICATION ===');
-      console.error('Error details:', error);
-      console.error('Error message:', error.message);
-      console.error('Error code:', error.code);
-      return false;
-    }
-  }
+// Usage: Call fixUserRole('narutossj33@yahoo.com') in the browser console
 
-  // Function to send email notification to admin about new technician application
-  async function sendAdminEmailNotification(technicianData) {
-    try {
-      console.log('=== SENDING ADMIN EMAIL NOTIFICATION ===');
-      
-      // Use environment variable for admin email, with fallback
-      const adminEmail = import.meta.env.VITE_ADMIN_EMAIL || 'admin@boltfix.com';
-      
-      const templateParams = {
-        to_email: adminEmail,
-        to_name: 'BoltFix Admin',
-        subject: 'New Technician Application - Action Required',
-        message: `Dear Admin,\n\nA new technician has applied to join BoltFix:\n\nTechnician Details:\n- Name: ${technicianData.fullName}\n- Email: ${technicianData.email}\n- Specialization: ${technicianData.specialization}\n- Experience: ${technicianData.experience} years\n- Location: ${technicianData.government}, ${technicianData.district}\n- Base Price: ${technicianData.basePrice}\n- PayPal Email: ${technicianData.paypalEmail || 'Not provided'}\n\nPlease review this application in your admin dashboard.\n\nBest regards,\nBoltFix System`
-      };
+// TEST FUNCTION: Verify registration flow
+function testRegistrationFlow() {
+  console.log('=== TESTING REGISTRATION FLOW ===');
+  console.log('1. User fills out TechRegister form');
+  console.log('2. handleRegister() is called');
+  console.log('3. Firebase Auth user is created');
+  console.log('4. Data is saved to pendingTechnicians collection with role: pending');
+  console.log('5. User document is saved to users collection with role: pending');
+  console.log('6. localStorage is set to: pending');
+  console.log('7. User is redirected to /pending-application');
+  console.log('8. NO role management functions are called during registration');
+  console.log('9. Admin must approve the application to change role to technician');
+  console.log('✅ Registration flow is correct!');
+}
 
-      // Email functionality removed
-      console.log('Admin email template:', templateParams);
-      return true;
-    } catch (error) {
-      console.error('=== ERROR SENDING ADMIN EMAIL NOTIFICATION ===');
-      console.error('Error details:', error);
-      console.error('Error message:', error.message);
-      console.error('Error code:', error.code);
-      return false;
-    }
-  }
+// Usage: Call testRegistrationFlow() in the browser console to verify the flow
+</script>
 
-  // Function to send welcome email to the technician
-  async function sendWelcomeEmail(email, fullName) {
-    try {
-      console.log('=== SENDING WELCOME EMAIL TO TECHNICIAN ===');
-      console.log('Email:', email);
-      console.log('Full Name:', fullName);
+<style scoped>
+body {
+    background: #D3CFE2;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
 
-      // Initialize EmailJS before sending
-      emailjs.init(EMAILJS_CONFIG.publicKey);
+.dark body {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
 
-      const templateParams = {
-        to_email: email,
-        to_name: fullName,
-        user_name: fullName,
-        service_name: 'BoltFix'
-      };
+.signup-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    box-sizing: border-box;
+    background: #D3CFE2;
 
-      const response = await emailjs.send(
-        EMAILJS_CONFIG.serviceId,
-        'template_68btlks', // Use the specified template ID
-        templateParams,
-        EMAILJS_CONFIG.publicKey
-      );
+}
+.dark .signup-container {
+  background: var(--primary-bg);
+}
 
-      console.log('✅ Welcome email sent successfully:', response);
-      return response;
-    } catch (error) {
-      console.error('=== ERROR SENDING WELCOME EMAIL ===');
-      console.error('Error details:', error);
-      console.error('Error message:', error.message);
-      console.error('Error code:', error.code);
-      console.error('Error status:', error.status);
-      console.error('Error text:', error.text);
-      throw error;
-    }
-  }
+.signup-form {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    padding: 3rem;
+    width: 100%;
+    max-width: 1200px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
 
-  // Terms and Conditions Modal Functions
-  const openTermsModal = () => {
-    showTermsModal.value = true;
-  };
+.dark .signup-form {
+  background: var(--secondary-bg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
 
-  const closeTermsModal = () => {
-    showTermsModal.value = false;
-  };
+.form-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
 
-  // TEMPORARY ADMIN UTILITY: Promote a user by email to technician
-  async function promoteUserToTechnician(email) {
-    const auth = getAuth();
-    // Get all users is not available in client SDK, so this only works if the user is currently logged in
-    const user = auth.currentUser;
-    if (!user || user.email !== email) {
-      alert('Please log in as the user you want to promote: ' + email);
-      return;
-    }
-    const technicianData = {
-      uid: user.uid,
-      fullName: user.displayName || 'Technician',
-      email: user.email,
-      specialization: '',
-      experience: '',
-      bio: '',
-      basePrice: '',
-      government: '',
-      district: '',
-      willingToTravel: '',
-      idPhotoUrl: '',
-      status: 'pending',
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-      role: 'pending'
-    };
-    await setDoc(doc(db, 'pendingTechnicians', user.uid), technicianData);
-    await setDoc(doc(db, 'users', user.uid), {
-      email: user.email,
-      role: 'pending',
-      createdAt: serverTimestamp()
-    });
-    alert('User promoted to technician!');
-  }
-  // Usage: Call promoteUserToTechnician('narutossj123@yahoo.com') in the browser console after logging in as that user.
+.logo {
+    width: 120px;
+    height: auto;
+    margin-bottom: 1.5rem;
+    display: inline;
+}
 
-  // TEMPORARY UTILITY: Fix specific user role issue
-  async function fixUserRole(email) {
-    try {
-      console.log('Fixing role for user:', email);
-      
-      // Get user by email
-      const usersRef = collection(db, 'users');
-      const q = query(usersRef, where('email', '==', email));
-      const querySnapshot = await getDocs(q);
-      
-      if (querySnapshot.empty) {
-        console.log('User not found in users collection');
-        return;
-      }
-      
-      const userDoc = querySnapshot.docs[0];
-      const userData = userDoc.data();
-      
-      console.log('Current user data:', userData);
-      
-      // Check if user is in pendingTechnicians collection
-      const pendingRef = doc(db, 'pendingTechnicians', userDoc.id);
-      const pendingSnap = await getDoc(pendingRef);
-      
-      // Check if user is in technicians collection
-      const techRef = doc(db, 'technicians', userDoc.id);
-      const techSnap = await getDoc(techRef);
-      
-      let correctRole = 'user'; // Default role
-      
-      if (email === 'elie1400674@gmail.com' || email === 'tasneemmostafa200110@gmail.com') {
-        correctRole = 'admin';
-      } else if (techSnap.exists()) {
-        correctRole = 'technician';
-      } else if (pendingSnap.exists()) {
-        correctRole = 'pending';
-      }
-      
-      console.log('Correct role should be:', correctRole);
-      
-      // Update user role if it's incorrect
-      if (userData.role !== correctRole) {
-        await updateDoc(doc(db, 'users', userDoc.id), {
-          role: correctRole,
-          updatedAt: serverTimestamp()
-        });
-        console.log('Updated user role to:', correctRole);
-      }
-      
-      // Update localStorage
-      localStorage.setItem('userType', correctRole);
-      
-      console.log('Role fix completed for:', email);
-      alert(`Role fixed for ${email}. New role: ${correctRole}`);
-      
-    } catch (error) {
-      console.error('Error fixing user role:', error);
-      alert('Error fixing user role: ' + error.message);
-    }
-  }
+.title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #625397;
+    margin: 0 0 0.5rem 0;
+    letter-spacing: -0.02em;
+}
 
-  // Usage: Call fixUserRole('narutossj33@yahoo.com') in the browser console
+.dark .title {
+  color: var(--primary-color);
+}
 
-  // TEST FUNCTION: Verify registration flow
-  function testRegistrationFlow() {
-    console.log('=== TESTING REGISTRATION FLOW ===');
-    console.log('1. User fills out TechRegister form');
-    console.log('2. handleRegister() is called');
-    console.log('3. Firebase Auth user is created');
-    console.log('4. Data is saved to pendingTechnicians collection with role: pending');
-    console.log('5. User document is saved to users collection with role: pending');
-    console.log('6. localStorage is set to: pending');
-    console.log('7. User is redirected to /pending-application');
-    console.log('8. NO role management functions are called during registration');
-    console.log('9. Admin must approve the application to change role to technician');
-    console.log('✅ Registration flow is correct!');
-  }
+.subtitle {
+    font-size: 1.1rem;
+    color: #6b7280;
+    margin: 0;
+    font-weight: 400;
+}
 
-  // Usage: Call testRegistrationFlow() in the browser console to verify the flow
-  </script>
+.dark .subtitle {
+  color: #9ca3af;
+}
 
-  <style scoped>
-  body {
-      background: #D3CFE2;
-      min-height: 100vh;
-      margin: 0;
-      padding: 0;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  }
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
 
-  .dark body {
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  }
+.form-section {
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid rgba(107, 79, 161, 0.1);
+}
 
-  .signup-container {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem;
-      box-sizing: border-box;
-      background: #D3CFE2;
+.dark .form-section {
+  background: var(--secondary-bg);
+  border-color: rgba(107, 79, 161, 0.2);
+}
 
-  }
-  .dark .signup-container {
-    background: var(--primary-bg);
-  }
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid rgba(107, 79, 161, 0.2);
+    color: var(--text-main, #1f2937);
+}
 
-  .signup-form {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      border-radius: 24px;
-      padding: 3rem;
-      width: 100%;
-      max-width: 1200px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-  }
+.dark .section-title {
+  color: var(--text-main);
+  border-bottom-color: rgba(107, 79, 161, 0.3);
+}
 
-  .dark .signup-form {
-    background: var(--secondary-bg);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  }
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1.25rem;
+}
 
-  .form-header {
-      text-align: center;
-      margin-bottom: 2.5rem;
-  }
+.form-group:last-child {
+    margin-bottom: 0;
+}
 
-  .logo {
-      width: 120px;
-      height: auto;
-      margin-bottom: 1.5rem;
-      display: inline;
-  }
+.form-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    display: block;
+}
 
-  .title {
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: #625397;
-      margin: 0 0 0.5rem 0;
-      letter-spacing: -0.02em;
-  }
+.dark .form-label {
+  color: #d1d5db;
+}
 
-  .dark .title {
-    color: var(--primary-color);
-  }
+.form-input {
+    padding: 0.875rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    background: var(--input-bg, #ffffff);
+    color: #1f2937;
+    font-family: inherit;
+}
 
-  .subtitle {
-      font-size: 1.1rem;
-      color: #6b7280;
-      margin: 0;
-      font-weight: 400;
-  }
+.dark .form-input {
+  background: var(--input-bg, #374151);
+  border-color: #4b5563;
+}
 
-  .dark .subtitle {
-    color: #9ca3af;
-  }
+.form-input:focus {
+    outline: none;
+    border-color: #625397;
+    box-shadow: 0 0 0 3px rgba(98, 83, 151, 0.1);
+}
 
-  .form-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-  }
+.dark .form-input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(98, 83, 151, 0.2);
+}
 
-  .form-section {
-      background: rgba(255, 255, 255, 0.5);
-      border-radius: 16px;
-      padding: 1.5rem;
-      border: 1px solid rgba(107, 79, 161, 0.1);
-  }
-
-  .dark .form-section {
-    background: var(--secondary-bg);
-    border-color: rgba(107, 79, 161, 0.2);
-  }
-
-  .section-title {
-      font-size: 1.25rem;
-      font-weight: 700;
-      margin-bottom: 1.5rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 2px solid rgba(107, 79, 161, 0.2);
-      color: var(--text-main, #1f2937);
-  }
-
-  .dark .section-title {
-    color: var(--text-main);
-    border-bottom-color: rgba(107, 79, 161, 0.3);
-  }
-
-  .form-group {
-      display: flex;
-      flex-direction: column;
-      margin-bottom: 1.25rem;
-  }
-
-  .form-group:last-child {
-      margin-bottom: 0;
-  }
-
-  .form-label {
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: #374151;
-      margin-bottom: 0.5rem;
-      display: block;
-  }
-
-  .dark .form-label {
-    color: #d1d5db;
-  }
-
-  .form-input {
-      padding: 0.875rem 1rem;
-      border: 2px solid #e5e7eb;
-      border-radius: 12px;
-      font-size: 1rem;
-      transition: all 0.2s ease;
-      background: var(--input-bg, #ffffff);
-      color: #1f2937;
-      font-family: inherit;
-  }
-
-  .dark .form-input {
-    background: var(--input-bg, #374151);
-    border-color: #4b5563;
-  }
-
-  .form-input:focus {
-      outline: none;
-      border-color: #625397;
-      box-shadow: 0 0 0 3px rgba(98, 83, 151, 0.1);
-  }
-
-  .dark .form-input:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(98, 83, 151, 0.2);
-  }
-
-  .form-input::placeholder {
-      color: var(--text-muted);
-  }
-
-  .dark .form-input::placeholder {
+.form-input::placeholder {
     color: var(--text-muted);
-  }
+}
 
-  /* Style for select dropdowns to match placeholder color */
-  .form-input option {
-      color: black;
-  }
+.dark .form-input::placeholder {
+  color: var(--text-muted);
+}
 
-  /* Style for select dropdown placeholder text */
-  .form-input:invalid {
-      color: var(--text-muted);
-  }
+/* Style for select dropdowns to match placeholder color */
+.form-input option {
+    color: black;
+}
 
-  .dark .form-input:invalid {
+/* Style for select dropdown placeholder text */
+.form-input:invalid {
     color: var(--text-muted);
-  }
+}
 
-  /* Dropdown Icons */
-  .form-input[type="select"],
-  select.form-input {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
-    background-position: right 5px center;
-    background-repeat: no-repeat;
-    background-size: 20px 16px;
-    padding-right: 3rem;
-  }
+.dark .form-input:invalid {
+  color: var(--text-muted);
+}
 
-  .dark .form-input[type="select"],
-  .dark select.form-input {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23aaaaaa' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
-    background-position: right 5px center;
-    background-repeat: no-repeat;
-    background-size: 20px 16px;
-    padding-right: 3rem;
-  }
-  .checkbox-group {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-top: 1rem;
-      width: 100%; /* Make both groups take full width */
-      max-width: 420px; /* Set a max width for consistency */
-  }
+/* Dropdown Icons */
+.form-input[type="select"],
+select.form-input {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 5px center;
+  background-repeat: no-repeat;
+  background-size: 20px 16px;
+  padding-right: 3rem;
+}
 
-  .form-input.error {
-      border-color: #ef4444;
-      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
-  }
+.dark .form-input[type="select"],
+.dark select.form-input {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23aaaaaa' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 5px center;
+  background-repeat: no-repeat;
+  background-size: 20px 16px;
+  padding-right: 3rem;
+}
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    width: 100%; /* Make both groups take full width */
+    max-width: 420px; /* Set a max width for consistency */
+}
 
-  .dark .form-input.error {
-    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
-  }
+.form-input.error {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
 
-  .error-message {
-      color: #ef4444;
-      font-size: 0.75rem;
-      margin-top: 0.25rem;
-      font-weight: 500;
-  }
+.dark .form-input.error {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+}
 
-  .password-validation {
-      margin-top: 0.75rem;
-      padding: 1rem;
-      background-color: var(--input-bg, #f8f9fa);
-      border-radius: 8px;
-      border: 1px solid #e9ecef;
-      font-size: 0.75rem;
-  }
+.error-message {
+    color: #ef4444;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    font-weight: 500;
+}
 
-  .dark .password-validation {
-    background-color: var(--input-bg, #374151);
-    border-color: #4b5563;
-  }
+.password-validation {
+    margin-top: 0.75rem;
+    padding: 1rem;
+    background-color: var(--input-bg, #f8f9fa);
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    font-size: 0.75rem;
+}
 
-  .validation-item {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 0.25rem;
-      color: #6b7280;
-      transition: color 0.2s ease;
-  }
+.dark .password-validation {
+  background-color: var(--input-bg, #374151);
+  border-color: #4b5563;
+}
 
-  .validation-item:last-child {
-      margin-bottom: 0;
-  }
+.validation-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+    color: #6b7280;
+    transition: color 0.2s ease;
+}
 
-  .validation-item.valid {
-      color: #10b981;
-  }
+.validation-item:last-child {
+    margin-bottom: 0;
+}
 
-  .validation-icon {
-      font-weight: bold;
-      font-size: 0.875rem;
-  }
+.validation-item.valid {
+    color: #10b981;
+}
 
-  .validation-text {
-      font-size: 0.75rem;
-  }
+.validation-icon {
+    font-weight: bold;
+    font-size: 0.875rem;
+}
 
-  .radio-group {
-      display: flex;
-      gap: 1.5rem;
-      margin-top: 0.5rem;
-  }
+.validation-text {
+    font-size: 0.75rem;
+}
 
-  .radio-label {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      cursor: pointer;
-      font-size: 0.875rem;
-      color: #374151;
-      transition: color 0.2s ease;
-  }
+.radio-group {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.5rem;
+}
 
-  .dark .radio-label {
-    color: #d1d5db;
-  }
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: #374151;
+    transition: color 0.2s ease;
+}
 
-  .radio-label:hover {
-      color: #625397;
-  }
+.dark .radio-label {
+  color: #d1d5db;
+}
 
-  .radio-label input[type="radio"] {
-      width: 1.125rem;
-      height: 1.125rem;
-      accent-color: #625397;
-  }
+.radio-label:hover {
+    color: #625397;
+}
 
-  .upload-area {
-      border: 2px dashed #9ca3af;
-      border-radius: 12px;
-      background-color: var(--input-bg, #f9fafb);
-      min-height: 120px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-  }
+.radio-label input[type="radio"] {
+    width: 1.125rem;
+    height: 1.125rem;
+    accent-color: #625397;
+}
 
-  .dark .upload-area {
-    background-color: var(--input-bg, #374151);
-    border-color: #4b5563;
-  }
+.upload-area {
+    border: 2px dashed #9ca3af;
+    border-radius: 12px;
+    background-color: var(--input-bg, #f9fafb);
+    min-height: 120px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-  .upload-area:hover {
-      border-color: #625397;
-      background-color: #f3f4f6;
-  }
+.dark .upload-area {
+  background-color: var(--input-bg, #374151);
+  border-color: #4b5563;
+}
 
-  .dark .upload-area:hover {
-    background-color: #4b5563;
-  }
+.upload-area:hover {
+    border-color: #625397;
+    background-color: #f3f4f6;
+}
 
-  .upload-content {
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      padding: 1rem;
-  }
+.dark .upload-area:hover {
+  background-color: #4b5563;
+}
 
-  .upload-icon {
-      color: #6b7280;
-      margin-bottom: 0.5rem;
-  }
+.upload-content {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem;
+}
 
-  .upload-text {
-      color: #6b7280;
-      font-size: 0.875rem;
-  }
+.upload-icon {
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+}
 
-  .browse-link {
-      color: #625397;
-      text-decoration: underline;
-      cursor: pointer;
-      font-weight: 600;
-      transition: color 0.2s ease;
-  }
+.upload-text {
+    color: #6b7280;
+    font-size: 0.875rem;
+}
 
-  .browse-link:hover {
-      color: #7c3aed;
-  }
-
-  .preview-container {
-      margin-top: 1rem;
-      display: flex;
-      justify-content: center;
-  }
-
-  .preview-img {
-      max-width: 120px;
-      max-height: 120px;
-      border-radius: 8px;
-      object-fit: cover;
-      border: 2px solid #625397;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-
-  .checkbox-group {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-top: 1rem;
-  }
-
-  .form-checkbox {
-      height: 1.25rem;
-      accent-color: #625397;
-  }
-
-  .checkbox-label {
-      font-size: 0.875rem;
-      color: #6b7280;
-      cursor: pointer;
-      user-select: none;
-  }
-
-  .dark .checkbox-label {
-    color: #9ca3af;
-  }
-
-  .terms-link {
+.browse-link {
     color: #625397;
     text-decoration: underline;
     cursor: pointer;
     font-weight: 600;
     transition: color 0.2s ease;
-  }
+}
 
-  .terms-link:hover {
+.browse-link:hover {
     color: #7c3aed;
-  }
+}
 
-  /* Modal Styles */
-  .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      padding: 1rem;
-  }
+.preview-container {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+}
 
-  .modal-content {
-      background: white;
-      border-radius: 16px;
-      max-width: 800px;
-      width: 100%;
-      max-height: 90vh;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  }
+.preview-img {
+    max-width: 120px;
+    max-height: 120px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 2px solid #625397;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
 
-  .dark .modal-content {
-    background: #1f2937;
-    color: #f9fafb;
-  }
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
 
-  .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1.5rem 2rem;
-      border-bottom: 1px solid #e5e7eb;
-      background: #f9fafb;
-  }
+.form-checkbox {
+    height: 1.25rem;
+    accent-color: #625397;
+}
 
-  .dark .modal-header {
-    background: #374151;
-    border-bottom-color: #4b5563;
-  }
+.checkbox-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+    cursor: pointer;
+    user-select: none;
+}
 
-  .modal-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #1f2937;
-      margin: 0;
-  }
+.dark .checkbox-label {
+  color: #9ca3af;
+}
 
-  .dark .modal-title {
-    color: #f9fafb;
-  }
+.terms-link {
+  color: #625397;
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
 
-  .modal-close {
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 0.5rem;
-      border-radius: 8px;
-      color: #6b7280;
-      transition: all 0.2s ease;
-  }
+.terms-link:hover {
+  color: #7c3aed;
+}
 
-  .modal-close:hover {
-      background: #e5e7eb;
-      color: #374151;
-  }
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+}
 
-  .dark .modal-close:hover {
-    background: #4b5563;
-    color: #f9fafb;
-  }
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    max-width: 800px;
+    width: 100%;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
 
-  .modal-body {
-      flex: 1;
-      overflow-y: auto;
-      padding: 2rem;
-  }
+.dark .modal-content {
+  background: #1f2937;
+  color: #f9fafb;
+}
 
-  .terms-content {
-      line-height: 1.6;
-  }
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f9fafb;
+}
 
-  .terms-content h3 {
-      color: #625397;
-      font-size: 1.25rem;
-      font-weight: 700;
-      margin: 2rem 0 1rem 0;
-      border-bottom: 2px solid #e5e7eb;
-      padding-bottom: 0.5rem;
-  }
+.dark .modal-header {
+  background: #374151;
+  border-bottom-color: #4b5563;
+}
 
-  .dark .terms-content h3 {
-    color: var(--primary-color);
-    border-bottom-color: #4b5563;
-  }
+.modal-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+}
 
-  .terms-content h4 {
-      color: #374151;
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin: 1.5rem 0 0.75rem 0;
-  }
+.dark .modal-title {
+  color: #f9fafb;
+}
 
-  .dark .terms-content h4 {
-    color: #d1d5db;
-  }
+.modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 8px;
+    color: #6b7280;
+    transition: all 0.2s ease;
+}
 
-  .terms-content ul {
-      margin: 0.75rem 0;
-      padding-left: 1.5rem;
-  }
+.modal-close:hover {
+    background: #e5e7eb;
+    color: #374151;
+}
 
-  .terms-content li {
-      margin-bottom: 0.5rem;
-      color: #4b5563;
-  }
+.dark .modal-close:hover {
+  background: #4b5563;
+  color: #f9fafb;
+}
 
-  .dark .terms-content li {
-    color: #9ca3af;
-  }
+.modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+}
 
-  .terms-content strong {
-      color: #1f2937;
-      font-weight: 600;
-  }
+.terms-content {
+    line-height: 1.6;
+}
 
-  .dark .terms-content strong {
-    color: #f9fafb;
-  }
+.terms-content h3 {
+    color: #625397;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 2rem 0 1rem 0;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 0.5rem;
+}
 
-  .terms-footer {
-      margin-top: 2rem;
-      padding: 1rem;
-      background: #f3f4f6;
-      border-radius: 8px;
-      font-weight: 600;
-      color: #374151;
-      text-align: center;
-  }
+.dark .terms-content h3 {
+  color: var(--primary-color);
+  border-bottom-color: #4b5563;
+}
 
-  .dark .terms-footer {
-    background: #374151;
-    color: #f9fafb;
-  }
+.terms-content h4 {
+    color: #374151;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 1.5rem 0 0.75rem 0;
+}
 
-  .modal-footer {
-      padding: 1.5rem 2rem;
-      border-top: 1px solid #e5e7eb;
-      background: #f9fafb;
-      text-align: center;
-  }
+.dark .terms-content h4 {
+  color: #d1d5db;
+}
 
-  .dark .modal-footer {
-    background: #374151;
-    border-top-color: #4b5563;
-  }
+.terms-content ul {
+    margin: 0.75rem 0;
+    padding-left: 1.5rem;
+}
 
-  .modal-btn {
-      background: #625397;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 0.75rem 2rem;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-  }
+.terms-content li {
+    margin-bottom: 0.5rem;
+    color: #4b5563;
+}
 
-  .dark .modal-btn {
+.dark .terms-content li {
+  color: #9ca3af;
+}
+
+.terms-content strong {
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.dark .terms-content strong {
+  color: #f9fafb;
+}
+
+.terms-footer {
+    margin-top: 2rem;
+    padding: 1rem;
+    background: #f3f4f6;
+    border-radius: 8px;
+    font-weight: 600;
+    color: #374151;
+    text-align: center;
+}
+
+.dark .terms-footer {
+  background: #374151;
+  color: #f9fafb;
+}
+
+.modal-footer {
+    padding: 1.5rem 2rem;
+    border-top: 1px solid #e5e7eb;
+    background: #f9fafb;
+    text-align: center;
+}
+
+.dark .modal-footer {
+  background: #374151;
+  border-top-color: #4b5563;
+}
+
+.modal-btn {
+    background: #625397;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dark .modal-btn {
+  background: var(--primary-color);
+}
+
+.modal-btn:hover {
+    background: #7c3aed;
+    transform: translateY(-1px);
+}
+
+.form-footer {
+    text-align: center;
+}
+
+.submit-btn {
     background: var(--primary-color);
-  }
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    width: 100%;
+    max-width: 300px;
+    justify-content: center;
+}
 
-  .modal-btn:hover {
-      background: #7c3aed;
-      transform: translateY(-1px);
-  }
+.dark .submit-btn {
+  background: var(--primary-color);
+}
 
-  .form-footer {
-      text-align: center;
-  }
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(98, 83, 151, 0.3);
+}
 
-  .submit-btn {
-      background: var(--primary-color);
-      color: white;
-      border: none;
-      border-radius: 12px;
-      padding: 1rem 2rem;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 1rem;
-      width: 100%;
-      max-width: 300px;
-      justify-content: center;
-  }
+.submit-btn:active {
+    transform: translateY(0);
+}
 
-  .dark .submit-btn {
-    background: var(--primary-color);
-  }
+.submit-btn:disabled {
+    background-color: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
 
-  .submit-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 25px rgba(98, 83, 151, 0.3);
-  }
+.arrow-icon {
+    transition: transform 0.2s ease;
+}
 
-  .submit-btn:active {
-      transform: translateY(0);
-  }
+.submit-btn:hover .arrow-icon {
+    transform: translateX(4px);
+}
 
-  .submit-btn:disabled {
-      background-color: #9ca3af;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-  }
+.error-text {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin: 0.5rem 0;
+    font-weight: 500;
+}
 
-  .arrow-icon {
-      transition: transform 0.2s ease;
-  }
+.success-text {
+    color: #10b981;
+    font-size: 0.875rem;
+    margin: 0.5rem 0;
+    font-weight: 500;
+}
 
-  .submit-btn:hover .arrow-icon {
-      transform: translateX(4px);
-  }
+.login-link {
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin: 0;
+}
 
-  .error-text {
-      color: #ef4444;
-      font-size: 0.875rem;
-      margin: 0.5rem 0;
-      font-weight: 500;
-  }
+.dark .login-link {
+  color: #9ca3af;
+}
 
-  .success-text {
-      color: #10b981;
-      font-size: 0.875rem;
-      margin: 0.5rem 0;
-      font-weight: 500;
-  }
+.login-link a {
+    color: #625397;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
 
-  .login-link {
-      color: #6b7280;
-      font-size: 0.875rem;
-      margin: 0;
-  }
+.dark .login-link a {
+  color: var(--primary-color);
+}
 
-  .dark .login-link {
-    color: #9ca3af;
-  }
+.login-link a:hover {
+    color: #7c3aed;
+    text-decoration: underline;
+}
 
-  .login-link a {
-      color: #625397;
-      text-decoration: none;
-      font-weight: 600;
-      transition: color 0.2s ease;
-  }
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .form-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+}
 
-  .dark .login-link a {
-    color: var(--primary-color);
-  }
+@media (max-width: 768px) {
+    .signup-container {
+        padding: 1rem;
+    }
+    
+    .signup-form {
+        padding: 2rem;
+        border-radius: 16px;
+    }
+    
+    .title {
+        font-size: 2rem;
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .form-section {
+        padding: 1rem;
+    }
+    
+    .submit-btn {
+        padding: 0.875rem 1.5rem;
+        font-size: 0.875rem;
+    }
 
-  .login-link a:hover {
-      color: #7c3aed;
-      text-decoration: underline;
-  }
+    .modal-content {
+        margin: 1rem;
+        max-height: 95vh;
+    }
 
-  /* Responsive Design */
-  @media (max-width: 1200px) {
-      .form-grid {
-          grid-template-columns: repeat(2, 1fr);
-          gap: 1rem;
-      }
-  }
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: 1rem;
+    }
+}
 
-  @media (max-width: 768px) {
-      .signup-container {
-          padding: 1rem;
-      }
-      
-      .signup-form {
-          padding: 2rem;
-          border-radius: 16px;
-      }
-      
-      .title {
-          font-size: 2rem;
-      }
-      
-      .form-grid {
-          grid-template-columns: 1fr;
-          gap: 1.5rem;
-      }
-      
-      .form-section {
-          padding: 1rem;
-      }
-      
-      .submit-btn {
-          padding: 0.875rem 1.5rem;
-          font-size: 0.875rem;
-      }
+@media (max-width: 480px) {
+    .signup-form {
+        padding: 1.5rem;
+    }
+    
+    .title {
+        font-size: 1.75rem;
+    }
+    
+    .logo {
+        width: 100px;
+    }
+    
+    .form-section {
+        padding: 0.75rem;
+    }
 
-      .modal-content {
-          margin: 1rem;
-          max-height: 95vh;
-      }
+    .modal-content {
+        margin: 0.5rem;
+    }
+}
+h3 {
+  color: #374151 !important;
+}
 
-      .modal-header,
-      .modal-body,
-      .modal-footer {
-          padding: 1rem;
-      }
-  }
-
-  @media (max-width: 480px) {
-      .signup-form {
-          padding: 1.5rem;
-      }
-      
-      .title {
-          font-size: 1.75rem;
-      }
-      
-      .logo {
-          width: 100px;
-      }
-      
-      .form-section {
-          padding: 0.75rem;
-      }
-
-      .modal-content {
-          margin: 0.5rem;
-      }
-  }
-  h3 {
-    color: #374151 !important;
-  }
-
-     .dark h3 {
-     color: white !important;
-   }
-
-   /* Loading styles */
-   .loading-container {
-     display: flex;
-     justify-content: center;
-     align-items: center;
-     min-height: 100vh;
-     background: #D3CFE2;
-   }
-
-   .dark .loading-container {
-     background: var(--primary-bg);
-   }
-
-   .loading-spinner {
-     text-align: center;
-   }
-
-   .spinner {
-     width: 50px;
-     height: 50px;
-     border: 4px solid #f3f3f3;
-     border-top: 4px solid #625397;
-     border-radius: 50%;
-     animation: spin 1s linear infinite;
-     margin: 0 auto 1rem;
-   }
-
-   @keyframes spin {
-     0% { transform: rotate(0deg); }
-     100% { transform: rotate(360deg); }
-   }
-
-   .loading-spinner p {
-     color: #625397;
-     font-weight: 600;
-   }
-
-   .dark .loading-spinner p {
-     color: var(--primary-color);
-   }
-   </style>
+.dark h3 {
+  color: white !important;
+}
+</style>
