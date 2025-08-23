@@ -38,6 +38,7 @@ const isPublicAuthRoute = computed(() => {
 
 // Debug authentication state
 onMounted(async () => {
+  console.log('=== APP COMPONENT MOUNTED ===');
   await waitForAuth();
   console.log('App mounted - Auth state:', {
     isAuthenticated: authState.isAuthenticated,
@@ -60,6 +61,7 @@ onMounted(async () => {
   } else {
     console.log('No redirect needed - user can stay on current route');
   }
+  console.log('=== APP COMPONENT MOUNTED END ===');
 });
 
 watch(locale, (newLocale) => {
@@ -88,11 +90,15 @@ watch(() => authState.isAuthenticated, (isAuth) => {
 </script>
 
 <template>
-  <Navbar v-if="!isAdminRoute" />
+  <!-- Debug: App component template rendering -->
+  <div style="position: fixed; top: 0; left: 50%; transform: translateX(-50%); background: green; color: white; z-index: 9999; padding: 10px;">
+    App Component Loaded - Route: {{ $route.path }} | Auth: {{ authState.isAuthenticated }} | Type: {{ authState.userType }}
+  </div>
+  <Navbar v-if="!isAdminRoute && !isPublicAuthRoute" />
   <div id="app">
     <router-view />
   </div>
-  <Footer v-if="!isAdminRoute" />
+  <Footer v-if="!isAdminRoute && !isPublicAuthRoute" />
 </template>
 
 <style>

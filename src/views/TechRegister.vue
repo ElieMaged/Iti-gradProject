@@ -434,7 +434,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch, computed } from 'vue';
+import { ref, reactive, watch, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { auth, db, storage } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
@@ -444,6 +444,7 @@ import { getGovernmentNames, getDistrictsForGovernment, governmentNamesAr, distr
 import { useI18n } from 'vue-i18n';
 import emailjs from '@emailjs/browser';
 import { EMAILJS_CONFIG } from '../utils/emailjsConfig';
+import { authState, waitForAuth } from '../utils/auth';
 
 // ...existing imports
 
@@ -454,6 +455,28 @@ const router = useRouter();
 
 // Debug component mounting
 console.log('TechRegister component script setup executed');
+
+// Add comprehensive debugging
+onMounted(async () => {
+  console.log('TechRegister component mounted');
+  console.log('Current route:', router.currentRoute.value.path);
+  console.log('Auth state on mount:', {
+    isAuthenticated: authState.isAuthenticated,
+    userType: authState.userType,
+    user: authState.user ? authState.user.email : null,
+    isLoading: authState.isLoading
+  });
+  
+  // Wait for auth to be ready
+  await waitForAuth();
+  console.log('Auth state after waiting:', {
+    isAuthenticated: authState.isAuthenticated,
+    userType: authState.userType,
+    user: authState.user ? authState.user.email : null,
+    isLoading: authState.isLoading
+  });
+});
+
 const fileInput = ref(null);
 const profileFileInput = ref(null);
 const previewUrl = ref(null);

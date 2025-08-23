@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, reactive, watch } from 'vue';
+import { ref, computed, reactive, watch, onMounted } from 'vue';
 
 import { useRouter } from 'vue-router';
 import { auth, db } from '../firebase';
@@ -9,12 +9,34 @@ import { ensureUserRole, fetchUserRole } from '../utils/userRole';
 import { sendWelcomeEmail } from '../utils/emailService';
 import { useI18n } from 'vue-i18n';
 import { getGovernmentNames, getDistrictsForGovernment, governmentNamesAr, districtsAr } from '../data/egyptianLocations';
+import { authState, waitForAuth } from '../utils/auth';
 
 const { t, locale } = useI18n();
 const router = useRouter();
 
 // Debug component mounting
 console.log('UserSignUp component script setup executed');
+
+// Add comprehensive debugging
+onMounted(async () => {
+  console.log('UserSignUp component mounted');
+  console.log('Current route:', router.currentRoute.value.path);
+  console.log('Auth state on mount:', {
+    isAuthenticated: authState.isAuthenticated,
+    userType: authState.userType,
+    user: authState.user ? authState.user.email : null,
+    isLoading: authState.isLoading
+  });
+  
+  // Wait for auth to be ready
+  await waitForAuth();
+  console.log('Auth state after waiting:', {
+    isAuthenticated: authState.isAuthenticated,
+    userType: authState.userType,
+    user: authState.user ? authState.user.email : null,
+    isLoading: authState.isLoading
+  });
+});
 
 const formData = reactive({
   firstName: '',

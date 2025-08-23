@@ -71,6 +71,7 @@ import AuthTest from '../views/AuthTest.vue'
 
 const routes = [
   { path: '/', component: HomePage },
+  { path: '/test-route', component: () => import('../views/TestPage.vue') }, // Simple test route
   { path: '/about', component: About },
   { path: '/contact', component: Contact },
   { path: '/plumbing', component: Plumbing },
@@ -153,10 +154,20 @@ const router = createRouter({
 
 // Add global navigation guard with authentication checks
 router.beforeEach(async (to, from, next) => {
+  console.log('=== ROUTER NAVIGATION START ===');
   console.log('Navigation:', { from: from.path, to: to.path, params: to.params });
   
+  // Simple test route bypass
+  if (to.path === '/test-route') {
+    console.log('✅ Allowing access to test route');
+    next();
+    return;
+  }
+  
   // Wait for authentication to be ready
+  console.log('Waiting for auth to be ready...');
   await waitForAuth();
+  console.log('Auth is ready');
 
   // If user is already authenticated and navigating to a public landing/login route,
   // redirect to the appropriate dashboard based on role.
@@ -173,20 +184,32 @@ router.beforeEach(async (to, from, next) => {
     to.path === '/techregister' ||
     to.path === '/pending-application'
   );
+  
+  console.log('Route analysis:', {
+    isPublicLanding,
+    isPublicAuthRoute,
+    toPath: to.path
+  });
+  
   // Always allow access to public auth routes (signup, registration, etc.)
   if (isPublicAuthRoute) {
-    console.log('Allowing access to public auth route:', to.path);
+    console.log('✅ Allowing access to public auth route:', to.path);
     next();
     return;
   }
   
+  console.log('Not a public auth route, checking authentication...');
+  
   if (isAuthenticated() && isPublicLanding) {
+    console.log('User is authenticated and trying to access public landing, redirecting...');
     if (isAdmin()) {
+      console.log('Redirecting admin to dashboard');
       next('/admin-dashboard');
       return;
     }
     if (isTechnician()) {
       // Use existing technician dashboard route (note the spelling in routes)
+      console.log('Redirecting technician to profile');
       next('/technicion-profile');
       return;
     }
@@ -241,6 +264,8 @@ router.beforeEach(async (to, from, next) => {
     }
   }
   
+  console.log('✅ Allowing navigation to:', to.path);
+  console.log('=== ROUTER NAVIGATION END ===');
   next();
 });
 
