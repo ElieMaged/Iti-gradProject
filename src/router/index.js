@@ -164,7 +164,23 @@ router.beforeEach(async (to, from, next) => {
     to.path === '/' ||
     to.path === '/userlogin' ||
     to.path === '/login' ||
-    to.path === '/welcome'
+    to.path === '/welcome'||
+    to.path === '/usersignup'||
+    to.path === '/techregister'||
+    to.path === '/about'||
+    to.path === '/contact'||
+    to.path === '/plumbing'||
+    to.path === '/electricity'||
+    to.path === '/aircondition'||
+    to.path === '/wallfinishing'||
+    to.path === '/carpentry'||
+    to.path === '/elecTechnicians'||
+    to.path === '/allservices'||
+    to.path === '/services'||
+    to.path === '/faq'||
+    to.path === '/faqs'
+    
+
   );
   if (isAuthenticated() && isPublicLanding) {
     if (isAdmin()) {
