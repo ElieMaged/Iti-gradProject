@@ -26,6 +26,7 @@
 <script>
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../firebase.js';
+import { calculateTechnicianRatings } from '../utils/ratingCalculator';
 
     export default {
   name: 'AllServices',
@@ -127,7 +128,7 @@ import { db } from '../firebase.js';
             name: data.fullName || data.name || 'Unknown Technician',
             image: data.profilePhotoUrl || data.idPhotoUrl || data.profileImage || '/images/Avatar.png',
             description: data.bio || data.description || 'Professional technician with years of experience.',
-            rating: data.averageRating || 4.5,
+            rating: 0, // Will be calculated by calculateTechnicianRatings
             price: data.basePrice || data.hourlyRate || 200,
             location: data.government || data.location || 'Cairo',
             yearsOfExperience: data.yearsOfExperience || 5,
@@ -155,7 +156,7 @@ import { db } from '../firebase.js';
                 name: data.fullName || data.name || 'Unknown Technician',
                 image: data.profilePhotoUrl || data.idPhotoUrl || data.profileImage || '/images/Avatar.png',
                 description: data.bio || data.description || 'Professional technician with years of experience.',
-                rating: data.averageRating || 4.5,
+                rating: data.rating || 0, // Will be calculated by calculateTechnicianRatings
                 price: data.basePrice || data.hourlyRate || 200,
                 location: data.government || data.location || 'Cairo',
                 yearsOfExperience: data.yearsOfExperience || 5,
@@ -173,9 +174,12 @@ import { db } from '../firebase.js';
 
         console.log('Firebase technicians found:', firebaseTechnicians.length);
         
-        // Use only Firebase technicians
-        this.technicians = firebaseTechnicians;
-        console.log('Using Firebase technicians');
+        // Calculate ratings for all technicians
+        const techniciansWithRatings = await calculateTechnicianRatings(firebaseTechnicians);
+        
+        // Use only Firebase technicians with calculated ratings
+        this.technicians = techniciansWithRatings;
+        console.log('Using Firebase technicians with calculated ratings');
       } catch (error) {
         console.error('Error fetching technicians:', error);
         // Handle Firebase errors gracefully

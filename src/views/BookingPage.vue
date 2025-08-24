@@ -1735,30 +1735,36 @@ function constructAddress(formData) {
 function handleLocationDetected(locationData) {
   console.log('Location detected in BookingPage:', locationData);
   
-  if (locationData.addressDetails) {
-    // Auto-fill form fields with detected location details
-    const { city, area, street, building } = locationData.addressDetails;
+  // Check if we have direct address updates from the map component
+  if (locationData.address) {
+    const { city, area, street, building } = locationData.address;
     
+    // Update form fields with detected location details
     if (city) form.value.city = city;
     if (area) form.value.area = area;
     if (street) form.value.street = street;
     if (building) form.value.building = building;
-    
-    console.log('Form auto-filled with detected location:', {
-      city: form.value.city,
-      area: form.value.area,
-      street: form.value.street,
-      building: form.value.building
-    });
+  } 
+  // Handle direct coordinate updates (reverse geocoding will be handled by the map)
+  else if (locationData.lat && locationData.lng) {
+    console.log('Coordinates received, reverse geocoding will be handled by the map component');
   }
   
-  // Store coordinates for potential future use
-  if (locationData.latitude && locationData.longitude) {
-    console.log('Coordinates stored:', {
-      latitude: locationData.latitude,
-      longitude: locationData.longitude,
-      accuracy: locationData.accuracy
-    });
+  // Log the updated form state
+  console.log('Updated form location data:', {
+    city: form.value.city,
+    area: form.value.area,
+    street: form.value.street,
+    building: form.value.building,
+    coordinates: locationData.lat && locationData.lng 
+      ? { lat: locationData.lat, lng: locationData.lng }
+      : 'No coordinates'
+  });
+  
+  // If we have coordinates but no address details, try to trigger reverse geocoding
+  if ((!form.value.city || !form.value.area) && locationData.lat && locationData.lng) {
+    console.log('Incomplete address data, attempting to get more details...');
+    // The map component will handle the reverse geocoding and emit updates
   }
 }
 

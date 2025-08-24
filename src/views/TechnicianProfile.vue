@@ -41,20 +41,11 @@
                   <span class="detail-label">{{ $t('yearsOfExperience') }}:</span>
                   <span class="detail-value">{{ technician.experience || technician.yearsOfExperience || $t('defaultExperience') }} {{ $t('years') }}</span>
                 </div>
-                <div class="detail-item">
-                  <span class="detail-label">{{ $t('averageRating') || 'Average Rating' }}:</span>
-                  <div class="rating-stars">
-                    <i 
-                      v-for="n in Math.round(averageRating)" 
-                      :key="n" 
-                      class="fa-solid fa-star star-filled"
-                    ></i>
-                    <span class="rating-text">{{ averageRating > 0 ? `${averageRating.toFixed(1)}/5` : 'No reviews yet' }}</span>
-                  </div>
-                </div>
               </div>
               <div class="rating-section">
-               
+                <div class="rating-text" v-if="reviews.length > 0">
+                  {{ averageRating.toFixed(1) }} {{ $t('outOf') }} 5 ({{ reviews.length }} {{ reviews.length === 1 ? $t('review') : $t('reviews') }})
+                </div>
               </div>
             </div>
           </div>
@@ -215,6 +206,7 @@
         </div>
         <!-- Reviews List -->
         <div class="reviews-list">
+          
           <div v-if="reviewsLoading" class="loading-state">
             <div class="loading-spinner"></div>
             <p>{{ $t('loadingReviews') }}</p>
@@ -1421,8 +1413,9 @@ onMounted(async () => {
   align-items: center;
   gap: 0.5rem;
 }
-/* Global star color for display purposes only - not for interactive rating */
-.rating-stars .fa-star {
+/* Global star color - only for display stars, not interactive ones */
+.rating-stars .fa-star,
+.review-rating .fa-star {
   color: #fbbf24 !important;
 }
 
@@ -2395,24 +2388,31 @@ color: #ddd7d7 ;
    color: var(--text-muted);
 }
 
-.dark .rating-stars .fa-star {
+/* Dark mode star colors - only for display stars, not interactive ones */
+.dark .rating-stars .fa-star,
+.dark .review-rating .fa-star {
+  color: #fbbf24 !important;
+}
+
+.dark .star-empty {
+  color:  var(--primary-text);
+}
+
+/* Dark mode star button styles */
+.dark .star-button.filled {
   color: #fbbf24 !important;
 }
 
 .dark .star-button.empty {
-  color: #6b7280 !important;
+  color: #d1d5db !important;
 }
 
-.dark .rating-text {
-  color: var(--text-muted);
+.dark .star-button.filled:hover {
+  color: #f59e0b !important;
 }
 
-.dark .review-rating .fa-star.filled {
+.dark .star-button.empty:hover {
   color: #fbbf24 !important;
-}
-
-.dark .review-rating .fa-star.empty {
-  color: #6b7280 !important;
 }
 /* Divider before reviews section */
 .reviews-divider {

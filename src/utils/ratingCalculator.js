@@ -3,57 +3,53 @@ import { db } from '../firebase'
 
 /**
  * Calculate the average rating for a technician based on their reviews
- * @param {string} technicianId - The technician's UID
+ * @param {string} technicianId - The technician's ID
  * @returns {Promise<number>} - The average rating (0 if no reviews)
  */
-export async function calculateAverageRating(technicianId) {
+export async function calculateTechnicianRating(technicianId) {
   try {
     const reviewsQuery = query(
       collection(db, 'reviews'),
       where('technicianId', '==', technicianId)
     )
     
-    const snapshot = await getDocs(reviewsQuery)
+    const reviewsSnapshot = await getDocs(reviewsQuery)
+    const reviews = reviewsSnapshot.docs.map(doc => doc.data())
     
-    if (snapshot.empty) {
+    if (reviews.length === 0) {
       return 0
     }
     
-    const reviews = snapshot.docs.map(doc => doc.data())
     const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0)
     const averageRating = totalRating / reviews.length
     
-    // Round to 1 decimal place
-    return Math.round(averageRating * 10) / 10
+    return Math.round(averageRating * 10) / 10 // Round to 1 decimal place
   } catch (error) {
-    console.error('Error calculating average rating:', error)
+    console.error('Error calculating technician rating:', error)
     return 0
   }
 }
 
 /**
  * Calculate average ratings for multiple technicians
- * @param {Array} technicians - Array of technician objects with id property
- * @returns {Promise<Array>} - Array of technicians with averageRating property
+ * @param {Array} technicians - Array of technician objects with id field
+ * @returns {Promise<Array>} - Array of technicians with calculated ratings
  */
-export async function calculateAverageRatingsForTechnicians(technicians) {
+export async function calculateTechnicianRatings(technicians) {
   try {
     const techniciansWithRatings = await Promise.all(
       technicians.map(async (technician) => {
-        const averageRating = await calculateAverageRating(technician.id)
+        const averageRating = await calculateTechnicianRating(technician.id)
         return {
           ...technician,
-          averageRating
+          rating: averageRating
         }
       })
     )
     
     return techniciansWithRatings
   } catch (error) {
-    console.error('Error calculating average ratings for technicians:', error)
-    return technicians.map(technician => ({
-      ...technician,
-      averageRating: 0
-    }))
+    console.error('Error calculating technician ratings:', error)
+    return technicians.map(tech => ({ ...tech, rating: 0 }))
   }
 }

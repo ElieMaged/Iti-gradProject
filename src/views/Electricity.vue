@@ -64,13 +64,12 @@
             <div class="card-bottom-section">
               <h3 class="member-name">{{ technician.name }}</h3>
               <div class="member-specialization">{{ technician.specialization }}</div>
-              <p class="member-description">{{ $t('technicianDescription') }}</p>
+              <p class="member-description">{{ technician.description }}</p>
               <!-- Details Row -->
               <div class="member-details">
                 <div class="detail-item rating-item">
                   <i class="fa-solid fa-star"></i>
-                  <span v-if="technician.rating > 0">{{ technician.rating }}/5</span>
-                  <span v-else>No reviews</span>
+                  <span>{{ technician.rating || 0 }}</span>
                 </div>
                 <div class="detail-item location-item">
                   <i class="fa-solid fa-location-dot"></i>
@@ -87,18 +86,15 @@
         </div>
 
         <!-- Pagination -->
-        <div v-if="totalPages > 1" class="pagination-container">
-          <div class="pagination-info">
-            Showing {{ (currentPage - 1) * pageSize + 1 }} - 
-            {{ Math.min(currentPage * pageSize, filteredTechnicians.length) }} 
-            of {{ filteredTechnicians.length }} technicians
-          </div>
-          <Pagination 
-            :current-page="currentPage"
-            :total-pages="totalPages"
-            @page-changed="goToPage"
-          />
-        </div>
+        <Pagination
+          v-if="totalPages > 1"
+          :current-page="currentPage"
+          :total-pages="totalPages"
+          @prev-page="goToPage(currentPage - 1)"
+          @next-page="goToPage(currentPage + 1)"
+          @page-changed="goToPage"
+          class="pagination-container"
+        />
 
     </section>
 
@@ -121,6 +117,7 @@ import profile6 from '../assets/profile/6.png'
 import profile7 from '../assets/profile/7.png'
 import profile8 from '../assets/profile/8.png'
 import plumbingBg from '../assets/Professions/Electricity.jpg'
+import { calculateTechnicianRatings } from '../utils/ratingCalculator'
 
 const router = useRouter()
 const loading = ref(true)
@@ -133,42 +130,21 @@ const locationFilter = ref({ government: '', district: '' })
 const specializationFilter = ref('')
 const priceFilter = ref('')
 const ratingFilter = ref('')
-// Pagination
+// Pagination - 3 rows of 4 cards per page
 const currentPage = ref(1)
-const pageSize = 12
+const pageSize = 12 // 4 cards/row × 3 rows
 
 async function fetchTechnicians() {
   try {
     loading.value = true
     const querySnapshot = await getDocs(collection(db, 'technicians'))
-    const technicians = querySnapshot.docs
+    const allTechnicians = querySnapshot.docs
       .map(doc => ({ id: doc.id, ...doc.data() }))
       .filter(tech => tech.specialization === 'Electricity')
     
-    // Fetch reviews for each technician to calculate average rating
-    for (let technician of technicians) {
-      try {
-        const reviewsQuery = query(
-          collection(db, 'reviews'),
-          where('technicianId', '==', technician.id),
-          orderBy('createdAt', 'desc')
-        )
-        const reviewsSnapshot = await getDocs(reviewsQuery)
-        const reviews = reviewsSnapshot.docs.map(doc => doc.data())
-        
-        if (reviews.length > 0) {
-          const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0)
-          technician.averageRating = Math.round((totalRating / reviews.length) * 10) / 10
-        } else {
-          technician.averageRating = 0
-        }
-      } catch (error) {
-        console.error(`Error fetching reviews for technician ${technician.id}:`, error)
-        technician.averageRating = 0
-      }
-    }
-    
-    firebaseTechnicians.value = technicians
+    // Calculate ratings for all technicians
+    const techniciansWithRatings = await calculateTechnicianRatings(allTechnicians)
+    firebaseTechnicians.value = techniciansWithRatings
   } catch (error) {
     console.error('Error fetching technicians:', error)
   } finally {
@@ -190,7 +166,7 @@ const mergedTechnicians = computed(() => {
       bgColor: '#E8E4F3', // or any default color
       price: fbTech.basePrice,
       description: fbTech.bio,
-      rating: fbTech.averageRating || 0,
+      rating: fbTech.rating || 0, // Use the calculated rating from reviews
       specialization: fbTech.specialization,
       government: fbTech.government, // Added government field
       district: fbTech.district, // Added district field
@@ -504,7 +480,7 @@ const heroBackgroundStyle = computed(() => {
 }
 .card-top-section {
   width: 100%;
-  height: 200px;
+  height: 250px;
   background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
   display: flex;
   align-items: center;
@@ -554,12 +530,17 @@ const heroBackgroundStyle = computed(() => {
   font-size: 0.9rem;
   color: #666666;
   line-height: 1.4;
-  margin-bottom: 0px;
-  font-family: Outfit, sans-serif;
-  flex: 1;
-  height: 60px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-height: 1.4em; /* 2 lines with line-height 1.4 */
+  min-height: 1.4em;
+  margin: 0.5rem 0 0.5rem;
+  font-family: Outfit, sans-serif;
+  flex: 1;
 }
 .member-details {
   display: flex;
