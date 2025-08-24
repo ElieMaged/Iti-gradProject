@@ -41,6 +41,18 @@
                   <span class="detail-label">{{ $t('yearsOfExperience') }}:</span>
                   <span class="detail-value">{{ technician.experience || technician.yearsOfExperience || $t('defaultExperience') }} {{ $t('years') }}</span>
                 </div>
+                <div class="detail-item">
+                  <span class="detail-label">{{ $t('averageRating') || 'Average Rating' }}:</span>
+                  <div class="rating-stars">
+                    <i 
+                      v-for="n in 5" 
+                      :key="n" 
+                      class="fa-solid fa-star"
+                      :class="{ 'star-filled': n <= Math.round(averageRating), 'star-empty': n > Math.round(averageRating) }"
+                    ></i>
+                    <span class="rating-text">{{ averageRating > 0 ? `${averageRating.toFixed(1)}/5` : 'No reviews yet' }}</span>
+                  </div>
+                </div>
               </div>
               <div class="rating-section">
                
@@ -1076,6 +1088,13 @@ onMounted(async () => {
 .rating-stars .fa-star.star-empty { color: #d1d5db !important; }
 .rating-stars .fa-star.star-filled { color: #fbbf24 !important; }
 
+.rating-text {
+  margin-left: 0.5rem;
+  font-size: 0.9rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
 .bio-section {
   border-top: 1px solid #e5e7eb;
   padding-top: 1rem;
@@ -1311,6 +1330,17 @@ onMounted(async () => {
   display: flex;
   gap: 0.25rem;
   margin-bottom: 1rem;
+  align-items: center;
+}
+
+.review-rating .fa-star.filled {
+  color: #fbbf24;
+  font-size: 1.1rem;
+}
+
+.review-rating .fa-star.empty {
+  color: #d1d5db;
+  font-size: 1.1rem;
 }
 
 .review-text {
@@ -2375,6 +2405,18 @@ color: #ddd7d7 ;
 }
 
 .dark .star-button.empty {
+  color: #6b7280 !important;
+}
+
+.dark .rating-text {
+  color: var(--text-muted);
+}
+
+.dark .review-rating .fa-star.filled {
+  color: #fbbf24 !important;
+}
+
+.dark .review-rating .fa-star.empty {
   color: #6b7280 !important;
 }
 /* Divider before reviews section */
