@@ -43,7 +43,7 @@
               <div class="member-details">
                 <div class="detail-item rating-item">
                   <i class="fa-solid fa-star"></i>
-                  <span>{{ technician.rating || 4.0 }}</span>
+                  <span>{{ technician.averageRating || 0 }}</span>
                 </div>
                 <div class="detail-item location-item">
                   <i class="fa-solid fa-location-dot"></i>
@@ -93,6 +93,7 @@ import profile6 from '../assets/profile/6.png'
 import profile7 from '../assets/profile/7.png'
 import profile8 from '../assets/profile/8.png'
 import plumbingBg from '../assets/Professions/Carpentry.jpg'
+import { calculateAverageRatingsForTechnicians } from '../utils/ratingCalculator'
 
 const router = useRouter()
 // Removed stock technicians - only show registered technicians
@@ -111,8 +112,12 @@ const pageSize = 12
 
 async function fetchTechnicians() {
   const querySnapshot = await getDocs(collection(db, 'technicians'))
-  firebaseTechnicians.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-  .filter(tech => tech.specialization === 'Carpentry' || tech.specialization === 'Carpenter') // Only include carpentry technicians
+  const allTechnicians = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+    .filter(tech => tech.specialization === 'Carpentry' || tech.specialization === 'Carpenter') // Only include carpentry technicians
+  
+  // Calculate average ratings for all technicians
+  const techniciansWithRatings = await calculateAverageRatingsForTechnicians(allTechnicians)
+  firebaseTechnicians.value = techniciansWithRatings
 }
 
 onMounted(fetchTechnicians)

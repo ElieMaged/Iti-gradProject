@@ -43,14 +43,7 @@
                 </div>
               </div>
               <div class="rating-section">
-                <div class="rating-stars">
-                  <i 
-                    v-for="n in 5" 
-                    :key="n" 
-                    class="fas fa-star"
-                    :class="{ 'star-filled': n <= Math.round(averageRating), 'star-empty': n > Math.round(averageRating) }"
-                  ></i>
-                </div>
+               
               </div>
             </div>
           </div>
@@ -92,7 +85,8 @@
                 {{ timeSlot }}
               </div>
               <div v-else-if="selectedDate && availableTimeSlots.length === 0" class="time-slot unavailable">
-                {{ $t('noAvailableTimeSlots') }}
+                <span v-if="isToday">{{ $t('noMoreTimeSlotsToday') || 'No more time slots available for today. Please choose a future date.' }}</span>
+                <span v-else>{{ $t('noAvailableTimeSlots') }}</span>
               </div>
               <div v-else-if="availableDates.length === 0" class="time-slot unavailable">
                 {{ $t('technicianNotSetAvailability') }}
@@ -100,6 +94,11 @@
               <div v-else class="time-slot">
                 {{ $t('selectDateToSeeSlots') }}
               </div>
+            </div>
+            <!-- Time filtering info message -->
+            <div v-if="selectedDate && availableTimeSlots.length > 0 && isToday" class="time-filtering-info">
+              <i class="fas fa-info-circle"></i>
+              <span>{{ $t('pastTimesFiltered') || 'Past time slots are automatically filtered out for today' }}</span>
             </div>
           </div>
           <div class="visit-price">
@@ -121,27 +120,30 @@
       <div class="reviews-section">
         <div class="reviews-header">
           <h2 class="reviews-title">{{ $t('reviews') }}</h2>
-          <div v-if="!showReviewForm">
-            <div v-if="userBookingsLoading" class="review-loading">
-              <i class="fa-solid fa-spinner fa-spin"></i> {{ $t('checkingEligibility') }}
+                      <div v-if="!showReviewForm">
+              <div v-if="userBookingsLoading" class="review-loading">
+                <i class="fa-solid fa-spinner fa-spin"></i> {{ $t('checkingEligibility') }}
+              </div>
+              <button 
+                v-else-if="hasBookingWithTechnician && canReview" 
+                @click="showReviewForm = true" 
+                class="add-review-btn"
+              >
+                {{ $t('addReview') }}
+              </button>
+              <div v-else-if="!auth.currentUser" class="review-notice">
+                {{ $t('loginToReview') }}
+              </div>
+              <div v-else-if="reviews.find(r => r.userEmail === auth.currentUser?.email)" class="review-notice">
+                {{ $t('thankYouForReview') }}
+              </div>
+              <div v-else-if="hasBookingWithTechnician && !canReview" class="review-notice">
+                You have already reviewed this technician
+              </div>
+              
+              
+
             </div>
-            <button 
-              v-else-if="hasBookingWithTechnician && canReview" 
-              @click="showReviewForm = true" 
-              class="add-review-btn"
-            >
-              {{ $t('addReview') }}
-            </button>
-            <div v-else-if="!auth.currentUser" class="review-notice">
-              {{ $t('loginToReview') }}
-            </div>
-            <div v-else-if="reviews.find(r => r.userEmail === auth.currentUser?.email)" class="review-notice">
-              {{ $t('thankYouForReview') }}
-            </div>
-            <div v-else-if="hasBookingWithTechnician && !canReview" class="review-notice">
-              {{ $t('bookingRequiredToReview') }}
-            </div>
-          </div>
         </div>
         <!-- Review Submission Form -->
         <div v-if="showReviewForm && hasBookingWithTechnician && canReview" class="review-form">
@@ -206,18 +208,6 @@
         </div>
         <!-- Reviews List -->
         <div class="reviews-list">
-          <!-- Debug information (remove in production) -->
-          <div v-if="auth.currentUser" class="debug-info" style="background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px; font-size: 12px;">
-            <strong>Debug Info:</strong><br>
-            User: {{ auth.currentUser.email }}<br>
-            Technician ID: {{ route.params.id }}<br>
-            User Bookings: {{ userBookings.length }}<br>
-            Has Booking: {{ hasBookingWithTechnician }}<br>
-            Can Review: {{ canReview }}<br>
-            Reviews Count: {{ reviews.length }}<br>
-            Already Reviewed: {{ reviews.find(r => r.userEmail === auth.currentUser?.email) ? 'Yes' : 'No' }}
-          </div>
-          
           <div v-if="reviewsLoading" class="loading-state">
             <div class="loading-spinner"></div>
             <p>{{ $t('loadingReviews') }}</p>
@@ -252,7 +242,7 @@
             <p>{{ $t('noReviewsYet') }}</p>
             <p v-if="hasBookingWithTechnician && canReview">{{ $t('beFirstToReview') }}</p>
             <p v-else-if="!auth.currentUser">{{ $t('loginToLeaveReview') }}</p>
-            <p v-else-if="!hasBookingWithTechnician">{{ $t('bookingRequiredToReview') }}</p>
+                         <p v-else-if="!hasBookingWithTechnician">You need to book this technician to leave a review</p>
           </div>
         </div>
       </div> <!-- close .reviews-section -->
@@ -287,6 +277,22 @@ const visibleDates = ref([])
 const dateAvailability = ref({})
 const availableTimeSlots = ref([])
 
+// Check if selected date is today
+const isToday = computed(() => {
+  if (!selectedDate.value) return false
+  
+  const today = new Date()
+  const selectedDateObj = new Date()
+  
+  // Parse the selected date (format: MM/DD/YYYY)
+  const [month, day, year] = selectedDate.value.split('/')
+  selectedDateObj.setMonth(parseInt(month) - 1)
+  selectedDateObj.setDate(parseInt(day))
+  selectedDateObj.setFullYear(parseInt(year))
+  
+  return today.toDateString() === selectedDateObj.toDateString()
+})
+
 // Review form state
 const showReviewForm = ref(false)
 const hoverRating = ref(0)
@@ -302,24 +308,19 @@ const fetchTechnician = async () => {
     loading.value = true
     const technicianId = route.params.id
     
-    console.log('Fetching technician with ID:', technicianId)
-    
     // Try to get technician from technicians collection
     const technicianDoc = await getDoc(doc(db, 'technicians', technicianId))
     
     if (technicianDoc.exists()) {
-      console.log('Found technician in technicians collection:', technicianDoc.data())
       technician.value = {
         id: technicianDoc.id,
         ...technicianDoc.data()
       }
   } else {
-      console.log('Technician not found in technicians collection, checking users collection...')
       // If not found in technicians, try users collection
       const userDoc = await getDoc(doc(db, 'users', technicianId))
       if (userDoc.exists()) {
         const userData = userDoc.data()
-        console.log('Found user in users collection:', userData)
         if (userData.role === 'technician') {
         technician.value = {
             id: userDoc.id,
@@ -329,7 +330,6 @@ const fetchTechnician = async () => {
           throw new Error('User is not a technician')
         }
       } else {
-        console.log('Technician not found in either collection')
         throw new Error('Technician not found')
       }
     }
@@ -383,7 +383,23 @@ const fetchUserBookings = async () => {
       ...doc.data()
     }))
     
-    console.log('User bookings fetched:', userBookings.value)
+    // Debug logging
+    console.log('=== USER BOOKINGS FETCHED ===')
+    console.log('Total bookings found:', userBookings.value.length)
+    console.log('Current route technician ID:', route.params.id)
+    userBookings.value.forEach((booking, index) => {
+      console.log(`Booking ${index + 1}:`, {
+        id: booking.id,
+        technicianId: booking.technicianId,
+        uid: booking.uid,
+        technician_id: booking.technician_id,
+        status: booking.status,
+        date: booking.date,
+        time: booking.time
+      })
+    })
+    console.log('=== END USER BOOKINGS ===')
+
   } catch (err) {
     console.error('Error fetching user bookings:', err)
   } finally {
@@ -457,7 +473,7 @@ const getDayName = (dateString) => {
 }
 
 // Generate time slots between start and end time
-const generateTimeSlots = (startTime, endTime) => {
+const generateTimeSlots = (startTime, endTime, selectedDate = null) => {
   const slots = []
   const start = new Date(`2000-01-01 ${startTime}`)
   const end = new Date(`2000-01-01 ${endTime}`)
@@ -469,6 +485,61 @@ const generateTimeSlots = (startTime, endTime) => {
       hour12: true 
     }))
     start.setMinutes(start.getMinutes() + 60) // 1-hour slots
+  }
+  
+  // If this is for today, filter out past time slots
+  if (selectedDate) {
+    const today = new Date()
+    const selectedDateObj = new Date()
+    
+    // Parse the selected date (format: MM/DD/YYYY)
+    const [month, day, year] = selectedDate.split('/')
+    selectedDateObj.setMonth(parseInt(month) - 1)
+    selectedDateObj.setDate(parseInt(day))
+    selectedDateObj.setFullYear(parseInt(year))
+    
+    // Check if selected date is today
+    const isToday = today.toDateString() === selectedDateObj.toDateString()
+    
+    if (isToday) {
+      const currentTime = new Date()
+      const currentHour = currentTime.getHours()
+      const currentMinute = currentTime.getMinutes()
+      
+      // Filter out past time slots
+      return slots.filter(timeSlot => {
+        const [time, period] = timeSlot.split(' ')
+        const [hour, minute] = time.split(':')
+        
+        let slotHour = parseInt(hour)
+        const slotMinute = parseInt(minute)
+        
+        // Convert to 24-hour format for comparison
+        if (period === 'PM' && slotHour !== 12) {
+          slotHour += 12
+        } else if (period === 'AM' && slotHour === 12) {
+          slotHour = 0
+        }
+        
+        // Add buffer time (e.g., 30 minutes) to allow for travel time and preparation
+        const bufferMinutes = 30
+        let adjustedCurrentHour = currentHour
+        let adjustedCurrentMinute = currentMinute + bufferMinutes
+        
+        // Handle minute overflow
+        if (adjustedCurrentMinute >= 60) {
+          adjustedCurrentHour += Math.floor(adjustedCurrentMinute / 60)
+          adjustedCurrentMinute = adjustedCurrentMinute % 60
+        }
+        
+        // Convert to minutes for easier comparison
+        const currentTimeInMinutes = adjustedCurrentHour * 60 + adjustedCurrentMinute
+        const slotTimeInMinutes = slotHour * 60 + slotMinute
+        
+        // Only show time slots that are at least bufferMinutes ahead of current time
+        return slotTimeInMinutes > currentTimeInMinutes
+      })
+    }
   }
   
   return slots
@@ -515,7 +586,7 @@ const getAvailableTimeSlots = async (date) => {
   const dayAvailability = technicianAvailability.value[dayName]
   
   if (dayAvailability && dayAvailability.available) {
-    const allTimeSlots = generateTimeSlots(dayAvailability.startTime, dayAvailability.endTime)
+    const allTimeSlots = generateTimeSlots(dayAvailability.startTime, dayAvailability.endTime, date)
     const existingBookings = await fetchExistingBookings(route.params.id, date)
     
     return allTimeSlots.filter(timeSlot => {
@@ -541,7 +612,6 @@ const positiveReviewPercentage = computed(() => {
 
 const canReview = computed(() => {
   if (!auth.currentUser) {
-    console.log('No authenticated user, cannot review')
     return false
   }
   
@@ -551,27 +621,29 @@ const canReview = computed(() => {
   )
   
   if (existingReview) {
-    console.log('User has already reviewed this technician')
     return false
   }
   
-  // Check if user has a booking with this technician (any status)
-  const hasBooking = userBookings.value.some(booking => {
-    const hasBookingWithThisTechnician = booking.technicianId === route.params.id
+  // Check if user has any booking with this technician (not cancelled or rejected)
+  const hasAnyBooking = userBookings.value.some(booking => {
+    // Check multiple possible field names for technician ID
+    const hasBookingWithThisTechnician = (
+      booking.technicianId === route.params.id || 
+      booking.uid === route.params.id ||
+      booking.technician_id === route.params.id
+    )
     
-    if (hasBookingWithThisTechnician) {
-      console.log('Found booking with technician:', booking)
-    }
+    // Allow reviews for any booking that's not explicitly cancelled or rejected
+    const isNotCancelledOrRejected = (
+      booking.status !== 'cancelled' && 
+      booking.status !== 'rejected'
+    )
     
-    return hasBookingWithThisTechnician
+    return hasBookingWithThisTechnician && isNotCancelledOrRejected
   })
   
-  console.log('Can review:', !existingReview && hasBooking)
-  console.log('User bookings:', userBookings.value)
-  console.log('Current technician ID:', route.params.id)
-  
-  // User can review if they haven't already reviewed AND they have any booking with this technician
-  return !existingReview && hasBooking
+  // User can review if they haven't already reviewed AND they have any valid booking with this technician
+  return !existingReview && hasAnyBooking
 })
 
 const isValidReview = computed(() => {
@@ -580,23 +652,28 @@ const isValidReview = computed(() => {
 
 const hasBookingWithTechnician = computed(() => {
   if (!auth.currentUser) {
-    console.log('No authenticated user, no booking check')
     return false
   }
   
-  // Check if user has any booking with this technician (any status)
-  const hasBooking = userBookings.value.some(booking => {
-    const hasBookingWithThisTechnician = booking.technicianId === route.params.id
+  // Check if user has any booking with this technician (not cancelled or rejected)
+  const hasAnyBooking = userBookings.value.some(booking => {
+    // Check multiple possible field names for technician ID
+    const hasBookingWithThisTechnician = (
+      booking.technicianId === route.params.id || 
+      booking.uid === route.params.id ||
+      booking.technician_id === route.params.id
+    )
     
-    if (hasBookingWithThisTechnician) {
-      console.log('Found booking with technician:', booking)
-    }
+    // Allow reviews for any booking that's not explicitly cancelled or rejected
+    const isNotCancelledOrRejected = (
+      booking.status !== 'cancelled' && 
+      booking.status !== 'rejected'
+    )
     
-    return hasBookingWithThisTechnician
+    return hasBookingWithThisTechnician && isNotCancelledOrRejected
   })
   
-  console.log('Has booking with technician:', hasBooking)
-  return hasBooking
+  return hasAnyBooking
 })
 
 // Methods
@@ -668,12 +745,10 @@ const setRating = (rating) => {
 
 const submitReview = async () => {
   if (!isValidReview.value || submittingReview.value) {
-    console.log('Review submission blocked - invalid review or already submitting')
     return
   }
   
   if (!auth.currentUser) {
-    console.log('No authenticated user for review submission')
     return
   }
   
@@ -690,11 +765,7 @@ const submitReview = async () => {
       createdAt: new Date()
     }
     
-    console.log('Submitting review with data:', reviewData)
-    
     await addDoc(collection(db, 'reviews'), reviewData)
-    
-    console.log('Review submitted successfully')
     
     // Reset form
     newReview.value = { rating: 0, text: '' }
@@ -1139,6 +1210,24 @@ onMounted(async () => {
   font-style: italic;
 }
 
+.time-filtering-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: #dbeafe;
+  border: 1px solid #3b82f6;
+  border-radius: 8px;
+  margin-top: 0.5rem;
+  color: #1e40af;
+  font-size: 0.875rem;
+}
+
+.time-filtering-info i {
+  color: #3b82f6;
+  font-size: 1rem;
+}
+
 .visit-price {
   display: flex;
   justify-content: center;
@@ -1307,7 +1396,8 @@ onMounted(async () => {
   align-items: center;
   gap: 0.5rem;
 }
-.fa-star {
+/* Global star color for display purposes only - not for interactive rating */
+.rating-stars .fa-star {
   color: #fbbf24 !important;
 }
 
@@ -1367,19 +1457,19 @@ onMounted(async () => {
 }
 
 .star-button.filled {
-  color: #fbbf24;
+  color: #fbbf24 !important;
 }
 
 .star-button.empty {
-  color: #d1d5db;
+  color: #d1d5db !important;
 }
 
 .star-button.filled:hover {
-  color: #f59e0b;
+  color: #f59e0b !important;
 }
 
 .star-button.empty:hover {
-  color: #fbbf24;
+  color: #fbbf24 !important;
 }
 
 .form-group {
@@ -2280,12 +2370,12 @@ color: #ddd7d7 ;
    color: var(--text-muted);
 }
 
-.dark .fa-star {
+.dark .rating-stars .fa-star {
   color: #fbbf24 !important;
 }
 
-.dark .star-empty {
-  color:  var(--primary-text);
+.dark .star-button.empty {
+  color: #6b7280 !important;
 }
 /* Divider before reviews section */
 .reviews-divider {

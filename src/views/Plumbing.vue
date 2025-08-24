@@ -125,6 +125,7 @@ import { useRouter } from 'vue-router'
 import SearchBar from '../components/SearchBar.vue'
 import profile1 from '../assets/profile/1.jpg'
 import plumbingBg from '../assets/Professions/Plumbing.jpg'
+import { calculateAverageRatingsForTechnicians } from '../utils/ratingCalculator'
 
 const router = useRouter()
 const loading = ref(true)
@@ -152,7 +153,9 @@ async function fetchTechnicians() {
     console.log('All technicians from Firebase:', querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })))
     console.log('Filtered plumbing technicians:', allTechnicians)
     
-    firebaseTechnicians.value = allTechnicians
+    // Calculate average ratings for all technicians
+    const techniciansWithRatings = await calculateAverageRatingsForTechnicians(allTechnicians)
+    firebaseTechnicians.value = techniciansWithRatings
   } catch (error) {
     console.error('Error fetching technicians:', error)
   } finally {
@@ -174,7 +177,7 @@ const mergedTechnicians = computed(() => {
       bgColor: '#E8E4F3', // or any default color
       price: fbTech.basePrice,
       description: fbTech.bio,
-      rating: fbTech.averageRating || fbTech.rating || 0,
+      rating: fbTech.averageRating || 0,
       specialization: fbTech.specialization,
       government: fbTech.government, // Assuming these fields exist in Firebase
       district: fbTech.district,

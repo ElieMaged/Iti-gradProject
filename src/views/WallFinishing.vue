@@ -131,6 +131,7 @@ import profile6 from '../assets/profile/6.png'
 import profile7 from '../assets/profile/7.png'
 import profile8 from '../assets/profile/8.png'
 import plumbingBg from '../assets/Professions/Wall.jpg'
+import { calculateAverageRatingsForTechnicians } from '../utils/ratingCalculator'
 
 const router = useRouter()
 const loading = ref(true)
@@ -151,9 +152,13 @@ async function fetchTechnicians() {
   try {
     loading.value = true
     const querySnapshot = await getDocs(collection(db, 'technicians'))
-    firebaseTechnicians.value = querySnapshot.docs
+    const allTechnicians = querySnapshot.docs
       .map(doc => ({ id: doc.id, ...doc.data() }))
       .filter(tech => tech.specialization === 'Wall Finishing')
+    
+    // Calculate average ratings for all technicians
+    const techniciansWithRatings = await calculateAverageRatingsForTechnicians(allTechnicians)
+    firebaseTechnicians.value = techniciansWithRatings
   } catch (error) {
     console.error('Error fetching technicians:', error)
   } finally {
@@ -173,7 +178,7 @@ const mergedTechnicians = computed(() => {
       bgColor: '#E8E4F3', // or any default color
       price: fbTech.basePrice,
       description: fbTech.bio,
-      rating: fbTech.rating || 4.0, // Use actual rating if available
+      rating: fbTech.averageRating || 0,
       specialization: fbTech.specialization,
       government: fbTech.government, // Added government field
       district: fbTech.district, // Added district field

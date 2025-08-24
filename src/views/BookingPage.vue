@@ -89,10 +89,12 @@
                 <option v-for="time in availableTimes" :key="time" :value="time">{{ time }}</option>
               </select>
               <div v-if="availableTimes.length === 0" class="text-sm text-red-500 mt-1">
-                All time slots for this date are already booked. Please choose a different date or time.
+                <span v-if="isToday">No more time slots available for today (past times are filtered out). Please choose a future date.</span>
+                <span v-else>All time slots for this date are already booked. Please choose a different date or time.</span>
               </div>
               <div v-else-if="availableTimes.length > 0" class="text-sm text-green-600 mt-1">
                 {{ availableTimes.length }} time slot(s) available for this date
+                <span v-if="isToday" class="text-blue-600">(Past times automatically filtered out for today)</span>
               </div>
             </div>
           </div>
@@ -458,6 +460,22 @@ const visibleDates = computed(() => {
 const availableTimes = ref([])
 const selectedTimeIndex = ref(0)
 
+// Check if selected date is today
+const isToday = computed(() => {
+  if (!form.value.date) return false
+  
+  const today = new Date()
+  const selectedDate = new Date()
+  
+  // Parse the selected date (format: MM/DD/YYYY)
+  const [month, day, year] = form.value.date.split(' ')[0].split('/')
+  selectedDate.setMonth(parseInt(month) - 1)
+  selectedDate.setDate(parseInt(day))
+  selectedDate.setFullYear(parseInt(year))
+  
+  return today.toDateString() === selectedDate.toDateString()
+})
+
 // Function to pre-populate form with user data
 function populateFormWithUserData() {
   console.log('=== POPULATING FORM WITH USER DATA ===');
@@ -646,7 +664,7 @@ function getDayName(dateString) {
 }
 
 // Function to generate time slots based on availability
-function generateTimeSlots(startTime, endTime) {
+function generateTimeSlots(startTime, endTime, selectedDate = null) {
   const slots = []
   const start = new Date(`2000-01-01 ${startTime}`)
   const end = new Date(`2000-01-01 ${endTime}`)
@@ -668,6 +686,120 @@ function generateTimeSlots(startTime, endTime) {
     })
     
     slots.push(`${slotStart} - ${slotEnd}`)
+  }
+  
+  // If this is for today, filter out past time slots
+  if (selectedDate) {
+    const today = new Date()
+    const selectedDateObj = new Date()
+    
+    // Parse the selected date (format: MM/DD/YYYY)
+    const [month, day, year] = selectedDate.split(' ')[0].split('/')
+    selectedDateObj.setMonth(parseInt(month) - 1)
+    selectedDateObj.setDate(parseInt(day))
+    selectedDateObj.setFullYear(parseInt(year))
+    
+    // Check if selected date is today
+    const isToday = today.toDateString() === selectedDateObj.toDateString()
+    
+    if (isToday) {
+      const currentTime = new Date()
+      const currentHour = currentTime.getHours()
+      const currentMinute = currentTime.getMinutes()
+      
+      // Filter out past time slots
+      console.log('Filtering time slots for today. Current time:', currentHour + ':' + currentMinute)
+      console.log('Available slots before filtering:', slots)
+      
+      const filteredSlots = slots.filter(timeSlot => {
+        const [startTimeStr] = timeSlot.split(' - ')
+        console.log('Processing time slot:', timeSlot, 'Start time string:', startTimeStr)
+        
+        const [time, period] = startTimeStr.split(' ')
+        console.log('Time part:', time, 'Period part:', period)
+        
+        const [hour, minute] = time.split(':')
+        console.log('Hour part:', hour, 'Minute part:', minute)
+        
+        let slotHour = parseInt(hour)
+        const slotMinute = parseInt(minute)
+        
+        console.log('Parsed hour:', slotHour, 'Parsed minute:', slotMinute)
+        
+        // Convert to 24-hour format for comparison
+        if (period === 'PM' && slotHour !== 12) {
+          slotHour += 12
+        } else if (period === 'AM' && slotHour === 12) {
+          slotHour = 0
+        }
+        
+        console.log('24-hour format hour:', slotHour)
+        
+        // Add buffer time (e.g., 15 minutes) to allow for travel time and preparation
+        const bufferMinutes = 15
+        let adjustedCurrentHour = currentHour
+        let adjustedCurrentMinute = currentMinute + bufferMinutes
+        
+        // Handle minute overflow
+        if (adjustedCurrentMinute >= 60) {
+          adjustedCurrentHour += Math.floor(adjustedCurrentMinute / 60)
+          adjustedCurrentMinute = adjustedCurrentMinute % 60
+        }
+        
+        // Convert to minutes for easier comparison
+        const currentTimeInMinutes = adjustedCurrentHour * 60 + adjustedCurrentMinute
+        const slotTimeInMinutes = slotHour * 60 + slotMinute
+        
+        console.log(`Time slot ${timeSlot}: ${slotHour}:${slotMinute} (${slotTimeInMinutes} min) vs current ${adjustedCurrentHour}:${adjustedCurrentMinute} (${currentTimeInMinutes} min) - ${slotTimeInMinutes > currentTimeInMinutes ? 'SHOW' : 'HIDE'}`)
+        
+        // Only show time slots that are at least bufferMinutes ahead of current time
+        return slotTimeInMinutes > currentTimeInMinutes
+      })
+      
+      console.log('Filtered slots:', filteredSlots)
+      
+      // If all slots were filtered out and it's still early in the day, show at least the next few hours
+      if (filteredSlots.length === 0 && currentHour < 18) { // Before 6 PM
+        console.log('All slots filtered out, but it\'s early in the day. Showing next few hours...')
+        const nextFewHours = slots.filter(timeSlot => {
+          const [startTimeStr] = timeSlot.split(' - ')
+          const [time, period] = startTimeStr.split(' ')
+          const [hour, minute] = time.split(':')
+          
+          let slotHour = parseInt(hour)
+          const slotMinute = parseInt(minute)
+          
+          // Convert to 24-hour format for comparison
+          if (period === 'PM' && slotHour !== 12) {
+            slotHour += 12
+          } else if (period === 'AM' && slotHour === 12) {
+            slotHour = 0
+          }
+          
+          // Show slots that are at least 1 hour ahead (reduced buffer)
+          const minBufferMinutes = 60
+          let adjustedCurrentHour = currentHour
+          let adjustedCurrentMinute = currentMinute + minBufferMinutes
+          
+          if (adjustedCurrentMinute >= 60) {
+            adjustedCurrentHour += Math.floor(adjustedCurrentMinute / 60)
+            adjustedCurrentMinute = adjustedCurrentMinute % 60
+          }
+          
+          const currentTimeInMinutes = adjustedCurrentHour * 60 + adjustedCurrentMinute
+          const slotTimeInMinutes = slotHour * 60 + slotMinute
+          
+          return slotTimeInMinutes > currentTimeInMinutes
+        })
+        
+        if (nextFewHours.length > 0) {
+          console.log('Showing next few hours with reduced buffer:', nextFewHours)
+          return nextFewHours
+        }
+      }
+      
+      return filteredSlots
+    }
   }
   
   return slots
@@ -702,7 +834,7 @@ async function getAvailableTimeForDate(dateString) {
   
   if (dayAvailability && dayAvailability.available) {
     // Check if there are any available slots after filtering out booked ones
-    const allTimeSlots = generateTimeSlots(dayAvailability.startTime, dayAvailability.endTime)
+    const allTimeSlots = generateTimeSlots(dayAvailability.startTime, dayAvailability.endTime, dateString)
     const existingBookings = await fetchExistingBookings(technician.value.uid, dateString)
     
     const availableSlots = allTimeSlots.filter(timeSlot => {
@@ -776,15 +908,25 @@ async function updateAvailableTimes(selectedDate) {
     return
   }
   
+  console.log('=== UPDATING AVAILABLE TIMES ===')
+  console.log('Selected date:', selectedDate)
+  
   const dayName = getDayName(selectedDate)
   const availability = await fetchTechnicianAvailability(technician.value.uid)
   
+  console.log('Day name:', dayName)
+  console.log('Availability:', availability)
+  
   if (availability && availability[dayName] && availability[dayName].available) {
     const { startTime, endTime } = availability[dayName]
-    const allTimeSlots = generateTimeSlots(startTime, endTime)
+    console.log('Start time:', startTime, 'End time:', endTime)
+    
+    const allTimeSlots = generateTimeSlots(startTime, endTime, selectedDate)
+    console.log('All time slots generated:', allTimeSlots)
     
     // Fetch existing bookings for this technician on this date
     const existingBookings = await fetchExistingBookings(technician.value.uid, selectedDate)
+    console.log('Existing bookings:', existingBookings)
     
     // Filter out already booked time slots
     const availableTimeSlots = allTimeSlots.filter(timeSlot => {
@@ -795,6 +937,7 @@ async function updateAvailableTimes(selectedDate) {
       return !isBooked
     })
     
+    console.log('Final available time slots:', availableTimeSlots)
     availableTimes.value = availableTimeSlots
     
     // Set default time if available
@@ -808,7 +951,10 @@ async function updateAvailableTimes(selectedDate) {
   } else {
     availableTimes.value = []
     form.value.time = ''
+    console.log('No availability for this day or technician not available')
   }
+  
+  console.log('=== END UPDATING AVAILABLE TIMES ===')
 }
 
 // Watch for date changes to update available times
@@ -842,6 +988,9 @@ watch(() => technicianAvailability.value, async () => {
   // Update date availability for visible dates
   await updateDateAvailability()
 })
+
+// Set up interval to refresh available times every minute (for current day bookings)
+let timeRefreshInterval = null
 
 // Watch for visible dates changes to update availability display
 watch(() => visibleDates.value, async () => {
@@ -1664,11 +1813,23 @@ onMounted(async () => {
   
   // Initialize available cities for default governorate
   updateCities();
+  
+  // Set up interval to refresh available times every minute (for current day bookings)
+  timeRefreshInterval = setInterval(async () => {
+    if (form.value.date) {
+      await updateAvailableTimes(form.value.date)
+    }
+  }, 60000) // Refresh every minute
 })
 
 // Cleanup function to prevent memory leaks
 onUnmounted(() => {
   errorMsg.value = '';
+  
+  // Clear interval when component is unmounted
+  if (timeRefreshInterval) {
+    clearInterval(timeRefreshInterval)
+  }
 })
 
 // Watch for technician data changes
@@ -2118,6 +2279,11 @@ watch(() => technician.value, (newTechnician) => {
   color: #dc2626;
   font-size: 0.875rem;
   margin-top: 0.25rem;
+}
+
+/* Info styling */
+.text-blue-600 {
+  color: #2563eb;
 }
 
 .field-error {
