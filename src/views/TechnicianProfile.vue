@@ -45,10 +45,9 @@
                   <span class="detail-label">{{ $t('averageRating') || 'Average Rating' }}:</span>
                   <div class="rating-stars">
                     <i 
-                      v-for="n in 5" 
+                      v-for="n in Math.round(averageRating)" 
                       :key="n" 
-                      class="fa-solid fa-star"
-                      :class="{ 'star-filled': n <= Math.round(averageRating), 'star-empty': n > Math.round(averageRating) }"
+                      class="fa-solid fa-star star-filled"
                     ></i>
                     <span class="rating-text">{{ averageRating > 0 ? `${averageRating.toFixed(1)}/5` : 'No reviews yet' }}</span>
                   </div>

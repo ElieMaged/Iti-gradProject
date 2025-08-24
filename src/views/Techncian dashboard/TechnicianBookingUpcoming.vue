@@ -4,6 +4,16 @@
     <Sidebar :activeMenu="'booking'" :activeBookingStatus="'upcoming'" @navigate="handleSidebarNavigate" />
     <!-- Main Content -->
     <div class="flex-1 main-layout">
+      <!-- Notification Toast -->
+      <div v-if="showNotification" class="notification-toast" :class="notificationType">
+        <div class="notification-content">
+          <i :class="getNotificationIcon()"></i>
+          <span>{{ notificationMessage }}</span>
+        </div>
+        <button @click="showNotification = false" class="notification-close">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
       <div class="technician-dashboard-layout p-4 mx-12">
         <div class="booking-main">
           <div class="booking-container">
@@ -28,6 +38,10 @@
               </button>
               <div v-if="lastCheckResult" class="check-result" :class="lastCheckResult.success ? 'success' : 'error'">
                 {{ lastCheckResult.message }}
+              </div>
+              <div class="auto-check-status">
+                <i class="fas fa-sync-alt"></i>
+                <span>Auto-checking every 5 minutes</span>
               </div>
             </div>
 
@@ -82,12 +96,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, onActivated } from 'vue';
 import { collection, getDocs, query, where, updateDoc, doc, writeBatch, getDoc } from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { db } from '../../firebase';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import Sidebar from '../../components/Sidebar.vue';
 import TopBar from '../../components/TopBar.vue';
 
@@ -99,6 +113,9 @@ const error = ref(null);
 const technicianUid = ref(null);
 const checkingExpired = ref(false);
 const lastCheckResult = ref(null);
+const showNotification = ref(false);
+const notificationMessage = ref('');
+const notificationType = ref('info');
 
 const functions = getFunctions();
 const moveExpiredBookings = httpsCallable(functions, 'moveExpiredBookings');
@@ -112,6 +129,30 @@ const filteredBookings = computed(() => {
 
 function handleSidebarNavigate(path) {
   router.push(path);
+}
+
+function showToast(message, type = 'info') {
+  notificationMessage.value = message;
+  notificationType.value = type;
+  showNotification.value = true;
+  
+  // Auto-hide after 5 seconds
+  setTimeout(() => {
+    showNotification.value = false;
+  }, 5000);
+}
+
+function getNotificationIcon() {
+  switch (notificationType.value) {
+    case 'success':
+      return 'fas fa-check-circle';
+    case 'error':
+      return 'fas fa-exclamation-circle';
+    case 'warning':
+      return 'fas fa-exclamation-triangle';
+    default:
+      return 'fas fa-info-circle';
+  }
 }
 
 // Function to check and update expired bookings
@@ -142,31 +183,97 @@ async function checkAndUpdateExpiredBookings() {
       console.log('Checking booking date:', booking.date, 'vs today:', today.toDateString());
       console.log('Booking date object:', bookingDate.toDateString());
       
-      // If booking date is in the past, mark it as expired
+      // Check if booking date is in the past OR if it's today but the time has passed
+      let isExpired = false;
+      
       if (bookingDate < today) {
+        // Booking date is in the past
+        isExpired = true;
+        console.log('✅ Found expired booking (past date):', booking.date, 'for booking ID:', doc.id);
+      } else if (bookingDate.getTime() === today.getTime()) {
+        // Booking is today, check if time has passed
+        const now = new Date();
+        const currentTime = now.getHours() * 60 + now.getMinutes(); // Convert to minutes
+        
+        // Parse booking time (assuming format like "2:00 PM" or "14:00")
+        let bookingTimeMinutes = 0;
+        if (booking.time) {
+          try {
+            // Handle 12-hour format (e.g., "2:00 PM")
+            if (booking.time.includes('PM') || booking.time.includes('AM')) {
+              const timeMatch = booking.time.match(/(\d+):(\d+)\s*(AM|PM)/i);
+              if (timeMatch) {
+                let hours = parseInt(timeMatch[1]);
+                const minutes = parseInt(timeMatch[2]);
+                const period = timeMatch[3].toUpperCase();
+                
+                if (period === 'PM' && hours !== 12) {
+                  hours += 12;
+                } else if (period === 'AM' && hours === 12) {
+                  hours = 0;
+                }
+                
+                bookingTimeMinutes = hours * 60 + minutes;
+              }
+            } else {
+              // Handle 24-hour format (e.g., "14:00")
+              const timeMatch = booking.time.match(/(\d+):(\d+)/);
+              if (timeMatch) {
+                const hours = parseInt(timeMatch[1]);
+                const minutes = parseInt(timeMatch[2]);
+                bookingTimeMinutes = hours * 60 + minutes;
+              }
+            }
+          } catch (timeError) {
+            console.warn('Could not parse booking time:', booking.time, timeError);
+          }
+        }
+        
+        // Add buffer time (30 minutes) to allow for travel and preparation
+        const bufferMinutes = 30;
+        const adjustedCurrentTime = currentTime + bufferMinutes;
+        
+        if (bookingTimeMinutes > 0 && adjustedCurrentTime > bookingTimeMinutes) {
+          isExpired = true;
+          console.log('✅ Found expired booking (time passed):', booking.date, booking.time, 'for booking ID:', doc.id);
+          console.log('Current time (with buffer):', adjustedCurrentTime, 'minutes, Booking time:', bookingTimeMinutes, 'minutes');
+        }
+      }
+      
+      if (isExpired) {
         expiredBookings.push({
           id: doc.id,
           ...booking
         });
-        console.log('✅ Found expired booking:', booking.date, 'for booking ID:', doc.id);
       }
     });
     
     console.log('Total expired bookings found:', expiredBookings.length);
     
-    // Update expired bookings to completed status
-    for (const booking of expiredBookings) {
-      try {
-        console.log('Updating expired booking to completed:', booking.id);
-        await updateDoc(doc(db, 'bookings', booking.id), { 
-          status: 'complete',
-          completedAt: new Date()
-        });
-        console.log('✅ Successfully updated booking to completed:', booking.id);
-      } catch (updateError) {
-        console.error('❌ Error updating expired booking:', booking.id, updateError);
-      }
-    }
+            // Update expired bookings to completed status
+        for (const booking of expiredBookings) {
+          try {
+            console.log('🔄 Updating expired booking to completed:', booking.id);
+            console.log('📅 Booking details:', {
+              date: booking.date,
+              time: booking.time,
+              user: booking.userName,
+              address: booking.address
+            });
+            
+            await updateDoc(doc(db, 'bookings', booking.id), { 
+              status: 'complete',
+              completedAt: new Date(),
+              movedFromUpcoming: true,
+              movedAt: new Date()
+            });
+            
+            console.log('✅ Successfully moved booking to completed:', booking.id);
+            console.log('📊 Status updated to: complete');
+          } catch (updateError) {
+            console.error('❌ Error updating expired booking:', booking.id, updateError);
+          }
+        }
     
     console.log('=== EXPIRED BOOKINGS CHECK COMPLETE ===');
     return expiredBookings.length;
@@ -200,6 +307,7 @@ async function checkExpiredBookings() {
     
     // Refresh the bookings list after moving expired ones
     if (result > 0) { // Changed to check result directly
+      showToast(`🔄 Successfully moved ${result} expired booking${result > 1 ? 's' : ''} to completed`, 'success');
       await fetchBookings();
     }
   } catch (err) {
@@ -237,70 +345,54 @@ async function fetchBookings() {
     );
     const snapshot = await getDocs(q);
     
-    // Fetch technician details for each booking
-    const bookingsWithTechDetails = await Promise.all(
-      snapshot.docs.map(async (doc) => {
-        const bookingData = { id: doc.id, ...doc.data() };
-                try {
-                  const technicianDoc = await getDoc(doc(db, 'technicians', bookingData.technicianId));
-                  if (technicianDoc.exists()) {
-                    const techData = technicianDoc.data();
-                    console.log('Technician data found:', techData);
-                    console.log('All technician fields:', Object.keys(techData));
-                    
-                    // Get the technician's login email (the email they used to register/login)
-                    const loginEmail = techData.email || techData.userEmail || techData.technicianEmail || techData.contactEmail;
-                    console.log('Technician login email:', loginEmail);
-                    
-                    // Debug price fields - look for costpervisit specifically
-                    console.log('CostPerVisit field value:', techData.costpervisit);
-                    console.log('BasePrice field value:', techData.basePrice);
-                    console.log('VisitPrice field value:', techData.visitPrice);
-                    console.log('Price field value:', techData.price);
-                    
-                    // Try to get price from costpervisit first, then fallback to other fields
-                    const price = techData.costpervisit || techData.basePrice || techData.visitPrice || techData.price;
-                    console.log('Selected price value:', price);
-                    
-                    bookingData.technicianEmail = loginEmail || 'N/A';
-            
-            // Try multiple specialization field names
-            const specialization = techData.specialization || 
-                                 techData.service || 
-                                 techData.services || 
-                                 techData.category || 
-                                 techData.type || 
-                                 techData.jobType || 
-                                 techData.workType || 
-                                 techData.profession || 
-                                 techData.trade || 
-                                 techData.skill || 
-                                 techData.skills || 
-                                 'N/A';
-            
-            bookingData.specialization = specialization;
-            // Use the technician's base price from their profile
-            bookingData.price = price || 'N/A';
-                    console.log('Technician details mapped:', {
-                      email: bookingData.technicianEmail,
-                      specialization: bookingData.specialization,
-                      price: bookingData.price,
-                      allFields: Object.keys(techData)
-                    });
-                  } else {
-                    bookingData.technicianEmail = 'N/A';
-                    bookingData.specialization = 'N/A';
-                    bookingData.price = 'N/A';
-                  }
-                } catch (error) {
-                  console.error('Error fetching technician details:', error);
-                  bookingData.technicianEmail = 'N/A';
-                  bookingData.specialization = 'N/A';
-                  bookingData.price = 'N/A';
-                }
-                return bookingData;
-              })
-            );
+         // Map booking data with proper field mapping
+     const bookingsWithTechDetails = snapshot.docs.map(doc => {
+       const bookingData = { id: doc.id, ...doc.data() };
+       
+       console.log('=== BOOKING DATA DEBUG ===');
+       console.log('Raw booking data:', bookingData);
+       console.log('All booking fields:', Object.keys(bookingData));
+       
+       // Map technician email from various possible fields in the booking
+       bookingData.technicianEmail = bookingData.technicianEmail || 
+                                    bookingData.technician_email || 
+                                    bookingData.techEmail || 
+                                    bookingData.tech_email || 
+                                    'N/A';
+       
+       // Map specialization from various possible fields in the booking
+       bookingData.specialization = bookingData.specialization || 
+                                   bookingData.service || 
+                                   bookingData.services || 
+                                   bookingData.category || 
+                                   bookingData.type || 
+                                   bookingData.jobType || 
+                                   bookingData.workType || 
+                                   bookingData.profession || 
+                                   bookingData.trade || 
+                                   bookingData.skill || 
+                                   bookingData.skills || 
+                                   'N/A';
+       
+       // Map price from various possible fields in the booking
+       bookingData.price = bookingData.price || 
+                          bookingData.cost || 
+                          bookingData.costPerVisit || 
+                          bookingData.costpervisit || 
+                          bookingData.basePrice || 
+                          bookingData.base_price || 
+                          bookingData.visitPrice || 
+                          bookingData.visit_price || 
+                          'N/A';
+       
+       console.log('Mapped booking data:', {
+         technicianEmail: bookingData.technicianEmail,
+         specialization: bookingData.specialization,
+         price: bookingData.price
+       });
+       
+       return bookingData;
+     });
     
     bookings.value = bookingsWithTechDetails;
   } catch (e) {
@@ -318,12 +410,65 @@ onMounted(() => {
       fetchBookings().then(() => {
         // Automatically check for expired bookings when component loads
         checkExpiredBookings();
+        
+        // Set up automatic checking for expired bookings every 5 minutes
+        const autoCheckInterval = setInterval(async () => {
+          if (technicianUid.value) {
+            console.log('🕐 Auto-checking for expired bookings...');
+            const expiredCount = await checkAndUpdateExpiredBookings();
+            if (expiredCount > 0) {
+              console.log(`🔄 Auto-moved ${expiredCount} expired bookings to completed`);
+              showToast(`🔄 Automatically moved ${expiredCount} expired booking${expiredCount > 1 ? 's' : ''} to completed`, 'success');
+              // Refresh the bookings list
+              await fetchBookings();
+            }
+          }
+        }, 5 * 60 * 1000); // Check every 5 minutes
+        
+        // Clean up interval when component unmounts
+        onUnmounted(() => {
+          clearInterval(autoCheckInterval);
+        });
+        
+        // Also check when page becomes visible (user returns to tab)
+        const handleVisibilityChange = () => {
+          if (!document.hidden && technicianUid.value) {
+            console.log('🔄 Page became visible, checking for expired bookings...');
+            checkAndUpdateExpiredBookings().then(expiredCount => {
+              if (expiredCount > 0) {
+                console.log(`🔄 Found ${expiredCount} expired bookings, refreshing list...`);
+                showToast(`🔄 Found ${expiredCount} expired booking${expiredCount > 1 ? 's' : ''} when returning to page`, 'info');
+                fetchBookings();
+              }
+            });
+          }
+        };
+        
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        
+        // Clean up event listener
+        onUnmounted(() => {
+          document.removeEventListener('visibilitychange', handleVisibilityChange);
+        });
       });
     } else {
       error.value = 'Technician not authenticated.';
       loading.value = false;
     }
   });
+});
+
+// Check for expired bookings when component is activated (user navigates to this page)
+onActivated(async () => {
+  if (technicianUid.value) {
+    console.log('🔄 Component activated, checking for expired bookings...');
+    const expiredCount = await checkAndUpdateExpiredBookings();
+    if (expiredCount > 0) {
+      console.log(`🔄 Found ${expiredCount} expired bookings, refreshing list...`);
+      showToast(`🔄 Found ${expiredCount} expired booking${expiredCount > 1 ? 's' : ''} when navigating to page`, 'info');
+      await fetchBookings();
+    }
+  }
 });
 </script>
 
@@ -403,6 +548,127 @@ onMounted(() => {
 .check-expired-btn:disabled {
   background: #ccc;
   cursor: not-allowed;
+}
+
+.auto-check-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6b7280;
+  font-size: 0.875rem;
+  font-style: italic;
+}
+
+.auto-check-status i {
+  color: #10b981;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.dark .auto-check-status {
+  color: var(--text-muted);
+}
+
+/* Notification Toast */
+.notification-toast {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1000;
+  max-width: 400px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-left: 4px solid;
+  animation: slideIn 0.3s ease-out;
+}
+
+.notification-toast.success {
+  border-left-color: #10b981;
+}
+
+.notification-toast.error {
+  border-left-color: #ef4444;
+}
+
+.notification-toast.warning {
+  border-left-color: #f59e0b;
+}
+
+.notification-toast.info {
+  border-left-color: #3b82f6;
+}
+
+.notification-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.notification-content i {
+  font-size: 1.25rem;
+}
+
+.notification-toast.success .notification-content i {
+  color: #10b981;
+}
+
+.notification-toast.error .notification-content i {
+  color: #ef4444;
+}
+
+.notification-toast.warning .notification-content i {
+  color: #f59e0b;
+}
+
+.notification-toast.info .notification-content i {
+  color: #3b82f6;
+}
+
+.notification-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.notification-close:hover {
+  background-color: #f3f4f6;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.dark .notification-toast {
+  background: var(--secondary-bg);
+  color: var(--primary-text);
+}
+
+.dark .notification-close {
+  color: var(--text-muted);
+}
+
+.dark .notification-close:hover {
+  background-color: var(--input-bg);
 }
 
 .dark .check-expired-btn:disabled {

@@ -108,109 +108,54 @@ async function fetchBookings() {
     
     console.log('Found completed/complete bookings:', snapshot.docs.length);
     
-    // Fetch technician details for each booking
-    const bookingsWithTechDetails = await Promise.all(
-      snapshot.docs.map(async (doc) => {
-        const bookingData = { id: doc.id, ...doc.data() };
-        
-        // Debug: Log the raw booking data to see what's actually stored
-        console.log('=== COMPLETED BOOKING DATA DEBUG ===');
-        console.log('Booking ID:', bookingData.id);
-        console.log('Raw booking data:', bookingData);
-        console.log('User email from booking:', bookingData.userEmail);
-        console.log('User email type:', typeof bookingData.userEmail);
-        console.log('Address field:', bookingData.address);
-        console.log('Address type:', typeof bookingData.address);
-        console.log('Address length:', bookingData.address ? bookingData.address.length : 'undefined');
-        console.log('All booking fields:', Object.keys(bookingData));
-        
-        // Try to get technician details from technicians collection
-        try {
-          console.log('=== TECHNICIAN LOOKUP DEBUG ===');
-          console.log('Looking up technician with ID:', bookingData.technicianId);
-          
-          const technicianDoc = await getDoc(doc(db, 'technicians', bookingData.technicianId));
-          if (technicianDoc.exists()) {
-            const techData = technicianDoc.data();
-            console.log('=== TECHNICIAN DATA DEBUG ===');
-            console.log('Technician ID:', bookingData.technicianId);
-            console.log('Technician document exists:', technicianDoc.exists());
-            console.log('Technician data found:', techData);
-            console.log('All technician fields:', Object.keys(techData));
-            console.log('Email field value:', techData.email);
-            console.log('UserEmail field value:', techData.userEmail);
-            console.log('TechnicianEmail field value:', techData.technicianEmail);
-            console.log('ContactEmail field value:', techData.contactEmail);
-            
-            // Get the technician's login email (the email they used to register/login)
-            const loginEmail = techData.email || techData.userEmail || techData.technicianEmail || techData.contactEmail;
-            console.log('Technician login email:', loginEmail);
-            
-            // Debug price fields - look for costpervisit specifically
-            console.log('CostPerVisit field value:', techData.costpervisit);
-            console.log('BasePrice field value:', techData.basePrice);
-            console.log('VisitPrice field value:', techData.visitPrice);
-            console.log('Price field value:', techData.price);
-            
-            // Try to get price from costpervisit first, then fallback to other fields
-            const price = techData.costpervisit || techData.basePrice || techData.visitPrice || techData.price;
-            console.log('Selected price value:', price);
-            
-            // Use the correct field names based on the technician document structure
-            // Try multiple possible field names for email
-            bookingData.technicianEmail = loginEmail || 'N/A';
-            
-            // Try multiple specialization field names
-            const specialization = techData.specialization || 
-                                 techData.service || 
-                                 techData.services || 
-                                 techData.category || 
-                                 techData.type || 
-                                 techData.jobType || 
-                                 techData.workType || 
-                                 techData.profession || 
-                                 techData.trade || 
-                                 techData.skill || 
-                                 techData.skills || 
-                                 'N/A';
-            
-            bookingData.specialization = specialization;
-
-            // Use the technician's base price from their profile
-            bookingData.price = price || 'N/A';
-            
-            console.log('Technician details mapped:', {
-              email: bookingData.technicianEmail,
-              specialization: bookingData.specialization,
-              price: bookingData.price,
-              allFields: Object.keys(techData)
-            });
-            console.log('=== END TECHNICIAN DATA DEBUG ===');
-          } else {
-            console.log('⚠️ Technician document not found for ID:', bookingData.technicianId);
-            bookingData.technicianEmail = 'N/A';
-            bookingData.specialization = 'N/A';
-            bookingData.price = 'N/A';
-          }
-        } catch (error) {
-          console.error('❌ Error fetching technician details:', error);
-          console.error('Error details:', {
-            code: error.code,
-            message: error.message,
-            stack: error.stack
-          });
-          bookingData.technicianEmail = 'N/A';
-          bookingData.specialization = 'N/A';
-          bookingData.price = 'N/A';
-        }
-        
-        // Debug: Log the final booking data
-        console.log('Final booking data with address:', bookingData.address);
-        console.log('=== END COMPLETED BOOKING DATA DEBUG ===');
-        
-        return bookingData;
-      })
-    );
+    // Map booking data with proper field mapping
+    const bookingsWithTechDetails = snapshot.docs.map(doc => {
+      const bookingData = { id: doc.id, ...doc.data() };
+      
+      console.log('=== COMPLETED BOOKING DATA DEBUG ===');
+      console.log('Raw booking data:', bookingData);
+      console.log('All booking fields:', Object.keys(bookingData));
+      
+      // Map technician email from various possible fields in the booking
+      bookingData.technicianEmail = bookingData.technicianEmail || 
+                                   bookingData.technician_email || 
+                                   bookingData.techEmail || 
+                                   bookingData.tech_email || 
+                                   'N/A';
+      
+      // Map specialization from various possible fields in the booking
+      bookingData.specialization = bookingData.specialization || 
+                                  bookingData.service || 
+                                  bookingData.services || 
+                                  bookingData.category || 
+                                  bookingData.type || 
+                                  bookingData.jobType || 
+                                  bookingData.workType || 
+                                  bookingData.profession || 
+                                  bookingData.trade || 
+                                  bookingData.skill || 
+                                  bookingData.skills || 
+                                  'N/A';
+      
+      // Map price from various possible fields in the booking
+      bookingData.price = bookingData.price || 
+                         bookingData.cost || 
+                         bookingData.costPerVisit || 
+                         bookingData.costpervisit || 
+                         bookingData.basePrice || 
+                         bookingData.base_price || 
+                         bookingData.visitPrice || 
+                         bookingData.visit_price || 
+                         'N/A';
+      
+      console.log('Mapped booking data:', {
+        technicianEmail: bookingData.technicianEmail,
+        specialization: bookingData.specialization,
+        price: bookingData.price
+      });
+      
+      return bookingData;
+    });
     
     bookings.value = bookingsWithTechDetails;
   } catch (e) {
