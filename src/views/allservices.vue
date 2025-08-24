@@ -74,7 +74,7 @@
                <div class="member-details">
                  <div class="detail-item rating-item">
                    <i class="fas fa-star"></i>
-                   <span>{{ technician.rating || 0 }}</span>
+                   <span>{{ technician.rating || 'No reviews' }}</span>
                  </div>
                  <div class="detail-item location-item">
                    <i class="fas fa-map-marker-alt"></i>

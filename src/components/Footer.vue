@@ -43,6 +43,7 @@
           <li><router-link to="/electricity">{{ $t('footerElectricity') }}</router-link></li>
           <li><router-link to="/wallfinishing">{{ $t('footerWallFinishing') }}</router-link></li>
           <li><router-link to="/carpentry">{{ $t('footerCarpentry') }}</router-link></li>
+          <li><router-link to="/elecTechnicians">{{ $t('footerElectrician') }}</router-link></li>
         </ul>
       </div>
       <!-- Contact Us -->

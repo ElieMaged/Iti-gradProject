@@ -32,7 +32,7 @@
           <div class="member-details">
             <div class="detail-item rating-item">
               <i class="fas fa-star"></i>
-              <span>{{ member.rating }}</span>
+              <span>{{ member.rating || 'No reviews' }}</span>
             </div>
             <div class="detail-item location-item">
               <i class="fas fa-map-marker-alt"></i>

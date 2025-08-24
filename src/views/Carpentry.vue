@@ -69,7 +69,7 @@
               <div class="member-details">
                 <div class="detail-item rating-item">
                   <i class="fa-solid fa-star"></i>
-                  <span>{{ technician.rating || 0 }}</span>
+                  <span>{{ technician.rating || 'No reviews' }}</span>
                 </div>
                 <div class="detail-item location-item">
                   <i class="fa-solid fa-location-dot"></i>
@@ -136,15 +136,23 @@ const pageSize = 12
 
 async function fetchTechnicians() {
   try {
+    loading.value = true
     const querySnapshot = await getDocs(collection(db, 'technicians'))
-    const allTechnicians = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-      .filter(tech => tech.specialization === 'Carpentry' || tech.specialization === 'Carpenter') // Only include carpentry technicians
+    const allTechnicians = querySnapshot.docs
+      .map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        rating: 0 // Initialize with default rating
+      }))
+      .filter(tech => tech.specialization === 'Carpentry' || tech.specialization === 'Carpenter')
     
     // Calculate ratings for all technicians
     const techniciansWithRatings = await calculateTechnicianRatings(allTechnicians)
     firebaseTechnicians.value = techniciansWithRatings
   } catch (error) {
     console.error('Error fetching technicians:', error)
+  } finally {
+    loading.value = false
   }
 }
 

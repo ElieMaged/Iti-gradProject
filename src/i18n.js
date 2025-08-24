@@ -4,6 +4,7 @@ const messages = {
   en: {
     hello: "Hello,",
     addressPlaceholder:"Address",
+    footerElectrician:"Electrical Appliances",
     //welcome page
     welcomeToBoltfix: "Welcome to BoltFix",
   chooseYourRole: "Choose your role to get started",
@@ -1350,8 +1351,11 @@ terms: {
 
   ar: {
     //welcome page
+
     hello: "مرحبًا",
     welcomeToBoltfix: "مرحبًا بك في بولت فيكس",
+    footerElectrician:"فني الاجهزة الكهربائية",
+    
   chooseYourRole: "اختر دورك",
   registerAsUser: "سجل كمستخدم",
   registerAsTechnician: "سجل كفني",

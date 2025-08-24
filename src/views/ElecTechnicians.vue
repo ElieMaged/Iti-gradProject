@@ -69,9 +69,8 @@
               <!-- Details Row -->
               <div class="member-details">
                 <div class="detail-item rating-item">
-                  <i class="fa-solid fa-star"></i>
-                  <span v-if="technician.rating > 0">{{ technician.rating }}/5</span>
-                  <span v-else>No reviews</span>
+                  <i class="fas fa-star"></i>
+                  <span>{{ technician.rating || 'No reviews' }}</span>
                 </div>
                 <div class="detail-item location-item">
                   <i class="fa-solid fa-location-dot"></i>
