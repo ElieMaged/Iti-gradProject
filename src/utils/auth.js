@@ -68,6 +68,7 @@ async function determineUserRoleFromFirestore(user) {
 
 // Initialize authentication state
 export function initializeAuth() {
+  console.log('=== INITIALIZING AUTH ===');
   return new Promise((resolve) => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       console.log('Auth state changed:', user ? 'User logged in' : 'User logged out');
@@ -102,6 +103,7 @@ export function initializeAuth() {
       }
       
       authState.isLoading = false;
+      console.log('=== AUTH INITIALIZATION COMPLETE ===');
       resolve();
     });
     

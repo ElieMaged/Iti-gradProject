@@ -69,7 +69,7 @@
               <div class="member-details">
                 <div class="detail-item rating-item">
                   <i class="fa-solid fa-star"></i>
-                  <span>{{ technician.rating }}</span>
+                  <span>{{ technician.rating || 0 }}</span>
                 </div>
                 <div class="detail-item location-item">
                   <i class="fa-solid fa-location-dot"></i>
@@ -117,6 +117,7 @@ import profile6 from '../assets/profile/6.png'
 import profile7 from '../assets/profile/7.png'
 import profile8 from '../assets/profile/8.png'
 import plumbingBg from '../assets/Professions/Electricity.jpg'
+import { calculateTechnicianRatings } from '../utils/ratingCalculator'
 
 const router = useRouter()
 const loading = ref(true)
@@ -137,9 +138,13 @@ async function fetchTechnicians() {
   try {
     loading.value = true
     const querySnapshot = await getDocs(collection(db, 'technicians'))
-    firebaseTechnicians.value = querySnapshot.docs
+    const allTechnicians = querySnapshot.docs
       .map(doc => ({ id: doc.id, ...doc.data() }))
       .filter(tech => tech.specialization === 'Electricity')
+    
+    // Calculate ratings for all technicians
+    const techniciansWithRatings = await calculateTechnicianRatings(allTechnicians)
+    firebaseTechnicians.value = techniciansWithRatings
   } catch (error) {
     console.error('Error fetching technicians:', error)
   } finally {
@@ -161,7 +166,7 @@ const mergedTechnicians = computed(() => {
       bgColor: '#E8E4F3', // or any default color
       price: fbTech.basePrice,
       description: fbTech.bio,
-      rating: fbTech.averageRating || fbTech.rating || 0,
+      rating: fbTech.rating || 0, // Use the calculated rating from reviews
       specialization: fbTech.specialization,
       government: fbTech.government,
       district: fbTech.district,

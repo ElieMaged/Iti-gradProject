@@ -66,6 +66,7 @@
 <script>
 import { collection, getDocs } from 'firebase/firestore';
 import { db, auth } from '../firebase.js';
+import { calculateTechnicianRatings } from '../utils/ratingCalculator';
 
 export default {
   name: 'ExpertTeam',
@@ -105,7 +106,7 @@ export default {
             name: data.fullName || data.name || 'Unknown Technician',
             image: data.profilePhotoUrl || data.idPhotoUrl || '/images/Avatar.png',
             description: data.bio || data.description || 'Professional technician with years of experience.',
-            rating: data.averageRating || 4.5,
+            rating: 0, // Will be calculated by calculateTechnicianRatings
             specialization: data.specialization || 'General Technician',
             experience: data.experience || data.yearsOfExperience ? `${data.yearsOfExperience || data.experience}+ years` : '5+ years',
             basePrice: data.basePrice || '300',
@@ -116,8 +117,11 @@ export default {
           });
         });
 
-        // Only use Firebase technicians - no stock technicians
-        this.teamMembers = firebaseTechnicians;
+        // Calculate ratings for all technicians
+        const techniciansWithRatings = await calculateTechnicianRatings(firebaseTechnicians);
+        
+        // Only use Firebase technicians with calculated ratings
+        this.teamMembers = techniciansWithRatings;
       } catch (error) {
         console.error('Error fetching technicians:', error);
         // No fallback - only show registered technicians

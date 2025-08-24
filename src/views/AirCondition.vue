@@ -90,6 +90,7 @@ import profile6 from '../assets/profile/6.png'
 import profile7 from '../assets/profile/7.png'
 import profile8 from '../assets/profile/8.png'
 import plumbingBg from '../assets/Professions/Air.jpg'
+import { calculateTechnicianRatings } from '../utils/ratingCalculator'
 
 const router = useRouter()
 // Removed stock technicians - only show registered technicians
@@ -107,9 +108,17 @@ const currentPage = ref(1)
 const pageSize = 12
 
 async function fetchTechnicians() {
-  const querySnapshot = await getDocs(collection(db, 'technicians'))
-  firebaseTechnicians.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-  .filter(tech => tech.specialization === 'Air Conditioning' || tech.specialization === 'AC Technician') // Only include air conditioning technicians
+  try {
+    const querySnapshot = await getDocs(collection(db, 'technicians'))
+    const allTechnicians = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+      .filter(tech => tech.specialization === 'Air Conditioning' || tech.specialization === 'AC Technician') // Only include air conditioning technicians
+    
+    // Calculate ratings for all technicians
+    const techniciansWithRatings = await calculateTechnicianRatings(allTechnicians)
+    firebaseTechnicians.value = techniciansWithRatings
+  } catch (error) {
+    console.error('Error fetching technicians:', error)
+  }
 }
 
 onMounted(fetchTechnicians)
@@ -122,7 +131,8 @@ const mergedTechnicians = computed(() => {
       ...fbTech,
       image: fbTech.profilePhotoUrl || fbTech.idPhotoUrl || profile1, // Use profile photo first, then ID photo as fallback
       name: fbTech.fullName || fbTech.name,
-      price: fbTech.basePrice || fbTech.price
+      price: fbTech.basePrice || fbTech.price,
+      rating: fbTech.rating || 0 // Use the calculated rating from reviews
     })
   })
   console.log('Firebase technicians:', allTechs)

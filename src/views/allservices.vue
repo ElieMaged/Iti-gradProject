@@ -74,7 +74,7 @@
                <div class="member-details">
                  <div class="detail-item rating-item">
                    <i class="fas fa-star"></i>
-                   <span>{{ technician.rating }}</span>
+                   <span>{{ technician.rating || 0 }}</span>
                  </div>
                  <div class="detail-item location-item">
                    <i class="fas fa-map-marker-alt"></i>
@@ -122,6 +122,7 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../firebase.js';
 import { waitForAuth, isAuthenticated } from '../utils/auth';
 import Pagination from '../components/pagination.vue';
+import { calculateTechnicianRatings } from '../utils/ratingCalculator';
 
     export default {
   name: 'AllServices',
@@ -227,7 +228,7 @@ import Pagination from '../components/pagination.vue';
             name: data.fullName || data.name || 'Unknown Technician',
             image: data.profilePhotoUrl || data.idPhotoUrl || data.profileImage || '/images/Avatar.png',
             description: data.bio || data.description || 'Professional technician with years of experience.',
-            rating: data.averageRating || data.rating || 0,
+            rating: 0, // Will be calculated by calculateTechnicianRatings
             price: data.basePrice || data.hourlyRate || 200,
             government: data.government,
             district: data.district,
@@ -257,7 +258,7 @@ import Pagination from '../components/pagination.vue';
                 name: data.fullName || data.name || 'Unknown Technician',
                 image: data.profilePhotoUrl || data.idPhotoUrl || data.profileImage || '/images/Avatar.png',
                 description: data.bio || data.description || 'Professional technician with years of experience.',
-                rating: data.averageRating || data.rating || 0,
+                rating: 0, // Will be calculated by calculateTechnicianRatings
                 price: data.basePrice || data.hourlyRate || 200,
                 government: data.government,
                 district: data.district,
@@ -277,9 +278,12 @@ import Pagination from '../components/pagination.vue';
 
         console.log('Firebase technicians found:', firebaseTechnicians.length);
         
-        // Use only Firebase technicians
-        this.technicians = firebaseTechnicians;
-        console.log('Using Firebase technicians');
+        // Calculate ratings for all technicians
+        const techniciansWithRatings = await calculateTechnicianRatings(firebaseTechnicians);
+        
+        // Use only Firebase technicians with calculated ratings
+        this.technicians = techniciansWithRatings;
+        console.log('Using Firebase technicians with calculated ratings');
       } catch (error) {
         console.error('Error fetching technicians:', error);
         // Handle Firebase errors gracefully
