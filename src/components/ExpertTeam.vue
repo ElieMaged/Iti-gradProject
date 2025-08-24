@@ -302,7 +302,7 @@ export default {
 /* Top Section - Image Area */
 .card-top-section {
   width: 100%;
-  height: 200px;
+  height: 250px;
   background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
   display: flex;
   align-items: center;
@@ -366,15 +366,15 @@ export default {
   font-size: 0.9rem;
   color: #666666;
   line-height: 1.4;
-  margin-bottom: 0px;
+  margin: 0.5rem 0 0.5rem;
   font-family: Outfit, sans-serif;
   flex: 1;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  min-height: 2.8em; /* 2 lines with line-height 1.4 */
-  max-height: 2.8em; /* 2 lines with line-height 1.4 */
+  min-height: 1.4em;
+  max-height: 1.4em;
 }
 
 .dark .member-description {

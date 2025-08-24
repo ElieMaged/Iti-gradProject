@@ -34,9 +34,10 @@
           {{ isDetecting ? ($t('detecting') || 'Detecting...') : ($t('detectMyLocation') || 'Detect My Location') }}
         </button>
         <button 
-          @click="detectUserLocation" 
+          @click.stop.prevent="onCenterAddressClick" 
           class="center-address-btn"
-          :disabled="isDetecting"
+          :disabled="!hasAddress || isDetecting"
+          type="button"
         >
           <i class="fas fa-map-marker-alt"></i>
           {{ $t('centerOnAddress') || 'Center on Address' }}
@@ -219,11 +220,12 @@ const loadLeafletJS = () => {
 const detectUserLocation = async () => {
   if (!navigator.geolocation) {
     detectionError.value = 'Geolocation is not supported by this browser.'
-    return
+    return false
   }
-
+  
+  const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor)
   isDetecting.value = true
-  detectionError.value = ''
+  detectionError.value = 'Detecting your location... (Please allow location access)'
   locationDetected.value = false
 
   try {
@@ -237,87 +239,80 @@ const detectUserLocation = async () => {
       await new Promise(resolve => setTimeout(resolve, 500))
     }
 
-    const position = await new Promise((resolve, reject) => {
-      navigator.geolocation.getCurrentPosition(resolve, reject, {
-        enableHighAccuracy: true,
-        timeout: 20000,
-        maximumAge: 0,
-        distanceFilter: 10,
-        useSignificantChanges: true
-      })
-    })
-
-    const { latitude, longitude, accuracy, altitude, altitudeAccuracy, heading, speed } = position.coords
-    
-    console.log('Location details:', {
-      latitude,
-      longitude,
-      accuracy: `${accuracy} meters`,
-      altitude: altitude ? `${altitude} meters` : 'Not available',
-      altitudeAccuracy: altitudeAccuracy ? `${altitudeAccuracy} meters` : 'Not available',
-      heading: heading ? `${heading}° from north` : 'Not available',
-      speed: speed ? `${speed} m/s` : 'Not available',
-      timestamp: new Date(position.timestamp).toLocaleString()
+    // Get current position with best available accuracy
+    const position = await getPositionWithOptions({
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 0
     })
     
-    // Update map to user location
-    updateUserLocation(latitude, longitude)
+    const { latitude, longitude, accuracy } = position.coords
     
-    // Adjust accuracy threshold and provide more specific guidance
-    if (accuracy > 500) { // Increased threshold to 500 meters
-      detectionError.value = `Low location accuracy (${Math.round(accuracy)}m). For better results:
-• Move to an open area
-• Enable high-accuracy mode in your device settings
-• Check if location services are enabled for your browser
-• Try refreshing the page if the issue persists`
-    } else if (accuracy > 100) {
-      // For moderate accuracy, show a less prominent warning
-      console.warn(`Moderate location accuracy: ${Math.round(accuracy)}m`)
-      // Don't show error for moderate accuracy, just log it
-    }
-    
-    // Perform reverse geocoding to get address details
-    const addressDetails = await reverseGeocode(latitude, longitude)
-    
-    if (!addressDetails) {
-      throw new Error('Could not determine address for this location')
-    }
-    
-    // Emit the detected coordinates and address details to parent component
-    const locationData = {
+    // Log position details
+    console.log('Location detected:', {
       latitude,
       longitude,
-      accuracy,
-      address: formattedAddress.value,
-      addressDetails
-    }
+      accuracy: `${Math.round(accuracy)}m`,
+      source: position.coords.altitude !== undefined ? 'GPS' : 'Network'
+    })
     
-    emit('locationDetected', locationData)
+    // Update the map with the user's location
+    await updateUserLocation(latitude, longitude)
     
-    // Auto-fill form fields if address details are available
-    if (addressDetails.city) emit('update:city', addressDetails.city)
-    if (addressDetails.area) emit('update:area', addressDetails.area)
-    if (addressDetails.street) emit('update:street', addressDetails.street)
-    if (addressDetails.building) emit('update:building', addressDetails.building)
+    // Clear any previous errors
+    detectionError.value = ''
     
     locationDetected.value = true
-    console.log('Location detection completed successfully')
+    return true
     
   } catch (error) {
     console.error('Error detecting location:', error)
     
-    // Handle specific geolocation errors
-    let errorMessage = 'Failed to detect location'
+    let errorMessage = 'Failed to detect your location. ';
+    
     if (error.code === 1) {
-      errorMessage = 'Location permission denied. Please allow location access in your browser settings.'
+      errorMessage = 'Location permission denied. ' + (isChrome ? 
+        'In Chrome, please follow these steps to enable location access:\n' +
+        '1. Click the lock icon (🔒) in the address bar\n' +
+        '2. Set "Location" to "Allow"\n' +
+        '3. Refresh the page and try again' : 
+        'Please allow location access in your browser settings.')
     } else if (error.code === 2) {
-      errorMessage = 'Location unavailable. Please check your device location settings and try again.'
+      errorMessage = 'Location unavailable. ';
+      if (isChrome) {
+        errorMessage += 'Chrome cannot access your location. Please ensure:\n';
+        errorMessage += '1. Your device location is turned on\n';
+        errorMessage += '2. Chrome has permission to access your location\n';
+        errorMessage += '3. You\'re not in incognito mode (which can block location)';
+      } else {
+        errorMessage += 'Please check your device location settings and try again.';
+      }
     } else if (error.code === 3) {
-      errorMessage = 'Location detection timed out. Please try again in an area with better reception.'
-    } else if (error.message.includes('Network')) {
-      errorMessage = 'Network error. Please check your internet connection and try again.'
+      errorMessage = 'Location detection timed out. ';
+      if (isChrome) {
+        errorMessage += 'Chrome is having trouble getting your location. Please try:\n';
+        errorMessage += '1. Moving to an area with better GPS signal\n';
+        errorMessage += '2. Disabling any VPN or proxy\n';
+        errorMessage += '3. Checking Chrome\'s site settings for location permissions';
+      } else {
+        errorMessage += 'Please try again in an area with better reception.';
+      }
+    } else if (error.message && error.message.includes('Network')) {
+      errorMessage = 'Network error. Please check your internet connection and try again.';
+    } else if (error.message && error.message.includes('timeout')) {
+      errorMessage = 'Location request took too long. ';
+      if (isChrome) {
+        errorMessage += 'Chrome may be waiting for more accurate location data. ';
+        errorMessage += 'Try moving to an area with better GPS signal or using a different browser.';
+      } else {
+        errorMessage += 'Please try again in an area with better reception.';
+      }
     } else {
-      errorMessage = `Location detection failed: ${error.message || 'Unknown error'}`
+      errorMessage = `Location detection failed: ${error.message || 'Unknown error'}`;
+      if (isChrome && error.message.includes('Only secure origins are allowed')) {
+        errorMessage = 'This website needs to be served over HTTPS to access your location. ';
+        errorMessage += 'Please try accessing the site using HTTPS instead of HTTP.';
+      }
     }
     
     detectionError.value = errorMessage
@@ -326,10 +321,17 @@ const detectUserLocation = async () => {
   }
 }
 
-const updateUserLocation = (lat, lng) => {
-  if (!map.value) return
+const updateUserLocation = async (lat, lng) => {
+  if (!map.value) {
+    console.warn('Map not initialized, cannot update location')
+    return
+  }
 
   try {
+    // Show loading state
+    isDetecting.value = true
+    detectionError.value = ''
+    
     // Remove existing user marker
     if (userMarker.value) {
       map.value.removeLayer(userMarker.value)
@@ -345,16 +347,60 @@ const updateUserLocation = (lat, lng) => {
       })
     }).addTo(map.value)
 
-    // Center map on user location
+    // Center map on user location with appropriate zoom
     map.value.setView([lat, lng], 15)
-
+    
     // Add popup to user marker
     userMarker.value.bindPopup('Your current location').openPopup()
     
-    console.log('User location updated on map')
+    // Get address details using reverse geocoding
+    console.log('Reverse geocoding coordinates:', { lat, lng })
+    const addressDetails = await reverseGeocode(lat, lng)
+    console.log('Reverse geocoding results:', addressDetails)
+    
+    // Emit update events for each address component
+    if (addressDetails.city) emit('update:city', addressDetails.city)
+    if (addressDetails.area) emit('update:area', addressDetails.area)
+    if (addressDetails.street) emit('update:street', addressDetails.street)
+    if (addressDetails.building) emit('update:building', addressDetails.building)
+    
+    // Emit the complete location detected event
+    emit('locationDetected', { 
+      lat, 
+      lng, 
+      address: addressDetails,
+      formattedAddress: [
+        addressDetails.building,
+        addressDetails.street,
+        addressDetails.area,
+        addressDetails.city
+      ].filter(Boolean).join(', ')
+    })
+    
+    // Update UI state
+    locationDetected.value = true
+    detectionError.value = ''
+    
   } catch (error) {
-    console.error('Error updating user location on map:', error)
+    console.error('Error updating user location:', error)
+    detectionError.value = 'Location detected, but could not get address details. Please enter them manually.'
+    
+    // Still emit the basic location data if reverse geocoding fails
+    emit('locationDetected', { 
+      lat, 
+      lng,
+      error: 'Failed to get address details',
+      errorDetails: error.message
+    })
+  } finally {
+    isDetecting.value = false
   }
+}
+
+const onCenterAddressClick = (event) => {
+  event.preventDefault()
+  event.stopPropagation()
+  centerOnAddress()
 }
 
 const centerOnAddress = async () => {
@@ -363,9 +409,20 @@ const centerOnAddress = async () => {
   try {
     const address = formattedAddress.value
     
-    // Use Nominatim for forward geocoding
+    // Construct a more specific query with address components
+    const queryParts = []
+    if (props.building) queryParts.push(props.building)
+    if (props.street) queryParts.push(props.street)
+    if (props.area) queryParts.push(props.area)
+    if (props.city) queryParts.push(props.city)
+    
+    const query = queryParts.join(', ')
+    
+    console.log('Geocoding address:', query)
+    
+    // Use Nominatim for forward geocoding with more specific parameters
     const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&countrycodes=eg&limit=1`,
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=eg&limit=1&addressdetails=1`,
       {
         headers: {
           'Accept': 'application/json',
@@ -380,41 +437,75 @@ const centerOnAddress = async () => {
     
     const data = await response.json()
     
-    if (data && data.length > 0) {
-      const result = data[0]
-      const lat = parseFloat(result.lat)
-      const lon = parseFloat(result.lon)
-      
-      // Remove existing address marker
-      if (addressMarker.value) {
-        map.value.removeLayer(addressMarker.value)
-      }
-
-      // Add address marker
-      addressMarker.value = L.marker([lat, lon], {
-        icon: L.divIcon({
-          className: 'address-marker',
-          html: '<i class="fas fa-map-marker-alt" style="color: #dc3545; font-size: 20px;"></i>',
-          iconSize: [20, 20],
-          iconAnchor: [10, 20]
-        })
-      }).addTo(map.value)
-
-      // Center map on address
-      map.value.setView([lat, lon], 15)
-
-      // Add popup to address marker
-      addressMarker.value.bindPopup(`Address: ${address}`).openPopup()
-      
-      console.log('Address centered successfully:', { lat, lon, address })
+    if (!data || data.length === 0) {
+      throw new Error('No results found for the provided address')
+    }
+    
+    console.log('Geocoding result:', data[0])
+    
+    // Process the first result
+    const result = data[0]
+    const coords = [parseFloat(result.lat), parseFloat(result.lon)]
+    const addressDetails = result.address || {}
+    
+    console.log('Found coordinates:', coords, 'for address:', result.display_name)
+    
+    // Remove existing address marker if any
+    if (addressMarker.value) {
+      map.value.removeLayer(addressMarker.value)
+    }
+    
+    // Add marker for the address with a different color
+    addressMarker.value = L.marker(coords, {
+      icon: L.divIcon({
+        className: 'address-marker',
+        html: '<i class="fas fa-map-pin" style="color: #dc3545; font-size: 24px;"></i>',
+        iconSize: [24, 24],
+        iconAnchor: [12, 24]
+      })
+    }).addTo(map.value)
+    
+    // Center map on the address with a reasonable zoom level
+    map.value.setView(coords, 16)
+    
+    // Create a more informative popup with address details
+    const popupContent = `
+      <div style="min-width: 200px;">
+        <strong>${result.display_name || 'Location'}</strong>
+        <div style="margin-top: 8px; font-size: 0.9em;">
+          ${addressDetails.road ? `<div>${addressDetails.road}</div>` : ''}
+          ${addressDetails.neighbourhood ? `<div>${addressDetails.neighbourhood}</div>` : ''}
+          ${addressDetails.suburb ? `<div>${addressDetails.suburb}</div>` : ''}
+          <div>${[addressDetails.city, addressDetails.town, addressDetails.village].filter(Boolean)[0] || ''}</div>
+        </div>
+      </div>
+    `
+    
+    addressMarker.value.bindPopup(popupContent).openPopup()
+    
+    // If the coordinates are very far from Egypt, show a warning
+    const isInEgypt = coords[0] > 22 && coords[0] < 32 && coords[1] > 25 && coords[1] < 37
+    if (!isInEgypt) {
+      console.warn('The geocoded location appears to be outside of Egypt. The address might be incorrect.')
+      detectionError.value = 'The address might be outside of Egypt. Please check the location on the map.'
     } else {
-      // Fallback to Cairo if geocoding fails
+      detectionError.value = ''
+    }
+    
+    return true
+  } catch (error) {
+    console.error('Error centering on address:', error)
+    // Fallback: try to center on a default location (Cairo)
+    if (map.value) {
       const cairoCoords = [30.0444, 31.2357]
+      map.value.setView(cairoCoords, 12)
+      detectionError.value = 'Could not find the exact address. Showing Cairo area instead.'
       
+      // Add a marker for Cairo
       if (addressMarker.value) {
         map.value.removeLayer(addressMarker.value)
       }
-
+      
       addressMarker.value = L.marker(cairoCoords, {
         icon: L.divIcon({
           className: 'address-marker',
@@ -423,20 +514,90 @@ const centerOnAddress = async () => {
           iconAnchor: [10, 20]
         })
       }).addTo(map.value)
-
-      map.value.setView(cairoCoords, 12)
-      addressMarker.value.bindPopup(`Address: ${address} (showing Cairo area)`).openPopup()
       
-      console.log('Geocoding failed, showing Cairo area')
+      addressMarker.value.bindPopup('Cairo, Egypt (default location)').openPopup()
+      
+      // Return false to indicate fallback was used
+      return false
     }
     
+    // If we get here, there was an error and we couldn't use the fallback
+    return false
+  }
+}
+
+// Helper function to get position with retries and better error handling
+const getPositionWithOptions = async (options, retryCount = 0) => {
+  const maxRetries = 2;
+  const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+  
+  try {
+    console.log('Getting position with options:', options, 'Retry:', retryCount);
+    
+    const position = await new Promise((resolve, reject) => {
+      const timeoutId = setTimeout(() => {
+        reject(new Error('Location request timed out'));
+      }, options.timeout + 2000);
+      
+      const success = (position) => {
+        clearTimeout(timeoutId);
+        console.log('Position obtained:', {
+          coords: position.coords,
+          timestamp: new Date(position.timestamp).toISOString()
+        });
+        resolve(position);
+      };
+      
+      const error = (error) => {
+        clearTimeout(timeoutId);
+        console.error('Geolocation error:', {
+          code: error.code,
+          message: error.message,
+          PERMISSION_DENIED: error.PERMISSION_DENIED,
+          POSITION_UNAVAILABLE: error.POSITION_UNAVAILABLE,
+          TIMEOUT: error.TIMEOUT
+        });
+        reject(error);
+      };
+      
+      // For Chrome, try watchPosition first as it sometimes works better
+      if (isChrome) {
+        const watchId = navigator.geolocation.watchPosition(
+          (pos) => {
+            navigator.geolocation.clearWatch(watchId);
+            success(pos);
+          },
+          error,
+          options
+        );
+        
+        // Fallback to getCurrentPosition if watchPosition doesn't respond
+        setTimeout(() => {
+          navigator.geolocation.clearWatch(watchId);
+          navigator.geolocation.getCurrentPosition(success, error, options);
+        }, options.timeout / 2);
+      } else {
+        navigator.geolocation.getCurrentPosition(success, error, options);
+      }
+    });
+    
+    return position;
+    
   } catch (error) {
-    console.error('Error centering on address:', error)
-    // Fallback: try to center on a default location (Cairo)
-    if (map.value) {
-      const cairoCoords = [30.0444, 31.2357]
-      map.value.setView(cairoCoords, 10)
+    // Retry logic for transient errors
+    if (retryCount < maxRetries && 
+        (error.code === error.TIMEOUT || 
+         error.code === error.POSITION_UNAVAILABLE ||
+         error.message.includes('timeout'))) {
+      console.log(`Retrying location detection (${retryCount + 1}/${maxRetries})...`);
+      // Increase timeout for retry
+      return getPositionWithOptions({
+        ...options,
+        timeout: options.timeout + 5000,
+        enableHighAccuracy: retryCount > 0 ? false : options.enableHighAccuracy
+      }, retryCount + 1);
     }
+    throw error;
   }
 }
 

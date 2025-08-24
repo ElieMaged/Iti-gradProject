@@ -430,7 +430,7 @@ function getLocationDisplay(technician) {
 }
 .card-top-section {
   width: 100%;
-  height: 200px;
+  height: 250px;
   background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
   display: flex;
   align-items: center;
@@ -480,7 +480,7 @@ function getLocationDisplay(technician) {
   font-size: 0.9rem;
   color: #666666;
   line-height: 1.4;
-  margin: 0.5rem 0 1rem;
+  margin: 0.5rem 0 0.5rem;
   font-family: Outfit, sans-serif;
   flex: 1;
   display: -webkit-box;
@@ -489,8 +489,8 @@ function getLocationDisplay(technician) {
   line-clamp: 2;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-height: 2.8em;
-  min-height: 2.8em;
+  max-height: 1.4em;
+  min-height: 1.4em;
   padding: 0 2px;
 }
 .member-details {

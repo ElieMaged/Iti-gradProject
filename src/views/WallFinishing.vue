@@ -474,7 +474,7 @@ const heroBackgroundStyle = computed(() => {
 }
 .card-top-section {
   width: 100%;
-  height: 200px;
+  height: 250px;
   background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
   display: flex;
   align-items: center;
@@ -530,9 +530,9 @@ const heroBackgroundStyle = computed(() => {
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-height: 2.8em; /* 2 lines with line-height 1.4 */
-  min-height: 2.8em;
-  margin: 0.5rem 0 1rem;
+  max-height: 1.4em; /* 2 lines with line-height 1.4 */
+  min-height: 1.4em;
+  margin: 0.5rem 0 0.5rem;
   font-family: Outfit, sans-serif;
   flex: 1;
 }
