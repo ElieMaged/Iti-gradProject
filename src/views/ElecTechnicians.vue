@@ -70,7 +70,8 @@
               <div class="member-details">
                 <div class="detail-item rating-item">
                   <i class="fa-solid fa-star"></i>
-                  <span>{{ technician.rating || 0 }}</span>
+                  <span v-if="technician.rating > 0">{{ technician.rating }}/5</span>
+                  <span v-else>No reviews</span>
                 </div>
                 <div class="detail-item location-item">
                   <i class="fa-solid fa-location-dot"></i>
@@ -107,7 +108,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { collection, getDocs } from 'firebase/firestore'
+import { collection, getDocs, query, where, orderBy } from 'firebase/firestore'
 import { db, auth } from '../firebase'
 import { useRouter } from 'vue-router'
 import SearchBar from '../components/SearchBar.vue'
@@ -141,9 +142,34 @@ async function fetchTechnicians() {
   try {
     loading.value = true
     const querySnapshot = await getDocs(collection(db, 'technicians'))
-    firebaseTechnicians.value = querySnapshot.docs
+    const technicians = querySnapshot.docs
       .map(doc => ({ id: doc.id, ...doc.data() }))
-      .filter(tech => tech.specialization === 'Electrical Appliances') // Only include registered technicians
+      .filter(tech => tech.specialization === 'Electrical Appliances')
+    
+    // Fetch reviews for each technician to calculate average rating
+    for (let technician of technicians) {
+      try {
+        const reviewsQuery = query(
+          collection(db, 'reviews'),
+          where('technicianId', '==', technician.id),
+          orderBy('createdAt', 'desc')
+        )
+        const reviewsSnapshot = await getDocs(reviewsQuery)
+        const reviews = reviewsSnapshot.docs.map(doc => doc.data())
+        
+        if (reviews.length > 0) {
+          const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0)
+          technician.averageRating = Math.round((totalRating / reviews.length) * 10) / 10
+        } else {
+          technician.averageRating = 0
+        }
+      } catch (error) {
+        console.error(`Error fetching reviews for technician ${technician.id}:`, error)
+        technician.averageRating = 0
+      }
+    }
+    
+    firebaseTechnicians.value = technicians
   } catch (error) {
     console.error('Error fetching technicians:', error)
   } finally {
@@ -165,7 +191,7 @@ const mergedTechnicians = computed(() => {
       bgColor: '#E8E4F3', // or any default color
       price: fbTech.basePrice,
       description: fbTech.bio,
-      rating: fbTech.averageRating || fbTech.rating || 0,
+      rating: fbTech.averageRating || 0,
       specialization: fbTech.specialization,
       government: fbTech.government, // Added government field
       district: fbTech.district, // Added district field

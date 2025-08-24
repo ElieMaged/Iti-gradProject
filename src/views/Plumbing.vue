@@ -70,7 +70,8 @@
               <div class="member-details">
                 <div class="detail-item rating-item">
                   <i class="fa-solid fa-star"></i>
-                  <span>{{ technician.rating }}</span>
+                  <span v-if="technician.rating > 0">{{ technician.rating }}/5</span>
+                  <span v-else>No reviews</span>
                 </div>
                 <div class="detail-item location-item">
                   <i class="fa-solid fa-location-dot"></i>
@@ -86,31 +87,18 @@
           </div>
         </div>
 
-        <!-- Pagination Controls -->
-        <div v-if="totalPages > 1" class="pagination">
-          <button 
-            class="pagination-btn" 
-            :disabled="currentPage === 1" 
-            @click="goToPage(currentPage - 1)"
-          >
-            &laquo;
-          </button>
-          <button 
-            v-for="page in totalPages" 
-            :key="page" 
-            class="pagination-btn" 
-            :class="{ active: page === currentPage }" 
-            @click="goToPage(page)"
-          >
-            {{ page }}
-          </button>
-          <button 
-            class="pagination-btn" 
-            :disabled="currentPage === totalPages" 
-            @click="goToPage(currentPage + 1)"
-          >
-            &raquo;
-          </button>
+        <!-- Pagination -->
+        <div v-if="totalPages > 1" class="pagination-container">
+          <div class="pagination-info">
+            Showing {{ (currentPage - 1) * pageSize + 1 }} - 
+            {{ Math.min(currentPage * pageSize, filteredTechnicians.length) }} 
+            of {{ filteredTechnicians.length }} technicians
+          </div>
+          <Pagination 
+            :current-page="currentPage"
+            :total-pages="totalPages"
+            @page-changed="goToPage"
+          />
         </div>
     </section>
 
@@ -123,6 +111,7 @@ import { collection, getDocs } from 'firebase/firestore'
 import { db, auth } from '../firebase'
 import { useRouter } from 'vue-router'
 import SearchBar from '../components/SearchBar.vue'
+import Pagination from '../components/pagination.vue'
 import profile1 from '../assets/profile/1.jpg'
 import plumbingBg from '../assets/Professions/Plumbing.jpg'
 import { calculateAverageRatingsForTechnicians } from '../utils/ratingCalculator'

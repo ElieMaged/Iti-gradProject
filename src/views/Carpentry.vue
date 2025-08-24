@@ -29,7 +29,33 @@
         </div>
 
         <div class="team-cards">
-          <div v-for="technician in paginatedTechnicians" :key="technician.id" class="team-card">
+          <!-- Loading Skeleton Cards -->
+          <div v-if="loading" v-for="n in 8" :key="`skeleton-${n}`" class="team-card skeleton-card">
+            <div class="card-top-section skeleton-image"></div>
+            <div class="card-bottom-section">
+              <div class="skeleton-name"></div>
+              <div class="member-specialization"></div>
+              <div class="skeleton-description"></div>
+              <div class="member-details">
+                <div class="detail-item rating-item">
+                  <i class="fa-solid fa-star"></i>
+                  <span class="skeleton-description short"></span>
+                </div>
+                <div class="detail-item location-item">
+                  <i class="fa-solid fa-location-dot"></i>
+                  <span class="skeleton-description short"></span>
+                </div>
+                <div class="detail-item price-item">
+                  <i class="fa-solid fa-dollar-sign"></i>
+                  <span class="skeleton-description short"></span>
+                </div>
+              </div>
+              <button class="view-profile-btn skeleton-button"></button>
+            </div>
+          </div>
+
+          <!-- Actual Technician Cards -->
+          <div v-else v-for="technician in paginatedTechnicians" :key="technician.id" class="team-card">
             <!-- Top Section - Image Area -->
             <div class="card-top-section">
               <img :src="technician.image" :alt="technician.name" class="member-photo" />
@@ -43,7 +69,8 @@
               <div class="member-details">
                 <div class="detail-item rating-item">
                   <i class="fa-solid fa-star"></i>
-                  <span>{{ technician.averageRating || 0 }}</span>
+                  <span v-if="technician.averageRating > 0">{{ technician.averageRating }}/5</span>
+                  <span v-else>No reviews</span>
                 </div>
                 <div class="detail-item location-item">
                   <i class="fa-solid fa-location-dot"></i>
@@ -96,6 +123,7 @@ import plumbingBg from '../assets/Professions/Carpentry.jpg'
 import { calculateAverageRatingsForTechnicians } from '../utils/ratingCalculator'
 
 const router = useRouter()
+const loading = ref(true)
 // Removed stock technicians - only show registered technicians
 const firebaseTechnicians = ref([])
 const searchQuery = ref('')
@@ -111,13 +139,20 @@ const currentPage = ref(1)
 const pageSize = 12
 
 async function fetchTechnicians() {
-  const querySnapshot = await getDocs(collection(db, 'technicians'))
-  const allTechnicians = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-    .filter(tech => tech.specialization === 'Carpentry' || tech.specialization === 'Carpenter') // Only include carpentry technicians
-  
-  // Calculate average ratings for all technicians
-  const techniciansWithRatings = await calculateAverageRatingsForTechnicians(allTechnicians)
-  firebaseTechnicians.value = techniciansWithRatings
+  try {
+    loading.value = true
+    const querySnapshot = await getDocs(collection(db, 'technicians'))
+    const allTechnicians = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+      .filter(tech => tech.specialization === 'Carpentry' || tech.specialization === 'Carpenter') // Only include carpentry technicians
+    
+    // Calculate average ratings for all technicians
+    const techniciansWithRatings = await calculateAverageRatingsForTechnicians(allTechnicians)
+    firebaseTechnicians.value = techniciansWithRatings
+  } catch (error) {
+    console.error('Error fetching technicians:', error)
+  } finally {
+    loading.value = false
+  }
 }
 
 onMounted(fetchTechnicians)
@@ -189,8 +224,8 @@ const filteredTechnicians = computed(() => {
   // Rating filtering
   if (ratingFilter.value && ratingFilter.value !== '') {
     list = list.filter(t => {
-      if (!t.rating) return false;
-      const rating = parseFloat(t.rating);
+      if (!t.averageRating) return false;
+      const rating = parseFloat(t.averageRating);
       
       switch (ratingFilter.value) {
         case '2-3':
@@ -211,7 +246,7 @@ const filteredTechnicians = computed(() => {
   } else if (sortOption.value === 'priceHigh') {
     list = [...list].sort((a, b) => b.price - a.price)
   } else if (sortOption.value === 'rating') {
-    list = [...list].sort((a, b) => b.rating - a.rating)
+    list = [...list].sort((a, b) => b.averageRating - a.averageRating)
   }
   return list
 })
