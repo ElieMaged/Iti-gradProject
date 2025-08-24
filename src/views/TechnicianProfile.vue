@@ -106,11 +106,7 @@
                 {{ $t('selectDateToSeeSlots') }}
               </div>
             </div>
-            <!-- Time filtering info message -->
-            <div v-if="selectedDate && availableTimeSlots.length > 0 && isToday" class="time-filtering-info">
-              <i class="fas fa-info-circle"></i>
-              <span>{{ $t('pastTimesFiltered') || 'Past time slots are automatically filtered out for today' }}</span>
-            </div>
+
           </div>
           <div class="visit-price">
             <span class="price-label">{{ $t('visitPrice') }}:</span>
