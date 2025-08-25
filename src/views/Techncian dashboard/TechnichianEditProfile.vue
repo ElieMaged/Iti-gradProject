@@ -29,8 +29,21 @@
                   <input type="email" id="email" v-model="form.email" required />
                 </div>
                 <div>
-                  <label for="phone">{{ $t('phoneNumberLabel') }}</label>
-                  <input type="text" id="phone" v-model="form.phone" required />
+                  <label for="phone">{{ $t('phoneNumberLabel') }}<span class="required">*</span></label>
+                  <input 
+                    type="tel" 
+                    id="phone" 
+                    v-model="form.phone" 
+                    class="form-input" 
+                    :class="{ 'is-invalid': form.phone && !validateEgyptianPhone(form.phone) }"
+                    inputmode="tel"
+                    :placeholder="$t('phone')" 
+                    required
+                    @input="error = ''"
+                  />
+                  <div v-if="form.phone && !validateEgyptianPhone(form.phone)" class="invalid-feedback">
+                    {{ $t('phoneNumberInvalid') }}
+                  </div>
                 </div>
                 <div>
                   <label for="specialization">{{ $t('specializationLabel') }}</label>
@@ -64,21 +77,39 @@
                   <textarea id="bio" v-model="form.bio" rows="3"></textarea>
                 </div>
                 <div>
-                  <label for="city">{{ $t('cityLabel') }}</label>
-                  <select id="city" v-model="form.government">
+                  <label for="government">{{ $t('cityLabel') }}</label>
+                  <select 
+                    id="government" 
+                    v-model="form.government" 
+                    @change="form.district = ''"
+                    required
+                  >
                     <option value="">{{ $t('selectGovernment') }}</option>
-                    <option value="Cairo">{{ $t('cairo') }}</option>
-                    <option value="Giza">{{ $t('giza') }}</option>
-                    <option value="Alexandria">{{ $t('alexandria') }}</option>
+                    <option 
+                      v-for="gov in governmentOptions" 
+                      :key="gov" 
+                      :value="gov"
+                    >
+                      {{ locale === 'ar' ? governmentNamesAr[gov] || gov : gov }}
+                    </option>
                   </select>
                 </div>
                 <div>
-                  <label for="area">{{ $t('areaLabel') }}</label>
-                  <select id="area" v-model="form.district">
+                  <label for="district">{{ $t('areaLabel') }}</label>
+                  <select 
+                    id="district" 
+                    v-model="form.district"
+                    :disabled="!form.government"
+                    required
+                  >
                     <option value="">{{ $t('selectArea') }}</option>
-                    <option value="Nasr City">{{ $t('nasrCity') }}</option>
-                    <option value="Maadi">{{ $t('maadi') }}</option>
-                    <option value="Dokki">{{ $t('dokki') }}</option>
+                    <option 
+                      v-for="district in districts" 
+                      :key="district" 
+                      :value="district"
+                    >
+                      {{ locale === 'ar' ? (districtsAr[form.government]?.[district] || district) : district }}
+                    </option>
                   </select>
                 </div>
                 <div>
@@ -107,22 +138,32 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed , watch} from 'vue';
 import { useRouter } from 'vue-router';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import TopBar from '../../components/TopBar.vue';
-
+import { useI18n } from 'vue-i18n';
 import { db } from '../../firebase';
 import Sidebar from '../../components/Sidebar.vue';
+import { getGovernmentNames, getDistrictsForGovernment, governmentNamesAr, districtsAr } from '../../data/egyptianLocations';
 
 const router = useRouter();
+const { t } = useI18n();
 const activeMenu = ref('technicianeditprofile');
 const profileImageUrl = ref('https://randomuser.me/api/portraits/men/32.jpg');
 const fileInput = ref(null);
 const loading = ref(false);
 const error = ref(null);
 const currentUser = ref(null);
+
+// Egyptian phone validation: supports local (11 digits starting 01x) and international (+20 or 0020)
+const validateEgyptianPhone = (phone) => {
+  const cleaned = String(phone).replace(/\s|-/g, '');
+  const local = /^01[0125][0-9]{8}$/; // e.g., 010xxxxxxxx, 011xxxxxxxx, 012xxxxxxxx, 015xxxxxxxx
+  const intl = /^(?:\+20|0020)1[0125][0-9]{8}$/; // e.g., +2010xxxxxxxx or 002010xxxxxxxx
+  return local.test(cleaned) || intl.test(cleaned);
+};
 
 const form = ref({
   fullName: '',
@@ -135,6 +176,16 @@ const form = ref({
   government: '',
   district: '',
   willingToTravel: '',
+});
+
+const governmentOptions = getGovernmentNames();
+const districts = computed(() => {
+  return form.value.government ? getDistrictsForGovernment(form.value.government) : [];
+});
+watch(() => form.value.government, () => { form.value.district = ''; })
+
+const locale = computed(() => {
+  return localStorage.getItem('locale') || 'en';
 });
 
 async function fetchTechnicianData() {
@@ -236,6 +287,13 @@ async function saveProfile() {
   try {
     loading.value = true;
     error.value = null;
+
+    // Validate phone number
+    if (form.value.phone && !validateEgyptianPhone(form.value.phone)) {
+      error.value = t('phoneNumberInvalid');
+      loading.value = false;
+      return;
+    }
     
     if (!currentUser.value) {
       error.value = 'User not authenticated';
