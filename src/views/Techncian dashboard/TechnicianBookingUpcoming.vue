@@ -25,23 +25,11 @@
               </div>
             </div>
             
-            <!-- Manual Check Button -->
+            <!-- Auto-checking status -->
             <div class="action-row">
-              <button 
-                @click="checkExpiredBookings" 
-                :disabled="checkingExpired"
-                class="check-expired-btn"
-              >
-                <i v-if="checkingExpired" class="fas fa-spinner fa-spin"></i>
-                <i v-else class="fas fa-clock"></i>
-                {{ checkingExpired ? 'Checking...' : 'Check for Expired Bookings' }}
-              </button>
-              <div v-if="lastCheckResult" class="check-result" :class="lastCheckResult.success ? 'success' : 'error'">
-                {{ lastCheckResult.message }}
-              </div>
               <div class="auto-check-status">
                 <i class="fas fa-sync-alt"></i>
-                <span>Auto-checking every 5 minutes</span>
+                <span>Auto-checking expired bookings every 2 minutes</span>
               </div>
             </div>
 
@@ -60,29 +48,37 @@
                     <th>User Name</th>
                     <th>User Email</th>
                     <th>Technician Name</th>
-                    <th>Technician Email</th>
-                    <th>Specialization</th>
                     <th>Date</th>
                     <th>Time</th>
                     <th>Address</th>
-                    <th>Price</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="booking in filteredBookings" :key="booking.id" class="table-row">
-                    <td>{{ booking.userName }}</td>
-                    <td>{{ booking.userEmail || 'N/A' }}</td>
-                    <td>{{ booking.technicianName }}</td>
-                    <td>{{ booking.technicianEmail || 'N/A' }}</td>
-                    <td>{{ booking.specialization || 'N/A' }}</td>
-                    <td>{{ booking.date }}</td>
-                    <td>{{ booking.time }}</td>
-                    <td>{{ booking.address && booking.address.trim() ? booking.address : 'Address not provided' }}</td>
-                    <td>{{ booking.price || 'N/A' }}</td>
-                    <td class="booking-status">{{ booking.status }}</td>
-                  </tr>
-                </tbody>
+                                         <th>Price</th>
+                     <th>Status</th>
+                     <th>Actions</th>
+                   </tr>
+                 </thead>
+                 <tbody>
+                   <tr v-for="booking in filteredBookings" :key="booking.id" class="table-row">
+                     <td>{{ booking.userName }}</td>
+                     <td>{{ booking.userEmail || 'N/A' }}</td>
+                     <td>{{ booking.technicianName }}</td>
+                     <td>{{ booking.date }}</td>
+                     <td>{{ booking.time }}</td>
+                     <td>{{ booking.address && booking.address.trim() ? booking.address : 'Address not provided' }}</td>
+                     <td>{{ booking.price || 'N/A' }}</td>
+                     <td class="booking-status">{{ booking.status }}</td>
+                     <td>
+                       <button 
+                         @click="markBookingAsCompleted(booking.id)" 
+                         :disabled="markingCompleted === booking.id"
+                         class="complete-btn"
+                       >
+                         <i v-if="markingCompleted === booking.id" class="fas fa-spinner fa-spin"></i>
+                         <i v-else class="fas fa-check"></i>
+                         {{ markingCompleted === booking.id ? 'Marking...' : 'Completed' }}
+                       </button>
+                     </td>
+                   </tr>
+                 </tbody>
               </table>
             </div>
             <div v-else class="empty-state">
@@ -98,7 +94,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, onActivated } from 'vue';
 import { collection, getDocs, query, where, updateDoc, doc, writeBatch, getDoc } from 'firebase/firestore';
-import { getFunctions, httpsCallable } from 'firebase/functions';
+
 import { db } from '../../firebase';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useRouter, useRoute } from 'vue-router';
@@ -111,14 +107,13 @@ const bookings = ref([]);
 const loading = ref(true);
 const error = ref(null);
 const technicianUid = ref(null);
-const checkingExpired = ref(false);
-const lastCheckResult = ref(null);
+
 const showNotification = ref(false);
 const notificationMessage = ref('');
 const notificationType = ref('info');
+const markingCompleted = ref(null);
 
-const functions = getFunctions();
-const moveExpiredBookings = httpsCallable(functions, 'moveExpiredBookings');
+
 
 const filteredBookings = computed(() => {
   const q = searchQuery.value.toLowerCase();
@@ -155,6 +150,36 @@ function getNotificationIcon() {
   }
 }
 
+// Function to mark a specific booking as completed
+async function markBookingAsCompleted(bookingId) {
+  try {
+    markingCompleted.value = bookingId;
+    
+    console.log('🔄 Marking booking as completed:', bookingId);
+    
+    const updateData = { 
+      status: 'complete',
+      completedAt: new Date(),
+      manuallyCompleted: true,
+      completedBy: technicianUid.value
+    };
+    
+    await updateDoc(doc(db, 'bookings', bookingId), updateData);
+    
+    console.log('✅ Successfully marked booking as completed:', bookingId);
+    showToast('✅ Booking marked as completed successfully', 'success');
+    
+    // Refresh the bookings list to show updated state
+    await fetchBookings();
+    
+  } catch (error) {
+    console.error('❌ Error marking booking as completed:', error);
+    showToast('❌ Failed to mark booking as completed', 'error');
+  } finally {
+    markingCompleted.value = null;
+  }
+}
+
 // Function to check and update expired bookings
 async function checkAndUpdateExpiredBookings() {
   try {
@@ -169,22 +194,87 @@ async function checkAndUpdateExpiredBookings() {
     const upcomingSnapshot = await getDocs(upcomingQuery);
     
     console.log('Found upcoming bookings:', upcomingSnapshot.docs.length);
+    console.log('Technician UID:', technicianUid.value);
     
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Set to start of day for comparison
+    // Log all upcoming bookings for debugging
+    upcomingSnapshot.docs.forEach(doc => {
+      const booking = doc.data();
+      console.log('Upcoming booking:', {
+        id: doc.id,
+        date: booking.date,
+        time: booking.time,
+        status: booking.status,
+        technicianId: booking.technicianId
+      });
+    });
     
-    const expiredBookings = [];
+    // Also check if there are any bookings with different status values that might be "upcoming"
+    const allBookingsQuery = query(
+      collection(db, 'bookings'),
+      where('technicianId', '==', technicianUid.value)
+    );
+    const allBookingsSnapshot = await getDocs(allBookingsQuery);
+    
+    console.log('All bookings for technician:', allBookingsSnapshot.docs.length);
+    const statusCounts = {};
+    allBookingsSnapshot.docs.forEach(doc => {
+      const booking = doc.data();
+      const status = booking.status || 'undefined';
+      statusCounts[status] = (statusCounts[status] || 0) + 1;
+    });
+    console.log('Status distribution:', statusCounts);
+    
+          const today = new Date();
+      today.setHours(0, 0, 0, 0); // Set to start of day for comparison
+      
+      console.log('Today (start of day):', today.toDateString());
+      console.log('Today timestamp:', today.getTime());
+      
+      const expiredBookings = [];
     
     upcomingSnapshot.docs.forEach(doc => {
       const booking = doc.data();
-      const bookingDate = new Date(booking.date);
-      bookingDate.setHours(0, 0, 0, 0);
+      
+      // Handle different date formats - booking.date could be a string or timestamp
+      let bookingDate;
+      if (typeof booking.date === 'string') {
+        // If it's a string like "2024-01-15", parse it
+        bookingDate = new Date(booking.date);
+      } else if (booking.date && booking.date.toDate) {
+        // If it's a Firestore timestamp, convert to Date
+        bookingDate = booking.date.toDate();
+      } else if (booking.date && booking.date.seconds) {
+        // If it's a timestamp object with seconds
+        bookingDate = new Date(booking.date.seconds * 1000);
+      } else {
+        // Fallback to direct Date constructor
+        bookingDate = new Date(booking.date);
+      }
+      
+      // Check if the date is valid
+      if (isNaN(bookingDate.getTime())) {
+        console.warn('Invalid booking date:', booking.date, 'for booking ID:', doc.id);
+        console.warn('Date type:', typeof booking.date);
+        console.warn('Date value:', booking.date);
+        return; // Skip this booking
+      }
+      
+      bookingDate.setHours(0, 0, 0, 0); // Set to start of day for comparison
       
       console.log('Checking booking date:', booking.date, 'vs today:', today.toDateString());
-      console.log('Booking date object:', bookingDate.toDateString());
+      console.log('Parsed booking date:', bookingDate.toDateString());
       
       // Check if booking date is in the past OR if it's today but the time has passed
       let isExpired = false;
+      
+      console.log('Date comparison for booking', doc.id, ':', {
+        bookingDate: bookingDate.toDateString(),
+        bookingTimestamp: bookingDate.getTime(),
+        today: today.toDateString(),
+        todayTimestamp: today.getTime(),
+        isPast: bookingDate < today,
+        isToday: bookingDate.getTime() === today.getTime()
+      });
       
       if (bookingDate < today) {
         // Booking date is in the past
@@ -229,15 +319,21 @@ async function checkAndUpdateExpiredBookings() {
           }
         }
         
-        // Add buffer time (30 minutes) to allow for travel and preparation
-        const bufferMinutes = 30;
-        const adjustedCurrentTime = currentTime + bufferMinutes;
-        
-        if (bookingTimeMinutes > 0 && adjustedCurrentTime > bookingTimeMinutes) {
-          isExpired = true;
-          console.log('✅ Found expired booking (time passed):', booking.date, booking.time, 'for booking ID:', doc.id);
-          console.log('Current time (with buffer):', adjustedCurrentTime, 'minutes, Booking time:', bookingTimeMinutes, 'minutes');
-        }
+                 // Add buffer time (15 minutes) to allow for travel and preparation
+         const bufferMinutes = 15;
+         const adjustedCurrentTime = currentTime + bufferMinutes;
+         
+         if (bookingTimeMinutes > 0 && adjustedCurrentTime > bookingTimeMinutes) {
+           isExpired = true;
+           console.log('✅ Found expired booking (time passed):', booking.date, booking.time, 'for booking ID:', doc.id);
+           console.log('Current time (with buffer):', adjustedCurrentTime, 'minutes, Booking time:', bookingTimeMinutes, 'minutes');
+         }
+         
+         // Also check if it's past business hours (after 6 PM) and mark as expired
+         if (currentTime > 18 * 60) { // After 6 PM
+           isExpired = true;
+           console.log('✅ Found expired booking (past business hours):', booking.date, booking.time, 'for booking ID:', doc.id);
+         }
       }
       
       if (isExpired) {
@@ -245,33 +341,81 @@ async function checkAndUpdateExpiredBookings() {
           id: doc.id,
           ...booking
         });
+        console.log('📝 Added to expired list:', doc.id, 'with date:', booking.date);
+      } else {
+        console.log('✅ Booking is not expired:', doc.id, 'with date:', booking.date);
       }
     });
     
     console.log('Total expired bookings found:', expiredBookings.length);
+    console.log('Expired booking IDs:', expiredBookings.map(b => b.id));
     
-            // Update expired bookings to completed status
-        for (const booking of expiredBookings) {
+            // Update expired bookings to completed status using batch operations for better reliability
+        console.log('🔄 Starting to update', expiredBookings.length, 'expired bookings...');
+        
+        if (expiredBookings.length > 0) {
           try {
-            console.log('🔄 Updating expired booking to completed:', booking.id);
-            console.log('📅 Booking details:', {
-              date: booking.date,
-              time: booking.time,
-              user: booking.userName,
-              address: booking.address
+            // Use batch operations for better reliability
+            const batch = writeBatch(db);
+            
+            expiredBookings.forEach(booking => {
+              const bookingRef = doc(db, 'bookings', booking.id);
+              const updateData = { 
+                status: 'complete',
+                completedAt: new Date(),
+                movedFromUpcoming: true,
+                movedAt: new Date()
+              };
+              
+              console.log('📝 Adding to batch:', booking.id, updateData);
+              batch.update(bookingRef, updateData);
             });
             
-            await updateDoc(doc(db, 'bookings', booking.id), { 
-              status: 'complete',
-              completedAt: new Date(),
-              movedFromUpcoming: true,
-              movedAt: new Date()
-            });
+            // Commit the batch
+            console.log('🔄 Committing batch update...');
+            await batch.commit();
             
-            console.log('✅ Successfully moved booking to completed:', booking.id);
-            console.log('📊 Status updated to: complete');
-          } catch (updateError) {
-            console.error('❌ Error updating expired booking:', booking.id, updateError);
+            console.log('✅ Successfully moved all expired bookings to completed status');
+            showToast(`🔄 Successfully moved ${expiredBookings.length} expired booking${expiredBookings.length > 1 ? 's' : ''} to completed`, 'success');
+            
+          } catch (batchError) {
+            console.error('❌ Batch update failed, trying individual updates:', batchError);
+            
+            // Fallback to individual updates if batch fails
+            let successCount = 0;
+            for (const booking of expiredBookings) {
+              try {
+                const updateData = { 
+                  status: 'complete',
+                  completedAt: new Date(),
+                  movedFromUpcoming: true,
+                  movedAt: new Date()
+                };
+                
+                await updateDoc(doc(db, 'bookings', booking.id), updateData);
+                successCount++;
+                console.log('✅ Successfully moved booking to completed:', booking.id);
+                
+              } catch (updateError) {
+                console.error('❌ Error updating expired booking:', booking.id, updateError);
+                
+                // Try to get the current document to see what's happening
+                try {
+                  const currentDoc = await getDoc(doc(db, 'bookings', booking.id));
+                  if (currentDoc.exists()) {
+                    console.log('📄 Current document data:', currentDoc.data());
+                  } else {
+                    console.log('⚠️ Document no longer exists:', booking.id);
+                  }
+                } catch (getError) {
+                  console.error('❌ Error getting current document:', getError);
+                }
+              }
+            }
+            
+            if (successCount > 0) {
+              showToast(`🔄 Moved ${successCount} out of ${expiredBookings.length} expired bookings to completed`, 'success');
+            }
           }
         }
     
@@ -284,42 +428,7 @@ async function checkAndUpdateExpiredBookings() {
   }
 }
 
-async function checkExpiredBookings() {
-  try {
-    checkingExpired.value = true;
-    lastCheckResult.value = null;
-    
-    let result;
-    
-    // Try Firebase Functions first, fallback to client-side
-    try {
-      result = await moveExpiredBookings();
-      lastCheckResult.value = result.data;
-    } catch (functionsError) {
-      console.log('Firebase Functions not available, using client-side solution');
-      result = await checkAndUpdateExpiredBookings(); // Changed to call the new function
-      lastCheckResult.value = {
-        success: true,
-        movedCount: result,
-        message: `Successfully moved ${result} expired bookings to completed`
-      };
-    }
-    
-    // Refresh the bookings list after moving expired ones
-    if (result > 0) { // Changed to check result directly
-      showToast(`🔄 Successfully moved ${result} expired booking${result > 1 ? 's' : ''} to completed`, 'success');
-      await fetchBookings();
-    }
-  } catch (err) {
-    console.error('Error checking expired bookings:', err);
-    lastCheckResult.value = {
-      success: false,
-      message: 'Failed to check for expired bookings. Please try again.'
-    };
-  } finally {
-    checkingExpired.value = false;
-  }
-}
+
 
 async function fetchBookings() {
   try {
@@ -333,9 +442,12 @@ async function fetchBookings() {
     console.log('Fetching bookings for technician UID:', technicianUid.value);
     
     // First, check and update any expired bookings
+    console.log('🔍 Checking for expired bookings in fetchBookings...');
     const expiredCount = await checkAndUpdateExpiredBookings();
     if (expiredCount > 0) {
-      console.log(`Updated ${expiredCount} expired bookings to completed status`);
+      console.log(`✅ Updated ${expiredCount} expired bookings to completed status`);
+    } else {
+      console.log('ℹ️ No expired bookings found');
     }
     
     const q = query(
@@ -407,23 +519,30 @@ onMounted(() => {
   onAuthStateChanged(auth, (user) => {
     if (user) {
       technicianUid.value = user.uid;
-      fetchBookings().then(() => {
-        // Automatically check for expired bookings when component loads
-        checkExpiredBookings();
-        
-        // Set up automatic checking for expired bookings every 5 minutes
-        const autoCheckInterval = setInterval(async () => {
-          if (technicianUid.value) {
-            console.log('🕐 Auto-checking for expired bookings...');
-            const expiredCount = await checkAndUpdateExpiredBookings();
-            if (expiredCount > 0) {
-              console.log(`🔄 Auto-moved ${expiredCount} expired bookings to completed`);
-              showToast(`🔄 Automatically moved ${expiredCount} expired booking${expiredCount > 1 ? 's' : ''} to completed`, 'success');
-              // Refresh the bookings list
-              await fetchBookings();
-            }
-          }
-        }, 5 * 60 * 1000); // Check every 5 minutes
+             fetchBookings().then(() => {
+         // Immediately check for expired bookings when component loads
+         checkAndUpdateExpiredBookings().then(expiredCount => {
+           if (expiredCount > 0) {
+             console.log(`🔄 Found ${expiredCount} expired bookings on load, moved to completed`);
+             showToast(`🔄 Found ${expiredCount} expired booking${expiredCount > 1 ? 's' : ''} and moved to completed`, 'success');
+             // Refresh the bookings list to show updated state
+             fetchBookings();
+           }
+         });
+         
+         // Set up automatic checking for expired bookings every 2 minutes (more frequent)
+         const autoCheckInterval = setInterval(async () => {
+           if (technicianUid.value) {
+             console.log('🕐 Auto-checking for expired bookings...');
+             const expiredCount = await checkAndUpdateExpiredBookings();
+             if (expiredCount > 0) {
+               console.log(`🔄 Auto-moved ${expiredCount} expired bookings to completed`);
+               showToast(`🔄 Automatically moved ${expiredCount} expired booking${expiredCount > 1 ? 's' : ''} to completed`, 'success');
+               // Refresh the bookings list
+               await fetchBookings();
+             }
+           }
+         }, 2 * 60 * 1000); // Check every 2 minutes
         
         // Clean up interval when component unmounts
         onUnmounted(() => {
@@ -517,38 +636,7 @@ onActivated(async () => {
   flex-wrap: wrap;
 }
 
-.check-expired-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: #7c6bb0;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
 
-.dark .check-expired-btn {
-  background: var(--primary);
-  color: var(--primary-text);
-}
-
-.check-expired-btn:hover:not(:disabled) {
-  background: #6b5fa7;
-}
-
-.dark .check-expired-btn:hover:not(:disabled) {
-  background: var(--primary);
-}
-
-.check-expired-btn:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-}
 
 .auto-check-status {
   display: flex;
@@ -671,41 +759,7 @@ onActivated(async () => {
   background-color: var(--input-bg);
 }
 
-.dark .check-expired-btn:disabled {
-  background: var(--text-muted);
-  color: var(--text-muted);
-}
 
-.check-result {
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.check-result.success {
-  background: #dcfce7;
-  color: #166534;
-  border: 1px solid #bbf7d0;
-}
-
-.dark .check-result.success {
-  background: #166534;
-  color: #dcfce7;
-  border-color: #22c55e;
-}
-
-.check-result.error {
-  background: #fef2f2;
-  color: #dc2626;
-  border: 1px solid #fecaca;
-}
-
-.dark .check-result.error {
-  background: #7f1d1d;
-  color: #fecaca;
-  border-color: #ef4444;
-}
 
 .page-title {
   color: var(--primary-color);
@@ -944,6 +998,49 @@ onActivated(async () => {
   color: #22c55e;
 }
 
+.complete-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+  font-weight: 500;
+  min-width: 100px;
+  justify-content: center;
+}
+
+.dark .complete-btn {
+  background: #059669;
+  color: var(--primary-text);
+}
+
+.complete-btn:hover:not(:disabled) {
+  background: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.dark .complete-btn:hover:not(:disabled) {
+  background: #047857;
+}
+
+.complete-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.complete-btn i {
+  font-size: 0.875rem;
+}
+
 @media (max-width: 768px) {
   .main-layout{
     margin-left: 0 !important;
@@ -971,13 +1068,19 @@ onActivated(async () => {
   .table-wrapper {
     font-size: 0.8rem;
   }
-  .table-header th,
-  .table-row td {
-    padding: 0.5rem 0.5rem;
-  }
-  .filter-search-bar{
-    padding: 0;
-  }
+     .table-header th,
+   .table-row td {
+     padding: 0.5rem 0.5rem;
+   }
+   .filter-search-bar{
+     padding: 0;
+   }
+   
+   .complete-btn {
+     padding: 0.375rem 0.75rem;
+     font-size: 0.8125rem;
+     min-width: 80px;
+   }
 }
 
 /* Enhanced Responsive Design */
@@ -1114,10 +1217,7 @@ onActivated(async () => {
     font-size: 0.6875rem;
   }
   
-  .check-expired-btn {
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-  }
+  
   .filter-search-bar{
     padding:0;
   }
@@ -1164,21 +1264,24 @@ onActivated(async () => {
     font-size: 0.6875rem;
   }
   
-  .table-header th,
-  .table-row td {
-    padding: 0.375rem 0.375rem;
-    font-size: 0.6875rem;
-  }
+     .table-header th,
+   .table-row td {
+     padding: 0.375rem 0.375rem;
+     font-size: 0.6875rem;
+   }
+   
+   .booking-status {
+     padding: 0.125rem 0.375rem;
+     font-size: 0.625rem;
+   }
+   
+   .complete-btn {
+     padding: 0.25rem 0.5rem;
+     font-size: 0.75rem;
+     min-width: 70px;
+   }
   
-  .booking-status {
-    padding: 0.125rem 0.375rem;
-    font-size: 0.625rem;
-  }
   
-  .check-expired-btn {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.8125rem;
-  }
   
   .loading-state,
   .error-state,
@@ -1228,21 +1331,24 @@ onActivated(async () => {
     font-size: 0.625rem;
   }
   
-  .table-header th,
-  .table-row td {
-    padding: 0.25rem 0.25rem;
-    font-size: 0.625rem;
-  }
+     .table-header th,
+   .table-row td {
+     padding: 0.25rem 0.25rem;
+     font-size: 0.625rem;
+   }
+   
+   .booking-status {
+     padding: 0.125rem 0.25rem;
+     font-size: 0.5625rem;
+   }
+   
+   .complete-btn {
+     padding: 0.125rem 0.375rem;
+     font-size: 0.6875rem;
+     min-width: 60px;
+   }
   
-  .booking-status {
-    padding: 0.125rem 0.25rem;
-    font-size: 0.5625rem;
-  }
   
-  .check-expired-btn {
-    padding: 0.3rem 0.6rem;
-    font-size: 0.75rem;
-  }
   
   .loading-state,
   .error-state,
@@ -1300,26 +1406,29 @@ onActivated(async () => {
     font-size: 0.5625rem;
   }
   
-  .table-header th,
-  .table-row td {
-    padding: 0.125rem 0.125rem;
-    font-size: 0.5625rem;
-  }
-  .search-icon {
-    left: 2px;
-    font-size: 0.75rem;
-    padding: 20px;
-  }
+     .table-header th,
+   .table-row td {
+     padding: 0.125rem 0.125rem;
+     font-size: 0.5625rem;
+   }
+   .search-icon {
+     left: 2px;
+     font-size: 0.75rem;
+     padding: 20px;
+   }
+   
+   .booking-status {
+     padding: 0.125rem 0.125rem;
+     font-size: 0.5rem;
+   }
+   
+   .complete-btn {
+     padding: 0.125rem 0.25rem;
+     font-size: 0.625rem;
+     min-width: 50px;
+   }
   
-  .booking-status {
-    padding: 0.125rem 0.125rem;
-    font-size: 0.5rem;
-  }
   
-  .check-expired-btn {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.6875rem;
-  }
   
   .loading-state,
   .error-state,

@@ -86,7 +86,7 @@
             </div>
             <Pagination 
               :total-pages="splitsTotalPages"
-              :initial-page="splitsCurrentPage"
+              :current-page="splitsCurrentPage"
               @page-changed="handleSplitsPageChange"
             />
           </div>
@@ -228,7 +228,7 @@ const splitsItemsPerPage = ref(10)
 
 // Pagination computed properties for payment splits
 const splitsTotalPages = computed(() => 
-  Math.ceil(paymentSplits.value.length / splitsItemsPerPage.value)
+  Math.max(1, Math.ceil(paymentSplits.value.length / splitsItemsPerPage.value))
 )
 
 const paginatedPaymentSplits = computed(() => {

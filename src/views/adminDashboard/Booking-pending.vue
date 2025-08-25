@@ -37,6 +37,7 @@
                 <th>{{ $t('address') }}</th>
                 <th>{{ $t('price') }}</th>
                 <th>{{ $t('status') }}</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -50,6 +51,17 @@
                 <td>{{ booking.address || 'N/A' }}</td>
                 <td>{{ booking.price || 'N/A' }}</td>
                 <td><span class="status-pending">{{ $t('pending') }}</span></td>
+                <td>
+                  <button
+                    class="complete-btn"
+                    :disabled="loading || actionLoading === booking.id"
+                    @click="completePendingBooking(booking.id)"
+                  >
+                    <i v-if="actionLoading === booking.id" class="fas fa-spinner fa-spin"></i>
+                    <i v-else class="fas fa-check"></i>
+                    {{ actionLoading === booking.id ? 'Marking...' : 'Completed' }}
+                  </button>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -97,8 +109,13 @@ export default {
   },
   computed: {
     filteredBookings() {
+      const base = this.bookings.filter(b => {
+        const spec = (b.specialization ?? '').toString().trim();
+        return spec && spec.toUpperCase() !== 'N/A';
+      });
       const q = this.searchQuery.toLowerCase();
-      return this.bookings.filter(b =>
+      if (!q) return base;
+      return base.filter(b =>
         Object.values(b).some(val => String(val).toLowerCase().includes(q))
       );
     },
@@ -174,6 +191,23 @@ export default {
         console.error('Error fetching bookings:', e);
       } finally {
         this.loading = false;
+      }
+    },
+    async completePendingBooking(bookingId) {
+      try {
+        this.actionLoading = bookingId;
+        await updateDoc(doc(db, 'bookings', bookingId), {
+          status: 'completed',
+          completedAt: new Date(),
+          adminCompleted: true,
+        });
+        // remove from local list
+        this.bookings = this.bookings.filter(b => b.id !== bookingId);
+      } catch (e) {
+        console.error('Error marking pending booking as completed:', e);
+        alert('Failed to mark as completed. Please try again.');
+      } finally {
+        this.actionLoading = null;
       }
     },
     
@@ -517,6 +551,30 @@ export default {
 }
 
 
+
+ .complete-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #10b981;
+  color: #fff;
+  border: none;
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.complete-btn:hover:not(:disabled) {
+  background: #059669;
+}
+
+.complete-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
 
 /* Mobile Responsive Styles */
 @media (max-width: 768px) {
