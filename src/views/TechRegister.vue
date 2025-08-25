@@ -43,18 +43,20 @@
           </div>
 
           <div class="form-group">
-            <label for="phoneNumber" class="form-label">{{ $t('phoneNumber') }}</label>
-            <input 
-              type="tel" 
-              id="phoneNumber" 
-              v-model="formData.phoneNumber" 
-              class="form-input" 
-              :placeholder="$t('phoneNumber')" 
-              inputmode="tel"
-              pattern="^(01[0125][0-9]{8}|(?:\\+20|0020)1[0125][0-9]{8})$"
-              :title="$t('enterValidEgyptianPhone')"
-              required 
-            />
+            <label for="phoneNumber" class="form-label">{{ $t('phoneNumber') }}<span class="required">*</span></label>
+            <input
+              type="tel"
+              id="phoneNumber"
+              v-model="formData.phoneNumber"
+              class="form-input"
+              :class="{ 'is-invalid': formData.phoneNumber && !validateEgyptianPhone(formData.phoneNumber) }"
+              :placeholder="$t('phoneNumber')"
+              required
+              @input="error = ''"
+            >
+            <div v-if="formData.phoneNumber && !validateEgyptianPhone(formData.phoneNumber)" class="invalid-feedback">
+              {{ $t('phoneNumberInvalid') }}
+            </div>
           </div>
 
           <div class="form-group">
@@ -160,15 +162,19 @@
           </div>
 
           <div class="form-group">
-            <label for="basePrice" class="form-label">{{ $t('baseVisitPrice') }}</label>
-            <input 
-              type="text" 
-              id="basePrice" 
-              v-model="formData.basePrice" 
-              class="form-input" 
-              :placeholder="$t('baseVisitPrice')" 
-              required 
-            />
+            <label for="basePrice" class="form-label">{{ $t('basePrice') }} (EGP)<span class="required">*</span></label>
+            <input
+              id="basePrice"
+              v-model.number="formData.basePrice"
+              type="number"
+              step="any"
+              class="form-control form-input"
+              :class="{ 'is-invalid': formData.basePrice !== null && (formData.basePrice < 50 || formData.basePrice > 500) }"
+              required
+            >
+            <div v-if="formData.basePrice !== null && (formData.basePrice < 50 || formData.basePrice > 500)" class="invalid-feedback">
+              {{ $t('validation.basePriceRange', { min: 50, max: 500 }) }}
+            </div>
           </div>
 
           <div class="form-group">
@@ -437,8 +443,14 @@ import { useI18n } from 'vue-i18n';
 import emailjs from '@emailjs/browser';
 import { EMAILJS_CONFIG } from '../utils/emailjsConfig';
 
-// ...existing imports
-
+// Form validation before submission
+const validateForm = () => {
+  if (formData.basePrice < 50 || formData.basePrice > 500) {
+    error.value = t('validation.basePriceRange', { min: 50, max: 500 });
+    return false;
+  }
+  return true;
+};
 
 const { t , locale} = useI18n();
 
@@ -461,7 +473,7 @@ const formData = reactive({
   specialization: '',
   experience: '',
   bio: '',
-  basePrice: '',
+  basePrice: null,
   government: '',
   district: '',
   willingToTravel: '',
@@ -558,7 +570,7 @@ function handleProfileFileChange(event) {
     const reader = new FileReader();
     reader.onload = function(e) {
       profilePreviewUrl.value = e.target.result; // For preview
-      formData.profilePhotoBase64 = e.target.result; // Save Base64 string
+      formData.profilePhotoBase64 = e.target.result; // Save profile picture Base64 string
     };
     reader.readAsDataURL(file);
   }
@@ -567,6 +579,9 @@ function handleProfileFileChange(event) {
 async function handleRegister() {
   error.value = '';
   success.value = '';
+  
+  // Validate price before submission
+  if (!validateForm()) return;
   
   // Email validation
   if (!formData.email || String(formData.email).trim().length === 0) {

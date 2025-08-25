@@ -106,7 +106,7 @@ export default {
             name: data.fullName || data.name || 'Unknown Technician',
             image: data.profilePhotoUrl || data.idPhotoUrl || '/images/Avatar.png',
             description: data.bio || data.description || 'Professional technician with years of experience.',
-            rating:data.rating || 0, // Will be calculated by calculateTechnicianRatings
+            rating: data.rating || 0, // Will be calculated by calculateTechnicianRatings
             specialization: data.specialization || 'General Technician',
             experience: data.experience || data.yearsOfExperience ? `${data.yearsOfExperience || data.experience}+ years` : '5+ years',
             basePrice: data.basePrice || '300',
@@ -118,9 +118,14 @@ export default {
         });
 
         // Calculate ratings for all technicians
-        const techniciansWithRatings = await calculateTechnicianRatings(firebaseTechnicians);
+        let techniciansWithRatings = await calculateTechnicianRatings(firebaseTechnicians);
         
-        // Only use Firebase technicians with calculated ratings
+        // Filter for approved technicians with rating >= 4.0 and sort by rating in descending order
+        techniciansWithRatings = techniciansWithRatings
+          .filter(tech => tech.rating >= 5.0 && tech.status === 'approved')
+          .sort((a, b) => b.rating - a.rating);
+        
+        // Only use top-rated technicians
         this.teamMembers = techniciansWithRatings;
       } catch (error) {
         console.error('Error fetching technicians:', error);

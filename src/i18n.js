@@ -5,6 +5,7 @@ const messages = {
     hello: "Hello,",
     addressPlaceholder:"Address",
     footerElectrician:"Electrical Appliances",
+    phoneNumberInvalid: "Invalid Egyptian phone number",
     //welcome page
     welcomeToBoltfix: "Welcome to BoltFix",
   chooseYourRole: "Choose your role to get started",
@@ -1355,7 +1356,7 @@ terms: {
     hello: "مرحبًا",
     welcomeToBoltfix: "مرحبًا بك في بولت فيكس",
     footerElectrician:"فني الاجهزة الكهربائية",
-    
+    phoneNumberInvalid: "رقم الهاتف غير صحيح",
   chooseYourRole: "اختر دورك",
   registerAsUser: "سجل كمستخدم",
   registerAsTechnician: "سجل كفني",

@@ -33,15 +33,6 @@
           <i class="fas fa-crosshairs"></i>
           {{ isDetecting ? ($t('detecting') || 'Detecting...') : ($t('detectMyLocation') || 'Detect My Location') }}
         </button>
-        <button 
-          @click.stop.prevent="onCenterAddressClick" 
-          class="center-address-btn"
-          :disabled="!hasAddress || isDetecting"
-          type="button"
-        >
-          <i class="fas fa-map-marker-alt"></i>
-          {{ $t('centerOnAddress') || 'Center on Address' }}
-        </button>
       </div>
     </div>
   </div>
@@ -98,6 +89,13 @@ const hasAddress = computed(() => {
 
 // Methods
 const initMap = () => {
+  // Center on address if we already have one when map initializes
+  if (hasAddress.value) {
+    // Small delay to ensure map is fully initialized
+    setTimeout(() => {
+      centerOnAddress()
+    }, 500)
+  }
   if (!mapContainer.value || !leafletLoaded.value) return
 
   try {
@@ -106,7 +104,7 @@ const initMap = () => {
 
     // Add OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors',
+      attribution: ' OpenStreetMap contributors',
       maxZoom: 18
     }).addTo(map.value)
 
@@ -397,12 +395,6 @@ const updateUserLocation = async (lat, lng) => {
   }
 }
 
-const onCenterAddressClick = (event) => {
-  event.preventDefault()
-  event.stopPropagation()
-  centerOnAddress()
-}
-
 const centerOnAddress = async () => {
   if (!hasAddress.value || !map.value) return
 
@@ -601,11 +593,11 @@ const getPositionWithOptions = async (options, retryCount = 0) => {
   }
 }
 
-// Watch for address changes
+// Watch for address changes and auto-center map
 watch(() => [props.city, props.area, props.street, props.building], () => {
   if (hasAddress.value && map.value) {
-    // Optionally auto-center on address when it changes
-    // centerOnAddress()
+    // Auto-center on address when it changes
+    centerOnAddress()
   }
 }, { deep: true })
 

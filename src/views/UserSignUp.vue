@@ -306,20 +306,21 @@ const closeTermsModal = () => {
 
       <!-- phone -->
       <div class="form-group">
-        <label for="phone" class="form-label">{{ $t('phone') }}</label>
+        <label for="phone" class="form-label">{{ $t('phone') }}<span class="required">*</span></label>
         <input 
-          type="text" 
+          type="tel" 
           id="phone" 
           v-model="formData.phone" 
           class="form-input" 
-          :class="{ 'error': errors.phone }"
+          :class="{ 'is-invalid': formData.phone && !validateEgyptianPhone(formData.phone) }"
           inputmode="tel"
-          pattern="^(01[0125][0-9]{8}|(?:\\+20|0020)1[0125][0-9]{8})$"
-          :title="$t('enterValidEgyptianPhone')"
           :placeholder="$t('phone')" 
-          required 
+          required
+          @input="error = ''"
         />
-        <p v-if="errors.phone" class="error-message">{{ errors.phone }}</p>
+        <div v-if="formData.phone && !validateEgyptianPhone(formData.phone)" class="invalid-feedback">
+          {{ $t('phoneNumberInvalid') }}
+        </div>
       </div>
 
       <!-- gender -->
