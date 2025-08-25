@@ -98,6 +98,8 @@
             :current-page="currentPage"
             :total-pages="totalPages"
             @page-changed="goToPage"
+            @prev-page="goToPage(currentPage - 1)"
+            @next-page="goToPage(currentPage + 1)"
           />
         </div>
     </section>

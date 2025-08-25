@@ -86,7 +86,7 @@
 import Sidebar from '../../components/Sidebar.vue';
 import TopBar from '../../components/TopBar.vue';
 import { ref, onMounted, computed } from 'vue';
-import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore'; 
+import { collection, query, where, orderBy, limit, getDocs, onSnapshot } from 'firebase/firestore'; 
 import { db, auth } from '../../firebase';
 
 export default {
@@ -130,11 +130,13 @@ export default {
           orderBy('createdAt', 'desc')
         );
         
-        const approvedSnapshot = await getDocs(approvedCreditsQuery);
-        const approvedCredits = approvedSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
+        // Realtime approved credits
+        const approvedCredits = []
+        const unsubApproved = onSnapshot(approvedCreditsQuery, (snapshot) => {
+          approvedCredits.length = 0
+          snapshot.forEach(d => approvedCredits.push({ id: d.id, ...d.data() }))
+          recompute()
+        })
         
         // Fetch pending credits
         const pendingCreditsQuery = query(
@@ -144,11 +146,13 @@ export default {
           orderBy('createdAt', 'desc')
         );
         
-        const pendingSnapshot = await getDocs(pendingCreditsQuery);
-        const pendingCredits = pendingSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
+        // Realtime pending credits
+        const pendingCredits = []
+        const unsubPending = onSnapshot(pendingCreditsQuery, (snapshot) => {
+          pendingCredits.length = 0
+          snapshot.forEach(d => pendingCredits.push({ id: d.id, ...d.data() }))
+          recompute()
+        })
         
         // Also fetch admin payouts to ensure they're included
         const adminPayoutsQuery = query(
@@ -158,58 +162,52 @@ export default {
           orderBy('createdAt', 'desc')
         );
         
-        const adminPayoutsSnapshot = await getDocs(adminPayoutsQuery);
-        const adminPayouts = adminPayoutsSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
+        // Realtime admin payouts
+        const adminPayouts = []
+        const unsubPayouts = onSnapshot(adminPayoutsQuery, (snapshot) => {
+          adminPayouts.length = 0
+          snapshot.forEach(d => adminPayouts.push({ id: d.id, ...d.data() }))
+          recompute()
+        })
         
-        // Calculate balances - include admin transfers
-        let totalCurrentBalance = approvedCredits.reduce((sum, credit) => {
-          const amount = parseFloat(credit.amount || credit.credits || 0);
-          return sum + amount;
-        }, 0);
-        
-        // Add admin transfers to the current balance
-        const adminTransfersTotal = adminPayouts.reduce((sum, payout) => {
-          const amount = parseFloat(payout.amount || 0);
-          return sum + amount;
-        }, 0);
-        
-        this.currentBalance = totalCurrentBalance + adminTransfersTotal;
-        
-        // Calculate credit breakdown
-        this.creditBreakdown = {
-          bookingCredits: totalCurrentBalance,
-          adminTransfers: adminTransfersTotal
-        };
-        
-        this.pendingBalance = pendingCredits.reduce((sum, credit) => {
-          const amount = parseFloat(credit.amount || credit.credits || 0);
-          return sum + amount;
-        }, 0);
-        
-        // Get recent transactions (last 10) - include admin transfers
-        const allTransactions = [
-          ...approvedCredits,
-          ...adminPayouts.map(payout => ({
-            id: payout.id,
-            type: 'admin_transfer',
-            amount: payout.amount,
-            description: `Admin Transfer: ${payout.reason || 'Credit Transfer'}`,
-            createdAt: payout.createdAt,
-            status: 'approved'
-          }))
-        ];
-        
-        // Sort by creation date and take the last 10
-        this.recentTransactions = allTransactions
-          .sort((a, b) => {
-            const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
-            const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
-            return dateB - dateA;
-          })
-          .slice(0, 10);
+        const recompute = () => {
+          // Calculate balances - include admin transfers
+          const totalCurrentBalance = approvedCredits.reduce((sum, credit) => {
+            const amount = parseFloat(credit.amount || credit.credits || 0);
+            return sum + (isNaN(amount) ? 0 : amount);
+          }, 0);
+          const adminTransfersTotal = adminPayouts.reduce((sum, payout) => {
+            const amount = parseFloat(payout.amount || 0);
+            return sum + (isNaN(amount) ? 0 : amount);
+          }, 0);
+          this.currentBalance = totalCurrentBalance + adminTransfersTotal;
+          this.creditBreakdown = {
+            bookingCredits: totalCurrentBalance,
+            adminTransfers: adminTransfersTotal
+          };
+          this.pendingBalance = pendingCredits.reduce((sum, credit) => {
+            const amount = parseFloat(credit.amount || credit.credits || 0);
+            return sum + (isNaN(amount) ? 0 : amount);
+          }, 0);
+          const allTransactions = [
+            ...approvedCredits,
+            ...adminPayouts.map(payout => ({
+              id: payout.id,
+              type: 'admin_transfer',
+              amount: payout.amount,
+              description: `Admin Transfer: ${payout.reason || 'Credit Transfer'}`,
+              createdAt: payout.createdAt,
+              status: 'approved'
+            }))
+          ];
+          this.recentTransactions = allTransactions
+            .sort((a, b) => {
+              const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+              const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+              return dateB - dateA;
+            })
+            .slice(0, 10);
+        }
         
         console.log('Technician credits fetched:', {
           approvedCredits: approvedCredits.length,

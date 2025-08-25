@@ -29,6 +29,7 @@
                 <th>{{ $t('address') }}</th>
                 <th>{{ $t('price') }}</th>
                 <th>{{ $t('status') }}</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -42,6 +43,17 @@
                 <td>{{ booking.address && booking.address.trim() ? booking.address : 'Address not provided' }}</td>
                 <td>{{ booking.price || 'N/A' }}</td>
                 <td class="booking-status">{{ booking.status }}</td>
+                <td>
+                  <button
+                    class="complete-btn"
+                    :disabled="actionLoading === booking.id"
+                    @click="completeUpcomingBooking(booking.id)"
+                  >
+                    <i v-if="actionLoading === booking.id" class="fas fa-spinner fa-spin"></i>
+                    <i v-else class="fas fa-check"></i>
+                    {{ actionLoading === booking.id ? 'Marking...' : 'Completed' }}
+                  </button>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -61,7 +73,7 @@
 
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
-import { collection, getDocs, query, where, doc, deleteDoc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, deleteDoc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useRouter } from 'vue-router';
 import AdminSidebar from '../../components/admin-sidebar.vue';
@@ -160,11 +172,16 @@ async function fetchBookings() {
   }
 }
 
-// Pagination logic
+// Pagination and filtering logic (exclude bookings with N/A phone or price)
 const filteredBookings = computed(() => {
-  if (!searchQuery.value.trim()) return bookings.value;
+  const valid = bookings.value.filter(b => {
+    const phone = (b.phone ?? '').toString().trim();
+    const price = (b.price ?? '').toString().trim();
+    return phone && phone !== 'N/A' && price && price !== 'N/A';
+  });
+  if (!searchQuery.value.trim()) return valid;
   const q = searchQuery.value.toLowerCase();
-  return bookings.value.filter(b =>
+  return valid.filter(b =>
     Object.values(b).some(val => String(val).toLowerCase().includes(q))
   );
 });
@@ -215,6 +232,25 @@ async function cancelBooking(bookingId) {
   } catch (error) {
     console.error('Error cancelling booking:', error);
     alert('Failed to cancel booking. Please try again.');
+  } finally {
+    actionLoading.value = null;
+  }
+}
+
+// Mark a specific upcoming booking as completed
+async function completeUpcomingBooking(bookingId) {
+  actionLoading.value = bookingId;
+  try {
+    await updateDoc(doc(db, 'bookings', bookingId), {
+      status: 'completed',
+      completedAt: new Date(),
+      adminCompleted: true,
+    });
+    // Remove from local list immediately
+    bookings.value = bookings.value.filter(b => b.id !== bookingId);
+  } catch (e) {
+    console.error('Error marking upcoming booking as completed:', e);
+    alert('Failed to mark as completed. Please try again.');
   } finally {
     actionLoading.value = null;
   }
@@ -494,6 +530,30 @@ async function cancelBooking(bookingId) {
   box-shadow: none;
 }
 
+
+.complete-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #10b981;
+  color: #fff;
+  border: none;
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.complete-btn:hover:not(:disabled) {
+  background: #059669;
+}
+
+.complete-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
 
 .edit-btn {
   background: none;

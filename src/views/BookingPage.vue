@@ -174,6 +174,12 @@
               <input type="radio" value="Cash on Visit" v-model="form.payment" @change="handlePaymentMethodChange" />
               <span class="payment-text">{{ $t('cashOnVisit') }}</span>
             </label>
+            <div class="payment-summary" style="margin-top: 0.5rem;" v-if="technician && (technician.visitPrice || technician.basePrice)">
+              <div class="payment-amount">
+                <span>{{ $t('totalAmount') }}:</span>
+                <span class="amount">{{ (technician.visitPrice || technician.basePrice) }} {{ $t('egp') }}</span>
+              </div>
+            </div>
             <label class="payment-option">
               <input type="radio" value="Credit Card" v-model="form.payment" @change="handlePaymentMethodChange" />
               <span class="payment-text">{{ $t('creditCard') || 'Credit Card' }}</span>
@@ -1782,7 +1788,8 @@ onMounted(async () => {
     const techData = docSnap.data();
     technician.value = {
       ...techData,
-      uid: id, // Ensure uid is set for consistency
+      // Prefer the actual auth UID if present on the document; fallback to doc id
+      uid: techData.uid || id,
       name: techData.fullName || techData.name, // Map fullName to name for consistency
       profilePhotoUrl: techData.profilePhotoUrl || techData.image || techData.idPhotoUrl || '/images/Avatar.png' // Map to profilePhotoUrl for template consistency
     };

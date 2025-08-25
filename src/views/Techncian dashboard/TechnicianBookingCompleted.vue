@@ -29,8 +29,6 @@
                     <th>{{ $t('userName') }}</th>
                     <th>{{ $t('userEmail') }}</th>
                     <th>{{ $t('technicianName') }}</th>
-                    <th>{{ $t('technicianEmail') }}</th>
-                    <th>{{ $t('specialization') }}</th>
                     <th>{{ $t('date') }}</th>
                     <th>{{ $t('time') }}</th>
                     <th>{{ $t('address') }}</th>
@@ -43,8 +41,6 @@
                     <td>{{ booking.userName }}</td>
                     <td>{{ booking.userEmail || 'N/A' }}</td>
                     <td>{{ booking.technicianName }}</td>
-                    <td>{{ booking.technicianEmail || 'N/A' }}</td>
-                    <td>{{ booking.specialization || 'N/A' }}</td>
                     <td>{{ booking.date }}</td>
                     <td>{{ booking.time }}</td>
                     <td>{{ booking.address && booking.address.trim() ? booking.address : 'Address not provided' }}</td>
