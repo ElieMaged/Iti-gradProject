@@ -356,7 +356,7 @@ import { calculateTechnicianRatings } from '../utils/ratingCalculator';
     },
     getLocationDisplay(technician) {
       if (technician.government && technician.district) {
-        return `${technician.government}, ${technician.district}`;
+        return `${technician.government}`;
       } else if (technician.government) {
         return technician.government;
       } else if (technician.district) {
@@ -663,6 +663,86 @@ import { calculateTechnicianRatings } from '../utils/ratingCalculator';
   .pagination-container {
     padding: 0 1rem;
   }
+  .services-container {
+    margin: 0 1rem;
+  }
+  .services-overview-container{
+    margin: 0 1rem;
+  }
+  .team-cards {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 0 1rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .team-card {
+    width: 100% !important;
+    max-width: 400px;
+    margin: 0;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .team-card:active {
+    transform: scale(0.98);
+  }
+  
+  .card-top-section {
+    height: 200px;
+  }
+  
+  .card-bottom-section {
+    padding: 1.25rem;
+    height: auto;
+  }
+  
+  .member-name {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    height: auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .member-specialization {
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+    height: auto;
+  }
+  
+  .member-description {
+    font-size: 0.9rem;
+    margin: 0.75rem 0;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    min-height: 2.8em;
+  }
+  
+  .member-details {
+    margin: 1rem 0;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    height: auto;
+  }
+  
+  .detail-item {
+    font-size: 0.85rem;
+    gap: 0.4rem;
+  }
+  
+  .view-profile-btn {
+    padding: 0.8rem;
+    font-size: 0.95rem;
+    margin-top: 0.5rem;
+    border-radius: 12px;
+  }
 }
 
 .team-card {
@@ -677,6 +757,7 @@ import { calculateTechnicianRatings } from '../utils/ratingCalculator';
   flex-direction: column;
   margin-bottom: 15px;
   cursor: pointer;
+  box-sizing: border-box;
 }
 .dark .team-card {
   background: var(--secondary-bg);

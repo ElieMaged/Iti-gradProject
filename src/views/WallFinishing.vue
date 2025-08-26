@@ -63,7 +63,7 @@
             <!-- Bottom Section - Information Area -->
             <div class="card-bottom-section">
               <h3 class="member-name">{{ technician.name }}</h3>
-              <div class="member-specialization">{{ technician.specialization }}</div>
+              <div class="member-specialization">{{ $t(technician.specialization) }}</div>
               <p class="member-description">{{ technician.description }}</p>
               <!-- Details Row -->
               <div class="member-details">
@@ -73,7 +73,7 @@
                 </div>
                 <div class="detail-item location-item">
                   <i class="fa-solid fa-location-dot"></i>
-                  <span>{{ getLocationDisplay(technician) }}</span>
+                  <span>{{ $t(getLocationDisplay(technician)) }}</span>
                 </div>
                 <div class="detail-item price-item">
                   <i class="fa-solid fa-dollar-sign"></i>
@@ -329,7 +329,7 @@ function viewProfile(member) {
 
 function getLocationDisplay(technician) {
   if (technician.government && technician.district) {
-    return `${technician.government}, ${technician.district}`;
+    return `${technician.government}`;
   } else if (technician.government) {
     return technician.government;
   } else if (technician.district) {

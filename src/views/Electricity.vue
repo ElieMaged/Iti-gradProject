@@ -329,7 +329,7 @@ function viewProfile(member) {
 
 function getLocationDisplay(technician) {
   if (technician.government && technician.district) {
-    return `${technician.government}, ${technician.district}`;
+    return `${technician.government}`;
   } else if (technician.government) {
     return technician.government;
   } else if (technician.district) {

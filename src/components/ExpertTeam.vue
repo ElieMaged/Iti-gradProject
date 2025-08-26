@@ -24,19 +24,19 @@
         
         <!-- Bottom Section - Information Area -->
         <div class="card-bottom-section">
-          <h3 class="member-name">{{ $t(member.name) }}</h3>
-          <div class="member-specialization">{{ $t(member.specialization) }}</div>
-          <p class="member-description">{{ $t(member.description) }}</p>
+          <h3 class="member-name">{{ member.name }}</h3>
+          <div class="member-specialization">{{ member.specialization }}</div>
+          <p class="member-description">{{ member.description }}</p>
           
           <!-- Details Row -->
           <div class="member-details">
             <div class="detail-item rating-item">
               <i class="fas fa-star"></i>
-              <span>{{ member.rating || 'No reviews' }}</span>
+              <span>{{ member.rating || $t('noReviews') }}</span>
             </div>
             <div class="detail-item location-item">
               <i class="fas fa-map-marker-alt"></i>
-              <span>{{ $t(member.location) }}</span>
+              <span>{{ member.location ? $t(member.location.toLowerCase()) : '' }}</span>
             </div>
             <div class="detail-item price-item">
               <i class="fa-solid fa-dollar-sign"></i>
@@ -92,6 +92,12 @@ export default {
     this.stopAutoSlide();
   },
   methods: {
+    getExperienceText(experience, yearsOfExperience) {
+      if (experience) return experience;
+      if (yearsOfExperience) return `${yearsOfExperience} ${this.$t('years')}`;
+      return this.$t('defaultExperience');
+    },
+    
     async fetchTechnicians() {
       try {
         this.loading = true;
@@ -103,15 +109,15 @@ export default {
           const data = doc.data();
           firebaseTechnicians.push({
             id: doc.id,
-            name: data.fullName || data.name || 'Unknown Technician',
+            name: data.fullName || data.name || this.$t('unknownTechnician'),
             image: data.profilePhotoUrl || data.idPhotoUrl || '/images/Avatar.png',
-            description: data.bio || data.description || 'Professional technician with years of experience.',
+            description: data.bio || data.description || this.$t('professionalTechnicianDescription'),
             rating: data.rating || 0, // Will be calculated by calculateTechnicianRatings
-            specialization: data.specialization || 'General Technician',
-            experience: data.experience || data.yearsOfExperience ? `${data.yearsOfExperience || data.experience}+ years` : '5+ years',
+            specialization: data.specialization ? this.$t(`specialization${data.specialization.replace(/\s+/g, '')}`) : this.$t('generalTechnician'),
+            experience: this.getExperienceText(data.experience, data.yearsOfExperience),
             basePrice: data.basePrice || '300',
             status: data.status || 'approved',
-            location: data.government || data.location || 'Cairo',
+            location: data.government || data.location || this.$t('defaultLocation'),
             phone: data.phone || '+20 111 222 3333',
             email: data.email || 'technician@example.com'
           });
@@ -680,7 +686,7 @@ export default {
   }
   
   .card-top-section {
-    height: 180px;
+    height: 250px;
   }
   
   .member-name {
@@ -711,7 +717,7 @@ export default {
   }
   
   .card-top-section {
-    height: 160px;
+    height: 250px;
   }
   
   .card-bottom-section {

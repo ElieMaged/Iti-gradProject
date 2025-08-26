@@ -23,38 +23,100 @@
               <p class="error-message">{{ error }}</p>
               <button @click="fetchBookings" class="retry-btn">{{ $t('retry') }}</button>
             </div>
-            <div v-else-if="filteredBookings.length > 0" class="table-wrapper">
-              <table class="booking-table">
-                <thead>
-                  <tr class="table-header">
-                    <th>{{ $t('userName') }}</th>
+            <div v-else-if="filteredBookings.length > 0">
+              <!-- Desktop Table -->
+              <div class="hidden md:block">
+                <div class="table-wrapper">
+                  <table class="booking-table">
+                    <thead>
+                      <tr class="table-header">
+                        <th>{{ $t('userName') }}</th>
+                        <th>{{ $t('Phone') }}</th>
                     <th>{{ $t('userEmail') }}</th>
-                    <th>{{ $t('technician') }}</th>
-                    <th>{{ $t('date') }}</th>
-                    <th>{{ $t('time') }}</th>
-                    <th>{{ $t('address') }}</th>
-                    <th>{{ $t('price') }}</th>
-                    <th>{{ $t('status') }}</th>
-                    <th>{{ $t('actions') }}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(booking, index) in filteredBookings" :key="booking.id" class="table-row">
-                    <td>{{ booking.userName }}</td>
+                        <th>{{ $t('date') }}</th>
+                        <th>{{ $t('time') }}</th>
+                        <th>{{ $t('address') }}</th>
+                        <th>{{ $t('price') }}</th>
+                        <th>{{ $t('status') }}</th>
+                        <th>{{ $t('actions') }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(booking) in filteredBookings" :key="booking.id" class="table-row">
+                        <td>{{ booking.userName }}</td>
+                        <td>{{ booking.userPhone || 'N/A' }}</td>
                     <td>{{ booking.userEmail || 'N/A' }}</td>
-                    <td>{{ booking.technicianName || booking.technicianId }}</td>
-                    <td>{{ booking.date }}</td>
-                    <td>{{ booking.time }}</td>
-                    <td>{{ booking.address && booking.address.trim() ? booking.address : 'Address not provided' }}</td>
-                    <td>{{ booking.price || 'N/A' }}</td>
-                    <td><span class="status-pending">{{ booking.status }}</span></td>
-                    <td>
-                      <button class="accept-btn" @click="acceptBooking(booking.id)" :disabled="actionLoading === booking.id">{{ $t('accept') }}</button>
-                      <button class="reject-btn" @click="rejectBooking(booking.id)" :disabled="actionLoading === booking.id">{{ $t('reject') }}</button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                        <td>{{ booking.date }}</td>
+                        <td>{{ booking.time }}</td>
+                        <td>{{ booking.address && booking.address.trim() ? booking.address : 'Address not provided' }}</td>
+                        <td>{{ booking.price || 'N/A' }}</td>
+                        <td><span class="status-pending">{{ booking.status }}</span></td>
+                        <td class="action-buttons">
+                          <button class="accept-btn" @click="acceptBooking(booking.id)" :disabled="actionLoading === booking.id">
+                            <span class="hidden sm:inline">{{ $t('accept') }}</span>
+                            <span class="sm:hidden">✓</span>
+                          </button>
+                          <button class="reject-btn" @click="rejectBooking(booking.id)" :disabled="actionLoading === booking.id">
+                            <span class="hidden sm:inline">{{ $t('reject') }}</span>
+                            <span class="sm:hidden">✕</span>
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Mobile Cards -->
+              <div class="md:hidden space-y-4">
+                <div v-for="booking in filteredBookings" :key="booking.id" class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+                  <div class="flex justify-between items-start mb-3">
+                    <div>
+                      <h3 class="font-semibold text-lg">{{ booking.userName }}</h3>
+                      <p class="text-gray-600 dark:text-gray-300">{{ booking.userPhone || 'N/A' }}</p>
+                    </div>
+                    <span class="status-pending text-sm">{{ booking.status }}</span>
+                  </div>
+                  
+                  <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                      <span class="text-gray-500 dark:text-gray-400">{{ $t('date') }}:</span>
+                      <span>{{ booking.date }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-gray-500 dark:text-gray-400">{{ $t('time') }}:</span>
+                      <span>{{ booking.time }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-gray-500 dark:text-gray-400">{{ $t('price') }}:</span>
+                      <span>{{ booking.price || 'N/A' }}</span>
+                    </div>
+                    <div class="pt-2">
+                      <p class="text-gray-500 dark:text-gray-400">{{ $t('address') }}:</p>
+                      <p>{{ booking.address && booking.address.trim() ? booking.address : 'Address not provided' }}</p>
+                    </div>
+                  </div>
+                  
+                  <div class="flex space-x-2 mt-4">
+                    <button 
+                      class="accept-btn flex-1" 
+                      @click="acceptBooking(booking.id)" 
+                      :disabled="actionLoading === booking.id"
+                    >
+                      <span class="hidden sm:inline">{{ $t('accept') }}</span>
+                      <span class="sm:hidden">✓ {{ $t('accept') }}</span>
+                    </button>
+                    <button 
+                      class="reject-btn flex-1" 
+                      @click="rejectBooking(booking.id)" 
+                      :disabled="actionLoading === booking.id"
+                    >
+                      <span class="hidden sm:inline">{{ $t('reject') }}</span>
+                      <span class="sm:hidden">✕ {{ $t('reject') }}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
             <div v-else class="empty-state">
               <p>{{ $t('noPendingBookings') }}</p>
@@ -852,7 +914,7 @@ onMounted(() => {
 }
 
 .table-header th {
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 0.5rem;
   text-align: left;
   font-weight: 600;
   font-size: 0.9rem;
@@ -872,7 +934,7 @@ onMounted(() => {
 }
 
 .table-row td {
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 0.5rem;
   font-size: 0.9rem;
   color: #333;
 }
@@ -899,14 +961,13 @@ onMounted(() => {
   background: #22c55e;
   color: #fff;
   border: none;
-  padding: 0.3rem 0.8rem;
-  border-radius: 0.5rem;
-  margin-right: 0.75rem;
-  margin-bottom: 0.5rem;
+  padding: 0.3rem 0.4rem;
+  border-radius: 1rem;
+  margin-right: 0.25rem;
   cursor: pointer;
   font-size: 0.9rem;
   transition: background 0.2s;
-  min-width: 70px;
+  min-width: 60px;
   text-align: center;
 }
 
@@ -929,12 +990,12 @@ onMounted(() => {
   background: #ef4444;
   color: #fff;
   border: none;
-  padding: 0.3rem 0.8rem;
-  border-radius: 0.5rem;
+  padding: 0.3rem 0.5rem;
+  border-radius: 1rem;
   cursor: pointer;
   font-size: 0.9rem;
   transition: background 0.2s;
-  min-width: 70px;
+  min-width: 60px;
   text-align: center;
 }
 
@@ -1170,6 +1231,29 @@ onMounted(() => {
 }
 
 @media (max-width: 480px) {
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .booking-table {
+    min-width: 1000px;
+  }
+  
+  .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 0.25rem 0;
+    min-width: 120px;
+  }
+  
+  .accept-btn,
+  .reject-btn {
+    width: 100%;
+    margin: 0.125rem 0;
+  }
   .flex-1.p-8 {
     padding: 0.375rem;
   }
@@ -1190,6 +1274,7 @@ onMounted(() => {
   
   .title-search-row {
     gap: 0.625rem;
+    flex-wrap: nowrap;
   }
   
   .search-wrapper {

@@ -41,48 +41,98 @@
               <p class="error-message">{{ error }}</p>
               <button @click="fetchBookings" class="retry-btn">Retry</button>
             </div>
-            <div v-else-if="filteredBookings.length > 0" class="table-wrapper">
-              <table class="booking-table">
-                <thead>
-                  <tr class="table-header">
-                    <th>User Name</th>
-                    <th>User Email</th>
-                    <th>Technician Name</th>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Address</th>
-                                         <th>Price</th>
-                     <th>Status</th>
-                     <th>Actions</th>
-                   </tr>
-                 </thead>
-                 <tbody>
-                   <tr v-for="booking in filteredBookings" :key="booking.id" class="table-row">
-                     <td>{{ booking.userName }}</td>
-                     <td>{{ booking.userEmail || 'N/A' }}</td>
-                     <td>{{ booking.technicianName }}</td>
-                     <td>{{ booking.date }}</td>
-                     <td>{{ booking.time }}</td>
-                     <td>{{ booking.address && booking.address.trim() ? booking.address : 'Address not provided' }}</td>
-                     <td>{{ booking.price || 'N/A' }}</td>
-                     <td class="booking-status">{{ booking.status }}</td>
-                     <td>
-                       <button 
-                         @click="markBookingAsCompleted(booking.id)" 
-                         :disabled="markingCompleted === booking.id"
-                         class="complete-btn"
-                       >
-                         <i v-if="markingCompleted === booking.id" class="fas fa-spinner fa-spin"></i>
-                         <i v-else class="fas fa-check"></i>
-                         {{ markingCompleted === booking.id ? 'Marking...' : 'Completed' }}
-                       </button>
-                     </td>
-                   </tr>
-                 </tbody>
-              </table>
+            <div v-else-if="filteredBookings.length > 0">
+              <!-- Desktop Table -->
+              <div class="hidden md:block">
+                <div class="table-wrapper">
+                  <table class="booking-table">
+                    <thead>
+                      <tr class="table-header">
+                        <th>{{ $t('userName') }}</th>
+                        <th>{{ $t('Phone') }}</th>
+                    <th>{{ $t('userEmail') }}</th>
+                        <th>{{ $t('date') }}</th>
+                        <th>{{ $t('time') }}</th>
+                        <th>{{ $t('address') }}</th>
+                        <th>{{ $t('price') }}</th>
+                        <th>{{ $t('status') }}</th>
+                        <th>{{ $t('actions') }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="booking in filteredBookings" :key="booking.id" class="table-row">
+                        <td>{{ booking.userName }}</td>
+                        <td>{{ booking.userPhone || 'N/A' }}</td>
+                    <td>{{ booking.userEmail || 'N/A' }}</td>
+                        <td>{{ booking.date }}</td>
+                        <td>{{ booking.time }}</td>
+                        <td>{{ booking.address && booking.address.trim() ? booking.address : 'Address not provided' }}</td>
+                        <td>{{ booking.price || 'N/A' }}</td>
+                        <td><span class="status-upcoming">{{ booking.status }}</span></td>
+                        <td class="action-buttons">
+                          <button 
+                            class="complete-btn"
+                            @click="markBookingAsCompleted(booking.id)" 
+                            :disabled="markingCompleted === booking.id"
+                          >
+                            <i v-if="markingCompleted === booking.id" class="fas fa-spinner fa-spin mr-1"></i>
+                            <i v-else class="fas fa-check mr-1"></i>
+                            <span class="hidden sm:inline">{{ markingCompleted === booking.id ? $t('marking') : $t('completed') }}</span>
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Mobile Cards -->
+              <div class="md:hidden space-y-4">
+                <div v-for="booking in filteredBookings" :key="booking.id" class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+                  <div class="flex justify-between items-start mb-3">
+                    <div>
+                      <h3 class="font-semibold text-lg">{{ booking.userName }}</h3>
+                      <p class="text-gray-600 dark:text-gray-300">{{ booking.userPhone || 'N/A' }}</p>
+                      <p class="text-sm text-gray-500 dark:text-gray-400">{{ booking.userEmail || 'N/A' }}</p>
+                    </div>
+                    <span class="status-upcoming text-sm">{{ booking.status }}</span>
+                  </div>
+                  
+                  <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                      <span class="text-gray-500 dark:text-gray-400">{{ $t('date') }}:</span>
+                      <span>{{ booking.date }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-gray-500 dark:text-gray-400">{{ $t('time') }}:</span>
+                      <span>{{ booking.time }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-gray-500 dark:text-gray-400">{{ $t('price') }}:</span>
+                      <span>{{ booking.price || 'N/A' }}</span>
+                    </div>
+                    <div class="pt-2">
+                      <p class="text-gray-500 dark:text-gray-400">{{ $t('address') }}:</p>
+                      <p>{{ booking.address && booking.address.trim() ? booking.address : 'Address not provided' }}</p>
+                    </div>
+                  </div>
+                  
+                  <div class="mt-4">
+                    <button 
+                      class="complete-btn w-full" 
+                      @click="markBookingAsCompleted(booking.id)" 
+                      :disabled="markingCompleted === booking.id"
+                    >
+                      <i v-if="markingCompleted === booking.id" class="fas fa-spinner fa-spin mr-1"></i>
+                      <i v-else class="fas fa-check mr-1"></i>
+                      {{ markingCompleted === booking.id ? $t('marking') : $t('completed') }}
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
             <div v-else class="empty-state">
-              <p>No upcoming bookings found.</p>
+              <p>{{ $t('noUpcomingBookings') }}</p>
             </div>
           </div>
         </div>
@@ -112,8 +162,6 @@ const showNotification = ref(false);
 const notificationMessage = ref('');
 const notificationType = ref('info');
 const markingCompleted = ref(null);
-
-
 
 const filteredBookings = computed(() => {
   const q = searchQuery.value.toLowerCase();
@@ -155,7 +203,7 @@ async function markBookingAsCompleted(bookingId) {
   try {
     markingCompleted.value = bookingId;
     
-    console.log('🔄 Marking booking as completed:', bookingId);
+    console.log(' Marking booking as completed:', bookingId);
     
     const updateData = { 
       status: 'complete',
@@ -166,15 +214,15 @@ async function markBookingAsCompleted(bookingId) {
     
     await updateDoc(doc(db, 'bookings', bookingId), updateData);
     
-    console.log('✅ Successfully marked booking as completed:', bookingId);
-    showToast('✅ Booking marked as completed successfully', 'success');
+    console.log(' Successfully marked booking as completed:', bookingId);
+    showToast(' Booking marked as completed successfully', 'success');
     
     // Refresh the bookings list to show updated state
     await fetchBookings();
     
   } catch (error) {
-    console.error('❌ Error marking booking as completed:', error);
-    showToast('❌ Failed to mark booking as completed', 'error');
+    console.error(' Error marking booking as completed:', error);
+    showToast(' Failed to mark booking as completed', 'error');
   } finally {
     markingCompleted.value = null;
   }
@@ -224,13 +272,13 @@ async function checkAndUpdateExpiredBookings() {
     });
     console.log('Status distribution:', statusCounts);
     
-          const today = new Date();
-      today.setHours(0, 0, 0, 0); // Set to start of day for comparison
-      
-      console.log('Today (start of day):', today.toDateString());
-      console.log('Today timestamp:', today.getTime());
-      
-      const expiredBookings = [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to start of day for comparison
+    
+    console.log('Today (start of day):', today.toDateString());
+    console.log('Today timestamp:', today.getTime());
+    
+    const expiredBookings = [];
     
     upcomingSnapshot.docs.forEach(doc => {
       const booking = doc.data();
@@ -279,7 +327,7 @@ async function checkAndUpdateExpiredBookings() {
       if (bookingDate < today) {
         // Booking date is in the past
         isExpired = true;
-        console.log('✅ Found expired booking (past date):', booking.date, 'for booking ID:', doc.id);
+        console.log(' Found expired booking (past date):', booking.date, 'for booking ID:', doc.id);
       } else if (bookingDate.getTime() === today.getTime()) {
         // Booking is today, check if time has passed
         const now = new Date();
@@ -319,21 +367,21 @@ async function checkAndUpdateExpiredBookings() {
           }
         }
         
-                 // Add buffer time (15 minutes) to allow for travel and preparation
-         const bufferMinutes = 15;
-         const adjustedCurrentTime = currentTime + bufferMinutes;
-         
-         if (bookingTimeMinutes > 0 && adjustedCurrentTime > bookingTimeMinutes) {
-           isExpired = true;
-           console.log('✅ Found expired booking (time passed):', booking.date, booking.time, 'for booking ID:', doc.id);
-           console.log('Current time (with buffer):', adjustedCurrentTime, 'minutes, Booking time:', bookingTimeMinutes, 'minutes');
-         }
-         
-         // Also check if it's past business hours (after 6 PM) and mark as expired
-         if (currentTime > 18 * 60) { // After 6 PM
-           isExpired = true;
-           console.log('✅ Found expired booking (past business hours):', booking.date, booking.time, 'for booking ID:', doc.id);
-         }
+        // Add buffer time (15 minutes) to allow for travel and preparation
+        const bufferMinutes = 15;
+        const adjustedCurrentTime = currentTime + bufferMinutes;
+        
+        if (bookingTimeMinutes > 0 && adjustedCurrentTime > bookingTimeMinutes) {
+          isExpired = true;
+          console.log(' Found expired booking (time passed):', booking.date, booking.time, 'for booking ID:', doc.id);
+          console.log('Current time (with buffer):', adjustedCurrentTime, 'minutes, Booking time:', bookingTimeMinutes, 'minutes');
+        }
+        
+        // Also check if it's past business hours (after 6 PM) and mark as expired
+        if (currentTime > 18 * 60) { // After 6 PM
+          isExpired = true;
+          console.log(' Found expired booking (past business hours):', booking.date, booking.time, 'for booking ID:', doc.id);
+        }
       }
       
       if (isExpired) {
@@ -341,95 +389,94 @@ async function checkAndUpdateExpiredBookings() {
           id: doc.id,
           ...booking
         });
-        console.log('📝 Added to expired list:', doc.id, 'with date:', booking.date);
+        console.log(' Added to expired list:', doc.id, 'with date:', booking.date);
       } else {
-        console.log('✅ Booking is not expired:', doc.id, 'with date:', booking.date);
+        console.log(' Booking is not expired:', doc.id, 'with date:', booking.date);
       }
     });
     
     console.log('Total expired bookings found:', expiredBookings.length);
     console.log('Expired booking IDs:', expiredBookings.map(b => b.id));
     
-            // Update expired bookings to completed status using batch operations for better reliability
-        console.log('🔄 Starting to update', expiredBookings.length, 'expired bookings...');
+    // Update expired bookings to completed status using batch operations for better reliability
+    console.log(' Starting to update', expiredBookings.length, 'expired bookings...');
+    
+    if (expiredBookings.length > 0) {
+      try {
+        // Use batch operations for better reliability
+        const batch = writeBatch(db);
         
-        if (expiredBookings.length > 0) {
+        expiredBookings.forEach(booking => {
+          const bookingRef = doc(db, 'bookings', booking.id);
+          const updateData = { 
+            status: 'complete',
+            completedAt: new Date(),
+            movedFromUpcoming: true,
+            movedAt: new Date()
+          };
+          
+          console.log(' Adding to batch:', booking.id, updateData);
+          batch.update(bookingRef, updateData);
+        });
+        
+        // Commit the batch
+        console.log(' Committing batch update...');
+        await batch.commit();
+        
+        console.log(' Successfully moved all expired bookings to completed status');
+        showToast(` Successfully moved ${expiredBookings.length} expired booking${expiredBookings.length > 1 ? 's' : ''} to completed`, 'success');
+        
+      } catch (batchError) {
+        console.error(' Batch update failed, trying individual updates:', batchError);
+        
+        // Fallback to individual updates if batch fails
+        let successCount = 0;
+        for (const booking of expiredBookings) {
           try {
-            // Use batch operations for better reliability
-            const batch = writeBatch(db);
+            const updateData = { 
+              status: 'complete',
+              completedAt: new Date(),
+              movedFromUpcoming: true,
+              movedAt: new Date()
+            };
             
-            expiredBookings.forEach(booking => {
-              const bookingRef = doc(db, 'bookings', booking.id);
-              const updateData = { 
-                status: 'complete',
-                completedAt: new Date(),
-                movedFromUpcoming: true,
-                movedAt: new Date()
-              };
-              
-              console.log('📝 Adding to batch:', booking.id, updateData);
-              batch.update(bookingRef, updateData);
-            });
+            await updateDoc(doc(db, 'bookings', booking.id), updateData);
+            successCount++;
+            console.log(' Successfully moved booking to completed:', booking.id);
             
-            // Commit the batch
-            console.log('🔄 Committing batch update...');
-            await batch.commit();
+          } catch (updateError) {
+            console.error(' Error updating expired booking:', booking.id, updateError);
             
-            console.log('✅ Successfully moved all expired bookings to completed status');
-            showToast(`🔄 Successfully moved ${expiredBookings.length} expired booking${expiredBookings.length > 1 ? 's' : ''} to completed`, 'success');
-            
-          } catch (batchError) {
-            console.error('❌ Batch update failed, trying individual updates:', batchError);
-            
-            // Fallback to individual updates if batch fails
-            let successCount = 0;
-            for (const booking of expiredBookings) {
-              try {
-                const updateData = { 
-                  status: 'complete',
-                  completedAt: new Date(),
-                  movedFromUpcoming: true,
-                  movedAt: new Date()
-                };
-                
-                await updateDoc(doc(db, 'bookings', booking.id), updateData);
-                successCount++;
-                console.log('✅ Successfully moved booking to completed:', booking.id);
-                
-              } catch (updateError) {
-                console.error('❌ Error updating expired booking:', booking.id, updateError);
-                
-                // Try to get the current document to see what's happening
-                try {
-                  const currentDoc = await getDoc(doc(db, 'bookings', booking.id));
-                  if (currentDoc.exists()) {
-                    console.log('📄 Current document data:', currentDoc.data());
-                  } else {
-                    console.log('⚠️ Document no longer exists:', booking.id);
-                  }
-                } catch (getError) {
-                  console.error('❌ Error getting current document:', getError);
-                }
+            // Try to get the current document to see what's happening
+            try {
+              const currentDoc = await getDoc(doc(db, 'bookings', booking.id));
+              if (currentDoc.exists()) {
+                console.log(' Current document data:', currentDoc.data());
+              } else {
+                console.log(' Document no longer exists:', booking.id);
               }
-            }
-            
-            if (successCount > 0) {
-              showToast(`🔄 Moved ${successCount} out of ${expiredBookings.length} expired bookings to completed`, 'success');
+            } catch (getError) {
+              console.error(' Error getting current document:', getError);
             }
           }
         }
+        
+        if (successCount > 0) {
+          showToast(` Moved ${successCount} out of ${expiredBookings.length} expired bookings to completed`, 'success');
+        }
+      }
+    }
     
     console.log('=== EXPIRED BOOKINGS CHECK COMPLETE ===');
     return expiredBookings.length;
     
   } catch (error) {
-    console.error('❌ Error checking expired bookings:', error);
+    console.error(' Error checking expired bookings:', error);
     return 0;
   }
 }
 
-
-
+// Function to fetch bookings
 async function fetchBookings() {
   try {
     loading.value = true;
@@ -442,12 +489,12 @@ async function fetchBookings() {
     console.log('Fetching bookings for technician UID:', technicianUid.value);
     
     // First, check and update any expired bookings
-    console.log('🔍 Checking for expired bookings in fetchBookings...');
+    console.log(' Checking for expired bookings in fetchBookings...');
     const expiredCount = await checkAndUpdateExpiredBookings();
     if (expiredCount > 0) {
-      console.log(`✅ Updated ${expiredCount} expired bookings to completed status`);
+      console.log(` Updated ${expiredCount} expired bookings to completed status`);
     } else {
-      console.log('ℹ️ No expired bookings found');
+      console.log(' No expired bookings found');
     }
     
     const q = query(
@@ -457,54 +504,54 @@ async function fetchBookings() {
     );
     const snapshot = await getDocs(q);
     
-         // Map booking data with proper field mapping
-     const bookingsWithTechDetails = snapshot.docs.map(doc => {
-       const bookingData = { id: doc.id, ...doc.data() };
-       
-       console.log('=== BOOKING DATA DEBUG ===');
-       console.log('Raw booking data:', bookingData);
-       console.log('All booking fields:', Object.keys(bookingData));
-       
-       // Map technician email from various possible fields in the booking
-       bookingData.technicianEmail = bookingData.technicianEmail || 
-                                    bookingData.technician_email || 
-                                    bookingData.techEmail || 
-                                    bookingData.tech_email || 
-                                    'N/A';
-       
-       // Map specialization from various possible fields in the booking
-       bookingData.specialization = bookingData.specialization || 
-                                   bookingData.service || 
-                                   bookingData.services || 
-                                   bookingData.category || 
-                                   bookingData.type || 
-                                   bookingData.jobType || 
-                                   bookingData.workType || 
-                                   bookingData.profession || 
-                                   bookingData.trade || 
-                                   bookingData.skill || 
-                                   bookingData.skills || 
-                                   'N/A';
-       
-       // Map price from various possible fields in the booking
-       bookingData.price = bookingData.price || 
-                          bookingData.cost || 
-                          bookingData.costPerVisit || 
-                          bookingData.costpervisit || 
-                          bookingData.basePrice || 
-                          bookingData.base_price || 
-                          bookingData.visitPrice || 
-                          bookingData.visit_price || 
-                          'N/A';
-       
-       console.log('Mapped booking data:', {
-         technicianEmail: bookingData.technicianEmail,
-         specialization: bookingData.specialization,
-         price: bookingData.price
-       });
-       
-       return bookingData;
-     });
+    // Map booking data with proper field mapping
+    const bookingsWithTechDetails = snapshot.docs.map(doc => {
+      const bookingData = { id: doc.id, ...doc.data() };
+      
+      console.log('=== BOOKING DATA DEBUG ===');
+      console.log('Raw booking data:', bookingData);
+      console.log('All booking fields:', Object.keys(bookingData));
+      
+      // Map technician email from various possible fields in the booking
+      bookingData.technicianEmail = bookingData.technicianEmail || 
+                                  bookingData.technician_email || 
+                                  bookingData.techEmail || 
+                                  bookingData.tech_email || 
+                                  'N/A';
+      
+      // Map specialization from various possible fields in the booking
+      bookingData.specialization = bookingData.specialization || 
+                                 bookingData.service || 
+                                 bookingData.services || 
+                                 bookingData.category || 
+                                 bookingData.type || 
+                                 bookingData.jobType || 
+                                 bookingData.workType || 
+                                 bookingData.profession || 
+                                 bookingData.trade || 
+                                 bookingData.skill || 
+                                 bookingData.skills || 
+                                 'N/A';
+      
+      // Map price from various possible fields in the booking
+      bookingData.price = bookingData.price || 
+                        bookingData.cost || 
+                        bookingData.costPerVisit || 
+                        bookingData.costpervisit || 
+                        bookingData.basePrice || 
+                        bookingData.base_price || 
+                        bookingData.visitPrice || 
+                        bookingData.visit_price || 
+                        'N/A';
+      
+      console.log('Mapped booking data:', {
+        technicianEmail: bookingData.technicianEmail,
+        specialization: bookingData.specialization,
+        price: bookingData.price
+      });
+      
+      return bookingData;
+    });
     
     bookings.value = bookingsWithTechDetails;
   } catch (e) {
@@ -519,30 +566,30 @@ onMounted(() => {
   onAuthStateChanged(auth, (user) => {
     if (user) {
       technicianUid.value = user.uid;
-             fetchBookings().then(() => {
-         // Immediately check for expired bookings when component loads
-         checkAndUpdateExpiredBookings().then(expiredCount => {
-           if (expiredCount > 0) {
-             console.log(`🔄 Found ${expiredCount} expired bookings on load, moved to completed`);
-             showToast(`🔄 Found ${expiredCount} expired booking${expiredCount > 1 ? 's' : ''} and moved to completed`, 'success');
-             // Refresh the bookings list to show updated state
-             fetchBookings();
-           }
-         });
-         
-         // Set up automatic checking for expired bookings every 2 minutes (more frequent)
-         const autoCheckInterval = setInterval(async () => {
-           if (technicianUid.value) {
-             console.log('🕐 Auto-checking for expired bookings...');
-             const expiredCount = await checkAndUpdateExpiredBookings();
-             if (expiredCount > 0) {
-               console.log(`🔄 Auto-moved ${expiredCount} expired bookings to completed`);
-               showToast(`🔄 Automatically moved ${expiredCount} expired booking${expiredCount > 1 ? 's' : ''} to completed`, 'success');
-               // Refresh the bookings list
-               await fetchBookings();
-             }
-           }
-         }, 2 * 60 * 1000); // Check every 2 minutes
+      fetchBookings().then(() => {
+        // Immediately check for expired bookings when component loads
+        checkAndUpdateExpiredBookings().then(expiredCount => {
+          if (expiredCount > 0) {
+            console.log(` Found ${expiredCount} expired bookings on load, moved to completed`);
+            showToast(` Found ${expiredCount} expired booking${expiredCount > 1 ? 's' : ''} and moved to completed`, 'success');
+            // Refresh the bookings list to show updated state
+            fetchBookings();
+          }
+        });
+        
+        // Set up automatic checking for expired bookings every 2 minutes (more frequent)
+        const autoCheckInterval = setInterval(async () => {
+          if (technicianUid.value) {
+            console.log(' Auto-checking for expired bookings...');
+            const expiredCount = await checkAndUpdateExpiredBookings();
+            if (expiredCount > 0) {
+              console.log(` Auto-moved ${expiredCount} expired bookings to completed`);
+              showToast(` Automatically moved ${expiredCount} expired booking${expiredCount > 1 ? 's' : ''} to completed`, 'success');
+              // Refresh the bookings list
+              await fetchBookings();
+            }
+          }
+        }, 2 * 60 * 1000); // Check every 2 minutes
         
         // Clean up interval when component unmounts
         onUnmounted(() => {
@@ -552,11 +599,11 @@ onMounted(() => {
         // Also check when page becomes visible (user returns to tab)
         const handleVisibilityChange = () => {
           if (!document.hidden && technicianUid.value) {
-            console.log('🔄 Page became visible, checking for expired bookings...');
+            console.log(' Page became visible, checking for expired bookings...');
             checkAndUpdateExpiredBookings().then(expiredCount => {
               if (expiredCount > 0) {
-                console.log(`🔄 Found ${expiredCount} expired bookings, refreshing list...`);
-                showToast(`🔄 Found ${expiredCount} expired booking${expiredCount > 1 ? 's' : ''} when returning to page`, 'info');
+                console.log(` Found ${expiredCount} expired bookings, refreshing list...`);
+                showToast(` Found ${expiredCount} expired booking${expiredCount > 1 ? 's' : ''} when returning to page`, 'info');
                 fetchBookings();
               }
             });
@@ -580,11 +627,11 @@ onMounted(() => {
 // Check for expired bookings when component is activated (user navigates to this page)
 onActivated(async () => {
   if (technicianUid.value) {
-    console.log('🔄 Component activated, checking for expired bookings...');
+    console.log(' Component activated, checking for expired bookings...');
     const expiredCount = await checkAndUpdateExpiredBookings();
     if (expiredCount > 0) {
-      console.log(`🔄 Found ${expiredCount} expired bookings, refreshing list...`);
-      showToast(`🔄 Found ${expiredCount} expired booking${expiredCount > 1 ? 's' : ''} when navigating to page`, 'info');
+      console.log(` Found ${expiredCount} expired bookings, refreshing list...`);
+      showToast(` Found ${expiredCount} expired booking${expiredCount > 1 ? 's' : ''} when navigating to page`, 'info');
       await fetchBookings();
     }
   }
@@ -635,8 +682,6 @@ onActivated(async () => {
   margin-bottom: 1.5rem;
   flex-wrap: wrap;
 }
-
-
 
 .auto-check-status {
   display: flex;
@@ -758,8 +803,6 @@ onActivated(async () => {
 .dark .notification-close:hover {
   background-color: var(--input-bg);
 }
-
-
 
 .page-title {
   color: var(--primary-color);
@@ -959,7 +1002,7 @@ onActivated(async () => {
 }
 
 .table-header th {
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 0.5rem;
   text-align: left;
   font-weight: 600;
   font-size: 0.9rem;
@@ -979,7 +1022,7 @@ onActivated(async () => {
 }
 
 .table-row td {
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 0.5rem;
   font-size: 0.9rem;
   color: #333;
 }
@@ -1006,7 +1049,7 @@ onActivated(async () => {
   color: white;
   border: none;
   padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
+  border-radius: 1rem;
   cursor: pointer;
   transition: all 0.2s;
   font-size: 0.875rem;

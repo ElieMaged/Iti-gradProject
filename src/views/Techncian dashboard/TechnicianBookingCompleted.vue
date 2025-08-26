@@ -22,33 +22,71 @@
               <p class="error-message">{{ error }}</p>
               <button @click="fetchBookings" class="retry-btn">{{ $t('retry') }}</button>
             </div>
-            <div v-else-if="filteredBookings.length > 0" class="table-wrapper">
-              <table class="booking-table">
-                <thead>
-                  <tr class="table-header">
-                    <th>{{ $t('userName') }}</th>
+            <div v-else-if="filteredBookings.length > 0">
+              <!-- Desktop Table -->
+              <div class="hidden md:block">
+                <div class="table-wrapper">
+                  <table class="booking-table">
+                    <thead>
+                      <tr class="table-header">
+                        <th>{{ $t('userName') }}</th>
+                        <th>{{ $t('Phone') }}</th>
                     <th>{{ $t('userEmail') }}</th>
-                    <th>{{ $t('technicianName') }}</th>
-                    <th>{{ $t('date') }}</th>
-                    <th>{{ $t('time') }}</th>
-                    <th>{{ $t('address') }}</th>
-                    <th>{{ $t('price') }}</th>
-                    <th>{{ $t('status') }}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(booking, index) in filteredBookings" :key="booking.id" class="table-row">
-                    <td>{{ booking.userName }}</td>
+                        <th>{{ $t('date') }}</th>
+                        <th>{{ $t('time') }}</th>
+                        <th>{{ $t('address') }}</th>
+                        <th>{{ $t('price') }}</th>
+                        <th>{{ $t('status') }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(booking, index) in filteredBookings" :key="booking.id" class="table-row">
+                        <td>{{ booking.userName }}</td>
+                        <td>{{ booking.userPhone || 'N/A' }}</td>
                     <td>{{ booking.userEmail || 'N/A' }}</td>
-                    <td>{{ booking.technicianName }}</td>
-                    <td>{{ booking.date }}</td>
-                    <td>{{ booking.time }}</td>
-                    <td>{{ booking.address && booking.address.trim() ? booking.address : 'Address not provided' }}</td>
-                    <td>{{ booking.price || 'N/A' }}</td>
-                    <td><span class="status-completed">{{ booking.status === 'complete' ? $t('complete') : booking.status }}</span></td>
-                  </tr>
-                </tbody>
-              </table>
+                        <td>{{ booking.date }}</td>
+                        <td>{{ booking.time }}</td>
+                        <td>{{ booking.address && booking.address.trim() ? booking.address : 'Address not provided' }}</td>
+                        <td>{{ booking.price || 'N/A' }}</td>
+                        <td><span class="status-completed">{{ booking.status === 'complete' ? $t('complete') : booking.status }}</span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Mobile Cards -->
+              <div class="md:hidden space-y-4">
+                <div v-for="booking in filteredBookings" :key="booking.id" class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+                  <div class="flex justify-between items-start mb-3">
+                    <div>
+                      <h3 class="font-semibold text-lg">{{ booking.userName }}</h3>
+                      <p class="text-gray-600 dark:text-gray-300">{{ booking.userPhone || 'N/A' }}</p>
+                      <p class="text-sm text-gray-500 dark:text-gray-400">{{ booking.userEmail || 'N/A' }}</p>
+                    </div>
+                    <span class="status-completed text-sm">{{ booking.status === 'complete' ? $t('complete') : booking.status }}</span>
+                  </div>
+                  
+                  <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                      <span class="text-gray-500 dark:text-gray-400">{{ $t('date') }}:</span>
+                      <span>{{ booking.date }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-gray-500 dark:text-gray-400">{{ $t('time') }}:</span>
+                      <span>{{ booking.time }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-gray-500 dark:text-gray-400">{{ $t('price') }}:</span>
+                      <span>{{ booking.price || 'N/A' }}</span>
+                    </div>
+                    <div class="pt-2">
+                      <p class="text-gray-500 dark:text-gray-400">{{ $t('address') }}:</p>
+                      <p>{{ booking.address && booking.address.trim() ? booking.address : 'Address not provided' }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
             <div v-else class="empty-state">
               <p>{{ $t('noCompletedBookings') }}</p>
@@ -422,7 +460,7 @@ onMounted(() => {
 }
 
 .table-header th {
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 0.5rem;
   text-align: left;
   font-weight: 600;
   font-size: 0.9rem;
@@ -442,7 +480,7 @@ onMounted(() => {
 }
 
 .table-row td {
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 0.5rem;
   font-size: 0.9rem;
   color: #333;
 }

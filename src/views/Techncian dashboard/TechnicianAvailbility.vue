@@ -9,7 +9,7 @@
             />
             <!-- Main Content -->
             <div class="flex-1 main-layout">
-                <div class=" mx-12 p-4">
+                <div class="avalibility-layout  p-4">
                     <TopBar :title="$t('availabilityTitle')" />
                     
                     <!-- Success/Error Messages -->
@@ -18,104 +18,91 @@
                     </div>
                     
                     <!-- Availability Table -->
-                    <div class="overflow-x-auto mb-12">
-                        <table class="min-w-full border border-gray-300 rounded-lg">
-                            <thead>
-                                <tr class="">
-                                    <th class="px-6 py-3 border border-gray-300">Saturday</th>
-                                    <th class="px-6 py-3 border border-gray-300">Sunday</th>
-                                    <th class="px-6 py-3 border border-gray-300">Monday</th>
-                                    <th class="px-6 py-3 border border-gray-300">Tuesday</th>
-                                    <th class="px-6 py-3 border border-gray-300">Wednesday</th>
-                                    <th class="px-6 py-3 border border-gray-300">Thursday</th>
-                                    <th class="px-6 py-3 border border-gray-300">Friday</th>
+                    <!-- Mobile View - Stacked Cards -->
+                    <div class="sm:hidden space-y-3 mb-6">
+                        <div v-for="(day, dayName) in {
+                            monday: availability.monday,
+                            tuesday: availability.tuesday,
+                            wednesday: availability.wednesday,
+                            thursday: availability.thursday,
+                            friday: availability.friday,
+                            saturday: availability.saturday,
+                            sunday: availability.sunday
+                        }" :key="dayName" class="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="font-semibold text-gray-900 text-base capitalize">{{ dayName }}</h3>
+                                <span v-if="day && day.available" class="text-xs px-2.5 py-1 bg-green-50 text-green-700 rounded-full font-medium border border-green-100">
+                                    Available
+                                </span>
+                                <span v-else class="text-xs px-2.5 py-1 bg-gray-50 text-gray-500 rounded-full font-medium border border-gray-200">
+                                    Unavailable
+                                </span>
+                            </div>
+                            <div v-if="day && day.available" class="space-y-2">
+                                <div class="flex items-center justify-between py-2 px-3 bg-blue-50 rounded-lg">
+                                    <span class="text-sm font-medium text-blue-800">Working Hours</span>
+                                    <span class="text-sm font-semibold text-blue-900">{{ day.startTime }} - {{ day.endTime }}</span>
+                                </div>
+                                <div v-if="day.bookedSlots?.length" class="mt-2">
+                                    <div class="text-xs font-medium text-gray-500 mb-1.5">Booked Appointments</div>
+                                    <div class="space-y-1.5">
+                                        <div v-for="(slot, index) in day.bookedSlots" :key="index" 
+                                            class="text-xs bg-red-50 p-2 rounded-lg border-l-2 border-red-400 text-red-700">
+                                            {{ slot }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Desktop View - Table -->
+                    <div class="hidden sm:block overflow-x-auto mb-12">
+                        <table class="min-w-full bg-white rounded-lg shadow-sm border border-gray-200 border-collapse">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th v-for="day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']" 
+                                        :key="day"
+                                        class="px-4 py-4 text-sm font-semibold text-gray-600 uppercase tracking-wider border border-gray-200">
+                                        {{ day }}
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr class="text-center">
-                                    <td class="px-6 py-4 border border-gray-300">
-                                        <span v-if="availability.saturday && availability.saturday.available">
-                                            {{ availability.saturday.startTime }} - {{ availability.saturday.endTime }}
-                                            <div v-if="availability.saturday.bookedSlots && availability.saturday.bookedSlots.length > 0" class="booked-slots">
-                                                <div class="booked-slots-title">Booked:</div>
-                                                <div v-for="slot in availability.saturday.bookedSlots" :key="slot" class="booked-slot">
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td v-for="day in ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']" 
+                                        :key="day"
+                                        class="px-4 py-4 text-xs text-gray-700 border border-gray-200">
+                                        <div v-if="availability[day]?.available" class="space-y-2">
+                                            <div class="flex items-center justify-center space-x-2">
+                                                <span class="text-green-500">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                                    </svg>
+                                                </span>
+                                                <span class="font-medium text-gray-900">
+                                                    {{ availability[day].startTime }} - {{ availability[day].endTime }}
+                                                </span>
+                                            </div>
+                                            
+                                            <div v-if="availability[day]?.bookedSlots?.length" class="mt-2 space-y-1">
+                                                <div class="text-xs text-gray-500 font-medium">Booked Slots:</div>
+                                                <div v-for="(slot, index) in availability[day].bookedSlots" 
+                                                     :key="index"
+                                                     class="text-xs bg-red-50 text-red-700 px-2 py-1 rounded flex items-center">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                                    </svg>
                                                     {{ slot }}
                                                 </div>
                                             </div>
-                                        </span>
-                                        <span v-else class="text-gray-400">Unavailable</span>
-                                    </td>
-                                    <td class="px-6 py-4 border border-gray-300">
-                                        <span v-if="availability.sunday && availability.sunday.available">
-                                            {{ availability.sunday.startTime }} - {{ availability.sunday.endTime }}
-                                            <div v-if="availability.sunday.bookedSlots && availability.sunday.bookedSlots.length > 0" class="booked-slots">
-                                                <div class="booked-slots-title">Booked:</div>
-                                                <div v-for="slot in availability.sunday.bookedSlots" :key="slot" class="booked-slot">
-                                                    {{ slot }}
-                                                </div>
-                                            </div>
-                                        </span>
-                                        <span v-else class="text-gray-400">Unavailable</span>
-                                    </td>
-                                    <td class="px-6 py-4 border border-gray-300">
-                                        <span v-if="availability.monday && availability.monday.available">
-                                            {{ availability.monday.startTime }} - {{ availability.monday.endTime }}
-                                            <div v-if="availability.monday.bookedSlots && availability.monday.bookedSlots.length > 0" class="booked-slots">
-                                                <div class="booked-slots-title">Booked:</div>
-                                                <div v-for="slot in availability.monday.bookedSlots" :key="slot" class="booked-slot">
-                                                    {{ slot }}
-                                                </div>
-                                            </div>
-                                        </span>
-                                        <span v-else class="text-gray-400">Unavailable</span>
-                                    </td>
-                                    <td class="px-6 py-4 border border-gray-300">
-                                        <span v-if="availability.tuesday && availability.tuesday.available">
-                                            {{ availability.tuesday.startTime }} - {{ availability.tuesday.endTime }}
-                                            <div v-if="availability.tuesday.bookedSlots && availability.tuesday.bookedSlots.length > 0" class="booked-slots">
-                                                <div class="booked-slots-title">Booked:</div>
-                                                <div v-for="slot in availability.tuesday.bookedSlots" :key="slot" class="booked-slot">
-                                                    {{ slot }}
-                                                </div>
-                                            </div>
-                                        </span>
-                                        <span v-else class="text-gray-400">Unavailable</span>
-                                    </td>
-                                    <td class="px-6 py-4 border border-gray-300">
-                                        <span v-if="availability.wednesday && availability.wednesday.available">
-                                            {{ availability.wednesday.startTime }} - {{ availability.wednesday.endTime }}
-                                            <div v-if="availability.wednesday.bookedSlots && availability.wednesday.bookedSlots.length > 0" class="booked-slots">
-                                                <div class="booked-slots-title">Booked:</div>
-                                                <div v-for="slot in availability.wednesday.bookedSlots" :key="slot" class="booked-slot">
-                                                    {{ slot }}
-                                                </div>
-                                            </div>
-                                        </span>
-                                        <span v-else class="text-gray-400">Unavailable</span>
-                                    </td>
-                                    <td class="px-6 py-4 border border-gray-300">
-                                        <span v-if="availability.thursday && availability.thursday.available">
-                                            {{ availability.thursday.startTime }} - {{ availability.thursday.endTime }}
-                                            <div v-if="availability.thursday.bookedSlots && availability.thursday.bookedSlots.length > 0" class="booked-slots">
-                                                <div class="booked-slots-title">Booked:</div>
-                                                <div v-for="slot in availability.thursday.bookedSlots" :key="slot" class="booked-slot">
-                                                    {{ slot }}
-                                                </div>
-                                            </div>
-                                        </span>
-                                        <span v-else class="text-gray-400">Unavailable</span>
-                                    </td>
-                                    <td class="px-6 py-4 border border-gray-300">
-                                        <span v-if="availability.friday && availability.friday.available">
-                                            {{ availability.friday.startTime }} - {{ availability.friday.endTime }}
-                                            <div v-if="availability.friday.bookedSlots && availability.friday.bookedSlots.length > 0" class="booked-slots">
-                                                <div class="booked-slots-title">Booked:</div>
-                                                <div v-for="slot in availability.friday.bookedSlots" :key="slot" class="booked-slot">
-                                                    {{ slot }}
-                                                </div>
-                                            </div>
-                                        </span>
-                                        <span v-else class="text-gray-400">Unavailable</span>
+                                        </div>
+                                        <div v-else class="flex items-center justify-center text-gray-400">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                            Not Available
+                                        </div>
                                     </td>
                                 </tr>
                             </tbody>
@@ -479,6 +466,9 @@ export default {
   margin-left: 14rem;
   background-color: #faf8fd;
 }
+.avalibility-layout {
+  margin: 0 38.5px;
+}
 .layout-container{
   background-color: #faf8fd;
 }
@@ -512,13 +502,132 @@ export default {
   align-items: center;
  }
 
- @media (max-width: 480px) {
+/* Table Styles */
+.availability-table {
+    border-collapse: collapse;
+    
+    th, td {
+        transition: background-color 0.2s, color 0.2s;
+        border: 1px solid #e2e8f0;
+        padding: 0.5rem;
+    }
+    
+    th {
+        background-color: #f8fafc;
+        font-weight: 600;
+        text-align: left;
+    }
+    
+    tr:hover td {
+        background-color: #f1f5f9;
+    }
+    
+    .available-slot {
+        background-color: #ecfdf5;
+        color: #047857;
+        padding: 0.375rem 0.75rem;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    
+    .booked-slot {
+        background-color: #fef2f2;
+        color: #b91c1c;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        margin-top: 0.25rem;
+        
+        svg {
+            height: 0.875rem;
+            width: 0.875rem;
+            margin-right: 0.375rem;
+        }
+    }
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 767px) {
   .main-layout {
-    margin: 0;        /* ensure no outer margins on phones */
+    margin: 0;
+    padding: 0 0.5rem;
     height: auto;
     min-height: auto;
   }
- }
+  
+  .avalibility-layout {
+    margin: 0 !important;
+    width: 100%;
+    padding: 0.5rem !important;
+  }
+  
+  /* Improve form layout on mobile */
+  .form-row {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+    
+    button {
+      width: 100%;
+      margin: 0.25rem 0;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+    }
+  }
+  
+  /* Table styles */
+  table {
+    th, td {
+      padding: 0.5rem 0.25rem;
+      font-size: 0.85rem;
+    }
+  }
+  
+  /* Form container */
+  .availability-form-container {
+    padding: 1rem 0.5rem !important;
+    margin-top: 1rem;
+  }
+  
+  .form-title {
+    font-size: 1.25rem !important;
+    margin-bottom: 1.25rem !important;
+  }
+  
+  .form-label {
+    font-size: 0.95rem !important;
+    margin-bottom: 0.4rem;
+  }
+  
+  .form-select {
+    width: 100%;
+    padding: 0.8rem 1rem !important;
+    font-size: 1rem !important;
+  }
+  
+  /* Improve touch targets */
+  button, a, [role="button"], input, select, textarea {
+    min-height: 44px;
+  }
+  
+  /* Card styles for mobile */
+  .bg-white {
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  }
+  
+  /* Adjust spacing */
+  .space-y-3 > * + * {
+    margin-top: 1rem;
+  }
+}
 
 .dark .page-title {
   color: var(--primary-color);

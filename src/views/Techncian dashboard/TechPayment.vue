@@ -4,7 +4,7 @@
             :activeMenu="activeMenu"
             @navigate="handleSidebarNavigate"
         />
-    <div class="payment-content p-4 mx-12">
+    <div class="payment-content p-4">
       <div class="page-header">
         <h1 class="page-title">{{ $t('payment') }}</h1>
         <button class="refresh-btn" @click="refreshData" :disabled="loading">
@@ -308,6 +308,7 @@ export default {
 .payment-content {
   flex: 1;
   width: auto;
+  margin: 0 38.5px;
 }
 .payment-page {
   background: #f5f5f7;
@@ -870,133 +871,309 @@ export default {
 }
 
 @media (max-width: 768px) {
-  .main-content{
+  .main-content {
     margin-left: 0 !important;
+    padding-bottom: 60px; /* Space for bottom navigation */
   }
+  
+  .payment-content {
+    padding: 0.75rem;
+    margin: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .page-header {
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+  
+  .page-title {
+    font-size: 1.5rem;
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+  
+  .refresh-btn {
+    width: 100%;
+    max-width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+  }
+  
   .transactions-section {
-    margin: 16px 0 16px 0;
-    padding: 16px 12px 12px 12px;
+    margin: 1rem 0;
+    padding: 1rem;
+    border-radius: 8px;
   }
   
   .transactions-title {
-    font-size: 1.3rem;
+    font-size: 1.25rem;
     margin-bottom: 1rem;
+    color: var(--primary-color);
   }
   
   .transaction-item {
-    padding: 0.75rem;
+    padding: 0.875rem;
+    margin-bottom: 0.75rem;
+    border-radius: 6px;
+    background: #f8f9fa;
   }
   
   .transaction-type {
     font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-color);
   }
   
   .transaction-description {
     font-size: 0.85rem;
+    color: #6c757d;
+    margin: 0.25rem 0;
   }
   
-  .amount-positive,
+  .transaction-date {
+    font-size: 0.75rem;
+    color: #adb5bd;
+  }
+  
+  .amount-positive {
+    color: #28a745;
+    font-weight: 600;
+  }
+  
   .amount-negative {
-    font-size: 1rem;
-  }
-}
-
-@media (max-width: 600px) {
-  .transactions-section {
-    margin: 12px 0 12px 0;
-    padding: 12px 8px 8px 8px;
+    color: #dc3545;
+    font-weight: 600;
   }
   
-  .transactions-title {
-    font-size: 1.1rem;
-    margin-bottom: 0.75rem;
+  /* Balance card styles */
+  .payment-balance-card {
+    padding: 1rem;
+    margin-bottom: 1.25rem;
+    border-radius: 10px;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   }
   
-  .transaction-item {
-    padding: 0.5rem;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-  
-  .transaction-amount {
-    align-self: flex-end;
-  }
-  
-  .transaction-type {
-    font-size: 0.9rem;
-  }
-  
-  .transaction-description {
-    font-size: 0.8rem;
-  }
-  
-  .amount-positive,
-  .amount-negative {
-    font-size: 0.95rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .payment-content {
-    padding: 0.5rem 0 0 0;
-  }
-  
-  .payment-title {
-    font-size: 0.9rem;
+  .balance-labels,
+  .balance-amounts {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
     margin-bottom: 0.5rem;
   }
-  
-     .payment-balance-card {
-     padding: 6px 1px 4px 1px;
-     border-radius: 8px;
-   }
-  
-
   
   .current-balance-label,
   .pending-label {
     font-size: 0.9rem;
-    padding-right: 2px;
+    color: #6c757d;
   }
   
   .current-balance-amount,
   .pending-amount {
-    font-size: 0.9rem;
-    padding-right: 2px;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary-color);
   }
   
-    
-}
+  /* Credit breakdown and payment info */
+  .credit-breakdown,
+  .payment-split-info {
+    padding: 0.875rem;
+    margin: 1rem 0;
+    border-radius: 8px;
+    background: #f8f9fa;
+  }
+  
+  .breakdown-title,
+  .split-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: var(--text-color);
+  }
+  
+  .breakdown-item,
+  .split-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.4rem 0;
+    font-size: 0.875rem;
+  }
+  
+  .breakdown-label,
+  .split-label {
+    color: #6c757d;
+  }
+  
+  .breakdown-amount,
+  .split-amount {
+    font-weight: 500;
+  }
+  
+  .technician-amount {
+    color: #28a745;
+  }
+  
+  .admin-amount {
+    color: #dc3545;
+  }
+
+@media (max-width: 600px) {
+  .page-title {
+    font-size: 1.35rem;
+  }
+  
+  .payment-balance-card {
+    padding: 0.875rem;
+  }
+  
+  .current-balance-amount,
+  .pending-amount {
+    font-size: 1.1rem;
+  }
+  
+  .transaction-item {
+    padding: 0.75rem;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  
+  .transaction-info {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .transaction-amount {
+    margin-left: 0.75rem;
+    text-align: right;
+  }
+  
+  .transaction-type {
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .transaction-description {
+    font-size: 0.8rem;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .credit-breakdown,
+  .payment-split-info {
+    padding: 0.75rem;
+  }
+  
+  .breakdown-item,
+  .split-item {
+    font-size: 0.825rem;
+    padding: 0.35rem 0;
+  }
+
+@media (max-width: 480px) {
+  .payment-content {
+    padding: 0.5rem;
+  }
+  
+  .page-title {
+    font-size: 1.25rem;
+  }
+  
+  .payment-balance-card {
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  
+  .current-balance-label,
+  .pending-label {
+    font-size: 0.85rem;
+  }
+  
+  .current-balance-amount,
+  .pending-amount {
+    font-size: 1.1rem;
+  }
+  
+  .transaction-item {
+    padding: 0.625rem;
+  }
+  
+  .transaction-type {
+    font-size: 0.85rem;
+  }
+  
+  .transaction-description {
+    font-size: 0.775rem;
+  }
+  
+  .transaction-date {
+    font-size: 0.7rem;
+  }
+  
+  .credit-breakdown,
+  .payment-split-info {
+    padding: 0.625rem;
+  }
+  
+  .breakdown-item,
+  .split-item {
+    font-size: 0.8rem;
+    padding: 0.3rem 0;
+  }
 
 @media (max-width: 360px) {
-  .layout-container{
-    flex-direction: row;
-
-  }
   .payment-content {
-    padding: 0.25rem 0 0 0;
+    padding: 0.4rem;
   }
   
-  .payment-title {
-    font-size: 0.8rem;
-    margin-bottom: 0.25rem;
+  .page-title {
+    font-size: 1.15rem;
   }
   
-     .payment-balance-card {
-     padding: 4px 0.5px 2px 0.5px;
-     border-radius: 6px;
-   }
-  
-
+  .payment-balance-card {
+    padding: 0.625rem;
+    border-radius: 8px;
+  }
   
   .current-balance-label,
   .pending-label {
     font-size: 0.8rem;
-    padding-right: 1px;
   }
   
   .current-balance-amount,
+  .pending-amount {
+    font-size: 1rem;
+  }
+  
+  .transaction-item {
+    padding: 0.5rem;
+  }
+  
+  .transaction-type {
+    font-size: 0.8rem;
+  }
+  
+  .transaction-description {
+    font-size: 0.75rem;
+  }
+  
+  .credit-breakdown,
+  .payment-split-info {
+    padding: 0.5rem;
+  }
+  
+  .breakdown-item,
+  .split-item {
+    font-size: 0.775rem;
+  }
   .pending-amount {
     font-size: 0.8rem;
     padding-right: 1px;
@@ -1012,4 +1189,7 @@ export default {
    box-shadow: 0 4px 16px rgba(98,83,151,0.10);
    border: 1.5px solid #948AB8;
  }
+}
+}
+}
 </style> 
