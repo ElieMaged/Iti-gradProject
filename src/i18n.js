@@ -234,6 +234,8 @@ terms: {
     loginToLeaveReview: "Please log in to leave a review",
     bookingRequiredToReview:
       "You must book a service with this technician before you can leave a review",
+    waitingForTechnicianAcceptance:
+      "Your booking is pending. You can leave a review once the technician accepts your request.",
     bookTechnicianFirst: "Book this technician first to leave a review",
     bookToLeaveFirstReview: "Book this technician to leave the first review",
     failedToFetchReviews: "Failed to fetch reviews",
@@ -1683,6 +1685,8 @@ terms: {
     loginToLeaveReview: "يرجى تسجيل الدخول لكتابة تقييم",
     bookingRequiredToReview:
       "يجب عليك حجز وإكمال خدمة مع هذا الفني قبل أن تتمكن من ترك تقييم",
+    waitingForTechnicianAcceptance:
+      "حجزك معلق. يمكنك ترك تقييم بمجرد أن يقبل الفني طلبك.",
     bookTechnicianFirst: "احجز هذا الفني أولاً لترك تقييم",
     bookToLeaveFirstReview: "احجز هذا الفني لترك أول تقييم",
     failedToFetchReviews: "فشل في جلب التقييمات",

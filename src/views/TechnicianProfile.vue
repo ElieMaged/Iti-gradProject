@@ -249,7 +249,8 @@
             <p>{{ $t('noReviewsYet') }}</p>
             <p v-if="hasBookingWithTechnician && canReview">{{ $t('beFirstToReview') }}</p>
             <p v-else-if="!auth.currentUser">{{ $t('loginToLeaveReview') }}</p>
-                         <p v-else-if="!hasBookingWithTechnician">You need to book this technician to leave a review</p>
+            <p v-else-if="hasPendingBookingWithTechnician">{{ $t('waitingForTechnicianAcceptance') }}</p>
+            <p v-else-if="!hasBookingWithTechnician">{{ $t('bookingRequiredToReview') }}</p>
           </div>
         </div>
       </div> <!-- close .reviews-section -->
@@ -631,8 +632,8 @@ const canReview = computed(() => {
     return false
   }
   
-  // Check if user has any booking with this technician (not cancelled or rejected)
-  const hasAnyBooking = userBookings.value.some(booking => {
+  // Check if user has an accepted or completed booking with this technician
+  const hasAcceptedOrCompletedBooking = userBookings.value.some(booking => {
     // Check multiple possible field names for technician ID
     const hasBookingWithThisTechnician = (
       booking.technicianId === route.params.id || 
@@ -640,17 +641,18 @@ const canReview = computed(() => {
       booking.technician_id === route.params.id
     )
     
-    // Allow reviews for any booking that's not explicitly cancelled or rejected
-    const isNotCancelledOrRejected = (
-      booking.status !== 'cancelled' && 
-      booking.status !== 'rejected'
+    // Only allow reviews for bookings that have been accepted by technician or completed
+    const isAcceptedOrCompleted = (
+      booking.status === 'upcoming' || 
+      booking.status === 'completed' || 
+      booking.status === 'complete'
     )
     
-    return hasBookingWithThisTechnician && isNotCancelledOrRejected
+    return hasBookingWithThisTechnician && isAcceptedOrCompleted
   })
   
-  // User can review if they haven't already reviewed AND they have any valid booking with this technician
-  return !existingReview && hasAnyBooking
+  // User can review if they haven't already reviewed AND they have an accepted/completed booking with this technician
+  return !existingReview && hasAcceptedOrCompletedBooking
 })
 
 const isValidReview = computed(() => {
@@ -662,8 +664,8 @@ const hasBookingWithTechnician = computed(() => {
     return false
   }
   
-  // Check if user has any booking with this technician (not cancelled or rejected)
-  const hasAnyBooking = userBookings.value.some(booking => {
+  // Check if user has an accepted or completed booking with this technician
+  const hasAcceptedOrCompletedBooking = userBookings.value.some(booking => {
     // Check multiple possible field names for technician ID
     const hasBookingWithThisTechnician = (
       booking.technicianId === route.params.id || 
@@ -671,16 +673,40 @@ const hasBookingWithTechnician = computed(() => {
       booking.technician_id === route.params.id
     )
     
-    // Allow reviews for any booking that's not explicitly cancelled or rejected
-    const isNotCancelledOrRejected = (
-      booking.status !== 'cancelled' && 
-      booking.status !== 'rejected'
+    // Only allow reviews for bookings that have been accepted by technician or completed
+    const isAcceptedOrCompleted = (
+      booking.status === 'upcoming' || 
+      booking.status === 'completed' || 
+      booking.status === 'complete'
     )
     
-    return hasBookingWithThisTechnician && isNotCancelledOrRejected
+    return hasBookingWithThisTechnician && isAcceptedOrCompleted
   })
   
-  return hasAnyBooking
+  return hasAcceptedOrCompletedBooking
+})
+
+const hasPendingBookingWithTechnician = computed(() => {
+  if (!auth.currentUser) {
+    return false
+  }
+  
+  // Check if user has a pending booking with this technician
+  const hasPendingBooking = userBookings.value.some(booking => {
+    // Check multiple possible field names for technician ID
+    const hasBookingWithThisTechnician = (
+      booking.technicianId === route.params.id || 
+      booking.uid === route.params.id ||
+      booking.technician_id === route.params.id
+    )
+    
+    // Check for pending status
+    const isPending = booking.status === 'pending'
+    
+    return hasBookingWithThisTechnician && isPending
+  })
+  
+  return hasPendingBooking
 })
 
 // Methods

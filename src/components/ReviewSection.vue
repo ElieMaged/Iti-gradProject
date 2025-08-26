@@ -182,12 +182,12 @@ async function checkBookingEligibility() {
       return
     }
 
-    // 2) Require a completed booking with this technician
+    // 2) Require an accepted or completed booking with this technician
     const bookingsQuery = query(
       collection(db, 'bookings'),
       where('userId', '==', auth.currentUser.uid),
       where('technicianId', '==', props.technicianId),
-      where('status', 'in', ['completed', 'complete'])
+      where('status', 'in', ['upcoming', 'completed', 'complete'])
     )
     const bookingsSnapshot = await getDocs(bookingsQuery)
 
