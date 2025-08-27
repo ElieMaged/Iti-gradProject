@@ -16,11 +16,9 @@
 
         <div class="balance-labels">
           <span class="current-balance-label">{{ $t('currentBalance') }}</span>
-          <span class="pending-label">{{ $t('pending') }}</span>
         </div>
         <div class="balance-amounts">
           <span class="current-balance-amount">{{ currentBalance }} EGP</span>
-          <span class="pending-amount">{{ pendingBalance }} EGP</span>
         </div>
         
         <!-- Credit Breakdown -->
@@ -98,7 +96,6 @@ export default {
      return {
        activeMenu: 'payment',
        currentBalance: 0,
-       pendingBalance: 0,
        technicianEmail: '',
        recentTransactions: [],
        loading: true,
@@ -126,8 +123,7 @@ export default {
         const approvedCreditsQuery = query(
           collection(db, 'technicianCredits'),
           where('technicianId', '==', technicianId),
-          where('status', '==', 'approved'),
-          orderBy('createdAt', 'desc')
+          where('status', '==', 'approved')
         );
         
         // Realtime approved credits
@@ -138,28 +134,13 @@ export default {
           recompute()
         })
         
-        // Fetch pending credits
-        const pendingCreditsQuery = query(
-          collection(db, 'technicianCredits'),
-          where('technicianId', '==', technicianId),
-          where('status', '==', 'pending'),
-          orderBy('createdAt', 'desc')
-        );
-        
-        // Realtime pending credits
-        const pendingCredits = []
-        const unsubPending = onSnapshot(pendingCreditsQuery, (snapshot) => {
-          pendingCredits.length = 0
-          snapshot.forEach(d => pendingCredits.push({ id: d.id, ...d.data() }))
-          recompute()
-        })
+        // Pending credits removed from UI and calculations as requested
         
         // Also fetch admin payouts to ensure they're included
         const adminPayoutsQuery = query(
           collection(db, 'adminPayouts'),
           where('technicianId', '==', technicianId),
-          where('status', '==', 'completed'),
-          orderBy('createdAt', 'desc')
+          where('status', '==', 'completed')
         );
         
         // Realtime admin payouts
@@ -171,6 +152,11 @@ export default {
         })
         
         const recompute = () => {
+          // If both sources are temporarily empty (e.g., during a realtime refresh),
+          // keep the last known balance to avoid flickering back to zero.
+          if (approvedCredits.length === 0 && adminPayouts.length === 0) {
+            return;
+          }
           // Calculate balances - include admin transfers
           const totalCurrentBalance = approvedCredits.reduce((sum, credit) => {
             const amount = parseFloat(credit.amount || credit.credits || 0);
@@ -185,10 +171,6 @@ export default {
             bookingCredits: totalCurrentBalance,
             adminTransfers: adminTransfersTotal
           };
-          this.pendingBalance = pendingCredits.reduce((sum, credit) => {
-            const amount = parseFloat(credit.amount || credit.credits || 0);
-            return sum + (isNaN(amount) ? 0 : amount);
-          }, 0);
           const allTransactions = [
             ...approvedCredits,
             ...adminPayouts.map(payout => ({
@@ -207,18 +189,17 @@ export default {
               return dateB - dateA;
             })
             .slice(0, 10);
+
+          // Helpful debug log (kept inside recompute to avoid scope issues)
+          console.log('Technician credits recomputed:', {
+            bookingCredits: totalCurrentBalance,
+            adminTransfers: adminTransfersTotal,
+            currentBalance: this.currentBalance,
+            transactions: this.recentTransactions.length
+          });
         }
         
-        console.log('Technician credits fetched:', {
-          approvedCredits: approvedCredits.length,
-          pendingCredits: pendingCredits.length,
-          adminPayouts: adminPayouts.length,
-          totalCurrentBalance,
-          adminTransfersTotal,
-          currentBalance: this.currentBalance,
-          pendingBalance: this.pendingBalance,
-          recentTransactions: this.recentTransactions.length
-        });
+        console.log('Technician credits listeners attached.');
         
       } catch (error) {
         console.error('Error fetching technician credits:', error);
