@@ -41,8 +41,11 @@
           </div>
         </div>
         <div class="filter-actions">
+          <button class="reset-btn" @click="resetFilters">
+            {{ $t('reset') }}
+          </button>
           <button class="apply-btn" @click="applyFilters">
-            Apply
+            {{ $t('apply') }}
           </button>
         </div>
       </div>
@@ -137,6 +140,7 @@ const filterCategories = computed(() => [
     key: 'price',
     label: t('filterPrice'),
     options: [
+      { value: '', label: t('allPrices') },
       { value: '50-100', label: t('filterPrice50to100') },
       { value: '100-150', label: t('filterPrice100to150') },
       { value: '150+', label: t('filterPrice150to200') },
@@ -147,6 +151,7 @@ const filterCategories = computed(() => [
     key: 'rating',
     label: t('filterRating'),
     options: [
+      { value: '', label: t('allRatings') },
       { value: '2-3', label: t('filterRating2to3') },
       { value: '3-4', label: t('filterRating3to4') },
       { value: '4-5', label: t('filterRating4to5') },
@@ -171,21 +176,62 @@ const tempFilters = ref({
   rating: ''
 });
 
-// Remove the automatic watch and add apply function
+// Apply filters function
 function applyFilters() {
+  // Create a clean filters object with all possible filter values
+  const filtersToEmit = {
+    price: tempFilters.value.price || '',
+    rating: tempFilters.value.rating || '',
+    specialization: tempFilters.value.specialization || ''
+  };
+  
   selectedFilters.value = { ...tempFilters.value };
-  emit('update:filter', selectedFilters.value);
+  
+  // Emit all filter values (including empty strings for 'All' options)
+  emit('update:filter', filtersToEmit);
+  
+  // Emit location updates
   emit('update:location', {
-    government: tempFilters.value.government,
-    district: tempFilters.value.district
+    government: tempFilters.value.government || '',
+    district: tempFilters.value.district || ''
   });
-  // Emit specialization filter separately for easier handling
-  if (tempFilters.value.specialization) {
-    emit('update:specialization', tempFilters.value.specialization);
-  }
+  
+  // Emit specialization update (empty string if not set)
+  emit('update:specialization', tempFilters.value.specialization || '');
   showFilterDropdown.value = false;
   openCategory.value = '';
-}
+};
+
+const resetFilters = () => {
+  // Reset all filters to their default empty state
+  const defaultFilters = {
+    government: '',
+    district: '',
+    specialization: '',
+    price: '',
+    rating: ''
+  };
+  
+  // Update temp filters to reset the UI
+  tempFilters.value = { ...defaultFilters };
+  
+  // Apply the reset filters
+  selectedFilters.value = { ...defaultFilters };
+  emit('update:filter', defaultFilters);
+  emit('update:location', {
+    government: '',
+    district: ''
+  });
+  emit('update:specialization', '');
+  emit('update:price', '');
+  emit('update:rating', '');
+  
+  
+  
+  // Close the dropdown
+  showFilterDropdown.value = false;
+  openCategory.value = '';
+};
 
 const sortOptions = [
   { value: '', label: t('sortby') },
@@ -455,9 +501,7 @@ function onGovernmentFilterChange(value) {
   margin-right: 0;
 }
 .sort-field {
-  min-width: 80px;
-  max-width: 100px;
-  width: 100px;
+  width: auto;
   height: 44px;
   position: relative;
 }
@@ -508,23 +552,37 @@ function onGovernmentFilterChange(value) {
   margin-top: 1rem;
   padding-top: 0.75rem;
   border-top: 1px solid #eee;
-  text-align: center;
+  text-align: right;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.apply-btn, .reset-btn {
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.3s;
 }
 
 .apply-btn {
-  background: #625397;
+  background-color: #4CAF50;
   color: white;
-  border: none;
-  border-radius: 0.5rem;
-  padding: 0.5rem 1.5rem;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
 }
 
 .apply-btn:hover {
-  background: #4a3d7a;
+  background-color: #45a049;
+}
+
+.reset-btn {
+  background-color: #f44336;
+  color: white;
+}
+
+.reset-btn:hover {
+  background-color: #d32f2f;
 }
 @media (max-width: 900px) {
   .searchbar-row {

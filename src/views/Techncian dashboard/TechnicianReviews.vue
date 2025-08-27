@@ -65,16 +65,7 @@
                   <p class="review-text">{{ review.comment }}</p>
                 </div>
                 
-                <div class="review-footer">
-                  <div class="service-info">
-                    <span class="service-label">{{ $t('service') }}:</span>
-                    <span class="service-name">{{ review.serviceType }}</span>
-                  </div>
-                  <div class="booking-info">
-                    <span class="booking-label">{{ $t('bookingDate') }}:</span>
-                    <span class="booking-date">{{ formatDate(review.bookingDate) }}</span>
-                  </div>
-                </div>
+
               </div>
             </div>
           </div>
@@ -170,10 +161,29 @@ export default {
         );
         
         const snapshot = await getDocs(reviewsQuery);
-        this.reviews = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
+        console.log('Fetched reviews count:', snapshot.docs.length);
+        
+        this.reviews = snapshot.docs.map(doc => {
+          const data = doc.data();
+          console.log('Review document ID:', doc.id);
+          console.log('Review data fields:', Object.keys(data));
+          console.log('Full review data:', data);
+          
+          // Try to find the review text in common field names
+          const reviewText = data.review || data.comment || data.reviews || data.message || data.text || 'No review text found';
+          
+          return {
+            id: doc.id,
+            customerName: 'Anonymous',
+            rating: data.rating || 0,
+            comment: reviewText, // Store the found review text
+            reviews: reviewText, // Keep for backward compatibility
+            bookingDate: data.bookingDate || data.date || null,
+            createdAt: data.createdAt?.toDate() || data.timestamp?.toDate() || new Date(),
+            // Include all original data as well
+            ...data
+          };
+        });
         
         this.lastDoc = snapshot.docs[snapshot.docs.length - 1];
       } catch (error) {

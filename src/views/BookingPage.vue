@@ -1058,12 +1058,12 @@ async function confirmBooking() {
   }
 
   // Set loading state for credit card payments
-  if (form.value.payment === 'Credit Card') {
+  if (form.value.payment === 'Credit Card' || form.value.payment === 'Cash on Visit') {
     isLoading.value = true;
   }
 
   // Validate credit card if payment method is Credit Card
-  if (form.value.payment === 'Credit Card') {
+  if (form.value.payment === 'Credit Card' ) {
     if (!validateCreditCardForm()) {
       errorMsg.value = 'Please fix the credit card errors before proceeding.';
       isLoading.value = false; // Reset loading state on validation error
@@ -2657,7 +2657,8 @@ watch(() => technician.value, (newTechnician) => {
     height: 56px;
   }
   .date-slots {
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
   }
 }
 </style>

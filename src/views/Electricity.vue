@@ -272,14 +272,14 @@ function onSearch(query) {
 
 function onFilter(filters) {
   // Handle the new filter structure from SearchBar
-  if (filters.price) {
-    priceFilter.value = filters.price;
+  if ('price' in filters) {
+    priceFilter.value = filters.price; // Can be empty string for 'All Prices'
   }
-  if (filters.rating) {
-    ratingFilter.value = filters.rating;
+  if ('rating' in filters) {
+    ratingFilter.value = filters.rating; // Can be empty string for 'All Ratings'
   }
-  if (filters.specialization) {
-    specializationFilter.value = filters.specialization;
+  if ('specialization' in filters) {
+    specializationFilter.value = filters.specialization || ''; // Handle empty specialization
   }
 }
 
