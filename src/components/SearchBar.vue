@@ -26,12 +26,7 @@
                 {{ option.label }}
               </label>
             </template>
-            <template v-else-if="cat.type === 'radio'">
-              <label v-for="option in cat.options" :key="option.value" class="dropdown-label">
-                <input type="radio" :name="cat.key" v-model="tempFilters[cat.key]" :value="option.value" @change="updateTempFilter(cat.key, option.value)" />
-                {{ option.label }}
-              </label>
-            </template>
+        
             <template v-else>
               <label v-for="option in cat.options" :key="option.value" class="dropdown-label">
                 <input type="checkbox" v-model="tempFilters[cat.key]" :value="option.value" @change="updateTempFilter(cat.key, tempFilters[cat.key])" />
