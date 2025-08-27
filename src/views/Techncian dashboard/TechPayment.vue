@@ -99,7 +99,9 @@ export default {
        technicianEmail: '',
        recentTransactions: [],
        loading: true,
-       creditBreakdown: null
+       creditBreakdown: null,
+       unsubApproved: null, // Store listeners for cleanup
+       unsubPayouts: null // Store listeners for cleanup
      }
    },
   methods: {
@@ -126,12 +128,22 @@ export default {
           where('status', '==', 'approved')
         );
         
-        // Realtime approved credits
+        // Realtime approved credits with error handling
         const approvedCredits = []
         const unsubApproved = onSnapshot(approvedCreditsQuery, (snapshot) => {
-          approvedCredits.length = 0
-          snapshot.forEach(d => approvedCredits.push({ id: d.id, ...d.data() }))
-          recompute()
+          try {
+            approvedCredits.length = 0
+            snapshot.forEach(d => approvedCredits.push({ id: d.id, ...d.data() }))
+            console.log('Approved credits updated:', approvedCredits.length, 'records')
+            // Only recompute if we have data or if this is the first load
+            if (approvedCredits.length > 0 || this.currentBalance === 0) {
+              recompute()
+            }
+          } catch (error) {
+            console.error('Error in approved credits snapshot:', error)
+          }
+        }, (error) => {
+          console.error('Approved credits query error:', error)
         })
         
         // Pending credits removed from UI and calculations as requested
@@ -143,21 +155,26 @@ export default {
           where('status', '==', 'completed')
         );
         
-        // Realtime admin payouts
+        // Realtime admin payouts with error handling
         const adminPayouts = []
         const unsubPayouts = onSnapshot(adminPayoutsQuery, (snapshot) => {
-          adminPayouts.length = 0
-          snapshot.forEach(d => adminPayouts.push({ id: d.id, ...d.data() }))
-          recompute()
+          try {
+            adminPayouts.length = 0
+            snapshot.forEach(d => adminPayouts.push({ id: d.id, ...d.data() }))
+            console.log('Admin payouts updated:', adminPayouts.length, 'records')
+            // Only recompute if we have data or if this is the first load
+            if (adminPayouts.length > 0 || this.currentBalance === 0) {
+              recompute()
+            }
+          } catch (error) {
+            console.error('Error in admin payouts snapshot:', error)
+          }
+        }, (error) => {
+          console.error('Admin payouts query error:', error)
         })
         
         const recompute = () => {
-          // If both sources are temporarily empty (e.g., during a realtime refresh),
-          // keep the last known balance to avoid flickering back to zero.
-          if (approvedCredits.length === 0 && adminPayouts.length === 0) {
-            return;
-          }
-          // Calculate balances - include admin transfers
+          // Prevent balance from becoming 0 unless explicitly intended
           const totalCurrentBalance = approvedCredits.reduce((sum, credit) => {
             const amount = parseFloat(credit.amount || credit.credits || 0);
             return sum + (isNaN(amount) ? 0 : amount);
@@ -166,7 +183,18 @@ export default {
             const amount = parseFloat(payout.amount || 0);
             return sum + (isNaN(amount) ? 0 : amount);
           }, 0);
-          this.currentBalance = totalCurrentBalance + adminTransfersTotal;
+          
+          const newBalance = totalCurrentBalance + adminTransfersTotal;
+          
+          // Only update if we have a valid positive balance or if this is the first load
+          if (newBalance > 0 || this.currentBalance === 0) {
+            this.currentBalance = newBalance;
+          } else if (newBalance === 0 && this.currentBalance > 0) {
+            // Log warning but don't reset to 0 if we had a previous balance
+            console.warn('Balance calculation returned 0, keeping previous balance:', this.currentBalance);
+            return;
+          }
+          
           this.creditBreakdown = {
             bookingCredits: totalCurrentBalance,
             adminTransfers: adminTransfersTotal
@@ -199,7 +227,11 @@ export default {
           });
         }
         
-        console.log('Technician credits listeners attached.');
+        // Store listeners for cleanup
+        this.unsubApproved = unsubApproved;
+        this.unsubPayouts = unsubPayouts;
+        
+        console.log('Technician credits listeners attached with error handling.');
         
       } catch (error) {
         console.error('Error fetching technician credits:', error);
@@ -260,14 +292,29 @@ export default {
          },
     
     async refreshData() {
-      await this.fetchTechnicianCredits();
+      try {
+        console.log('Refreshing technician credits...');
+        await this.fetchTechnicianCredits();
+        console.log('Refresh completed. Current balance:', this.currentBalance);
+      } catch (error) {
+        console.error('Error refreshing data:', error);
+      }
     }
   },
   
   async mounted() {
     await this.fetchTechnicianCredits();
     await this.fetchTechnicianProfile();
-  }
+  },
+     // Cleanup listeners when component is destroyed
+   beforeUnmount() {
+     if (this.unsubApproved) {
+       this.unsubApproved();
+     }
+     if (this.unsubPayouts) {
+       this.unsubPayouts();
+     }
+   }
 }
 </script>
 
