@@ -1,7 +1,7 @@
 <template>
   <section class="services-section py-16">
     <div class="custom-container">
-      <h3 class="services-title">Our Services</h3>
+      <h3 class="services-title">{{ $t('ourServices') }}</h3>
        <div class="services-overview-grid">
            <div 
              v-for="service in servicesList" 
