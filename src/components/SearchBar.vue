@@ -189,7 +189,6 @@ function applyFilters() {
 
 const sortOptions = [
   { value: '', label: t('sortby') },
-  { value: 'relevance', label: t('sortRelevance') },
   { value: 'priceLow', label: t('sortPriceLow') },
   { value: 'priceHigh', label: t('sortPriceHigh') },
   { value: 'rating', label: t('sortRating') }
