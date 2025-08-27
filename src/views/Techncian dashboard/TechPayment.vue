@@ -16,11 +16,9 @@
 
         <div class="balance-labels">
           <span class="current-balance-label">{{ $t('currentBalance') }}</span>
-          <span class="pending-label">{{ $t('pending') }}</span>
         </div>
         <div class="balance-amounts">
           <span class="current-balance-amount">{{ currentBalance }} EGP</span>
-          <span class="pending-amount">{{ pendingBalance }} EGP</span>
         </div>
         
         <!-- Credit Breakdown -->
@@ -116,137 +114,80 @@ export default {
         
         if (!auth.currentUser) {
           console.error('No authenticated user');
+          this.loading = false;
           return;
         }
         
         const technicianId = auth.currentUser.uid;
-        console.log('Fetching credits for technician:', technicianId);
+        console.log('Fetching completed bookings for technician:', technicianId);
         
-        // Fetch approved credits (current balance) - including admin transfers
-        const approvedCreditsQuery = query(
-          collection(db, 'technicianCredits'),
+        // Clear existing transactions
+        this.recentTransactions = [];
+        
+        // Fetch only completed bookings
+        const completedBookingsQuery = query(
+          collection(db, 'bookings'),
           where('technicianId', '==', technicianId),
-          where('status', '==', 'approved'),
-          orderBy('createdAt', 'desc')
+          where('status', '==', 'complete')
         );
         
-        // Realtime approved credits
-        const approvedCredits = []
-        const unsubApproved = onSnapshot(approvedCreditsQuery, (snapshot) => {
-          approvedCredits.length = 0
-          snapshot.forEach(d => approvedCredits.push({ id: d.id, ...d.data() }))
-          recompute()
-        })
-        
-        // Fetch pending credits
-        const pendingCreditsQuery = query(
-          collection(db, 'technicianCredits'),
-          where('technicianId', '==', technicianId),
-          where('status', '==', 'pending'),
-          orderBy('createdAt', 'desc')
-        );
-        
-        // Realtime pending credits
-        const pendingCredits = []
-        const unsubPending = onSnapshot(pendingCreditsQuery, (snapshot) => {
-          pendingCredits.length = 0
-          snapshot.forEach(d => pendingCredits.push({ id: d.id, ...d.data() }))
-          recompute()
-        })
-        
-        // Also fetch admin payouts to ensure they're included
-        const adminPayoutsQuery = query(
-          collection(db, 'adminPayouts'),
-          where('technicianId', '==', technicianId),
-          where('status', '==', 'completed'),
-          orderBy('createdAt', 'desc')
-        );
-        
-        // Realtime admin payouts
-        const adminPayouts = []
-        const unsubPayouts = onSnapshot(adminPayoutsQuery, (snapshot) => {
-          adminPayouts.length = 0
-          snapshot.forEach(d => adminPayouts.push({ id: d.id, ...d.data() }))
-          recompute()
-        })
-        
-        const recompute = () => {
-          // Calculate balances - include admin transfers
-          const totalCurrentBalance = approvedCredits.reduce((sum, credit) => {
-            const amount = parseFloat(credit.amount || credit.credits || 0);
-            return sum + (isNaN(amount) ? 0 : amount);
-          }, 0);
-          const adminTransfersTotal = adminPayouts.reduce((sum, payout) => {
-            const amount = parseFloat(payout.amount || 0);
-            return sum + (isNaN(amount) ? 0 : amount);
-          }, 0);
-          this.currentBalance = totalCurrentBalance + adminTransfersTotal;
-          this.creditBreakdown = {
-            bookingCredits: totalCurrentBalance,
-            adminTransfers: adminTransfersTotal
-          };
-          this.pendingBalance = pendingCredits.reduce((sum, credit) => {
-            const amount = parseFloat(credit.amount || credit.credits || 0);
-            return sum + (isNaN(amount) ? 0 : amount);
-          }, 0);
-          const allTransactions = [
-            ...approvedCredits,
-            ...adminPayouts.map(payout => ({
-              id: payout.id,
-              type: 'admin_transfer',
-              amount: payout.amount,
-              description: `Admin Transfer: ${payout.reason || 'Credit Transfer'}`,
-              createdAt: payout.createdAt,
-              status: 'approved'
-            }))
-          ];
-          this.recentTransactions = allTransactions
+        // Realtime completed bookings
+        this.completedBookings = [];
+        const unsubBookings = onSnapshot(completedBookingsQuery, (snapshot) => {
+          this.completedBookings = [];
+          const newTransactions = [];
+          let totalEarnings = 0;
+          
+          snapshot.forEach(doc => {
+            const booking = { id: doc.id, ...doc.data() };
+            this.completedBookings.push(booking);
+            
+            // Calculate 75% of each completed booking
+            const amount = parseFloat(booking.price) || 0;
+            const earnings = amount * 0.75;
+            totalEarnings += earnings;
+            
+            // Add to transactions
+            newTransactions.push({
+              id: booking.id,
+              type: 'completed_booking',
+              amount: earnings.toFixed(2),
+              description: `Completed Booking: ${booking.serviceType || 'Service'}`,
+              createdAt: booking.completedAt || booking.createdAt,
+              status: 'completed'
+            });
+          });
+          
+          // Update transactions with sorted list
+          this.recentTransactions = newTransactions
             .sort((a, b) => {
-              const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
-              const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+              const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0);
+              const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
               return dateB - dateA;
             })
             .slice(0, 10);
-        }
-        
-        console.log('Technician credits fetched:', {
-          approvedCredits: approvedCredits.length,
-          pendingCredits: pendingCredits.length,
-          adminPayouts: adminPayouts.length,
-          totalCurrentBalance,
-          adminTransfersTotal,
-          currentBalance: this.currentBalance,
-          pendingBalance: this.pendingBalance,
-          recentTransactions: this.recentTransactions.length
+          
+          // Update the current balance with the total earnings from completed bookings
+          this.currentBalance = totalEarnings;
+          this.creditBreakdown = {
+            completedBookings: totalEarnings
+          };
+          
+          this.loading = false;
+        }, (error) => {
+          console.error('Error fetching bookings:', error);
+          this.loading = false;
         });
         
+        // Cleanup function
+        return () => {
+          if (unsubBookings) {
+            unsubBookings();
+          }
+        };
       } catch (error) {
-        console.error('Error fetching technician credits:', error);
-      } finally {
+        console.error('Error in fetchTechnicianCredits:', error);
         this.loading = false;
-      }
-    },
-    
-    async fetchTechnicianProfile() {
-      try {
-        if (!auth.currentUser) return;
-        
-        const technicianId = auth.currentUser.uid;
-        
-        // Try to get technician data from technicians collection
-        const technicianQuery = query(
-          collection(db, 'technicians'),
-          where('uid', '==', technicianId)
-        );
-        
-        const technicianSnapshot = await getDocs(technicianQuery);
-        if (!technicianSnapshot.empty) {
-          const technicianData = technicianSnapshot.docs[0].data();
-          this.technicianEmail = technicianData.paypalEmail || technicianData.email || '';
-        }
-        
-      } catch (error) {
-        console.error('Error fetching technician profile:', error);
       }
     },
     
@@ -264,28 +205,22 @@ export default {
     },
     
     getTransactionTypeLabel(type) {
-      switch (type) {
-        case 'booking_payment':
-          return 'Booking Payment';
-        case 'admin_transfer':
-          return 'Admin Transfer';
-        case 'credit_addition':
-          return 'Credit Addition';
-        case 'payout_sent':
-          return 'Payout Sent';
-        default:
-          return type || 'Transaction';
-      }
-         },
+      const labels = {
+        'booking': 'Booking Payment',
+        'admin_transfer': 'Admin Transfer',
+        'withdrawal': 'Withdrawal',
+        'completed_booking': 'Completed Booking'
+      };
+      return labels[type] || type;
+    },
     
-    async refreshData() {
-      await this.fetchTechnicianCredits();
+    refreshData() {
+      this.fetchTechnicianCredits();
     }
   },
   
-  async mounted() {
-    await this.fetchTechnicianCredits();
-    await this.fetchTechnicianProfile();
+  mounted() {
+    this.fetchTechnicianCredits();
   }
 }
 </script>
@@ -296,15 +231,19 @@ export default {
   margin-left: 14rem;
   background-color: #faf8fd;
 }
-.layout-container{
+
+.layout-container {
   background-color: #faf8fd;
 }
-.dark .layout-container{
+
+.dark .layout-container {
   background-color: var(--primary-bg);
 }
+
 .dark .main-content {
   background-color: var(--primary-bg);
 }
+
 .payment-content {
   flex: 1;
   width: auto;
