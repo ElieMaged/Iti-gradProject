@@ -145,7 +145,6 @@ export default {
             basePrice: data.basePrice,
             status: data.status,
             location: data.government + ' - ' + data.district,
-            phone: data.phone,
             email: data.email
           });
         });
@@ -167,7 +166,6 @@ export default {
           registered.map(t =>
             `<div style="margin-bottom: 8px;">
       <b>Name:</b> ${t.name}<br>
-      <b>Phone:</b> ${t.phone || 'N/A'}<br>
       <b>Email:</b> ${t.email || 'N/A'}<br>
       <b>Specialization:</b> ${t.specialization || 'N/A'}<br>
       <b>Rating:</b> ${t.rating ? t.rating + '/5' : 'No ratings yet'}<br>
