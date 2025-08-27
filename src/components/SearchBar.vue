@@ -26,7 +26,12 @@
                 {{ option.label }}
               </label>
             </template>
-        
+            <template v-else-if="cat.type === 'radio'">
+              <label v-for="option in cat.options" :key="option.value" class="dropdown-label">
+                <input type="radio" :name="cat.key" v-model="tempFilters[cat.key]" :value="option.value" @change="updateTempFilter(cat.key, option.value)" />
+                {{ option.label }}
+              </label>
+            </template>
             <template v-else>
               <label v-for="option in cat.options" :key="option.value" class="dropdown-label">
                 <input type="checkbox" v-model="tempFilters[cat.key]" :value="option.value" @change="updateTempFilter(cat.key, tempFilters[cat.key])" />
@@ -125,20 +130,6 @@ const filterCategories = computed(() => [
         value: district, 
         label: locale.value === 'ar' ? (districtsAr[tempFilters.value.government]?.[district] || district) : district 
       })),
-    ],
-    type: 'radio'
-  },
-  {
-    key: 'specialization',
-    label: t('specialization'),
-    options: [
-      { value: '', label: t('allSpecializations') },
-      { value: 'plumbing', label: t('plumbing') },
-      { value: 'wallfinishing', label: t('wallFinishing') },
-      { value: 'carpentry', label: t('carpentry') },
-      { value: 'electricity', label: t('electricity') },
-      { value: 'airconditioning', label: t('airConditioning') },
-      { value: 'electricalappliances', label: t('electricalAppliances') }
     ],
     type: 'radio'
   },
