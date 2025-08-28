@@ -58,6 +58,63 @@
         </div>
              </div>
       
+      <!-- Send to Admin Section -->
+      <div class="send-to-admin-card">
+        <div class="section-header">
+          <h3 class="section-title">{{ $t('sendToAdmin') || 'Send to Admin' }}</h3>
+          <p class="section-description">Transfer money from your balance to the admin account</p>
+        </div>
+        
+        <div class="transfer-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="transferAmount">Amount to Transfer (EGP)</label>
+              <input
+                id="transferAmount"
+                v-model="transferAmount"
+                type="number"
+                min="0.01"
+                :max="currentBalance"
+                step="0.01"
+                class="form-input"
+                :placeholder="`Max: ${currentBalance} EGP`"
+                :disabled="transferLoading || currentBalance <= 0"
+              />
+              <div v-if="amountError" class="error-message">{{ amountError }}</div>
+            </div>
+            
+            <div class="form-group">
+              <label for="transferReason">Reason (Optional)</label>
+              <input
+                id="transferReason"
+                v-model="transferReason"
+                type="text"
+                class="form-input"
+                placeholder="e.g., Service fee, Platform charge"
+                :disabled="transferLoading"
+              />
+            </div>
+          </div>
+          
+          <div class="form-actions">
+            <button 
+              @click="sendToAdmin" 
+              :disabled="transferLoading || !canTransfer || currentBalance <= 0"
+              class="transfer-btn"
+            >
+              <i v-if="transferLoading" class="fas fa-spinner fa-spin"></i>
+              <i v-else class="fas fa-arrow-up"></i>
+              {{ transferLoading ? 'Processing...' : 'Send to Admin' }}
+            </button>
+            
+            <div v-if="currentBalance <= 0" class="insufficient-funds">
+              <i class="fas fa-exclamation-triangle"></i>
+              Insufficient funds to transfer
+            </div>
+          </div>
+        </div>
+      </div>
+      
       <!-- Recent Transactions -->
       <div class="transactions-section" v-if="recentTransactions.length > 0">
         <h3 class="transactions-title">{{ $t('recentTransactions') || 'Recent Transactions' }}</h3>
@@ -84,7 +141,7 @@
 import Sidebar from '../../components/Sidebar.vue';
 import TopBar from '../../components/TopBar.vue';
 import { ref, onMounted, computed } from 'vue';
-import { collection, query, where, orderBy, limit, getDocs, onSnapshot } from 'firebase/firestore'; 
+import { collection, query, where, orderBy, limit, getDocs, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore'; 
 import { db, auth } from '../../firebase';
 
 export default {
@@ -101,7 +158,12 @@ export default {
        loading: true,
        creditBreakdown: null,
        unsubApproved: null, // Store listeners for cleanup
-       unsubPayouts: null // Store listeners for cleanup
+       unsubPayouts: null, // Store listeners for cleanup
+       // Transfer to admin properties
+       transferAmount: '',
+       transferReason: '',
+       transferLoading: false,
+       amountError: ''
      }
    },
   methods: {
@@ -291,7 +353,7 @@ export default {
       }
          },
     
-    async refreshData() {
+        async refreshData() {
       try {
         console.log('Refreshing technician credits...');
         await this.fetchTechnicianCredits();
@@ -299,10 +361,85 @@ export default {
       } catch (error) {
         console.error('Error refreshing data:', error);
       }
+    },
+    
+    async sendToAdmin() {
+      try {
+        // Validate input
+        const amount = parseFloat(this.transferAmount);
+        if (isNaN(amount) || amount <= 0) {
+          this.amountError = 'Please enter a valid amount';
+          return;
+        }
+        
+        if (amount > this.currentBalance) {
+          this.amountError = 'Insufficient balance';
+          return;
+        }
+        
+        this.transferLoading = true;
+        this.amountError = '';
+        
+        // Get current user
+        const user = auth.currentUser;
+        if (!user) {
+          throw new Error('User not authenticated');
+        }
+        
+        const technicianId = user.uid;
+        
+        // Create admin payout record (deducts from technician)
+        const adminPayoutData = {
+          technicianId: technicianId,
+          amount: amount,
+          reason: this.transferReason || 'Transfer to Admin',
+          createdAt: serverTimestamp(),
+          status: 'completed'
+        };
+        
+        // Add to adminPayouts collection
+        await addDoc(collection(db, 'adminPayouts'), adminPayoutData);
+        
+        // Add to adminCredits collection (adds to admin balance)
+        const adminCreditData = {
+          amount: amount,
+          source: 'technician_transfer',
+          technicianId: technicianId,
+          reason: this.transferReason || 'Transfer from Technician',
+          createdAt: serverTimestamp(),
+          status: 'approved'
+        };
+        
+        await addDoc(collection(db, 'adminCredits'), adminCreditData);
+        
+        // Reset form
+        this.transferAmount = '';
+        this.transferReason = '';
+        
+        // Show success message
+        this.$toast.success('Transfer completed successfully!');
+        
+        // Refresh data to update balances
+        await this.fetchTechnicianCredits();
+        
+      } catch (error) {
+        console.error('Error sending to admin:', error);
+        this.amountError = 'Transfer failed. Please try again.';
+        this.$toast.error('Transfer failed. Please try again.');
+      } finally {
+        this.transferLoading = false;
+      }
     }
-  },
-  
-  async mounted() {
+   },
+   
+   computed: {
+     canTransfer() {
+       const amount = parseFloat(this.transferAmount);
+       return amount > 0 && amount <= this.currentBalance && !this.transferLoading;
+     }
+   },
+   
+   async mounted() {
     await this.fetchTechnicianCredits();
     await this.fetchTechnicianProfile();
   },
@@ -963,6 +1100,161 @@ export default {
   .amount-negative {
     font-size: 0.95rem;
   }
+}
+
+/* Send to Admin Section Styles */
+.send-to-admin-card {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.dark .send-to-admin-card {
+  background: var(--secondary-bg);
+  border-color: var(--border-color);
+}
+
+.section-header {
+  margin-bottom: 1.5rem;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin: 0 0 0.5rem 0;
+}
+
+.section-description {
+  color: #6b7280;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.dark .section-description {
+  color: #9ca3af;
+}
+
+.transfer-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-weight: 500;
+  color: #374151;
+  font-size: 0.9rem;
+}
+
+.dark .form-group label {
+  color: #d1d5db;
+}
+
+.form-input {
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background: white;
+}
+
+.dark .form-input {
+  background: var(--tertiary-bg);
+  border-color: var(--border-color);
+  color: var(--text-color);
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(98, 83, 151, 0.1);
+}
+
+.form-input:disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.dark .form-input:disabled {
+  background: var(--quaternary-bg);
+  color: #6b7280;
+}
+
+.error-message {
+  color: #dc2626;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.form-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.transfer-btn {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 160px;
+}
+
+.transfer-btn:hover:not(:disabled) {
+  background: var(--primary-color-dark, #4a3f8c);
+  transform: translateY(-1px);
+}
+
+.transfer-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.insufficient-funds {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #f59e0b;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.dark .insufficient-funds {
+  color: #fbbf24;
 }
 
 @media (max-width: 480px) {
