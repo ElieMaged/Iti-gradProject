@@ -34,7 +34,7 @@
             </thead>
             <tbody>
               <tr v-for="booking in paginatedBookings" :key="booking.id" class="table-row">
-                <td>{{ booking.technicianName }}</td>
+                <td>{{ booking.userName || 'N/A' }}</td>
                 <td>{{ booking.phone || 'N/A' }}</td>
                 <td>{{ booking.technicianName || 'N/A' }}</td>
                 <td>{{ booking.specialization || 'N/A' }}</td>
@@ -131,6 +131,7 @@ async function fetchBookings() {
                                     'N/A';
               bookingData.specialization = specialization;
               bookingData.phone = user.phone || user.phoneNumber || 'N/A';
+              bookingData.user = user.name || user.fullName || user.displayName || 'N/A';
 
               // Backfill technician name if missing
               if (!bookingData.technicianName) {
