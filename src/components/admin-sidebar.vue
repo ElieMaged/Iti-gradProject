@@ -71,12 +71,13 @@
             <i class="fas fa-chevron-down chevron-icon"></i>
           </div>
           <div class="dropdown-menu" v-show="showBooking">
+            <router-link to="/booking-pending" 
+                         class="dropdown-status-link" 
+                         :class="{ active: isBookingStatusActive('pending') }">{{ $t('pending') }}
+            </router-link>
             <router-link to="/booking-upcoming" 
                          class="dropdown-status-link" 
                          :class="{ active: isBookingStatusActive('upcoming') }">{{ $t('upcoming') }}</router-link>
-            <router-link to="/booking-pending" 
-                         class="dropdown-status-link" 
-                         :class="{ active: isBookingStatusActive('pending') }">{{ $t('pending') }}</router-link>
             <router-link to="/booking-completed" 
                          class="dropdown-status-link" 
                          :class="{ active: isBookingStatusActive('completed') }">{{ $t('completed') }}</router-link>

@@ -471,6 +471,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  
 }
 
 .user-avatar {
@@ -483,7 +484,7 @@ export default {
 .role-badge {
   padding: 0.25rem 0.75rem;
   border-radius: 1rem;
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   font-weight: 600;
   text-transform: capitalize;
 }
@@ -506,6 +507,7 @@ export default {
 .action-cell {
   display: flex;
   gap: 0.5rem;
+  justify-content: center;
 }
 
 .action-btn {
@@ -516,6 +518,7 @@ export default {
   border-radius: 0.25rem;
   transition: all 0.2s;
   font-size: 1rem;
+  
 }
 
 .action-btn:disabled {
@@ -544,17 +547,21 @@ export default {
 .users-table td:nth-child(1) {
   width: 6ch; /* No. */
 }
+.users-table th:nth-child(2),
+.users-table td:nth-child(2) {
+  width: 38ch; /* No. */
+}
 
 
 .users-table th:nth-child(3),
 .users-table td:nth-child(3) {
-  width: 12ch; /* Role */
+  width: 10ch; /* Role */
 }
 
 .users-table th:nth-child(4),
 .users-table td:nth-child(4) {
-  width: 54ch; /* Location */
-  max-width: 54ch;
+  width: 48ch; /* Location */
+  max-width: 48ch;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -571,12 +578,12 @@ export default {
 
 .users-table th:nth-child(6),
 .users-table td:nth-child(6) {
-  width: 14ch; /* Contact */
+  width: 20ch; /* Contact */
 }
 
 .users-table th:nth-child(7),
 .users-table td:nth-child(7) {
-  width: 12ch; /* Action */
+  width: 20ch; /* Action */
 }
 
 .loading-state, .error-state, .empty-state {

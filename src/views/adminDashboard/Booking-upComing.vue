@@ -444,8 +444,8 @@ async function completeUpcomingBooking(bookingId) {
 /* 1: Technician Name */
 .booking-table th:nth-child(1),
 .booking-table td:nth-child(1) {
-  width: 12ch;
-  max-width: 12ch;
+  width: 20ch;
+  max-width: 20ch;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -453,8 +453,8 @@ async function completeUpcomingBooking(bookingId) {
 /* 2: Technician Email */
 .booking-table th:nth-child(2),
 .booking-table td:nth-child(2) {
-  width: 8ch;
-  max-width: 8ch;
+  width:20ch;
+  max-width: 20ch;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -462,8 +462,8 @@ async function completeUpcomingBooking(bookingId) {
 /* 3: Phone */
 .booking-table th:nth-child(3),
 .booking-table td:nth-child(3) {
-  width: 10ch;
-  max-width: 10ch;
+  width: 18ch;
+  max-width: 18ch;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -471,8 +471,8 @@ async function completeUpcomingBooking(bookingId) {
 /* 4: Specialization */
 .booking-table th:nth-child(4),
 .booking-table td:nth-child(4) {
-  width: 9ch;
-  max-width: 9ch;
+  width: 18ch;
+  max-width: 18ch;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -480,18 +480,18 @@ async function completeUpcomingBooking(bookingId) {
 /* 5: Date */
 .booking-table th:nth-child(5),
 .booking-table td:nth-child(5) {
-  width: 14ch;
+  width:22ch;
 }
 /* 6: Time */
 .booking-table th:nth-child(6),
 .booking-table td:nth-child(6) {
-  width: 12ch;
+  width: 20ch;
 }
 /* 7: Address */
 .booking-table th:nth-child(7),
 .booking-table td:nth-child(7) {
-  width: 22ch;
-  max-width: 22ch;
+  width: 40ch;
+  max-width: 40ch;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -499,13 +499,13 @@ async function completeUpcomingBooking(bookingId) {
 /* 8: Price */
 .booking-table th:nth-child(8),
 .booking-table td:nth-child(8) {
-  width: 5ch;
+  width: 10ch;
   text-align: center;
 }
 /* 9: Status */
 .booking-table th:nth-child(9),
 .booking-table td:nth-child(9) {
-  width: 8ch;
+  width:14ch;
   text-align: center;
 }
 

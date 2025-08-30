@@ -37,7 +37,7 @@
                 <th>{{ $t('address') }}</th>
                 <th>{{ $t('price') }}</th>
                 <th>{{ $t('status') }}</th>
-                <th>Actions</th>
+                
               </tr>
             </thead>
             <tbody>
@@ -51,17 +51,7 @@
                 <td>{{ booking.address || 'N/A' }}</td>
                 <td>{{ booking.price || 'N/A' }}</td>
                 <td><span class="status-pending">{{ $t('pending') }}</span></td>
-                <td>
-                  <button
-                    class="complete-btn"
-                    :disabled="loading || actionLoading === booking.id"
-                    @click="completePendingBooking(booking.id)"
-                  >
-                    <i v-if="actionLoading === booking.id" class="fas fa-spinner fa-spin"></i>
-                    <i v-else class="fas fa-check"></i>
-                    {{ actionLoading === booking.id ? 'Marking...' : 'Completed' }}
-                  </button>
-                </td>
+                
               </tr>
             </tbody>
           </table>
@@ -473,8 +463,8 @@ export default {
 /* 1: User Name */
 .booking-table th:nth-child(1),
 .booking-table td:nth-child(1) {
-  width: 12ch;
-  max-width: 12ch;
+  width: 24ch;
+  max-width: 24ch;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -482,8 +472,8 @@ export default {
 /* 2: Email */
 .booking-table th:nth-child(2),
 .booking-table td:nth-child(2) {
-  width: 8ch; 
-  max-width: 8ch;
+  width: 24ch; 
+  max-width: 24ch;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -491,8 +481,8 @@ export default {
 /* 3: Technician */
 .booking-table th:nth-child(3),
 .booking-table td:nth-child(3) {
-  width: 8ch;
-  max-width: 8ch;
+  width: 20ch;
+  max-width: 20ch;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -500,8 +490,8 @@ export default {
 /* 4: Specialization */
 .booking-table th:nth-child(4),
 .booking-table td:nth-child(4) {
-  width: 9ch;
-  max-width: 9ch;
+  width: 22ch;
+  max-width: 22ch;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -509,18 +499,18 @@ export default {
 /* 5: Date */
 .booking-table th:nth-child(5),
 .booking-table td:nth-child(5) {
-  width: 14ch;
+  width: 22ch;
 }
 /* 6: Time */
 .booking-table th:nth-child(6),
 .booking-table td:nth-child(6) {
-  width: 12ch;
+  width: 28ch;
 }
 /* 7: Address */
 .booking-table th:nth-child(7),
 .booking-table td:nth-child(7) {
-  width: 22ch;
-  max-width: 22ch;
+  width: 44ch;
+  max-width: 44ch;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -528,13 +518,13 @@ export default {
 /* 8: Price */
 .booking-table th:nth-child(8),
 .booking-table td:nth-child(8) {
-  width: 5ch;
+  width: 16ch;
   text-align: center;
 }
 /* 9: Status */
 .booking-table th:nth-child(9),
 .booking-table td:nth-child(9) {
-  width: 8ch;
+  width: 20ch;
   text-align: center;
 }
 .dark .table-row {
